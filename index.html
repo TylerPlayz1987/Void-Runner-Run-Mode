@@ -106,7 +106,15 @@
         flex-direction: column;
         align-items: center;
         gap: 10px;
-        width: 280px;
+        width: 340px;
+        max-width: 90%;
+      }
+
+      .mute-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        width: 100%;
       }
 
       h1 {
@@ -213,7 +221,7 @@
               <span>SFX Volume: <span id="sfxValue">50%</span></span>
               <input type="range" id="sfxSlider" min="0" max="100" value="50" />
             </div>
-            <div class="setting-item" style="display:flex;gap:8px;">
+            <div class="setting-item mute-row">
               <button id="musicMuteBtn" class="small-btn">Music: ON</button>
               <button id="sfxMuteBtn" class="small-btn">SFX: ON</button>
             </div>
