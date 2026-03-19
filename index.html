@@ -489,6 +489,7 @@
           h: 20,
           vx: 0,
           vy: 0,
+          momentumX: 0,
           speed: 5,
           runSpeed: 8,
           jump: -12,
@@ -780,12 +781,17 @@
             keys["ShiftLeft"] || keys["ShiftRight"]
               ? player.runSpeed
               : player.speed;
-          player.vx =
-            keys["ArrowLeft"] || keys["KeyA"]
-              ? -s
-              : keys["ArrowRight"] || keys["KeyD"]
-                ? s
-                : player.vx * 0.85;
+          let inputDir =
+            (keys["ArrowRight"] || keys["KeyD"] ? 1 : 0) -
+            (keys["ArrowLeft"] || keys["KeyA"] ? 1 : 0);
+          if (inputDir !== 0) {
+            player.momentumX += inputDir * 0.6;
+            player.momentumX = Math.max(-s, Math.min(s, player.momentumX));
+          } else {
+            player.momentumX *= 0.8;
+            if (Math.abs(player.momentumX) < 0.03) player.momentumX = 0;
+          }
+          player.vx = player.momentumX;
           player.vy += 0.6;
           let dead = false,
             suckedIn = false;
