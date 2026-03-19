@@ -196,6 +196,16 @@
           <div id="settingsPage" class="menu-page" style="display: none">
             <h1>SETTINGS</h1>
             <div class="setting-item">
+              <span>Master Volume: <span id="masterValue">50%</span></span
+              ><input
+                type="range"
+                id="masterSlider"
+                min="0"
+                max="100"
+                value="50"
+              />
+            </div>
+            <div class="setting-item">
               <span>Music Volume: <span id="musicValue">50%</span></span
               ><input
                 type="range"
@@ -214,6 +224,10 @@
                 max="100"
                 value="50"
               />
+            </div>
+            <div class="setting-item" style="display: flex; gap: 8px;">
+              <button id="musicMuteBtn" class="small-btn">Music: ON</button>
+              <button id="sfxMuteBtn" class="small-btn">SFX: ON</button>
             </div>
             <div class="setting-item">
               <span>THEME</span
@@ -311,8 +325,11 @@
     <script>
       window.onload = function () {
         let audioCtx,
+          masterVol = 0.5,
           musicVol = 0.5,
           sfxVol = 0.5,
+          musicMuted = false,
+          sfxMuted = false,
           frameCount = 0,
           running = false,
           isPaused = false,
@@ -473,7 +490,8 @@
                 slide,
                 audioCtx.currentTime + d,
               );
-            g.gain.setValueAtTime(v * sfxVol, audioCtx.currentTime);
+            const effectiveSfxVol = sfxMuted ? 0 : sfxVol * masterVol;
+            g.gain.setValueAtTime(v * effectiveSfxVol, audioCtx.currentTime);
             g.gain.exponentialRampToValueAtTime(
               0.0001,
               audioCtx.currentTime + d,
@@ -1350,7 +1368,7 @@
           const m = document.getElementById("bgMusic");
           if (m && themes[currentTheme] && themes[currentTheme].music) {
             m.src = themes[currentTheme].music;
-            m.volume = musicVol;
+            m.volume = musicMuted ? 0 : musicVol * masterVol;
             m.play().catch(() => {});
           }
           running = true;
@@ -1379,24 +1397,58 @@
           document.getElementById("cheatsPage").style.display = "none";
           document.getElementById("mainPausePage").style.display = "flex";
         };
+        document.getElementById("masterSlider").oninput = (e) => {
+          masterVol = e.target.value / 100;
+          document.getElementById("masterValue").textContent =
+            e.target.value + "%";
+          const m = document.getElementById("bgMusic");
+          if (m) {
+            m.volume = musicMuted ? 0 : musicVol * masterVol;
+          }
+        };
         document.getElementById("musicSlider").oninput = (e) => {
           musicVol = e.target.value / 100;
           document.getElementById("musicValue").textContent =
             e.target.value + "%";
           const m = document.getElementById("bgMusic");
-          if (m) m.volume = musicVol;
+          if (m) {
+            m.volume = musicMuted ? 0 : musicVol * masterVol;
+          }
+          if (musicMuted && musicVol > 0 && masterVol > 0) {
+            // auto-unmute if user adjusts the music slider
+            musicMuted = false;
+            document.getElementById("musicMuteBtn").textContent = "Music: ON";
+          }
         };
         document.getElementById("sfxSlider").oninput = (e) => {
           sfxVol = e.target.value / 100;
           document.getElementById("sfxValue").textContent =
             e.target.value + "%";
+          if (sfxMuted && sfxVol > 0 && masterVol > 0) {
+            sfxMuted = false;
+            document.getElementById("sfxMuteBtn").textContent = "SFX: ON";
+          }
+        };
+        document.getElementById("musicMuteBtn").onclick = () => {
+          musicMuted = !musicMuted;
+          document.getElementById("musicMuteBtn").textContent =
+            "Music: " + (musicMuted ? "OFF" : "ON");
+          const m = document.getElementById("bgMusic");
+          if (m) {
+            m.volume = musicMuted ? 0 : musicVol * masterVol;
+          }
+        };
+        document.getElementById("sfxMuteBtn").onclick = () => {
+          sfxMuted = !sfxMuted;
+          document.getElementById("sfxMuteBtn").textContent =
+            "SFX: " + (sfxMuted ? "OFF" : "ON");
         };
         document.getElementById("themeSelect").onchange = (e) => {
           currentTheme = e.target.value;
           const m = document.getElementById("bgMusic");
           if (m && themes[currentTheme] && themes[currentTheme].music) {
             m.src = themes[currentTheme].music;
-            m.volume = musicVol;
+            m.volume = musicMuted ? 0 : musicVol * masterVol;
             if (running || currentTheme === "sunny") {
               m.play().catch(() => {});
             } else {
