@@ -110,10 +110,26 @@
         max-width: 90%;
       }
 
-      .mute-row {
+      .audio-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        width: 100%;
+        align-items: start;
+      }
+
+      .audio-left,
+      .audio-right {
+        display: flex;
+        flex-direction: column;
         gap: 10px;
+      }
+
+      .audio-right {
+        align-items: stretch;
+      }
+
+      .audio-right button {
         width: 100%;
       }
 
@@ -209,23 +225,27 @@
           </div>
           <div id="audioPage" class="menu-page" style="display: none">
             <h1>Audio</h1>
-            <div class="setting-item">
-              <span>Master Volume: <span id="masterValue">50%</span></span>
-              <input type="range" id="masterSlider" min="0" max="100" value="50" />
+            <div class="audio-grid">
+              <div class="audio-left">
+                <div class="setting-item">
+                  <span>Master Volume: <span id="masterValue">50%</span></span>
+                  <input type="range" id="masterSlider" min="0" max="100" value="50" />
+                </div>
+                <div class="setting-item">
+                  <span>Music Volume: <span id="musicValue">50%</span></span>
+                  <input type="range" id="musicSlider" min="0" max="100" value="50" />
+                </div>
+                <div class="setting-item">
+                  <span>SFX Volume: <span id="sfxValue">50%</span></span>
+                  <input type="range" id="sfxSlider" min="0" max="100" value="50" />
+                </div>
+              </div>
+              <div class="audio-right">
+                <button id="musicMuteBtn" class="small-btn">Music: ON</button>
+                <button id="sfxMuteBtn" class="small-btn">SFX: ON</button>
+              </div>
             </div>
-            <div class="setting-item">
-              <span>Music Volume: <span id="musicValue">50%</span></span>
-              <input type="range" id="musicSlider" min="0" max="100" value="50" />
-            </div>
-            <div class="setting-item">
-              <span>SFX Volume: <span id="sfxValue">50%</span></span>
-              <input type="range" id="sfxSlider" min="0" max="100" value="50" />
-            </div>
-            <div class="setting-item mute-row">
-              <button id="musicMuteBtn" class="small-btn">Music: ON</button>
-              <button id="sfxMuteBtn" class="small-btn">SFX: ON</button>
-            </div>
-            <button id="audioBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+            <button id="audioBackBtn" class="small-btn" style="margin-top: 12px; width: 100%;">Back</button>
           </div>
           <div id="themePage" class="menu-page" style="display: none">
             <h1>Theme</h1>
