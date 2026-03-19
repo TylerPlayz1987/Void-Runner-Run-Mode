@@ -857,21 +857,40 @@
               p.seekerX += 2.5 * p.seekerDir;
               if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1;
             }
-            if (
-              solid &&
-              nX + player.w > p.x &&
-              nX < p.x + p.w &&
-              player.y + player.h <= p.y &&
-              nY + player.h >= p.y
-            ) {
-              player.vy = 0;
-              nY = p.y - player.h;
-              player.grounded = true;
-              if (p.isSinking) p.isTouched = true;
-              if (dX !== 0) nX += dX;
-              if (!wasGrounded) {
-                player.stretchX = 1.5;
-                player.stretchY = 0.5;
+            if (solid) {
+              let px1 = p.x,
+                px2 = p.x + p.w,
+                py1 = p.y,
+                py2 = p.y + p.h;
+              let overlapX = Math.min(nX + player.w, px2) - Math.max(nX, px1);
+              let overlapY = Math.min(nY + player.h, py2) - Math.max(nY, py1);
+              if (overlapX > 0 && overlapY > 0) {
+                // resolve smallest intersection axis first
+                if (overlapX < overlapY) {
+                  // horizontal hit
+                  if (player.x + player.w <= px1) {
+                    nX = px1 - player.w;
+                  } else if (player.x >= px2) {
+                    nX = px2;
+                  }
+                  player.vx = 0;
+                } else {
+                  // vertical hit
+                  if (player.y + player.h <= py1) {
+                    nY = py1 - player.h;
+                    player.vy = 0;
+                    player.grounded = true;
+                    if (p.isSinking) p.isTouched = true;
+                    if (dX !== 0) nX += dX;
+                    if (!wasGrounded) {
+                      player.stretchX = 1.5;
+                      player.stretchY = 0.5;
+                    }
+                  } else if (player.y >= py2) {
+                    nY = py2;
+                    player.vy = 0;
+                  }
+                }
               }
             }
           });
