@@ -195,43 +195,25 @@
           </div>
           <div id="settingsPage" class="menu-page" style="display: none">
             <h1>SETTINGS</h1>
-            <div class="setting-item" style="border-bottom:1px solid #0f0;padding-bottom:10px;margin-bottom:10px;width:100%">
-              <h2 style="margin:0;font-size:16px">Audio</h2>
-              <div style="font-size:12px;color:#0f0;">Master and channel sound controls</div>
-            </div>
-            <div class="setting-item">
-              <span>Master Volume: <span id="masterValue">50%</span></span
-              ><input
-                type="range"
-                id="masterSlider"
-                min="0"
-                max="100"
-                value="50"
-              />
-            </div>
-            <div class="setting-item">
-              <span>Music Volume: <span id="musicValue">50%</span></span
-              ><input
-                type="range"
-                id="musicSlider"
-                min="0"
-                max="100"
-                value="50"
-              />
-            </div>
-            <div class="setting-item">
-              <span>SFX Volume: <span id="sfxValue">50%</span></span
-              ><input
-                type="range"
-                id="sfxSlider"
-                min="0"
-                max="100"
-                value="50"
-              />
-            </div>
-            <div class="setting-item" style="display: flex; gap: 8px;">
-              <button id="musicMuteBtn" class="small-btn">Music: ON</button>
-              <button id="sfxMuteBtn" class="small-btn">SFX: ON</button>
+            <div id="audioSettings" class="setting-item" style="border:1px solid #0f0;padding:10px;border-radius:5px;margin-bottom:12px;width:100%;background:rgba(0,255,0,0.05)">
+              <h2 style="margin:0 0 8px;font-size:16px">Audio</h2>
+              <div style="font-size:12px;color:#0f0;margin-bottom:8px">Master and channel sound controls</div>
+              <div class="setting-item" style="margin:0 0 8px;padding:0;border:none;">
+                <span>Master Volume: <span id="masterValue">50%</span></span>
+                <input type="range" id="masterSlider" min="0" max="100" value="50" />
+              </div>
+              <div class="setting-item" style="margin:0 0 8px;padding:0;border:none;">
+                <span>Music Volume: <span id="musicValue">50%</span></span>
+                <input type="range" id="musicSlider" min="0" max="100" value="50" />
+              </div>
+              <div class="setting-item" style="margin:0 0 8px;padding:0;border:none;">
+                <span>SFX Volume: <span id="sfxValue">50%</span></span>
+                <input type="range" id="sfxSlider" min="0" max="100" value="50" />
+              </div>
+              <div class="setting-item" style="display:flex;gap:8px;margin:0;padding:0;border:none;">
+                <button id="musicMuteBtn" class="small-btn">Music: ON</button>
+                <button id="sfxMuteBtn" class="small-btn">SFX: ON</button>
+              </div>
             </div>
             <div class="setting-item">
               <span>THEME</span
