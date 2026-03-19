@@ -195,29 +195,35 @@
           </div>
           <div id="settingsPage" class="menu-page" style="display: none">
             <h1>SETTINGS</h1>
-            <div id="audioSettings" class="setting-item" style="border:1px solid #0f0;padding:10px;border-radius:5px;margin-bottom:12px;width:100%;background:rgba(0,255,0,0.05)">
-              <h2 style="margin:0 0 8px;font-size:16px">Audio</h2>
-              <div style="font-size:12px;color:#0f0;margin-bottom:8px">Master and channel sound controls</div>
-              <div class="setting-item" style="margin:0 0 8px;padding:0;border:none;">
-                <span>Master Volume: <span id="masterValue">50%</span></span>
-                <input type="range" id="masterSlider" min="0" max="100" value="50" />
-              </div>
-              <div class="setting-item" style="margin:0 0 8px;padding:0;border:none;">
-                <span>Music Volume: <span id="musicValue">50%</span></span>
-                <input type="range" id="musicSlider" min="0" max="100" value="50" />
-              </div>
-              <div class="setting-item" style="margin:0 0 8px;padding:0;border:none;">
-                <span>SFX Volume: <span id="sfxValue">50%</span></span>
-                <input type="range" id="sfxSlider" min="0" max="100" value="50" />
-              </div>
-              <div class="setting-item" style="display:flex;gap:8px;margin:0;padding:0;border:none;">
-                <button id="musicMuteBtn" class="small-btn">Music: ON</button>
-                <button id="sfxMuteBtn" class="small-btn">SFX: ON</button>
-              </div>
+            <button id="openAudioBtn" style="width: 100%; margin-bottom: 8px;">Audio Settings</button>
+            <button id="openThemeBtn" style="width: 100%; margin-bottom: 8px;">Theme Settings</button>
+            <button id="settingsBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="audioPage" class="menu-page" style="display: none">
+            <h1>Audio</h1>
+            <div class="setting-item">
+              <span>Master Volume: <span id="masterValue">50%</span></span>
+              <input type="range" id="masterSlider" min="0" max="100" value="50" />
             </div>
             <div class="setting-item">
-              <span>THEME</span
-              ><select id="themeSelect">
+              <span>Music Volume: <span id="musicValue">50%</span></span>
+              <input type="range" id="musicSlider" min="0" max="100" value="50" />
+            </div>
+            <div class="setting-item">
+              <span>SFX Volume: <span id="sfxValue">50%</span></span>
+              <input type="range" id="sfxSlider" min="0" max="100" value="50" />
+            </div>
+            <div class="setting-item" style="display:flex;gap:8px;">
+              <button id="musicMuteBtn" class="small-btn">Music: ON</button>
+              <button id="sfxMuteBtn" class="small-btn">SFX: ON</button>
+            </div>
+            <button id="audioBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="themePage" class="menu-page" style="display: none">
+            <h1>Theme</h1>
+            <div class="setting-item">
+              <span>THEME</span>
+              <select id="themeSelect">
                 <option value="classic">Classic</option>
                 <option value="sunny">Sunny</option>
                 <option value="moony">Moony</option>
@@ -228,9 +234,7 @@
                 <option value="stardust">Star-Dust</option>
               </select>
             </div>
-            <button id="backBtn" class="small-btn" style="margin-top: 20px">
-              Back
-            </button>
+            <button id="themeBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
           <div id="cheatsPage" class="menu-page" style="display: none">
             <h1 style="color: #fa0">CHEATS</h1>
@@ -1370,14 +1374,32 @@
         document.getElementById("settingsBtn").onclick = () => {
           document.getElementById("mainPausePage").style.display = "none";
           document.getElementById("settingsPage").style.display = "flex";
+          document.getElementById("audioPage").style.display = "none";
+          document.getElementById("themePage").style.display = "none";
+        };
+        document.getElementById("openAudioBtn").onclick = () => {
+          document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("audioPage").style.display = "flex";
+        };
+        document.getElementById("openThemeBtn").onclick = () => {
+          document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("themePage").style.display = "flex";
+        };
+        document.getElementById("settingsBackBtn").onclick = () => {
+          document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("mainPausePage").style.display = "flex";
+        };
+        document.getElementById("audioBackBtn").onclick = () => {
+          document.getElementById("audioPage").style.display = "none";
+          document.getElementById("settingsPage").style.display = "flex";
+        };
+        document.getElementById("themeBackBtn").onclick = () => {
+          document.getElementById("themePage").style.display = "none";
+          document.getElementById("settingsPage").style.display = "flex";
         };
         document.getElementById("cheatsBtn").onclick = () => {
           document.getElementById("mainPausePage").style.display = "none";
           document.getElementById("cheatsPage").style.display = "flex";
-        };
-        document.getElementById("backBtn").onclick = () => {
-          document.getElementById("settingsPage").style.display = "none";
-          document.getElementById("mainPausePage").style.display = "flex";
         };
         document.getElementById("cheatBackBtn").onclick = () => {
           document.getElementById("cheatsPage").style.display = "none";
