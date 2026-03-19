@@ -1380,7 +1380,7 @@
         }
 
         function draw() {
-          const isRetro = isRetro8bit;
+          const isRetro = isRetro8bit && currentTheme === "classic";
           if (isRetro) {
             retroCtx.setTransform(1, 0, 0, 1, 0, 0);
             retroCtx.imageSmoothingEnabled = false;
