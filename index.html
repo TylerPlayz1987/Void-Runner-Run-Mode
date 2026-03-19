@@ -1331,11 +1331,102 @@
             p.alpha = Math.max(0, p.alpha - 0.04);
             p.life--; if (p.life <= 0 || p.alpha <= 0) jumpDust.splice(i, 1);
           }
-          ctx.fillStyle = "#0f0";
-          ctx.shadowBlur = 15;
-          ctx.shadowColor = "#0f0";
-          ctx.fillRect(goal.x - camX, goal.y, goal.w, goal.h);
-          ctx.shadowBlur = 0;
+          const gx = goal.x - camX;
+          const gy = goal.y;
+          const gw = goal.w;
+          const gh = goal.h;
+          ctx.save();
+          if (currentTheme === "sunny") {
+            ctx.fillStyle = "#ffeb3b";
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = "#fff05a";
+            ctx.fillRect(gx, gy, gw, gh);
+            ctx.strokeStyle = "#f2c200";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(gx, gy, gw, gh);
+          } else if (currentTheme === "moony") {
+            ctx.fillStyle = "#ab47bc";
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = "#d89eff";
+            ctx.fillRect(gx, gy, gw, gh);
+            ctx.strokeStyle = "#7e1b9f";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(gx, gy, gw, gh);
+          } else if (currentTheme === "toybox") {
+            ctx.fillStyle = "#f44336";
+            ctx.fillRect(gx, gy, gw, gh);
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(gx + 4, gy + 4, gw - 8, gh - 8);
+            ctx.fillStyle = "#2196f3";
+            ctx.fillRect(gx + 8, gy + 8, gw - 16, gh - 16);
+          } else if (currentTheme === "deepsea") {
+            ctx.fillStyle = "#6b4c2d";
+            ctx.fillRect(gx, gy + gh * 0.6, gw, gh * 0.4);
+            ctx.fillStyle = "#a77b5f";
+            for (let i = 0; i < 4; i++) {
+              ctx.fillRect(gx + i * 12, gy + gh * 0.55, 6, gh * 0.45);
+            }
+            ctx.fillStyle = "#00bcd4";
+            ctx.globalAlpha = 0.6;
+            ctx.fillRect(gx, gy, gw, gh);
+            ctx.globalAlpha = 1;
+          } else if (currentTheme === "magma") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            const flame = 0.8 + Math.sin(frameCount / 10) * 0.2;
+            ctx.fillStyle = `rgba(${255},${Math.floor(80 + 120*flame)},0,1)`;
+            ctx.beginPath();
+            ctx.moveTo(0, -gh * 0.4);
+            ctx.lineTo(gw * 0.25, gh * 0.4);
+            ctx.lineTo(-gw * 0.25, gh * 0.4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          } else if (currentTheme === "cyber") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            ctx.rotate(frameCount * 0.07);
+            ctx.strokeStyle = "#0ff";
+            ctx.lineWidth = 3;
+            ctx.fillStyle = "rgba(0,255,255,0.4)";
+            ctx.beginPath();
+            ctx.moveTo(0, -gh * 0.5);
+            ctx.lineTo(gw * 0.5, 0);
+            ctx.lineTo(0, gh * 0.5);
+            ctx.lineTo(-gw * 0.5, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+          } else if (currentTheme === "stardust") {
+            let pulse = 0.7 + 0.3 * Math.sin(frameCount / 15);
+            let rad = (gw / 2) * (1 + pulse * 0.15);
+            let g = ctx.createRadialGradient(
+              gx + gw / 2,
+              gy + gh / 2,
+              0,
+              gx + gw / 2,
+              gy + gh / 2,
+              rad,
+            );
+            g.addColorStop(0, "rgba(255,255,255,0.9)");
+            g.addColorStop(0.7, "rgba(180,220,255,0.7)");
+            g.addColorStop(1, "rgba(80,180,255,0.1)");
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(gx + gw / 2, gy + gh / 2, rad, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(gx + gw / 2, gy + gh / 2, gw * 0.25, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.fillStyle = "#0f0";
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "#0f0";
+            ctx.fillRect(gx, gy, gw, gh);
+          }
+          ctx.restore();
           winParticles.forEach((p) => {
             ctx.fillStyle = `rgba(0,255,0,${p.l / 40})`;
             ctx.fillRect(p.x - camX, p.y, 5, 5);
