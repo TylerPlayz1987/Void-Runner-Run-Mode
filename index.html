@@ -209,14 +209,15 @@
     </div>
     <audio id="bgSunnyMusic" loop crossorigin="anonymous" src="Smile.ogg"></audio>
     <audio id="bgMoonyMusic" loop crossorigin="anonymous" src="Dark.ogg"></audio>
+    <audio id="bgToyBoxMusic" loop crossorigin="anonymous" src="Funny.ogg"></audio>
     <script>
         window.onload = function () {
             let audioCtx, masterVol = 0.5, frameCount = 0, running = false, isPaused = false, currentLevel = 1, lastCheckpoint = 1, deathCount = 0, cheatsUsed = false, shake = 0, winParticles = [], flashAlpha = 0; const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d'), container = document.getElementById('container'), cpNotif = document.getElementById('cp-notif'); canvas.width = 800; canvas.height = 400; let bestLevel = localStorage.getItem('core_best_v20') || 1; document.getElementById('best').textContent = bestLevel; let shieldItem = null, wells = [], currentTheme = 'classic', infiniteInvincibility = false; const themes = {
                 classic: { bg: '#050505', plat: '#333', player: '#fff', hazards: '#f33' },
                 sunny: { bg: '#87CEEB', plat: '#fff', player: '#FFFF00', hazards: '#f33', music: 'Smile.ogg' },
                 moony: { bg: '#000000', plat: '#D8BFD8', player: '#FFF', hazards: '#FFFF33', stars: true, music: 'Dark.ogg' },
-                toybox: { bg: '#ffeb3b', plat: '#f44336', player: '#2196f3', hazards: '#4caf50', music: '' },
-                deepsea: { bg: '#001a33', plat: '#2c3e50', player: '#f1c40f', hazards: '#e74c3c', music: '' },
+                toybox: { bg: '#ffeb3b', plat: '#f44336', player: '#2196f3', hazards: '#4caf50', music: 'Funny.ogg' },
+                deepsea: { bg: '#001a33', plat: '#2c3e50', player: '#f1c40f', hazards: '#e74c3c', music: 'Sea.ogg' },
                 cyber: { bg: '#1a0a2e', plat: '#0ff', player: '#f0f', hazards: '#ff0055', glitch: true, music: '' },
                 magma: { bg: '#1a0505', plat: '#111', player: '#ffa500', hazards: '#ff4500', glow: true, music: '' },
                 stardust: { bg: '#000033', plat: '#e0e0e0', player: '#fff', hazards: '#00ffcc', aurora: true, music: '' }
