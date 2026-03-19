@@ -346,7 +346,26 @@
     ></audio>
     <audio id="bgMusic" loop crossorigin="anonymous"></audio>
     <script>
+      // Entry point: run once DOM is ready
       window.onload = function () {
+        // ---------------------------------------------------------------------
+        // Game audio and UI state variables
+        // ---------------------------------------------------------------------
+        // audioCtx: Web Audio API context for generated SFX (oscillators)
+        // masterVol: global volume multiplier (0.0-1.0)
+        // musicVol: background music volume control (0.0-1.0)
+        // sfxVol: sound effects volume control (0.0-1.0)
+        // musicMuted / sfxMuted: explicit toggle state
+        // isRetro8bit: state for retro low-res filter effect
+        // frameCount: global frame counter for animations
+        // running: whether game loop is active
+        // isPaused: when true the game sim stops updating
+        // currentLevel / lastCheckpoint: progression tracking
+        // deathCount: player deaths shown on UI
+        // cheatsUsed: toggles high-score saving checks
+        // shake: camera shake amount for effects
+        // winParticles: victory particle effect storage
+        // flashAlpha: white flash overlay timer for checkpoints
         let audioCtx,
           masterVol = 0.5,
           musicVol = 0.5,
@@ -443,6 +462,7 @@
             music: "Starry.ogg",
           },
         };
+        // Theme particles/background add-ons (cosmetic)
         const cyberBldgs = Array.from({ length: 12 }, () => ({
           x: Math.random() * 1200,
           w: 80 + Math.random() * 60,
@@ -478,10 +498,12 @@
           y: Math.random() * 400,
           s: Math.random() * 2,
         }));
+        // World state arrays and input map
         let platforms = [],
           hazards = [],
           keys = {},
           jumpDust = [];
+        // Player state and physics
         const player = {
           x: 50,
           y: 200,
@@ -509,6 +531,9 @@
         };
         let goal = { x: 0, y: 0, w: 40, h: 40 };
         function sfx(f, t, d, v, slide = 0) {
+          // Generate a simple oscillator-based sound effect.
+          // f: frequency in Hz, t: waveform type, d: duration seconds, v: volume gain.
+          // slide: optional frequency glide target (for jump / warp chirp effects).
           try {
             if (!audioCtx) return;
             if (audioCtx.state === "suspended") audioCtx.resume();
@@ -551,6 +576,9 @@
           cheatsUsed = true;
           document.getElementById("best").textContent = "CHEATS USED";
         }
+        // Procedurally generate platforms/hazards for the current level
+        // - resets collectible/shield state
+        // - creates base ground and progressively harder obstacles
         function generateLevel() {
           shieldItem = null;
           wells = [];
@@ -639,6 +667,7 @@
             }
           }
         }
+        // Handle player death and reset after falling/out of bounds/hazard hit
         function die() {
           if (player.spaghettified) return;
           shake = 15;
@@ -731,6 +760,7 @@
           player.isBeingRescued = false;
           generateLevel();
         }
+        // Main game simulation, runs every frame before draw()
         function update() {
           if (!running || isPaused) return;
           frameCount++;
@@ -976,6 +1006,7 @@
             return;
           }
         }
+        // Render player sprite/shape based on current theme and status effects (shield, rescue, spaghettified)
         function drawPlayer(x, y, c) {
           ctx.save();
           ctx.translate(x + player.w / 2, y + player.h);
@@ -1059,6 +1090,7 @@
           }
           ctx.restore();
         }
+        // Core world rendering in current theme
         function drawScene() {
           const t = themes[currentTheme];
           ctx.save();
@@ -1503,6 +1535,8 @@
           ctx.fillText("v0.5", canvas.width - 10, canvas.height - 10);
         }
 
+        // Top-level draw entry - handles retro scaling wrapper
+        // Converts main rendering to low-res offscreen buffer when 8-bit mode is enabled.
         function draw() {
           const isRetro = isRetro8bit && currentTheme === "classic";
           if (isRetro) {
@@ -1537,6 +1571,7 @@
           }
         }
 
+        // Pause/resume and menu toggling (also handles music pause/resume)
         function toggle() {
           if (!running) return;
           isPaused = !isPaused;
