@@ -1513,9 +1513,42 @@
             die();
           }
         };
+        function submenuBack() {
+          const settingsPage = document.getElementById("settingsPage");
+          const audioPage = document.getElementById("audioPage");
+          const themePage = document.getElementById("themePage");
+          const cheatsPage = document.getElementById("cheatsPage");
+
+          if (audioPage.style.display === "flex" || themePage.style.display === "flex") {
+            audioPage.style.display = "none";
+            themePage.style.display = "none";
+            settingsPage.style.display = "flex";
+            return true;
+          }
+
+          if (cheatsPage.style.display === "flex") {
+            cheatsPage.style.display = "none";
+            settingsPage.style.display = "flex";
+            return true;
+          }
+
+          if (settingsPage.style.display === "flex") {
+            settingsPage.style.display = "none";
+            document.getElementById("mainPausePage").style.display = "flex";
+            return true;
+          }
+
+          return false;
+        }
+
         window.onkeydown = (e) => {
           keys[e.code] = 1;
-          if (e.code === "KeyP" || e.code === "Escape") toggle();
+          if (e.code === "KeyP" || e.code === "Escape") {
+            if (document.getElementById("pauseMenu").style.display === "flex") {
+              if (submenuBack()) return;
+            }
+            toggle();
+          }
           if (
             [
               "ArrowUp",
