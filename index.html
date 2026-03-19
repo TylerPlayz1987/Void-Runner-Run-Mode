@@ -222,9 +222,9 @@
                 moony: { bg: '#000000', plat: '#D8BFD8', player: '#FFF', hazards: '#FFFF33', stars: true, music: 'Dark.ogg' },
                 toybox: { bg: '#ffeb3b', plat: '#f44336', player: '#2196f3', hazards: '#4caf50', music: 'Funny.ogg' },
                 deepsea: { bg: '#001a33', plat: '#2c3e50', player: '#f1c40f', hazards: '#e74c3c', music: 'Sea.ogg' },
-                cyber: { bg: '#1a0a2e', plat: '#0ff', player: '#f0f', hazards: '#ff0055', glitch: true },
-                magma: { bg: '#1a0505', plat: '#111', player: '#ffa500', hazards: '#ff4500', glow: true },
-                stardust: { bg: '#000033', plat: '#e0e0e0', player: '#fff', hazards: '#00ffcc', aurora: true }
+                cyber: { bg: '#1a0a2e', plat: '#0ff', player: '#f0f', hazards: '#ff0055', glitch: true, music: 'Neon.ogg' },
+                magma: { bg: '#1a0505', plat: '#111', player: '#ffa500', hazards: '#ff4500', glow: true, music: 'Boom.ogg' },
+                stardust: { bg: '#000033', plat: '#e0e0e0', player: '#fff', hazards: '#00ffcc', aurora: true, music: 'Starry.ogg' }
             };
             const cyberBldgs = Array.from({ length: 12 }, () => ({ x: Math.random() * 1200, w: 80 + Math.random() * 60, h: 180 + Math.random() * 180, s: 0.15 + Math.random() * 0.1, neon: ['#f0f', '#0ff', '#f06'][Math.floor(Math.random() * 3)] }));
             const hoverCars = Array.from({ length: 6 }, () => ({ x: Math.random() * 800, y: 150 + Math.random() * 150, s: 2 + Math.random() * 3, w: 15, c: ['#f0f', '#0ff'][Math.floor(Math.random() * 2)] }));
