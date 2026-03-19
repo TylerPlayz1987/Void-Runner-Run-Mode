@@ -480,7 +480,8 @@
         }));
         let platforms = [],
           hazards = [],
-          keys = {};
+          keys = {},
+          jumpDust = [];
         const player = {
           x: 50,
           y: 200,
@@ -678,6 +679,20 @@
           });
           return s;
         }
+        function emitJumpDust() {
+          for (let i = 0; i < 12; i++) {
+            jumpDust.push({
+              x: player.x + player.w / 2 + (Math.random() - 0.5) * 8,
+              y: player.y + player.h,
+              vx: (Math.random() - 0.5) * 2.5,
+              vy: -4 - Math.random() * 1.5,
+              size: 2 + Math.random() * 2,
+              alpha: 0.85,
+              life: 18 + Math.floor(Math.random() * 8),
+            });
+          }
+        }
+
         function win() {
           currentLevel++;
           document.getElementById("lvl").textContent = currentLevel;
@@ -811,6 +826,7 @@
             play.jp();
             player.stretchX = 0.6;
             player.stretchY = 1.4;
+            emitJumpDust();
           }
           let nX = player.x + player.vx,
             nY = player.y + player.vy;
@@ -943,6 +959,7 @@
           });
           player.x = nX;
           player.y = nY;
+          if (!wasGrounded && player.grounded) emitJumpDust();
           if (
             player.x + player.w > goal.x &&
             player.x < goal.x + goal.w &&
@@ -1302,6 +1319,17 @@
             ctx.stroke();
             ctx.fillStyle = "rgba(0,255,255,0.1)";
             ctx.fill();
+          }
+          // Jump dust particles
+          for (let i = jumpDust.length - 1; i >= 0; i--) {
+            const p = jumpDust[i];
+            ctx.fillStyle = `rgba(168,168,168,${p.alpha})`;
+            ctx.fillRect(p.x - camX, p.y, p.size, p.size);
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.2;
+            p.alpha = Math.max(0, p.alpha - 0.04);
+            p.life--; if (p.life <= 0 || p.alpha <= 0) jumpDust.splice(i, 1);
           }
           ctx.fillStyle = "#0f0";
           ctx.shadowBlur = 15;
