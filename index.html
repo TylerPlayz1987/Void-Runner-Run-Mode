@@ -42,6 +42,7 @@
       canvas {
         display: block;
         z-index: 5;
+        image-rendering: pixelated;
       }
 
       #ui-left,
@@ -253,6 +254,7 @@
               <span>THEME</span>
               <select id="themeSelect">
                 <option value="classic">Classic</option>
+                <option value="classicRetro">Classic Retro</option>
                 <option value="sunny">Sunny</option>
                 <option value="moony">Moony</option>
                 <option value="toybox">Toybox</option>
@@ -261,6 +263,10 @@
                 <option value="magma">Magma</option>
                 <option value="stardust">Star-Dust</option>
               </select>
+            </div>
+            <div class="setting-item">
+              <span>8-bit Filter</span>
+              <button id="retroToggleBtn" class="small-btn">8-bit: OFF</button>
             </div>
             <button id="themeBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
@@ -348,6 +354,7 @@
           sfxVol = 0.5,
           musicMuted = false,
           sfxMuted = false,
+          isRetro8bit = false,
           frameCount = 0,
           running = false,
           isPaused = false,
@@ -359,9 +366,14 @@
           winParticles = [],
           flashAlpha = 0;
         const canvas = document.getElementById("canvas"),
-          ctx = canvas.getContext("2d"),
+          mainCtx = canvas.getContext("2d"),
           container = document.getElementById("container"),
           cpNotif = document.getElementById("cp-notif");
+        let ctx = mainCtx;
+        const retroCanvas = document.createElement("canvas");
+        retroCanvas.width = 160;
+        retroCanvas.height = 80;
+        const retroCtx = retroCanvas.getContext("2d");
         canvas.width = 800;
         canvas.height = 400;
         let bestLevel = localStorage.getItem("core_best_v20") || 1;
@@ -1025,9 +1037,8 @@
           }
           ctx.restore();
         }
-        function draw() {
+        function drawScene() {
           const t = themes[currentTheme];
-          ctx.clearRect(0, 0, canvas.width, canvas.height);
           ctx.save();
           if (shake > 0)
             ctx.translate(
@@ -1367,6 +1378,41 @@
           ctx.textAlign = "right";
           ctx.fillText("v0.5", canvas.width - 10, canvas.height - 10);
         }
+
+        function draw() {
+          const isRetro = isRetro8bit;
+          if (isRetro) {
+            retroCtx.setTransform(1, 0, 0, 1, 0, 0);
+            retroCtx.imageSmoothingEnabled = false;
+            retroCtx.clearRect(0, 0, retroCanvas.width, retroCanvas.height);
+            ctx = retroCtx;
+            ctx.save();
+            ctx.scale(0.2, 0.2);
+            drawScene();
+            ctx.restore();
+            ctx = mainCtx;
+            ctx.imageSmoothingEnabled = false;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(
+              retroCanvas,
+              0,
+              0,
+              retroCanvas.width,
+              retroCanvas.height,
+              0,
+              0,
+              canvas.width,
+              canvas.height,
+            );
+          } else {
+            ctx = mainCtx;
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawScene();
+          }
+        }
+
         function toggle() {
           if (!running) return;
           isPaused = !isPaused;
@@ -1493,6 +1539,11 @@
           } else if (m) {
             m.pause();
           }
+        };
+        document.getElementById("retroToggleBtn").onclick = () => {
+          isRetro8bit = !isRetro8bit;
+          document.getElementById("retroToggleBtn").textContent =
+            "8-bit: " + (isRetro8bit ? "ON" : "OFF");
         };
         document.getElementById("invincibleBtn").onclick = () => {
           infiniteInvincibility = !infiniteInvincibility;
