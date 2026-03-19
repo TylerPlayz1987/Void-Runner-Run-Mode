@@ -1443,6 +1443,14 @@
         function toggle() {
           if (!running) return;
           isPaused = !isPaused;
+          const m = document.getElementById("bgMusic");
+          if (m) {
+            if (isPaused) {
+              m.pause();
+            } else if (themes[currentTheme] && themes[currentTheme].music) {
+              m.play().catch(() => {});
+            }
+          }
           document.getElementById("pauseMenu").style.display = isPaused
             ? "flex"
             : "none";
