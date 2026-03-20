@@ -646,14 +646,16 @@
               Math.abs(lastP.x - 50) > 140 &&
               Math.abs(lastP.x - goal.x) > 120
             ) {
+              const requiredHeight = 400 - lastP.y + 24; // ensure it reaches through platform
+              const levelHeight = 100 + Math.min(140, currentLevel * 2);
               hazards.push({
                 type: "lava",
                 x: lastP.x + lastP.w / 2 - 12,
                 w: 24,
                 y: 400,
                 h: 0,
-                maxH: 100 + Math.min(140, currentLevel * 2),
-                speed: 1.6 + Math.min(2.4, currentLevel * 0.03),
+                maxH: Math.max(requiredHeight, levelHeight),
+                speed: 1.6 + Math.min(2.6, currentLevel * 0.03),
                 rising: true,
                 hold: 0,
                 holdMax: 40,
