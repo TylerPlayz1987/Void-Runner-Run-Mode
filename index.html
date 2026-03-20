@@ -627,7 +627,7 @@
         // Player state and physics
         const player = {
           x: 50,
-          y: 200,
+          y: fancyMode ? (platforms[0].y - player.h - 2) : 200,
           w: 20,
           h: 20,
           baseW: 20,
@@ -822,7 +822,7 @@
           setTimeout(() => (container.style.borderColor = "#333"), 200);
           generateLevel();
           player.x = 50;
-          player.y = 330;
+          player.y = fancyMode ? (platforms[0].y - player.h - 2) : 200;
           player.vx = 0;
           player.vy = 0;
           player.trail = [];
@@ -832,6 +832,7 @@
           player.deathScale = 1;
           player.deathRotate = 0;
           player.isBeingRescued = false;
+          player.rescueTarget = null;
           player.stretchX = 1;
           player.stretchY = 1;
           player.coyoteTime = 0;
@@ -908,8 +909,8 @@
 
           // Fancy mode uses a slightly larger player hitbox
           if (fancyMode) {
-            player.w = 28;
-            player.h = 28;
+            player.w = 32;
+            player.h = 32;
           } else {
             player.w = player.baseW;
             player.h = player.baseH;
@@ -1970,7 +1971,7 @@
 
         function respawnPlayer() {
           player.x = 50;
-          player.y = 200;
+          player.y = fancyMode ? (platforms[0].y - player.h - 2) : 200;
           player.vx = 0;
           player.vy = 0;
           player.trail = [];
