@@ -158,7 +158,7 @@
         border-radius: 2px;
         box-shadow: 0 0 8px #0ff;
         transform: rotate(0deg);
-        transition: transform 0.2s linear;
+        transition: none;
       }
 
       #timeTravelAnimation .rewind-track {
@@ -1832,32 +1832,46 @@
           const levelLabel = document.getElementById("timeLevelLabel");
           const progressBar = document.getElementById("rewindProgress");
 
-          const total = Math.max(1, fromLevel);
-          const duration = Math.min(2800, 1100 + fromLevel * 80);
-          const tick = Math.max(30, duration / Math.max(1, total));
+          const duration = Math.min(3500, 1100 + fromLevel * 90);
+          const startTime = performance.now();
+          const startAngle = 0;
+          const endAngle = -360;
+          const startLevel = Math.max(1, fromLevel);
+          let currentLevel = startLevel;
 
-          let current = fromLevel;
-          levelLabel.textContent = `Rewinding from Level ${current}`;
+          levelLabel.textContent = `Rewinding from Level ${currentLevel}`;
           progressBar.style.width = "0%";
-          clockHand.style.transform = "rotate(360deg)";
-
+          clockHand.style.transform = `rotate(${startAngle}deg)`;
           overlay.style.display = "flex";
 
-          const intervalId = setInterval(() => {
-            current = Math.max(1, current - 1);
-            const levelPct = (fromLevel - current) / Math.max(1, fromLevel - 1);
-            progressBar.style.width = `${(levelPct * 100).toFixed(1)}%`;
-            levelLabel.textContent = `Rewinding: Level ${current}`;
-            const angle = 360 - (current / Math.max(1, fromLevel)) * 360;
+          function animate(now) {
+            const t = Math.min(1, (now - startTime) / duration);
+            const angle = startAngle + (endAngle - startAngle) * t;
             clockHand.style.transform = `rotate(${angle}deg)`;
+            progressBar.style.width = `${(t * 100).toFixed(2)}%`;
 
-            if (current === 1) {
-              clearInterval(intervalId);
+            const targetLevel = Math.max(
+              1,
+              Math.round(startLevel - (startLevel - 1) * t),
+            );
+            if (targetLevel !== currentLevel) {
+              currentLevel = targetLevel;
+              levelLabel.textContent =
+                currentLevel === 1
+                  ? "Rewind complete"
+                  : `Rewinding to Level ${currentLevel}`;
+            }
+
+            if (t < 1) {
+              requestAnimationFrame(animate);
+            } else {
               setTimeout(() => {
                 overlay.style.display = "none";
-              }, 500);
+              }, 450);
             }
-          }, tick);
+          }
+
+          requestAnimationFrame(animate);
         }
 
         function checkpointRestart() {
