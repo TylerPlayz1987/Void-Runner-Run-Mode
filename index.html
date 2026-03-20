@@ -88,6 +88,99 @@
         z-index: 150;
       }
 
+      #resetConfirm,
+      #timeTravelAnimation {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 250;
+        color: #0f0;
+        text-align: center;
+      }
+
+      #resetConfirm .confirm-box,
+      #timeTravelAnimation .confirm-box {
+        width: 320px;
+        max-width: 90%;
+        background: #111;
+        border: 2px solid #0f0;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      #timeTravelAnimation p {
+        font-size: 22px;
+        margin: 0;
+        color: #0ff;
+      }
+
+      #timeTravelAnimation .clock {
+        position: relative;
+        width: 170px;
+        height: 170px;
+        margin: 0 auto 12px;
+        border-radius: 50%;
+        border: 3px solid #0f0;
+        background: rgba(0, 0, 0, 0.6);
+        box-shadow: 0 0 18px #0ff;
+      }
+
+      #timeTravelAnimation .clock-center {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 14px;
+        height: 14px;
+        margin: -7px 0 0 -7px;
+        background: #0f0;
+        border-radius: 50%;
+        z-index: 5;
+      }
+
+      #timeTravelAnimation .hand {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 4px;
+        height: 72px;
+        margin-left: -2px;
+        margin-top: -72px;
+        transform-origin: 50% 100%;
+        background: #0ff;
+        border-radius: 2px;
+        box-shadow: 0 0 8px #0ff;
+        transform: rotate(0deg);
+        transition: none;
+      }
+
+      #timeTravelAnimation .rewind-track {
+        width: 90%;
+        height: 12px;
+        margin: 12px auto 0;
+        background: #111;
+        border: 1px solid #0f0;
+        position: relative;
+      }
+
+      #timeTravelAnimation .rewind-track span {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        background: #0ff;
+        width: 0;
+        transition: width 0.1s linear;
+      }
+
       .overlay {
         position: absolute;
         width: 100%;
@@ -205,6 +298,28 @@
           </div>
         </div>
         <div id="cp-notif">Checkpoint Reached</div>
+
+        <div id="resetConfirm">
+          <div class="confirm-box">
+            <h2>Reset Game</h2>
+            <p>Choose a reset option:</p>
+            <button id="checkpointRestartBtn" class="small-btn">Restart from Checkpoint</button>
+            <button id="fullRestartBtn" class="small-btn">Full Restart (Level 1)</button>
+            <button id="cancelResetBtn" class="small-btn">Cancel</button>
+          </div>
+        </div>
+
+        <div id="timeTravelAnimation">
+          <div class="confirm-box">
+            <div class="clock">
+              <div class="hand" id="clockHand"></div>
+              <div class="clock-center"></div>
+            </div>
+            <p id="timeLevelLabel">Rewinding time...</p>
+            <div class="rewind-track"><span id="rewindProgress"></span></div>
+          </div>
+        </div>
+
         <div id="startMenu" class="overlay">
           <h1>Void Runner</h1>
           <button id="startBtn" style="width: 200px">Start(Run Mode)</button>
@@ -506,6 +621,7 @@
         // World state arrays and input map
         let platforms = [],
           hazards = [],
+          lavaParticles = [],
           keys = {},
           jumpDust = [];
         // Player state and physics
@@ -572,6 +688,10 @@
             setTimeout(() => sfx(659, "triangle", 0.1, 0.1), 80);
           },
           di: () => sfx(150, "sawtooth", 0.4, 0.1, 40),
+          rewind: () => {
+            sfx(220, "triangle", 0.15, 0.12, 360);
+            setTimeout(() => sfx(120, "sine", 0.2, 0.08, 220), 70);
+          },
           cp: () => {
             sfx(300, "sine", 1.2, 0.2, 1400);
             sfx(450, "sine", 1.2, 0.1, 1600);
@@ -596,17 +716,6 @@
           for (let i = 0; i < 4 + currentLevel; i++) {
             let gp = 110 + Math.random() * 80,
               vd = (Math.random() - 0.5) * 140;
-            if (currentLevel >= 15 && Math.random() < 0.3)
-              hazards.push({
-                x: lx + gp / 2 - 10,
-                y: 100,
-                w: 15,
-                h: 80,
-                s: 2,
-                dir: 1,
-                r: 200,
-                sy: 50,
-              });
             lx += gp;
             ly = Math.max(120, Math.min(340, ly + vd));
             let isG = i === 3 + currentLevel,
@@ -654,6 +763,32 @@
                 r: 110,
                 core: currentLevel >= 55 ? 10 : 0,
               });
+
+            // lava wall hazard from this platform (bottom-up wall)
+            if (
+              currentLevel >= 15 &&
+              !isG &&
+              Math.random() < 0.22 &&
+              Math.abs(lastP.x - 50) > 140 &&
+              Math.abs(lastP.x - goal.x) > 120
+            ) {
+              const requiredHeight = 400 - lastP.y + 24; // ensure it reaches through platform
+              const levelHeight = 100 + Math.min(140, currentLevel * 2);
+              hazards.push({
+                type: "lava",
+                x: lastP.x + lastP.w / 2 - 12,
+                w: 24,
+                y: 400,
+                h: 0,
+                maxH: Math.max(requiredHeight, levelHeight),
+                speed: 1.6 + Math.min(2.6, currentLevel * 0.03),
+                rising: true,
+                hold: 0,
+                holdMax: 40,
+                warned: false,
+              });
+            }
+
             if (
               currentLevel >= 35 &&
               !shieldItem &&
@@ -951,7 +1086,44 @@
             }
           }
           hazards.forEach((h) => {
-            if (h.r) {
+            if (h.type === "lava") {
+              if (!h.warned && h.rising && h.h < 10) {
+                h.warned = true;
+                sfx(270, "sawtooth", 0.07, 0.11, 240);
+              }
+              if (h.h >= h.maxH && h.rising) {
+                h.h = h.maxH;
+                h.hold = (h.hold || 0) + 1;
+                if (h.hold >= h.holdMax) {
+                  h.rising = false;
+                  h.hold = 0;
+                }
+              } else if (h.h <= 0 && !h.rising) {
+                h.h = 0;
+                h.hold = (h.hold || 0) + 1;
+                if (h.hold >= h.holdMax) {
+                  h.rising = true;
+                  h.hold = 0;
+                  h.warned = false;
+                }
+              } else {
+                h.h += h.rising ? h.speed : -h.speed;
+                h.h = Math.max(0, Math.min(h.maxH, h.h));
+              }
+              h.y = 400 - h.h;
+
+              // emit rim particles while active
+              if (h.h > 10 && Math.random() < 0.35) {
+                lavaParticles.push({
+                  x: h.x + Math.random() * h.w,
+                  y: h.y + h.h,
+                  vx: (Math.random() - 0.5) * 0.6,
+                  vy: -1 - Math.random() * 0.8,
+                  life: 24 + Math.floor(Math.random() * 12),
+                  size: 1 + Math.random() * 2,
+                });
+              }
+            } else if (h.r) {
               h.sy += h.s * h.dir;
               if (h.sy > h.r || h.sy < 50) h.dir *= -1;
               h.y = h.sy;
@@ -1430,6 +1602,18 @@
             p.alpha = Math.max(0, p.alpha - 0.04);
             p.life--; if (p.life <= 0 || p.alpha <= 0) jumpDust.splice(i, 1);
           }
+
+          // Lava rim particles
+          for (let i = lavaParticles.length - 1; i >= 0; i--) {
+            const p = lavaParticles[i];
+            ctx.fillStyle = `rgba(255, ${120 + p.life}, 0, ${Math.max(0, p.life / 35)})`;
+            ctx.fillRect(p.x - camX, p.y, p.size, p.size);
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.08;
+            p.life--;
+            if (p.life <= 0) lavaParticles.splice(i, 1);
+          }
           const gx = goal.x - camX;
           const gy = goal.y;
           const gw = goal.w;
@@ -1551,6 +1735,26 @@
               ctx.strokeStyle = "rgba(255,255,255,0.3)";
               ctx.lineWidth = 2;
               ctx.strokeRect(x, y, w, hgt);
+            if (h.type === "lava") {
+              let glow = ctx.createRadialGradient(
+                h.x - camX + h.w / 2,
+                h.y + h.h / 2,
+                0,
+                h.x - camX + h.w / 2,
+                h.y + h.h / 2,
+                Math.max(20, h.h),
+              );
+              glow.addColorStop(0, "rgba(255,150,0,0.7)");
+              glow.addColorStop(0.45, "rgba(255,80,0,0.45)");
+              glow.addColorStop(1, "rgba(255,0,0,0)");
+              ctx.fillStyle = glow;
+              ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
+
+              ctx.fillStyle = "rgba(255,120,20,0.95)";
+              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+              ctx.strokeStyle = "rgba(255,210,50,0.8)";
+              ctx.lineWidth = 2;
+              ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
             } else {
               ctx.fillStyle = t.hazards;
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
@@ -1638,7 +1842,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.5", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
@@ -1752,6 +1956,151 @@
           document.getElementById("cheatsPage").style.display = "none";
           document.getElementById("mainPausePage").style.display = "flex";
         };
+
+        function hideResetPrompt() {
+          document.getElementById("resetConfirm").style.display = "none";
+          document.getElementById("mainPausePage").style.display = "flex";
+        }
+
+        function showResetPrompt() {
+          document.getElementById("mainPausePage").style.display = "none";
+          document.getElementById("resetConfirm").style.display = "flex";
+        }
+
+        function respawnPlayer() {
+          player.x = 50;
+          player.y = 200;
+          player.vx = 0;
+          player.vy = 0;
+          player.trail = [];
+          player.hasShield = false;
+          player.invincibleTimer = 0;
+          player.spaghettified = false;
+          player.deathScale = 1;
+          player.deathRotate = 0;
+          player.isBeingRescued = false;
+          player.rescueTarget = null;
+          player.stretchX = 1;
+          player.stretchY = 1;
+          player.coyoteTime = 0;
+          player.jumpBuffer = 0;
+        }
+
+        function applyDefaults() {
+          masterVol = 0.5;
+          musicVol = 0.5;
+          sfxVol = 0.5;
+          musicMuted = false;
+          sfxMuted = false;
+          isRetro8bit = false;
+          infiniteInvincibility = false;
+          currentTheme = "classic";
+          document.getElementById("masterSlider").value = 50;
+          document.getElementById("musicSlider").value = 50;
+          document.getElementById("sfxSlider").value = 50;
+          document.getElementById("masterValue").textContent = "50%";
+          document.getElementById("musicValue").textContent = "50%";
+          document.getElementById("sfxValue").textContent = "50%";
+          document.getElementById("musicMuteBtn").textContent = "Music: ON";
+          document.getElementById("sfxMuteBtn").textContent = "SFX: ON";
+          document.getElementById("themeSelect").value = "classic";
+          document.getElementById("retroToggleBtn").textContent = "8-bit: OFF";
+          document.getElementById("invincibleBtn").textContent = "Invincibility: OFF";
+          const m = document.getElementById("bgMusic");
+          if (m) {
+            if (themes[currentTheme].music) {
+              m.src = themes[currentTheme].music;
+              m.volume = musicVol * masterVol;
+              m.play().catch(() => {});
+            } else {
+              m.pause();
+            }
+          }
+        }
+
+        function runRewindAnimation(fromLevel) {
+          const overlay = document.getElementById("timeTravelAnimation");
+          const clockHand = document.getElementById("clockHand");
+          const levelLabel = document.getElementById("timeLevelLabel");
+          const progressBar = document.getElementById("rewindProgress");
+
+          const duration = Math.min(3500, 1100 + fromLevel * 90);
+          const startTime = performance.now();
+          const startAngle = 0;
+          const endAngle = -360;
+          const startLevel = Math.max(1, fromLevel);
+          let currentLevel = startLevel;
+
+          levelLabel.textContent = `Rewinding from Level ${currentLevel}`;
+          progressBar.style.width = "0%";
+          clockHand.style.transform = `rotate(${startAngle}deg)`;
+          overlay.style.display = "flex";
+
+          function animate(now) {
+            const t = Math.min(1, (now - startTime) / duration);
+            const angle = startAngle + (endAngle - startAngle) * t;
+            clockHand.style.transform = `rotate(${angle}deg)`;
+            progressBar.style.width = `${(t * 100).toFixed(2)}%`;
+
+            const targetLevel = Math.max(
+              1,
+              Math.round(startLevel - (startLevel - 1) * t),
+            );
+            if (targetLevel !== currentLevel) {
+              currentLevel = targetLevel;
+              levelLabel.textContent =
+                currentLevel === 1
+                  ? "Rewind complete"
+                  : `Rewinding to Level ${currentLevel}`;
+            }
+
+            if (t < 1) {
+              requestAnimationFrame(animate);
+            } else {
+              setTimeout(() => {
+                overlay.style.display = "none";
+              }, 450);
+            }
+          }
+
+          requestAnimationFrame(animate);
+        }
+
+        function checkpointRestart() {
+          currentLevel = lastCheckpoint;
+          document.getElementById("lvl").textContent = currentLevel;
+          generateLevel();
+          respawnPlayer();
+          isPaused = false;
+          document.getElementById("pauseMenu").style.display = "none";
+          hideResetPrompt();
+        }
+
+        function fullRestart() {
+          const fromLevel = currentLevel;
+          lastCheckpoint = 1;
+          currentLevel = 1;
+          deathCount = 0;
+          bestLevel = 1;
+          localStorage.setItem("core_best_v20", 1);
+          document.getElementById("deaths").textContent = deathCount;
+          document.getElementById("lvl").textContent = currentLevel;
+          document.getElementById("best").textContent = bestLevel;
+          applyDefaults();
+          generateLevel();
+          respawnPlayer();
+          isPaused = false;
+          document.getElementById("pauseMenu").style.display = "none";
+          hideResetPrompt();
+          play.rewind();
+          runRewindAnimation(fromLevel);
+        }
+
+        document.getElementById("restartBtn").onclick = showResetPrompt;
+        document.getElementById("cancelResetBtn").onclick = hideResetPrompt;
+        document.getElementById("checkpointRestartBtn").onclick = checkpointRestart;
+        document.getElementById("fullRestartBtn").onclick = fullRestart;
+
         document.getElementById("masterSlider").oninput = (e) => {
           masterVol = e.target.value / 100;
           document.getElementById("masterValue").textContent =
