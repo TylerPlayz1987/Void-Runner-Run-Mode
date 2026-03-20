@@ -88,6 +88,56 @@
         z-index: 150;
       }
 
+      #resetConfirm,
+      #timeTravelAnimation {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 250;
+        color: #0f0;
+        text-align: center;
+      }
+
+      #resetConfirm .confirm-box,
+      #timeTravelAnimation .confirm-box {
+        width: 320px;
+        max-width: 90%;
+        background: #111;
+        border: 2px solid #0f0;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      #timeTravelAnimation p {
+        font-size: 22px;
+        margin: 0;
+        color: #0ff;
+      }
+
+      #timeTravelAnimation .time-bar {
+        width: 90%;
+        height: 10px;
+        background: #222;
+        border: 1px solid #0f0;
+        overflow: hidden;
+      }
+
+      #timeTravelAnimation .time-progress {
+        width: 0;
+        height: 100%;
+        background: #0ff;
+        transition: width 0.75s ease-out;
+      }
+
       .overlay {
         position: absolute;
         width: 100%;
@@ -205,6 +255,24 @@
           </div>
         </div>
         <div id="cp-notif">Checkpoint Reached</div>
+
+        <div id="resetConfirm">
+          <div class="confirm-box">
+            <h2>Reset Game</h2>
+            <p>Choose a reset option:</p>
+            <button id="checkpointRestartBtn" class="small-btn">Restart from Checkpoint</button>
+            <button id="fullRestartBtn" class="small-btn">Full Restart (Level 1)</button>
+            <button id="cancelResetBtn" class="small-btn">Cancel</button>
+          </div>
+        </div>
+
+        <div id="timeTravelAnimation">
+          <div class="confirm-box">
+            <p>Rewinding time...</p>
+            <div class="time-bar"><div class="time-progress" id="timeProgress"></div></div>
+          </div>
+        </div>
+
         <div id="startMenu" class="overlay">
           <h1>Void Runner</h1>
           <button id="startBtn" style="width: 200px">Start(Run Mode)</button>
@@ -1646,6 +1714,106 @@
           document.getElementById("cheatsPage").style.display = "none";
           document.getElementById("mainPausePage").style.display = "flex";
         };
+
+        function hideResetPrompt() {
+          document.getElementById("resetConfirm").style.display = "none";
+          document.getElementById("mainPausePage").style.display = "flex";
+        }
+
+        function showResetPrompt() {
+          document.getElementById("mainPausePage").style.display = "none";
+          document.getElementById("resetConfirm").style.display = "flex";
+        }
+
+        function respawnPlayer() {
+          player.x = 50;
+          player.y = 200;
+          player.vx = 0;
+          player.vy = 0;
+          player.trail = [];
+          player.hasShield = false;
+          player.invincibleTimer = 0;
+          player.spaghettified = false;
+          player.deathScale = 1;
+          player.deathRotate = 0;
+          player.isBeingRescued = false;
+          player.rescueTarget = null;
+          player.stretchX = 1;
+          player.stretchY = 1;
+          player.coyoteTime = 0;
+          player.jumpBuffer = 0;
+        }
+
+        function applyDefaults() {
+          masterVol = 0.5;
+          musicVol = 0.5;
+          sfxVol = 0.5;
+          musicMuted = false;
+          sfxMuted = false;
+          isRetro8bit = false;
+          infiniteInvincibility = false;
+          currentTheme = "classic";
+          document.getElementById("masterSlider").value = 50;
+          document.getElementById("musicSlider").value = 50;
+          document.getElementById("sfxSlider").value = 50;
+          document.getElementById("masterValue").textContent = "50%";
+          document.getElementById("musicValue").textContent = "50%";
+          document.getElementById("sfxValue").textContent = "50%";
+          document.getElementById("musicMuteBtn").textContent = "Music: ON";
+          document.getElementById("sfxMuteBtn").textContent = "SFX: ON";
+          document.getElementById("themeSelect").value = "classic";
+          document.getElementById("retroToggleBtn").textContent = "8-bit: OFF";
+          document.getElementById("invincibleBtn").textContent = "Invincibility: OFF";
+          const m = document.getElementById("bgMusic");
+          if (m) {
+            if (themes[currentTheme].music) {
+              m.src = themes[currentTheme].music;
+              m.volume = musicVol * masterVol;
+              m.play().catch(() => {});
+            } else {
+              m.pause();
+            }
+          }
+        }
+
+        function checkpointRestart() {
+          currentLevel = lastCheckpoint;
+          document.getElementById("lvl").textContent = currentLevel;
+          generateLevel();
+          respawnPlayer();
+          isPaused = false;
+          document.getElementById("pauseMenu").style.display = "none";
+          hideResetPrompt();
+        }
+
+        function fullRestart() {
+          lastCheckpoint = 1;
+          currentLevel = 1;
+          deathCount = 0;
+          document.getElementById("deaths").textContent = deathCount;
+          document.getElementById("lvl").textContent = currentLevel;
+          applyDefaults();
+          generateLevel();
+          respawnPlayer();
+          isPaused = false;
+          document.getElementById("pauseMenu").style.display = "none";
+          hideResetPrompt();
+          document.getElementById("timeTravelAnimation").style.display = "flex";
+          const progress = document.getElementById("timeProgress");
+          progress.style.width = "0";
+          setTimeout(() => {
+            progress.style.width = "100%";
+          }, 20);
+          setTimeout(() => {
+            document.getElementById("timeTravelAnimation").style.display = "none";
+          }, 900);
+        }
+
+        document.getElementById("restartBtn").onclick = showResetPrompt;
+        document.getElementById("cancelResetBtn").onclick = hideResetPrompt;
+        document.getElementById("checkpointRestartBtn").onclick = checkpointRestart;
+        document.getElementById("fullRestartBtn").onclick = fullRestart;
+
         document.getElementById("masterSlider").oninput = (e) => {
           masterVol = e.target.value / 100;
           document.getElementById("masterValue").textContent =
