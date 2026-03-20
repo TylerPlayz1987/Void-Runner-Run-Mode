@@ -267,6 +267,10 @@
               <span>8-bit Filter</span>
               <button id="retroToggleBtn" class="small-btn">8-bit: OFF</button>
             </div>
+            <div class="setting-item">
+              <span>Fancy Mode (3D style)</span>
+              <button id="fancyToggleBtn" class="small-btn">Fancy: OFF</button>
+            </div>
             <button id="themeBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
           <div id="cheatsPage" class="menu-page" style="display: none">
@@ -399,7 +403,8 @@
         let shieldItem = null,
           wells = [],
           currentTheme = "classic",
-          infiniteInvincibility = false;
+          infiniteInvincibility = false,
+          fancyMode = false;
         const themes = {
           classic: {
             bg: "#050505",
@@ -1474,8 +1479,26 @@
             ctx.shadowColor = t.hazards;
           }
           hazards.forEach((h) => {
-            ctx.fillStyle = t.hazards;
-            ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+            if (fancyMode) {
+              const x = h.x - camX;
+              const y = h.y;
+              const w = h.w;
+              const hgt = h.h;
+              const base = ctx.createLinearGradient(x, y, x, y + hgt);
+              base.addColorStop(0, "rgba(255,180,0,0.95)");
+              base.addColorStop(0.5, "rgba(255,100,10,0.9)");
+              base.addColorStop(1, "rgba(140,40,0,0.8)");
+              ctx.fillStyle = base;
+              ctx.fillRect(x, y, w, hgt);
+              ctx.fillStyle = "rgba(255,220,120,0.3)";
+              ctx.fillRect(x, y, w, Math.min(hgt, 6));
+              ctx.strokeStyle = "rgba(255,255,255,0.3)";
+              ctx.lineWidth = 2;
+              ctx.strokeRect(x, y, w, hgt);
+            } else {
+              ctx.fillStyle = t.hazards;
+              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+            }
           });
           ctx.shadowBlur = 0;
           platforms.forEach((p) => {
@@ -1493,18 +1516,45 @@
               ctx.lineTo(p.x - camX + 70, p.y + 12);
               ctx.stroke();
             } else {
-              ctx.fillStyle =
-                p.isPhase &&
-                cy >= 120 &&
-                cy < 240 &&
-                Math.floor(frameCount / 10) % 2
-                  ? "#fff"
-                  : p.isPhase
-                    ? "#08f"
-                    : p.moveRange > 0
-                      ? "#555"
+              if (fancyMode) {
+                const px = p.x - camX;
+                const py = p.y;
+                const pw = p.w;
+                const ph = p.h;
+                const gene = ctx.createLinearGradient(px, py, px, py + ph);
+                const baseCol = p.isPhase
+                  ? "rgba(0,170,255,0.85)"
+                  : p.moveRange > 0
+                    ? "rgba(110,110,110,0.9)"
+                    : p.isPhase
+                      ? "rgba(0,140,255,0.9)"
                       : t.plat;
-              ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+                gene.addColorStop(0, "rgba(255,255,255,0.5)");
+                gene.addColorStop(0.4, baseCol);
+                gene.addColorStop(1, "rgba(0,0,0,0.65)");
+                ctx.fillStyle = gene;
+                ctx.fillRect(px, py, pw, ph);
+                ctx.fillStyle = "rgba(255,255,255,0.15)";
+                ctx.fillRect(px, py, pw, 4);
+                ctx.fillStyle = "rgba(0,0,0,0.25)";
+                ctx.fillRect(px, py + ph - 3, pw, 3);
+                ctx.strokeStyle = "rgba(180,180,180,0.45)";
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(px, py, pw, ph);
+              } else {
+                ctx.fillStyle =
+                  p.isPhase &&
+                  cy >= 120 &&
+                  cy < 240 &&
+                  Math.floor(frameCount / 10) % 2
+                    ? "#fff"
+                    : p.isPhase
+                      ? "#08f"
+                      : p.moveRange > 0
+                        ? "#555"
+                        : t.plat;
+                ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+              }
             }
             if (p.hasSpike || p.hasSeeker) {
               ctx.fillStyle = t.hazards;
@@ -1711,6 +1761,11 @@
           isRetro8bit = !isRetro8bit;
           document.getElementById("retroToggleBtn").textContent =
             "8-bit: " + (isRetro8bit ? "ON" : "OFF");
+        };
+        document.getElementById("fancyToggleBtn").onclick = () => {
+          fancyMode = !fancyMode;
+          document.getElementById("fancyToggleBtn").textContent =
+            "Fancy: " + (fancyMode ? "ON" : "OFF");
         };
         document.getElementById("invincibleBtn").onclick = () => {
           infiniteInvincibility = !infiniteInvincibility;
