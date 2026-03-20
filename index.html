@@ -590,17 +590,6 @@
           for (let i = 0; i < 4 + currentLevel; i++) {
             let gp = 110 + Math.random() * 80,
               vd = (Math.random() - 0.5) * 140;
-            if (currentLevel >= 15 && Math.random() < 0.3)
-              hazards.push({
-                x: lx + gp / 2 - 10,
-                y: 100,
-                w: 15,
-                h: 80,
-                s: 2,
-                dir: 1,
-                r: 200,
-                sy: 50,
-              });
             lx += gp;
             ly = Math.max(120, Math.min(340, ly + vd));
             let isG = i === 3 + currentLevel,
