@@ -616,6 +616,7 @@
         // World state arrays and input map
         let platforms = [],
           hazards = [],
+          lavaParticles = [],
           keys = {},
           jumpDust = [];
         // Player state and physics
@@ -708,17 +709,6 @@
           for (let i = 0; i < 4 + currentLevel; i++) {
             let gp = 110 + Math.random() * 80,
               vd = (Math.random() - 0.5) * 140;
-            if (currentLevel >= 15 && Math.random() < 0.3)
-              hazards.push({
-                x: lx + gp / 2 - 10,
-                y: 100,
-                w: 15,
-                h: 80,
-                s: 2,
-                dir: 1,
-                r: 200,
-                sy: 50,
-              });
             lx += gp;
             ly = Math.max(120, Math.min(340, ly + vd));
             let isG = i === 3 + currentLevel,
@@ -766,6 +756,32 @@
                 r: 110,
                 core: currentLevel >= 55 ? 10 : 0,
               });
+
+            // lava wall hazard from this platform (bottom-up wall)
+            if (
+              currentLevel >= 15 &&
+              !isG &&
+              Math.random() < 0.22 &&
+              Math.abs(lastP.x - 50) > 140 &&
+              Math.abs(lastP.x - goal.x) > 120
+            ) {
+              const requiredHeight = 400 - lastP.y + 24; // ensure it reaches through platform
+              const levelHeight = 100 + Math.min(140, currentLevel * 2);
+              hazards.push({
+                type: "lava",
+                x: lastP.x + lastP.w / 2 - 12,
+                w: 24,
+                y: 400,
+                h: 0,
+                maxH: Math.max(requiredHeight, levelHeight),
+                speed: 1.6 + Math.min(2.6, currentLevel * 0.03),
+                rising: true,
+                hold: 0,
+                holdMax: 40,
+                warned: false,
+              });
+            }
+
             if (
               currentLevel >= 35 &&
               !shieldItem &&
@@ -1053,7 +1069,44 @@
             }
           }
           hazards.forEach((h) => {
-            if (h.r) {
+            if (h.type === "lava") {
+              if (!h.warned && h.rising && h.h < 10) {
+                h.warned = true;
+                sfx(270, "sawtooth", 0.07, 0.11, 240);
+              }
+              if (h.h >= h.maxH && h.rising) {
+                h.h = h.maxH;
+                h.hold = (h.hold || 0) + 1;
+                if (h.hold >= h.holdMax) {
+                  h.rising = false;
+                  h.hold = 0;
+                }
+              } else if (h.h <= 0 && !h.rising) {
+                h.h = 0;
+                h.hold = (h.hold || 0) + 1;
+                if (h.hold >= h.holdMax) {
+                  h.rising = true;
+                  h.hold = 0;
+                  h.warned = false;
+                }
+              } else {
+                h.h += h.rising ? h.speed : -h.speed;
+                h.h = Math.max(0, Math.min(h.maxH, h.h));
+              }
+              h.y = 400 - h.h;
+
+              // emit rim particles while active
+              if (h.h > 10 && Math.random() < 0.35) {
+                lavaParticles.push({
+                  x: h.x + Math.random() * h.w,
+                  y: h.y + h.h,
+                  vx: (Math.random() - 0.5) * 0.6,
+                  vy: -1 - Math.random() * 0.8,
+                  life: 24 + Math.floor(Math.random() * 12),
+                  size: 1 + Math.random() * 2,
+                });
+              }
+            } else if (h.r) {
               h.sy += h.s * h.dir;
               if (h.sy > h.r || h.sy < 50) h.dir *= -1;
               h.y = h.sy;
@@ -1488,6 +1541,18 @@
             p.alpha = Math.max(0, p.alpha - 0.04);
             p.life--; if (p.life <= 0 || p.alpha <= 0) jumpDust.splice(i, 1);
           }
+
+          // Lava rim particles
+          for (let i = lavaParticles.length - 1; i >= 0; i--) {
+            const p = lavaParticles[i];
+            ctx.fillStyle = `rgba(255, ${120 + p.life}, 0, ${Math.max(0, p.life / 35)})`;
+            ctx.fillRect(p.x - camX, p.y, p.size, p.size);
+            p.x += p.vx;
+            p.y += p.vy;
+            p.vy += 0.08;
+            p.life--;
+            if (p.life <= 0) lavaParticles.splice(i, 1);
+          }
           const gx = goal.x - camX;
           const gy = goal.y;
           const gw = goal.w;
@@ -1593,8 +1658,30 @@
             ctx.shadowColor = t.hazards;
           }
           hazards.forEach((h) => {
-            ctx.fillStyle = t.hazards;
-            ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+            if (h.type === "lava") {
+              let glow = ctx.createRadialGradient(
+                h.x - camX + h.w / 2,
+                h.y + h.h / 2,
+                0,
+                h.x - camX + h.w / 2,
+                h.y + h.h / 2,
+                Math.max(20, h.h),
+              );
+              glow.addColorStop(0, "rgba(255,150,0,0.7)");
+              glow.addColorStop(0.45, "rgba(255,80,0,0.45)");
+              glow.addColorStop(1, "rgba(255,0,0,0)");
+              ctx.fillStyle = glow;
+              ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
+
+              ctx.fillStyle = "rgba(255,120,20,0.95)";
+              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+              ctx.strokeStyle = "rgba(255,210,50,0.8)";
+              ctx.lineWidth = 2;
+              ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
+            } else {
+              ctx.fillStyle = t.hazards;
+              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+            }
           });
           ctx.shadowBlur = 0;
           platforms.forEach((p) => {
