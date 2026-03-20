@@ -123,19 +123,61 @@
         color: #0ff;
       }
 
-      #timeTravelAnimation .time-bar {
-        width: 90%;
-        height: 10px;
-        background: #222;
-        border: 1px solid #0f0;
-        overflow: hidden;
+      #timeTravelAnimation .clock {
+        position: relative;
+        width: 170px;
+        height: 170px;
+        margin: 0 auto 12px;
+        border-radius: 50%;
+        border: 3px solid #0f0;
+        background: rgba(0, 0, 0, 0.6);
+        box-shadow: 0 0 18px #0ff;
       }
 
-      #timeTravelAnimation .time-progress {
-        width: 0;
+      #timeTravelAnimation .clock-center {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 14px;
+        height: 14px;
+        margin: -7px 0 0 -7px;
+        background: #0f0;
+        border-radius: 50%;
+        z-index: 5;
+      }
+
+      #timeTravelAnimation .hand {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 4px;
+        height: 70px;
+        margin-left: -2px;
+        transform-origin: 50% 80%;
+        background: #0ff;
+        border-radius: 2px;
+        box-shadow: 0 0 8px #0ff;
+        transform: rotate(0deg);
+        transition: transform 0.2s linear;
+      }
+
+      #timeTravelAnimation .rewind-track {
+        width: 90%;
+        height: 12px;
+        margin: 12px auto 0;
+        background: #111;
+        border: 1px solid #0f0;
+        position: relative;
+      }
+
+      #timeTravelAnimation .rewind-track span {
+        position: absolute;
+        left: 0;
+        top: 0;
         height: 100%;
         background: #0ff;
-        transition: width 0.75s ease-out;
+        width: 0;
+        transition: width 0.1s linear;
       }
 
       .overlay {
@@ -268,8 +310,12 @@
 
         <div id="timeTravelAnimation">
           <div class="confirm-box">
-            <p>Rewinding time...</p>
-            <div class="time-bar"><div class="time-progress" id="timeProgress"></div></div>
+            <div class="clock">
+              <div class="hand" id="clockHand"></div>
+              <div class="clock-center"></div>
+            </div>
+            <p id="timeLevelLabel">Rewinding time...</p>
+            <div class="rewind-track"><span id="rewindProgress"></span></div>
           </div>
         </div>
 
@@ -1604,7 +1650,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.5", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
@@ -1780,6 +1826,40 @@
           }
         }
 
+        function runRewindAnimation(fromLevel) {
+          const overlay = document.getElementById("timeTravelAnimation");
+          const clockHand = document.getElementById("clockHand");
+          const levelLabel = document.getElementById("timeLevelLabel");
+          const progressBar = document.getElementById("rewindProgress");
+
+          const total = Math.max(1, fromLevel);
+          const duration = Math.min(2800, 1100 + fromLevel * 80);
+          const tick = Math.max(30, duration / Math.max(1, total));
+
+          let current = fromLevel;
+          levelLabel.textContent = `Rewinding from Level ${current}`;
+          progressBar.style.width = "0%";
+          clockHand.style.transform = "rotate(360deg)";
+
+          overlay.style.display = "flex";
+
+          const intervalId = setInterval(() => {
+            current = Math.max(1, current - 1);
+            const levelPct = (fromLevel - current) / Math.max(1, fromLevel - 1);
+            progressBar.style.width = `${(levelPct * 100).toFixed(1)}%`;
+            levelLabel.textContent = `Rewinding: Level ${current}`;
+            const angle = 360 - (current / Math.max(1, fromLevel)) * 360;
+            clockHand.style.transform = `rotate(${angle}deg)`;
+
+            if (current === 1) {
+              clearInterval(intervalId);
+              setTimeout(() => {
+                overlay.style.display = "none";
+              }, 500);
+            }
+          }, tick);
+        }
+
         function checkpointRestart() {
           currentLevel = lastCheckpoint;
           document.getElementById("lvl").textContent = currentLevel;
@@ -1791,6 +1871,7 @@
         }
 
         function fullRestart() {
+          const fromLevel = currentLevel;
           lastCheckpoint = 1;
           currentLevel = 1;
           deathCount = 0;
@@ -1806,15 +1887,7 @@
           document.getElementById("pauseMenu").style.display = "none";
           hideResetPrompt();
           play.rewind();
-          document.getElementById("timeTravelAnimation").style.display = "flex";
-          const progress = document.getElementById("timeProgress");
-          progress.style.width = "0";
-          setTimeout(() => {
-            progress.style.width = "100%";
-          }, 20);
-          setTimeout(() => {
-            document.getElementById("timeTravelAnimation").style.display = "none";
-          }, 900);
+          runRewindAnimation(fromLevel);
         }
 
         document.getElementById("restartBtn").onclick = showResetPrompt;
