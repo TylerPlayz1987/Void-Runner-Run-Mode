@@ -633,6 +633,10 @@
             setTimeout(() => sfx(659, "triangle", 0.1, 0.1), 80);
           },
           di: () => sfx(150, "sawtooth", 0.4, 0.1, 40),
+          rewind: () => {
+            sfx(220, "triangle", 0.15, 0.12, 360);
+            setTimeout(() => sfx(120, "sine", 0.2, 0.08, 220), 70);
+          },
           cp: () => {
             sfx(300, "sine", 1.2, 0.2, 1400);
             sfx(450, "sine", 1.2, 0.1, 1600);
@@ -1790,14 +1794,18 @@
           lastCheckpoint = 1;
           currentLevel = 1;
           deathCount = 0;
+          bestLevel = 1;
+          localStorage.setItem("core_best_v20", 1);
           document.getElementById("deaths").textContent = deathCount;
           document.getElementById("lvl").textContent = currentLevel;
+          document.getElementById("best").textContent = bestLevel;
           applyDefaults();
           generateLevel();
           respawnPlayer();
           isPaused = false;
           document.getElementById("pauseMenu").style.display = "none";
           hideResetPrompt();
+          play.rewind();
           document.getElementById("timeTravelAnimation").style.display = "flex";
           const progress = document.getElementById("timeProgress");
           progress.style.width = "0";
