@@ -644,6 +644,7 @@
           stretchY: 1,
           coyoteTime: 0,
           jumpBuffer: 0,
+          hasAirJump: true,
         };
         let goal = { x: 0, y: 0, w: 40, h: 40 };
         function sfx(f, t, d, v, slide = 0) {
@@ -829,6 +830,7 @@
           player.stretchY = 1;
           player.coyoteTime = 0;
           player.jumpBuffer = 0;
+          player.hasAirJump = true;
         }
         function findSafePlatform() {
           let s = platforms;
@@ -998,6 +1000,14 @@
             player.stretchX = 0.6;
             player.stretchY = 1.4;
             emitJumpDust();
+          } else if (player.jumpBuffer > 0 && player.hasAirJump && player.coyoteTime === 0) {
+            player.vy = player.jump;
+            player.hasAirJump = false;
+            player.jumpBuffer = 0;
+            play.jp();
+            player.stretchX = 0.6;
+            player.stretchY = 1.4;
+            emitJumpDust();
           }
           let nX = player.x + player.vx,
             nY = player.y + player.vy;
@@ -1151,6 +1161,7 @@
                     nY = py1 - player.h;
                     player.vy = 0;
                     player.grounded = true;
+                    player.hasAirJump = true;
                     if (p.isSinking) p.isTouched = true;
                     if (dX !== 0) nX += dX;
                     if (!wasGrounded) {
