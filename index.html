@@ -514,6 +514,8 @@
           y: 200,
           w: 20,
           h: 20,
+          baseW: 20,
+          baseH: 20,
           vx: 0,
           vy: 0,
           momentumX: 0,
@@ -768,6 +770,16 @@
         // Main game simulation, runs every frame before draw()
         function update() {
           if (!running || isPaused) return;
+
+          // Fancy mode uses a slightly larger player hitbox
+          if (fancyMode) {
+            player.w = 28;
+            player.h = 28;
+          } else {
+            player.w = player.baseW;
+            player.h = player.baseH;
+          }
+
           frameCount++;
           if (shake > 0) shake *= 0.9;
           if (flashAlpha > 0) flashAlpha -= 0.02;
@@ -1095,6 +1107,10 @@
             let phase = Math.floor(frameCount / (run ? 5 : 12)) % 4;
             let step = [0, 2, 0, -2][phase];
             let arm = [2, 0, -2, 0][phase];
+            let s = player.w / 20;
+            let pW = player.w;
+            let pH = player.h;
+
             if (run) {
               let bounce = Math.sin(frameCount / 4) * 1.5;
               ctx.translate(0, bounce);
@@ -1102,31 +1118,32 @@
 
             // Feet
             ctx.fillStyle = "#000";
-            ctx.fillRect(x + 2, y + 18 + step * 0.2, 5, 3);
-            ctx.fillRect(x + 13, y + 18 - step * 0.2, 5, 3);
+            ctx.fillRect(x + 2 * s, y + (pH - 5) + step * 0.1, 5 * s, 3 * s);
+            ctx.fillRect(x + 13 * s, y + (pH - 5) - step * 0.1, 5 * s, 3 * s);
 
             // Leg segments
             ctx.fillStyle = c;
-            ctx.fillRect(x + 2, y + 13 + step * 0.3, 4, 6);
-            ctx.fillRect(x + 14, y + 13 - step * 0.3, 4, 6);
+            ctx.fillRect(x + 2 * s, y + 13 * s + step * 0.15, 4 * s, 6 * s);
+            ctx.fillRect(x + 14 * s, y + 13 * s - step * 0.15, 4 * s, 6 * s);
 
             // Body
             ctx.fillStyle = c;
-            ctx.fillRect(x + 4, y + 5, 12, 12);
+            ctx.fillRect(x + 4 * s, y + 5 * s, 12 * s, 12 * s);
 
             // Arms
+            let armX = arm < 0 ? 0 : 16;
             ctx.fillStyle = c;
-            ctx.fillRect(x + (arm < 0 ? 0 : 16), y + 7, 4, 2);
-            ctx.fillRect(x + (arm < 0 ? 0 : 16), y + 10, 4, 2);
+            ctx.fillRect(x + armX * s, y + 7 * s, 4 * s, 2 * s);
+            ctx.fillRect(x + armX * s, y + 10 * s, 4 * s, 2 * s);
             ctx.fillStyle = "#000";
-            ctx.fillRect(x + (arm < 0 ? 0 : 16), y + 8, 2, 2);
+            ctx.fillRect(x + armX * s, y + 8 * s, 2 * s, 2 * s);
 
             // Head
             ctx.fillStyle = c;
-            ctx.fillRect(x + 5, y - 2, 10, 10);
+            ctx.fillRect(x + 5 * s, y - 2 * s, 10 * s, 10 * s);
             ctx.fillStyle = "#000";
-            ctx.fillRect(x + 6, y + 0, 2, 2);
-            ctx.fillRect(x + 12, y + 0, 2, 2);
+            ctx.fillRect(x + 6 * s, y + 0 * s, 2 * s, 2 * s);
+            ctx.fillRect(x + 12 * s, y + 0 * s, 2 * s, 2 * s);
 
           } else {
             ctx.fillStyle = c;
