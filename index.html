@@ -1048,8 +1048,7 @@
           let wasGrounded = player.grounded;
           player.grounded = false;
           platforms.forEach((p) => {
-            let cycle = frameCount % 300,
-              solid = !p.isPhase || cycle < 240;
+            p.isSolidNow = !p.isPhase || frameCount % 300 < 240;
             let dX = 0;
             if (p.moveRange > 0) {
               let oX = p.x;
@@ -1080,9 +1079,7 @@
           // Carry player with moving platforms when standing on top.
           if (wasGrounded) {
             for (let p of platforms) {
-              let cycle = frameCount % 300,
-                solid = !p.isPhase || cycle < 240;
-              if (!solid) continue;
+              if (!p.isSolidNow) continue;
               if (
                 Math.abs(player.y + player.h - p.y) < 2 &&
                 player.x + player.w > p.x + 1 &&
@@ -1097,9 +1094,7 @@
           for (let i = 0; i < steps; i++) {
             let nextX = resolvedX + stepX;
             for (let p of platforms) {
-              let cycle = frameCount % 300,
-                solid = !p.isPhase || cycle < 240;
-              if (!solid) continue;
+              if (!p.isSolidNow) continue;
               if (
                 nextX < p.x + p.w &&
                 nextX + player.w > p.x &&
@@ -1125,9 +1120,7 @@
 
             let nextY = resolvedY + stepY;
             for (let p of platforms) {
-              let cycle = frameCount % 300,
-                solid = !p.isPhase || cycle < 240;
-              if (!solid) continue;
+              if (!p.isSolidNow) continue;
               if (
                 resolvedX < p.x + p.w &&
                 resolvedX + player.w > p.x &&
