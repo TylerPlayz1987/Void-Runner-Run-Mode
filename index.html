@@ -577,6 +577,168 @@
             music: "Starry.ogg",
           },
         };
+        const lavaThemeFx = {
+          classic: {
+            glowInner: "rgba(255,150,0,0.7)",
+            glowMid: "rgba(255,80,0,0.45)",
+            glowOuter: "rgba(255,0,0,0)",
+            fill: "rgba(255,120,20,0.95)",
+            stroke: "rgba(255,210,50,0.8)",
+            particleA: [255, 140, 30],
+            particleB: [255, 210, 80],
+            particleStyle: "ember",
+          },
+          sunny: {
+            glowInner: "rgba(255,225,80,0.72)",
+            glowMid: "rgba(255,170,40,0.45)",
+            glowOuter: "rgba(255,200,0,0)",
+            fill: "rgba(255,215,80,0.93)",
+            stroke: "rgba(255,245,160,0.82)",
+            particleA: [255, 230, 90],
+            particleB: [255, 170, 50],
+            particleStyle: "spark",
+          },
+          moony: {
+            glowInner: "rgba(180,120,255,0.7)",
+            glowMid: "rgba(120,70,220,0.45)",
+            glowOuter: "rgba(90,40,180,0)",
+            fill: "rgba(155,110,245,0.92)",
+            stroke: "rgba(220,190,255,0.82)",
+            particleA: [210, 180, 255],
+            particleB: [130, 90, 230],
+            particleStyle: "bubble",
+          },
+          toybox: {
+            glowInner: "rgba(90,255,150,0.72)",
+            glowMid: "rgba(40,210,230,0.45)",
+            glowOuter: "rgba(20,170,200,0)",
+            fill: "rgba(70,235,165,0.93)",
+            stroke: "rgba(180,255,230,0.84)",
+            particleA: [80, 255, 170],
+            particleB: [70, 210, 255],
+            particleStyle: "bubble",
+          },
+          deepsea: {
+            glowInner: "rgba(60,220,255,0.72)",
+            glowMid: "rgba(20,140,220,0.45)",
+            glowOuter: "rgba(0,90,170,0)",
+            fill: "rgba(50,180,255,0.92)",
+            stroke: "rgba(170,240,255,0.82)",
+            particleA: [120, 230, 255],
+            particleB: [40, 160, 240],
+            particleStyle: "bubble",
+          },
+          cyber: {
+            glowInner: "rgba(255,40,180,0.75)",
+            glowMid: "rgba(0,220,255,0.45)",
+            glowOuter: "rgba(100,0,220,0)",
+            fill: "rgba(255,30,170,0.92)",
+            stroke: "rgba(120,255,255,0.84)",
+            particleA: [255, 80, 200],
+            particleB: [0, 240, 255],
+            particleStyle: "spark",
+          },
+          magma: {
+            glowInner: "rgba(255,120,0,0.75)",
+            glowMid: "rgba(255,40,0,0.5)",
+            glowOuter: "rgba(120,0,0,0)",
+            fill: "rgba(255,80,0,0.95)",
+            stroke: "rgba(255,190,80,0.82)",
+            particleA: [255, 200, 90],
+            particleB: [255, 70, 10],
+            particleStyle: "ember",
+          },
+          stardust: {
+            glowInner: "rgba(170,255,255,0.72)",
+            glowMid: "rgba(120,190,255,0.46)",
+            glowOuter: "rgba(70,110,220,0)",
+            fill: "rgba(150,235,255,0.9)",
+            stroke: "rgba(235,255,255,0.85)",
+            particleA: [220, 245, 255],
+            particleB: [120, 180, 255],
+            particleStyle: "spark",
+          },
+        };
+        function getLavaFx(themeName) {
+          return lavaThemeFx[themeName] || lavaThemeFx.classic;
+        }
+        const wellThemeFx = {
+          classic: {
+            normalInner: "rgba(0,128,255,0.5)",
+            normalMid: "rgba(0,75,130,0.3)",
+            normalRing: "rgba(0,128,255,0.2)",
+            coreInner: "rgba(128,0,255,0.5)",
+            coreMid: "rgba(75,0,130,0.3)",
+            coreRing: "rgba(128,0,255,0.2)",
+            coreStroke: "#80f",
+          },
+          sunny: {
+            normalInner: "rgba(255,220,90,0.5)",
+            normalMid: "rgba(255,165,40,0.3)",
+            normalRing: "rgba(255,200,70,0.22)",
+            coreInner: "rgba(255,120,40,0.52)",
+            coreMid: "rgba(220,70,20,0.34)",
+            coreRing: "rgba(255,130,50,0.24)",
+            coreStroke: "#ff9a3c",
+          },
+          moony: {
+            normalInner: "rgba(180,180,255,0.5)",
+            normalMid: "rgba(90,90,170,0.3)",
+            normalRing: "rgba(180,180,255,0.2)",
+            coreInner: "rgba(200,120,255,0.52)",
+            coreMid: "rgba(95,50,150,0.34)",
+            coreRing: "rgba(210,150,255,0.24)",
+            coreStroke: "#c99bff",
+          },
+          toybox: {
+            normalInner: "rgba(90,255,170,0.5)",
+            normalMid: "rgba(0,180,220,0.3)",
+            normalRing: "rgba(90,255,190,0.22)",
+            coreInner: "rgba(255,80,140,0.52)",
+            coreMid: "rgba(180,20,80,0.34)",
+            coreRing: "rgba(255,110,170,0.24)",
+            coreStroke: "#ff66ad",
+          },
+          deepsea: {
+            normalInner: "rgba(90,220,255,0.5)",
+            normalMid: "rgba(0,90,170,0.3)",
+            normalRing: "rgba(90,220,255,0.22)",
+            coreInner: "rgba(60,180,255,0.52)",
+            coreMid: "rgba(0,65,140,0.34)",
+            coreRing: "rgba(110,210,255,0.24)",
+            coreStroke: "#58cfff",
+          },
+          cyber: {
+            normalInner: "rgba(0,255,255,0.5)",
+            normalMid: "rgba(0,120,200,0.3)",
+            normalRing: "rgba(0,255,255,0.22)",
+            coreInner: "rgba(255,0,180,0.52)",
+            coreMid: "rgba(120,0,130,0.34)",
+            coreRing: "rgba(255,60,210,0.24)",
+            coreStroke: "#ff4cd6",
+          },
+          magma: {
+            normalInner: "rgba(255,140,40,0.5)",
+            normalMid: "rgba(170,45,0,0.3)",
+            normalRing: "rgba(255,130,60,0.22)",
+            coreInner: "rgba(255,70,20,0.52)",
+            coreMid: "rgba(130,20,0,0.34)",
+            coreRing: "rgba(255,95,45,0.24)",
+            coreStroke: "#ff7a3a",
+          },
+          stardust: {
+            normalInner: "rgba(180,240,255,0.5)",
+            normalMid: "rgba(90,140,220,0.3)",
+            normalRing: "rgba(180,240,255,0.22)",
+            coreInner: "rgba(150,200,255,0.52)",
+            coreMid: "rgba(70,90,170,0.34)",
+            coreRing: "rgba(180,220,255,0.24)",
+            coreStroke: "#b4d7ff",
+          },
+        };
+        function getWellFx(themeName) {
+          return wellThemeFx[themeName] || wellThemeFx.classic;
+        }
         // Theme particles/background add-ons (cosmetic)
         const cyberBldgs = Array.from({ length: 12 }, () => ({
           x: Math.random() * 1200,
@@ -619,6 +781,126 @@
           lavaParticles = [],
           keys = {},
           jumpDust = [];
+        const PLATFORM_W = 120,
+          SPIKE_W = 15,
+          SPIKE_H = 12,
+          SPEED_ZONE_START_LEVEL = 40,
+          SPEED_ZONE_CHANCE = 0.33,
+          SWING_START_LEVEL = 60,
+          SWING_CHANCE = 0.55,
+          FAKE_HAZARD_START_LEVEL = 70,
+          FAKE_HAZARD_CHANCE = 0.12;
+        function createSpikeProfile(level = 1, isSeeker = false) {
+          let shape = "triangle";
+          const roll = Math.random();
+          if (level < 20) {
+            shape = roll < 0.55 ? "wide" : roll < 0.9 ? "triangle" : "split";
+          } else if (level < 40) {
+            shape =
+              roll < 0.35
+                ? "wide"
+                : roll < 0.65
+                  ? "triangle"
+                  : roll < 0.85
+                    ? "split"
+                    : "diamond";
+          } else {
+            shape =
+              roll < 0.2
+                ? "wide"
+                : roll < 0.4
+                  ? "triangle"
+                  : roll < 0.65
+                    ? "split"
+                    : roll < 0.85
+                      ? "diamond"
+                      : "needle";
+          }
+          if (isSeeker && shape === "needle" && level < 45) shape = "split";
+          const scale = Math.min(1.4, 1 + level * 0.006);
+          if (shape === "needle") {
+            return {
+              shape,
+              w: 8 + Math.floor(Math.random() * 5),
+              h: Math.floor((16 + Math.random() * 9) * scale),
+            };
+          }
+          if (shape === "wide") {
+            return {
+              shape,
+              w: Math.floor((20 + Math.random() * 9) * Math.min(1.25, scale)),
+              h: 8 + Math.floor(Math.random() * 6),
+            };
+          }
+          if (shape === "split") {
+            return {
+              shape,
+              w: 16 + Math.floor(Math.random() * 9),
+              h: Math.floor((10 + Math.random() * 9) * Math.min(1.25, scale)),
+            };
+          }
+          if (shape === "diamond") {
+            return {
+              shape,
+              w: 12 + Math.floor(Math.random() * 10),
+              h: Math.floor((10 + Math.random() * 8) * Math.min(1.3, scale)),
+            };
+          }
+          return {
+            shape,
+            w: 12 + Math.floor(Math.random() * 9),
+            h: Math.floor((10 + Math.random() * 7) * Math.min(1.2, scale)),
+          };
+        }
+        function drawSpike(sx, sy, w, h, shape, camX) {
+          const drawX = sx - camX;
+          if (shape === "split") {
+            const gap = Math.max(2, Math.floor(w * 0.2));
+            const toothW = Math.max(4, (w - gap) / 2);
+            ctx.beginPath();
+            ctx.moveTo(drawX, sy);
+            ctx.lineTo(drawX + toothW / 2, sy - h);
+            ctx.lineTo(drawX + toothW, sy);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(drawX + toothW + gap, sy);
+            ctx.lineTo(drawX + toothW + gap + toothW / 2, sy - h);
+            ctx.lineTo(drawX + toothW + gap + toothW, sy);
+            ctx.fill();
+            return;
+          }
+          if (shape === "diamond") {
+            ctx.beginPath();
+            ctx.moveTo(drawX + w / 2, sy - h);
+            ctx.lineTo(drawX + w, sy - h / 2);
+            ctx.lineTo(drawX + w / 2, sy);
+            ctx.lineTo(drawX, sy - h / 2);
+            ctx.closePath();
+            ctx.fill();
+            return;
+          }
+          ctx.beginPath();
+          ctx.moveTo(drawX, sy);
+          ctx.lineTo(drawX + w / 2, sy - h);
+          ctx.lineTo(drawX + w, sy);
+          ctx.fill();
+        }
+        function getSwingBob(p) {
+          const angle =
+            Math.sin(frameCount * p.swingSpeed + p.swingPhase) * p.swingAmp;
+          const anchorX =
+            typeof p.swingAnchorAbsX === "number"
+              ? p.swingAnchorAbsX
+              : p.x + p.swingAnchorX;
+          const anchorY = p.swingAnchorY;
+          return {
+            angle,
+            anchorX,
+            anchorY,
+            x: anchorX + Math.sin(angle) * p.swingLen,
+            y: anchorY + Math.cos(angle) * p.swingLen,
+          };
+        }
         // Player state and physics
         const player = {
           x: 50,
@@ -644,6 +926,9 @@
           stretchY: 1,
           coyoteTime: 0,
           jumpBuffer: 0,
+          speedZoneTimer: 0,
+          speedZoneType: null,
+          speedZoneMul: 1,
         };
         let goal = { x: 0, y: 0, w: 40, h: 40 };
         function sfx(f, t, d, v, slide = 0) {
@@ -718,20 +1003,96 @@
                 !platforms[platforms.length - 1].isPhase &&
                 Math.random() < 0.35,
               isSink = currentLevel >= 50 && !isG && !ph && Math.random() < 0.3;
+            const canPlaceOnPlatform = !isG && !ph && !isSink;
+            const allowObstacleStacking = currentLevel >= 50;
+            let platformHasObstacle = false;
+            let hasSwingObstacle =
+              currentLevel >= SWING_START_LEVEL &&
+              canPlaceOnPlatform &&
+              Math.random() < SWING_CHANCE;
+            if (hasSwingObstacle) platformHasObstacle = true;
+            let hasFakeHazard =
+              !hasSwingObstacle &&
+              currentLevel >= FAKE_HAZARD_START_LEVEL &&
+              canPlaceOnPlatform &&
+              Math.random() < FAKE_HAZARD_CHANCE;
+            if (hasFakeHazard) platformHasObstacle = true;
+            let hasSpike =
+                currentLevel >= 10 &&
+                canPlaceOnPlatform &&
+                !hasSwingObstacle &&
+                !hasFakeHazard &&
+                (allowObstacleStacking || !platformHasObstacle) &&
+                Math.random() < 0.3;
+            if (hasSpike) platformHasObstacle = true;
+            let hasSeeker =
+                currentLevel >= 40 &&
+                canPlaceOnPlatform &&
+                !hasSwingObstacle &&
+                !hasFakeHazard &&
+                (allowObstacleStacking || !platformHasObstacle) &&
+                Math.random() < 0.3;
+            if (hasSeeker) platformHasObstacle = true;
+            const hasSpeedZone =
+              currentLevel >= SPEED_ZONE_START_LEVEL &&
+              !isG &&
+              !ph &&
+              !hasSwingObstacle &&
+              !hasFakeHazard &&
+              Math.random() < SPEED_ZONE_CHANCE;
+            const swingType = hasSwingObstacle
+              ? Math.random() < 0.65
+                ? "blade"
+                : "platform"
+              : null;
+            const isSwingPlatform = hasSwingObstacle && swingType === "platform";
+            const isSwingBlade = hasSwingObstacle && swingType === "blade";
+            const platformWidth = isSwingPlatform
+              ? 68 + Math.random() * 36
+              : PLATFORM_W;
+            const speedZoneW = hasSpeedZone ? 34 + Math.random() * 36 : 0;
+            const speedZoneX = hasSpeedZone
+              ? Math.random() * (platformWidth - speedZoneW)
+              : 0;
+            const speedZoneType = hasSpeedZone
+              ? Math.random() < 0.5
+                ? "boost"
+                : "slow"
+              : null;
+            const swingAnchorY = hasSwingObstacle ? 18 + Math.random() * 70 : 0;
+            const swingLen = hasSwingObstacle
+              ? Math.max(45, ly - swingAnchorY - 18)
+              : 0;
+            const fakeType = hasFakeHazard
+              ? Math.random() < 0.7
+                ? "ghostSpike"
+                : "ghostBlock"
+              : null;
+            const fakeW = hasFakeHazard
+              ? fakeType === "ghostSpike"
+                ? 16 + Math.random() * 14
+                : 20 + Math.random() * 18
+              : 0;
+            const fakeH = hasFakeHazard
+              ? fakeType === "ghostSpike"
+                ? 12 + Math.random() * 10
+                : 14 + Math.random() * 10
+              : 0;
+            const spikeProfile = hasSpike ? createSpikeProfile(currentLevel, false) : null;
+            const seekerProfile = hasSeeker ? createSpikeProfile(currentLevel, true) : null;
             platforms.push({
               x: lx,
               y: ly,
-              w: 120,
+              w: platformWidth,
               h: 15,
               isPhase: ph,
               isSinking: isSink,
               isTouched: false,
-              hasSpike:
-                currentLevel >= 10 &&
-                !isG &&
-                !ph &&
-                !isSink &&
-                Math.random() < 0.3,
+              hasSpike,
+              spikeX: hasSpike ? Math.random() * (PLATFORM_W - spikeProfile.w) : 0,
+              spikeW: hasSpike ? spikeProfile.w : SPIKE_W,
+              spikeH: hasSpike ? spikeProfile.h : SPIKE_H,
+              spikeShape: hasSpike ? spikeProfile.shape : "triangle",
               moveRange:
                 currentLevel >= 20 && !isG && Math.random() < 0.4
                   ? 50 + Math.random() * 50
@@ -739,28 +1100,77 @@
               startX: lx,
               moveDir: 1,
               moveSpeed: 1.5,
-              hasSeeker:
-                currentLevel >= 40 &&
-                !isG &&
-                !ph &&
-                !isSink &&
-                Math.random() < 0.3,
+              hasSeeker,
               seekerX: 0,
               seekerDir: 1,
+              seekerW: hasSeeker ? seekerProfile.w : SPIKE_W,
+              seekerH: hasSeeker ? seekerProfile.h : SPIKE_H,
+              seekerShape: hasSeeker ? seekerProfile.shape : "triangle",
+              hasSpeedZone,
+              speedZoneType,
+              speedZoneX,
+              speedZoneW,
+              speedZoneDuration:
+                hasSpeedZone ? 600 + Math.floor(Math.random() * 301) : 0,
+              speedZoneMul:
+                speedZoneType === "boost"
+                  ? 1.55 + Math.random() * 0.25
+                  : speedZoneType === "slow"
+                    ? 0.5 + Math.random() * 0.15
+                    : 1,
+              hasSwingObstacle,
+              isSwingPlatform,
+              isSwingBlade,
+              swingType,
+              swingAnchorX: hasSwingObstacle ? 20 + Math.random() * 80 : 0,
+              swingAnchorAbsX: hasSwingObstacle
+                ? lx + 20 + Math.random() * (platformWidth - 40)
+                : 0,
+              swingAnchorY,
+              swingLen,
+              swingAmp: hasSwingObstacle ? 0.65 + Math.random() * 0.55 : 0,
+              swingSpeed: hasSwingObstacle ? 0.025 + Math.random() * 0.018 : 0,
+              swingPhase: hasSwingObstacle ? Math.random() * Math.PI * 2 : 0,
+              swingSize: hasSwingObstacle
+                ? swingType === "blade"
+                  ? 9 + Math.random() * 6
+                  : 34 + Math.random() * 20
+                : 0,
+              swingThickness:
+                hasSwingObstacle && swingType === "platform"
+                  ? 9 + Math.random() * 5
+                  : 0,
+              hasFakeHazard,
+              fakeType,
+              fakeX: hasFakeHazard ? Math.random() * (PLATFORM_W - fakeW) : 0,
+              fakeW,
+              fakeH,
             });
             let lastP = platforms[platforms.length - 1];
-            if (currentLevel >= 10 && !isG && Math.random() < 0.25)
+            if (
+              currentLevel >= 10 &&
+              canPlaceOnPlatform &&
+              !hasSwingObstacle &&
+              !hasFakeHazard &&
+              (allowObstacleStacking || !platformHasObstacle) &&
+              Math.random() < 0.25
+            ) {
               wells.push({
                 x: lx + 60,
                 y: ly - 100,
                 r: 110,
                 core: currentLevel >= 55 ? 10 : 0,
               });
+              platformHasObstacle = true;
+            }
 
             // lava wall hazard from this platform (bottom-up wall)
             if (
               currentLevel >= 15 &&
-              !isG &&
+              canPlaceOnPlatform &&
+              !hasSwingObstacle &&
+              !hasFakeHazard &&
+              (allowObstacleStacking || !platformHasObstacle) &&
               Math.random() < 0.22 &&
               Math.abs(lastP.x - 50) > 140 &&
               Math.abs(lastP.x - goal.x) > 120
@@ -780,6 +1190,7 @@
                 holdMax: 40,
                 warned: false,
               });
+              platformHasObstacle = true;
             }
 
             if (
@@ -829,12 +1240,15 @@
           player.stretchY = 1;
           player.coyoteTime = 0;
           player.jumpBuffer = 0;
+          player.speedZoneTimer = 0;
+          player.speedZoneType = null;
+          player.speedZoneMul = 1;
         }
         function findSafePlatform() {
           let s = platforms;
           let minD = Infinity;
           platforms.forEach((p) => {
-            if (!p.isPhase && !p.hasSpike && !p.hasSeeker) {
+            if (!p.isPhase && !p.hasSpike && !p.hasSeeker && !p.isSwingBlade) {
               let d = Math.abs(p.x - player.x);
               if (d < minD) {
                 minD = d;
@@ -893,6 +1307,9 @@
           player.vy = 0;
           player.invincibleTimer = 0;
           player.isBeingRescued = false;
+          player.speedZoneTimer = 0;
+          player.speedZoneType = null;
+          player.speedZoneMul = 1;
           generateLevel();
         }
         // Main game simulation, runs every frame before draw()
@@ -942,10 +1359,39 @@
           } else {
             player.trail = [];
           }
+          let activeSpeedZone = null;
+          for (let p of platforms) {
+            if (!p.hasSpeedZone) continue;
+            const zoneX = p.x + p.speedZoneX;
+            if (
+              player.x + player.w > zoneX &&
+              player.x < zoneX + p.speedZoneW &&
+              player.y + player.h >= p.y - 6 &&
+              player.y + player.h <= p.y + p.h + 8
+            ) {
+              activeSpeedZone = p;
+              break;
+            }
+          }
+          if (activeSpeedZone) {
+            player.speedZoneTimer = Math.max(
+              player.speedZoneTimer,
+              activeSpeedZone.speedZoneDuration,
+            );
+            player.speedZoneType = activeSpeedZone.speedZoneType;
+            player.speedZoneMul = activeSpeedZone.speedZoneMul;
+          }
+          if (player.speedZoneTimer > 0) {
+            player.speedZoneTimer--;
+          } else {
+            player.speedZoneType = null;
+            player.speedZoneMul = 1;
+          }
           let s =
             keys["ShiftLeft"] || keys["ShiftRight"]
               ? player.runSpeed
               : player.speed;
+          s *= player.speedZoneMul;
           let inputDir =
             (keys["ArrowRight"] || keys["KeyD"] ? 1 : 0) -
             (keys["ArrowLeft"] || keys["KeyA"] ? 1 : 0);
@@ -1028,6 +1474,7 @@
 
               // emit rim particles while active
               if (h.h > 10 && Math.random() < 0.35) {
+                const lavaFx = getLavaFx(currentTheme);
                 lavaParticles.push({
                   x: h.x + Math.random() * h.w,
                   y: h.y,
@@ -1035,6 +1482,10 @@
                   vy: -1 - Math.random() * 0.8,
                   life: 24 + Math.floor(Math.random() * 12),
                   size: 1 + Math.random() * 2,
+                  tintMix: Math.random(),
+                  particleA: lavaFx.particleA,
+                  particleB: lavaFx.particleB,
+                  style: lavaFx.particleStyle,
                 });
               }
             } else if (h.r) {
@@ -1050,7 +1501,16 @@
           platforms.forEach((p) => {
             p.isSolidNow = !p.isPhase || frameCount % 300 < 240;
             let dX = 0;
-            if (p.moveRange > 0) {
+            let dY = 0;
+            if (p.isSwingPlatform) {
+              const oX = p.x;
+              const oY = p.y;
+              const swing = getSwingBob(p);
+              p.x = swing.x - p.w / 2;
+              p.y = swing.y - p.h / 2;
+              dX = p.x - oX;
+              dY = p.y - oY;
+            } else if (p.moveRange > 0) {
               let oX = p.x;
               p.x += p.moveSpeed * p.moveDir;
               if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange)
@@ -1058,10 +1518,11 @@
               dX = p.x - oX;
             }
             p.deltaX = dX;
+            p.deltaY = dY;
             if (p.isSinking && p.isTouched) p.y += 2.5;
             if (p.hasSeeker) {
               p.seekerX += 2.5 * p.seekerDir;
-              if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1;
+              if (p.seekerX > p.w - p.seekerW || p.seekerX < 0) p.seekerDir *= -1;
             }
           });
 
@@ -1086,6 +1547,7 @@
                 player.x < p.x + p.w - 1
               ) {
                 resolvedX += p.deltaX || 0;
+                resolvedY += p.deltaY || 0;
                 break;
               }
             }
@@ -1133,8 +1595,13 @@
                   nextY = p.y - player.h;
                   player.vy = 0;
                   player.grounded = true;
-                  if (!wasGrounded && !inheritedLandingMove && p.deltaX) {
+                  if (
+                    !wasGrounded &&
+                    !inheritedLandingMove &&
+                    (p.deltaX || p.deltaY)
+                  ) {
                     resolvedX += p.deltaX;
+                    resolvedY += p.deltaY || 0;
                     inheritedLandingMove = true;
                   }
                   if (p.isSinking) p.isTouched = true;
@@ -1180,13 +1647,32 @@
             }
             for (let p of platforms) {
               if (p.hasSpike || p.hasSeeker) {
-                let sx = p.hasSpike ? p.x + 52.5 : p.x + p.seekerX;
+                let sx = p.hasSpike ? p.x + p.spikeX : p.x + p.seekerX;
+                let sw = p.hasSpike ? p.spikeW : p.seekerW;
+                let sh = p.hasSpike ? p.spikeH : p.seekerH;
                 if (
                   nX + player.w > sx &&
-                  nX < sx + 15 &&
-                  nY + player.h > p.y - 12 &&
+                  nX < sx + sw &&
+                  nY + player.h > p.y - sh &&
                   nY < p.y
                 ) {
+                  dead = true;
+                  break;
+                }
+              }
+              if (p.isSwingBlade) {
+                const swing = getSwingBob(p);
+                const closestX = Math.max(
+                  nX,
+                  Math.min(swing.x, nX + player.w),
+                );
+                const closestY = Math.max(
+                  nY,
+                  Math.min(swing.y, nY + player.h),
+                );
+                const dx = swing.x - closestX;
+                const dy = swing.y - closestY;
+                if (dx * dx + dy * dy < p.swingSize * p.swingSize) {
                   dead = true;
                   break;
                 }
@@ -1313,6 +1799,24 @@
           } else {
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
+          }
+          if (player.speedZoneTimer > 0) {
+            const pulse = 0.45 + Math.sin(frameCount / 8) * 0.25;
+            if (player.speedZoneType === "boost") {
+              ctx.strokeStyle = `rgba(80,255,210,${0.55 + pulse})`;
+              ctx.lineWidth = 2;
+              ctx.strokeRect(x - 4, y - 4, player.w + 8, player.h + 8);
+              ctx.fillStyle = `rgba(120,255,230,${0.3 + pulse * 0.25})`;
+              ctx.fillRect(x - 8, y + 4, 3, 3);
+              ctx.fillRect(x - 12, y + 9, 2, 2);
+            } else if (player.speedZoneType === "slow") {
+              ctx.strokeStyle = `rgba(255,190,90,${0.55 + pulse})`;
+              ctx.lineWidth = 2;
+              ctx.strokeRect(x - 4, y - 4, player.w + 8, player.h + 8);
+              ctx.fillStyle = `rgba(255,210,130,${0.28 + pulse * 0.22})`;
+              ctx.fillRect(x + player.w + 5, y + 5, 3, 3);
+              ctx.fillRect(x + player.w + 10, y + 10, 2, 2);
+            }
           }
           ctx.restore();
         }
@@ -1512,6 +2016,7 @@
           }
           if (t.glitch) ctx.globalAlpha = 0.8;
           wells.forEach((w) => {
+            const wellFx = getWellFx(currentTheme);
             ctx.beginPath();
             ctx.arc(w.x - camX, w.y, w.r, 0, Math.PI * 2);
             let g = ctx.createRadialGradient(
@@ -1523,11 +2028,11 @@
               w.r,
             );
             if (w.core > 0) {
-              g.addColorStop(0, "rgba(128,0,255,0.5)");
-              g.addColorStop(0.3, "rgba(75,0,130,0.3)");
+              g.addColorStop(0, wellFx.coreInner);
+              g.addColorStop(0.3, wellFx.coreMid);
             } else {
-              g.addColorStop(0, "rgba(0,128,255,0.5)");
-              g.addColorStop(0.3, "rgba(0,75,130,0.3)");
+              g.addColorStop(0, wellFx.normalInner);
+              g.addColorStop(0.3, wellFx.normalMid);
             }
             g.addColorStop(1, "transparent");
             ctx.fillStyle = g;
@@ -1543,7 +2048,7 @@
               );
               ctx.fillStyle = "#000";
               ctx.fill();
-              ctx.strokeStyle = "#80f";
+              ctx.strokeStyle = wellFx.coreStroke;
               ctx.lineWidth = 3;
               ctx.stroke();
             }
@@ -1557,7 +2062,7 @@
                 frameCount / 20 + i + 1,
               );
               ctx.strokeStyle =
-                w.core > 0 ? "rgba(128,0,255,0.2)" : "rgba(0,128,255,0.2)";
+                w.core > 0 ? wellFx.coreRing : wellFx.normalRing;
               ctx.stroke();
             }
           });
@@ -1599,8 +2104,36 @@
           // Lava rim particles
           for (let i = lavaParticles.length - 1; i >= 0; i--) {
             const p = lavaParticles[i];
-            ctx.fillStyle = `rgba(255, ${120 + p.life}, 0, ${Math.max(0, p.life / 35)})`;
-            ctx.fillRect(p.x - camX, p.y, p.size, p.size);
+            const fade = Math.max(0, p.life / 35);
+            const particleA = p.particleA || [255, 140, 30];
+            const particleB = p.particleB || [255, 210, 80];
+            const tintMix = typeof p.tintMix === "number" ? p.tintMix : 0.5;
+            const style = p.style || "ember";
+            const r = Math.floor(
+              particleA[0] * (1 - tintMix) + particleB[0] * tintMix,
+            );
+            const g = Math.floor(
+              particleA[1] * (1 - tintMix) + particleB[1] * tintMix,
+            );
+            const b = Math.floor(
+              particleA[2] * (1 - tintMix) + particleB[2] * tintMix,
+            );
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${fade})`;
+            if (style === "bubble") {
+              ctx.beginPath();
+              ctx.arc(p.x - camX, p.y, p.size, 0, Math.PI * 2);
+              ctx.fill();
+            } else if (style === "spark") {
+              ctx.fillRect(p.x - camX, p.y, p.size + 1, p.size * 0.8);
+              ctx.fillRect(
+                p.x - camX + p.size * 0.3,
+                p.y - p.size * 0.4,
+                p.size * 0.4,
+                p.size * 1.4,
+              );
+            } else {
+              ctx.fillRect(p.x - camX, p.y, p.size, p.size);
+            }
             p.x += p.vx;
             p.y += p.vy;
             p.vy += 0.08;
@@ -1713,6 +2246,7 @@
           }
           hazards.forEach((h) => {
             if (h.type === "lava") {
+              const lavaFx = getLavaFx(currentTheme);
               let glow = ctx.createRadialGradient(
                 h.x - camX + h.w / 2,
                 h.y + h.h / 2,
@@ -1721,15 +2255,15 @@
                 h.y + h.h / 2,
                 Math.max(20, h.h),
               );
-              glow.addColorStop(0, "rgba(255,150,0,0.7)");
-              glow.addColorStop(0.45, "rgba(255,80,0,0.45)");
-              glow.addColorStop(1, "rgba(255,0,0,0)");
+              glow.addColorStop(0, lavaFx.glowInner);
+              glow.addColorStop(0.45, lavaFx.glowMid);
+              glow.addColorStop(1, lavaFx.glowOuter);
               ctx.fillStyle = glow;
               ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
 
-              ctx.fillStyle = "rgba(255,120,20,0.95)";
+              ctx.fillStyle = lavaFx.fill;
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
-              ctx.strokeStyle = "rgba(255,210,50,0.8)";
+              ctx.strokeStyle = lavaFx.stroke;
               ctx.lineWidth = 2;
               ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
             } else {
@@ -1766,14 +2300,82 @@
                       : t.plat;
               ctx.fillRect(p.x - camX, p.y, p.w, p.h);
             }
+            if (p.hasSpeedZone) {
+              const zoneX = p.x + p.speedZoneX - camX;
+              const zoneY = p.y + 1;
+              const pulse = 0.55 + Math.sin(frameCount / 8 + p.x * 0.01) * 0.25;
+              ctx.fillStyle =
+                p.speedZoneType === "boost"
+                  ? `rgba(0,255,180,${0.45 + pulse * 0.2})`
+                  : `rgba(255,170,40,${0.45 + pulse * 0.2})`;
+              ctx.fillRect(zoneX, zoneY, p.speedZoneW, p.h - 2);
+              ctx.strokeStyle =
+                p.speedZoneType === "boost"
+                  ? "rgba(180,255,240,0.8)"
+                  : "rgba(255,240,170,0.8)";
+              ctx.lineWidth = 1;
+              ctx.strokeRect(zoneX, zoneY, p.speedZoneW, p.h - 2);
+              ctx.strokeStyle =
+                p.speedZoneType === "boost"
+                  ? "rgba(20,180,140,0.7)"
+                  : "rgba(180,120,30,0.7)";
+              for (let zx = 0; zx < p.speedZoneW; zx += 6) {
+                ctx.beginPath();
+                ctx.moveTo(zoneX + zx, zoneY);
+                ctx.lineTo(zoneX + zx - 4, zoneY + p.h - 2);
+                ctx.stroke();
+              }
+            }
             if (p.hasSpike || p.hasSeeker) {
               ctx.fillStyle = t.hazards;
+              let sx = p.hasSpike ? p.x + p.spikeX : p.x + p.seekerX;
+              let sw = p.hasSpike ? p.spikeW : p.seekerW;
+              let sh = p.hasSpike ? p.spikeH : p.seekerH;
+              let ss = p.hasSpike ? p.spikeShape : p.seekerShape;
+              drawSpike(sx, p.y, sw, sh, ss, camX);
+            }
+            if (p.hasFakeHazard) {
+              const fx = p.x + p.fakeX;
+              ctx.save();
+              ctx.globalAlpha = 0.35 + Math.sin(frameCount / 12 + p.x * 0.01) * 0.15;
+              ctx.fillStyle = currentTheme === "cyber" ? "#0ff" : "#fff";
+              ctx.strokeStyle = currentTheme === "cyber" ? "#f0f" : "#88f";
+              if (p.fakeType === "ghostSpike") {
+                drawSpike(fx, p.y, p.fakeW, p.fakeH, "triangle", camX);
+              } else {
+                const bx = fx - camX;
+                const by = p.y - p.fakeH;
+                ctx.fillRect(bx, by, p.fakeW, p.fakeH);
+                ctx.strokeRect(bx, by, p.fakeW, p.fakeH);
+              }
+              ctx.restore();
+            }
+            if (p.hasSwingObstacle) {
+              const swing = getSwingBob(p);
+              ctx.strokeStyle = "rgba(210,210,210,0.85)";
+              ctx.lineWidth = 2;
               ctx.beginPath();
-              let sx = p.hasSpike ? p.x + 52.5 : p.x + p.seekerX;
-              ctx.moveTo(sx - camX, p.y);
-              ctx.lineTo(sx + 7.5 - camX, p.y - 12);
-              ctx.lineTo(sx + 15 - camX, p.y);
-              ctx.fill();
+              ctx.moveTo(swing.anchorX - camX, swing.anchorY);
+              if (p.isSwingPlatform) {
+                ctx.lineTo(swing.x - camX, swing.y - p.h / 2);
+              } else {
+                ctx.lineTo(swing.x - camX, swing.y);
+              }
+              ctx.stroke();
+              if (p.isSwingBlade) {
+                ctx.fillStyle = "#ccc";
+                ctx.beginPath();
+                ctx.arc(swing.x - camX, swing.y, p.swingSize, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#666";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+              } else if (p.isSwingPlatform) {
+                ctx.fillStyle = "#d5d5d5";
+                ctx.beginPath();
+                ctx.arc(swing.anchorX - camX, swing.anchorY, 3, 0, Math.PI * 2);
+                ctx.fill();
+              }
             }
           });
           ctx.globalAlpha = 1;
@@ -1792,7 +2394,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.5.4", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.5.5", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
