@@ -999,10 +999,161 @@
             player.stretchY = 1.4;
             emitJumpDust();
           }
+          hazards.forEach((h) => {
+            if (h.type === "lava") {
+              if (!h.warned && h.rising && h.h < 10) {
+                h.warned = true;
+                sfx(270, "sawtooth", 0.07, 0.11, 240);
+              }
+              if (h.h >= h.maxH && h.rising) {
+                h.h = h.maxH;
+                h.hold = (h.hold || 0) + 1;
+                if (h.hold >= h.holdMax) {
+                  h.rising = false;
+                  h.hold = 0;
+                }
+              } else if (h.h <= 0 && !h.rising) {
+                h.h = 0;
+                h.hold = (h.hold || 0) + 1;
+                if (h.hold >= h.holdMax) {
+                  h.rising = true;
+                  h.hold = 0;
+                  h.warned = false;
+                }
+              } else {
+                h.h += h.rising ? h.speed : -h.speed;
+                h.h = Math.max(0, Math.min(h.maxH, h.h));
+              }
+              h.y = 400 - h.h;
+
+              // emit rim particles while active
+              if (h.h > 10 && Math.random() < 0.35) {
+                lavaParticles.push({
+                  x: h.x + Math.random() * h.w,
+                  y: h.y,
+                  vx: (Math.random() - 0.5) * 0.6,
+                  vy: -1 - Math.random() * 0.8,
+                  life: 24 + Math.floor(Math.random() * 12),
+                  size: 1 + Math.random() * 2,
+                });
+              }
+            } else if (h.r) {
+              h.sy += h.s * h.dir;
+              if (h.sy > h.r || h.sy < 50) h.dir *= -1;
+              h.y = h.sy;
+            }
+          });
           let nX = player.x + player.vx,
             nY = player.y + player.vy;
           let wasGrounded = player.grounded;
           player.grounded = false;
+          platforms.forEach((p) => {
+            p.isSolidNow = !p.isPhase || frameCount % 300 < 240;
+            let dX = 0;
+            if (p.moveRange > 0) {
+              let oX = p.x;
+              p.x += p.moveSpeed * p.moveDir;
+              if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange)
+                p.moveDir *= -1;
+              dX = p.x - oX;
+            }
+            p.deltaX = dX;
+            if (p.isSinking && p.isTouched) p.y += 2.5;
+            if (p.hasSeeker) {
+              p.seekerX += 2.5 * p.seekerDir;
+              if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1;
+            }
+          });
+
+          // Sub-steps reduce tunneling and improve corner handling.
+          const steps = Math.max(
+            1,
+            Math.ceil(Math.max(Math.abs(player.vx), Math.abs(player.vy)) / 8),
+          );
+          const stepX = player.vx / steps;
+          const stepY = player.vy / steps;
+          let resolvedX = player.x;
+          let resolvedY = player.y;
+          let inheritedLandingMove = false;
+
+          // Carry player with moving platforms when standing on top.
+          if (wasGrounded) {
+            for (let p of platforms) {
+              if (!p.isSolidNow) continue;
+              if (
+                Math.abs(player.y + player.h - p.y) < 2 &&
+                player.x + player.w > p.x + 1 &&
+                player.x < p.x + p.w - 1
+              ) {
+                resolvedX += p.deltaX || 0;
+                break;
+              }
+            }
+          }
+
+          for (let i = 0; i < steps; i++) {
+            let nextX = resolvedX + stepX;
+            for (let p of platforms) {
+              if (!p.isSolidNow) continue;
+              if (
+                nextX < p.x + p.w &&
+                nextX + player.w > p.x &&
+                resolvedY < p.y + p.h &&
+                resolvedY + player.h > p.y
+              ) {
+                if (stepX > 0) {
+                  nextX = p.x - player.w;
+                } else if (stepX < 0) {
+                  nextX = p.x + p.w;
+                } else {
+                  // Resolve stationary penetrations (e.g., platform moving into player).
+                  const pushLeft = p.x - player.w - nextX;
+                  const pushRight = p.x + p.w - nextX;
+                  nextX +=
+                    Math.abs(pushLeft) <= Math.abs(pushRight)
+                      ? pushLeft
+                      : pushRight;
+                }
+                player.vx = 0;
+                player.momentumX = 0;
+              }
+            }
+            resolvedX = nextX;
+
+            let nextY = resolvedY + stepY;
+            for (let p of platforms) {
+              if (!p.isSolidNow) continue;
+              if (
+                resolvedX < p.x + p.w &&
+                resolvedX + player.w > p.x &&
+                nextY < p.y + p.h &&
+                nextY + player.h > p.y
+              ) {
+                if (stepY >= 0 && resolvedY + player.h <= p.y + 1) {
+                  nextY = p.y - player.h;
+                  player.vy = 0;
+                  player.grounded = true;
+                  if (!wasGrounded && !inheritedLandingMove && p.deltaX) {
+                    resolvedX += p.deltaX;
+                    inheritedLandingMove = true;
+                  }
+                  if (p.isSinking) p.isTouched = true;
+                  if (!wasGrounded) {
+                    player.stretchX = 1.5;
+                    player.stretchY = 0.5;
+                  }
+                } else if (stepY < 0 && resolvedY >= p.y + p.h - 1) {
+                  nextY = p.y + p.h;
+                  player.vy = 0;
+                }
+              }
+            }
+            resolvedY = nextY;
+          }
+
+          nX = resolvedX;
+          nY = resolvedY;
+
           if (shieldItem && !shieldItem.collected) {
             if (
               nX < shieldItem.x + shieldItem.w &&
@@ -1042,7 +1193,7 @@
               }
             }
           }
-          if (player.y > 400) {
+          if (nY > 400) {
             if (player.hasShield || infiniteInvincibility) {
               player.isBeingRescued = true;
               player.rescueTarget = findSafePlatform();
@@ -1068,103 +1219,6 @@
               return;
             }
           }
-          hazards.forEach((h) => {
-            if (h.type === "lava") {
-              if (!h.warned && h.rising && h.h < 10) {
-                h.warned = true;
-                sfx(270, "sawtooth", 0.07, 0.11, 240);
-              }
-              if (h.h >= h.maxH && h.rising) {
-                h.h = h.maxH;
-                h.hold = (h.hold || 0) + 1;
-                if (h.hold >= h.holdMax) {
-                  h.rising = false;
-                  h.hold = 0;
-                }
-              } else if (h.h <= 0 && !h.rising) {
-                h.h = 0;
-                h.hold = (h.hold || 0) + 1;
-                if (h.hold >= h.holdMax) {
-                  h.rising = true;
-                  h.hold = 0;
-                  h.warned = false;
-                }
-              } else {
-                h.h += h.rising ? h.speed : -h.speed;
-                h.h = Math.max(0, Math.min(h.maxH, h.h));
-              }
-              h.y = 400 - h.h;
-
-              // emit rim particles while active
-              if (h.h > 10 && Math.random() < 0.35) {
-                lavaParticles.push({
-                  x: h.x + Math.random() * h.w,
-                  y: h.y + h.h,
-                  vx: (Math.random() - 0.5) * 0.6,
-                  vy: -1 - Math.random() * 0.8,
-                  life: 24 + Math.floor(Math.random() * 12),
-                  size: 1 + Math.random() * 2,
-                });
-              }
-            } else if (h.r) {
-              h.sy += h.s * h.dir;
-              if (h.sy > h.r || h.sy < 50) h.dir *= -1;
-              h.y = h.sy;
-            }
-          });
-          platforms.forEach((p) => {
-            let cycle = frameCount % 300,
-              solid = !p.isPhase || cycle < 240;
-            let dX = 0;
-            if (p.moveRange > 0) {
-              let oX = p.x;
-              p.x += p.moveSpeed * p.moveDir;
-              if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange)
-                p.moveDir *= -1;
-              dX = p.x - oX;
-            }
-            if (p.isSinking && p.isTouched) p.y += 2.5;
-            if (p.hasSeeker) {
-              p.seekerX += 2.5 * p.seekerDir;
-              if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1;
-            }
-            if (solid) {
-              let px1 = p.x,
-                px2 = p.x + p.w,
-                py1 = p.y,
-                py2 = p.y + p.h;
-              let overlapX = Math.min(nX + player.w, px2) - Math.max(nX, px1);
-              let overlapY = Math.min(nY + player.h, py2) - Math.max(nY, py1);
-              if (overlapX > 0 && overlapY > 0) {
-                // resolve smallest intersection axis first
-                if (overlapX < overlapY) {
-                  // horizontal hit
-                  if (player.x + player.w <= px1) {
-                    nX = px1 - player.w;
-                  } else if (player.x >= px2) {
-                    nX = px2;
-                  }
-                  player.vx = 0;
-                } else {
-                  // vertical hit
-                  if (player.y + player.h <= py1) {
-                    nY = py1 - player.h;
-                    player.vy = 0;
-                    player.grounded = true;
-                    if (p.isSinking) p.isTouched = true;
-                    if (dX !== 0) nX += dX;
-                    if (!wasGrounded) {
-                      player.stretchX = 1.5;
-                      player.stretchY = 0.5;
-                    }
-                  } else if (player.y >= py2) {
-                    nY = py2;
-                    player.vy = 0;
-                  }
-                }
-              }
-            }
-          });
           player.x = nX;
           player.y = nY;
           if (!wasGrounded && player.grounded) emitJumpDust();
@@ -1738,7 +1792,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.5.3", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.5.4", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
