@@ -717,7 +717,13 @@
                 !isG &&
                 !platforms[platforms.length - 1].isPhase &&
                 Math.random() < 0.35,
-              isSink = currentLevel >= 50 && !isG && !ph && Math.random() < 0.3;
+              isSink = currentLevel >= 50 && !isG && !ph && Math.random() < 0.3,
+              hasSpike =
+                currentLevel >= 10 &&
+                !isG &&
+                !ph &&
+                !isSink &&
+                Math.random() < 0.3;
             platforms.push({
               x: lx,
               y: ly,
@@ -726,12 +732,8 @@
               isPhase: ph,
               isSinking: isSink,
               isTouched: false,
-              hasSpike:
-                currentLevel >= 10 &&
-                !isG &&
-                !ph &&
-                !isSink &&
-                Math.random() < 0.3,
+              hasSpike,
+              spikeX: hasSpike ? Math.random() * (120 - 15) : 0,
               moveRange:
                 currentLevel >= 20 && !isG && Math.random() < 0.4
                   ? 50 + Math.random() * 50
@@ -1180,7 +1182,7 @@
             }
             for (let p of platforms) {
               if (p.hasSpike || p.hasSeeker) {
-                let sx = p.hasSpike ? p.x + 52.5 : p.x + p.seekerX;
+                let sx = p.hasSpike ? p.x + p.spikeX : p.x + p.seekerX;
                 if (
                   nX + player.w > sx &&
                   nX < sx + 15 &&
@@ -1769,7 +1771,7 @@
             if (p.hasSpike || p.hasSeeker) {
               ctx.fillStyle = t.hazards;
               ctx.beginPath();
-              let sx = p.hasSpike ? p.x + 52.5 : p.x + p.seekerX;
+              let sx = p.hasSpike ? p.x + p.spikeX : p.x + p.seekerX;
               ctx.moveTo(sx - camX, p.y);
               ctx.lineTo(sx + 7.5 - camX, p.y - 12);
               ctx.lineTo(sx + 15 - camX, p.y);
