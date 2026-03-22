@@ -1133,10 +1133,10 @@
                   nextY = p.y - player.h;
                   player.vy = 0;
                   player.grounded = true;
-                    if (!inheritedLandingMove && p.deltaX) {
-                      resolvedX += p.deltaX;
-                      inheritedLandingMove = true;
-                    }
+                  if (!wasGrounded && !inheritedLandingMove && p.deltaX) {
+                    resolvedX += p.deltaX;
+                    inheritedLandingMove = true;
+                  }
                   if (p.isSinking) p.isTouched = true;
                   if (!wasGrounded) {
                     player.stretchX = 1.5;
