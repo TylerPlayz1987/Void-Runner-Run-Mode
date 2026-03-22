@@ -577,6 +577,91 @@
             music: "Starry.ogg",
           },
         };
+        const lavaThemeFx = {
+          classic: {
+            glowInner: "rgba(255,150,0,0.7)",
+            glowMid: "rgba(255,80,0,0.45)",
+            glowOuter: "rgba(255,0,0,0)",
+            fill: "rgba(255,120,20,0.95)",
+            stroke: "rgba(255,210,50,0.8)",
+            particleA: [255, 140, 30],
+            particleB: [255, 210, 80],
+            particleStyle: "ember",
+          },
+          sunny: {
+            glowInner: "rgba(255,225,80,0.72)",
+            glowMid: "rgba(255,170,40,0.45)",
+            glowOuter: "rgba(255,200,0,0)",
+            fill: "rgba(255,215,80,0.93)",
+            stroke: "rgba(255,245,160,0.82)",
+            particleA: [255, 230, 90],
+            particleB: [255, 170, 50],
+            particleStyle: "spark",
+          },
+          moony: {
+            glowInner: "rgba(180,120,255,0.7)",
+            glowMid: "rgba(120,70,220,0.45)",
+            glowOuter: "rgba(90,40,180,0)",
+            fill: "rgba(155,110,245,0.92)",
+            stroke: "rgba(220,190,255,0.82)",
+            particleA: [210, 180, 255],
+            particleB: [130, 90, 230],
+            particleStyle: "bubble",
+          },
+          toybox: {
+            glowInner: "rgba(90,255,150,0.72)",
+            glowMid: "rgba(40,210,230,0.45)",
+            glowOuter: "rgba(20,170,200,0)",
+            fill: "rgba(70,235,165,0.93)",
+            stroke: "rgba(180,255,230,0.84)",
+            particleA: [80, 255, 170],
+            particleB: [70, 210, 255],
+            particleStyle: "bubble",
+          },
+          deepsea: {
+            glowInner: "rgba(60,220,255,0.72)",
+            glowMid: "rgba(20,140,220,0.45)",
+            glowOuter: "rgba(0,90,170,0)",
+            fill: "rgba(50,180,255,0.92)",
+            stroke: "rgba(170,240,255,0.82)",
+            particleA: [120, 230, 255],
+            particleB: [40, 160, 240],
+            particleStyle: "bubble",
+          },
+          cyber: {
+            glowInner: "rgba(255,40,180,0.75)",
+            glowMid: "rgba(0,220,255,0.45)",
+            glowOuter: "rgba(100,0,220,0)",
+            fill: "rgba(255,30,170,0.92)",
+            stroke: "rgba(120,255,255,0.84)",
+            particleA: [255, 80, 200],
+            particleB: [0, 240, 255],
+            particleStyle: "spark",
+          },
+          magma: {
+            glowInner: "rgba(255,120,0,0.75)",
+            glowMid: "rgba(255,40,0,0.5)",
+            glowOuter: "rgba(120,0,0,0)",
+            fill: "rgba(255,80,0,0.95)",
+            stroke: "rgba(255,190,80,0.82)",
+            particleA: [255, 200, 90],
+            particleB: [255, 70, 10],
+            particleStyle: "ember",
+          },
+          stardust: {
+            glowInner: "rgba(170,255,255,0.72)",
+            glowMid: "rgba(120,190,255,0.46)",
+            glowOuter: "rgba(70,110,220,0)",
+            fill: "rgba(150,235,255,0.9)",
+            stroke: "rgba(235,255,255,0.85)",
+            particleA: [220, 245, 255],
+            particleB: [120, 180, 255],
+            particleStyle: "spark",
+          },
+        };
+        function getLavaFx(themeName) {
+          return lavaThemeFx[themeName] || lavaThemeFx.classic;
+        }
         // Theme particles/background add-ons (cosmetic)
         const cyberBldgs = Array.from({ length: 12 }, () => ({
           x: Math.random() * 1200,
@@ -621,21 +706,46 @@
           jumpDust = [];
         const PLATFORM_W = 120,
           SPIKE_W = 15,
-          SPIKE_H = 12,
-          SPIKE_SHAPES = ["triangle", "needle", "wide", "split", "diamond"];
-        function createSpikeProfile() {
-          const shape = SPIKE_SHAPES[Math.floor(Math.random() * SPIKE_SHAPES.length)];
+          SPIKE_H = 12;
+        function createSpikeProfile(level = 1, isSeeker = false) {
+          let shape = "triangle";
+          const roll = Math.random();
+          if (level < 20) {
+            shape = roll < 0.55 ? "wide" : roll < 0.9 ? "triangle" : "split";
+          } else if (level < 40) {
+            shape =
+              roll < 0.35
+                ? "wide"
+                : roll < 0.65
+                  ? "triangle"
+                  : roll < 0.85
+                    ? "split"
+                    : "diamond";
+          } else {
+            shape =
+              roll < 0.2
+                ? "wide"
+                : roll < 0.4
+                  ? "triangle"
+                  : roll < 0.65
+                    ? "split"
+                    : roll < 0.85
+                      ? "diamond"
+                      : "needle";
+          }
+          if (isSeeker && shape === "needle" && level < 45) shape = "split";
+          const scale = Math.min(1.4, 1 + level * 0.006);
           if (shape === "needle") {
             return {
               shape,
               w: 8 + Math.floor(Math.random() * 5),
-              h: 16 + Math.floor(Math.random() * 9),
+              h: Math.floor((16 + Math.random() * 9) * scale),
             };
           }
           if (shape === "wide") {
             return {
               shape,
-              w: 20 + Math.floor(Math.random() * 9),
+              w: Math.floor((20 + Math.random() * 9) * Math.min(1.25, scale)),
               h: 8 + Math.floor(Math.random() * 6),
             };
           }
@@ -643,20 +753,20 @@
             return {
               shape,
               w: 16 + Math.floor(Math.random() * 9),
-              h: 10 + Math.floor(Math.random() * 9),
+              h: Math.floor((10 + Math.random() * 9) * Math.min(1.25, scale)),
             };
           }
           if (shape === "diamond") {
             return {
               shape,
               w: 12 + Math.floor(Math.random() * 10),
-              h: 10 + Math.floor(Math.random() * 8),
+              h: Math.floor((10 + Math.random() * 8) * Math.min(1.3, scale)),
             };
           }
           return {
             shape,
             w: 12 + Math.floor(Math.random() * 9),
-            h: 10 + Math.floor(Math.random() * 7),
+            h: Math.floor((10 + Math.random() * 7) * Math.min(1.2, scale)),
           };
         }
         function drawSpike(sx, sy, w, h, shape, camX) {
@@ -803,8 +913,8 @@
                 !ph &&
                 !isSink &&
                 Math.random() < 0.3;
-            const spikeProfile = hasSpike ? createSpikeProfile() : null;
-            const seekerProfile = hasSeeker ? createSpikeProfile() : null;
+            const spikeProfile = hasSpike ? createSpikeProfile(currentLevel, false) : null;
+            const seekerProfile = hasSeeker ? createSpikeProfile(currentLevel, true) : null;
             platforms.push({
               x: lx,
               y: ly,
@@ -1112,6 +1222,7 @@
 
               // emit rim particles while active
               if (h.h > 10 && Math.random() < 0.35) {
+                const lavaFx = getLavaFx(currentTheme);
                 lavaParticles.push({
                   x: h.x + Math.random() * h.w,
                   y: h.y,
@@ -1119,6 +1230,10 @@
                   vy: -1 - Math.random() * 0.8,
                   life: 24 + Math.floor(Math.random() * 12),
                   size: 1 + Math.random() * 2,
+                  tintMix: Math.random(),
+                  particleA: lavaFx.particleA,
+                  particleB: lavaFx.particleB,
+                  style: lavaFx.particleStyle,
                 });
               }
             } else if (h.r) {
@@ -1685,8 +1800,36 @@
           // Lava rim particles
           for (let i = lavaParticles.length - 1; i >= 0; i--) {
             const p = lavaParticles[i];
-            ctx.fillStyle = `rgba(255, ${120 + p.life}, 0, ${Math.max(0, p.life / 35)})`;
-            ctx.fillRect(p.x - camX, p.y, p.size, p.size);
+            const fade = Math.max(0, p.life / 35);
+            const particleA = p.particleA || [255, 140, 30];
+            const particleB = p.particleB || [255, 210, 80];
+            const tintMix = typeof p.tintMix === "number" ? p.tintMix : 0.5;
+            const style = p.style || "ember";
+            const r = Math.floor(
+              particleA[0] * (1 - tintMix) + particleB[0] * tintMix,
+            );
+            const g = Math.floor(
+              particleA[1] * (1 - tintMix) + particleB[1] * tintMix,
+            );
+            const b = Math.floor(
+              particleA[2] * (1 - tintMix) + particleB[2] * tintMix,
+            );
+            ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${fade})`;
+            if (style === "bubble") {
+              ctx.beginPath();
+              ctx.arc(p.x - camX, p.y, p.size, 0, Math.PI * 2);
+              ctx.fill();
+            } else if (style === "spark") {
+              ctx.fillRect(p.x - camX, p.y, p.size + 1, p.size * 0.8);
+              ctx.fillRect(
+                p.x - camX + p.size * 0.3,
+                p.y - p.size * 0.4,
+                p.size * 0.4,
+                p.size * 1.4,
+              );
+            } else {
+              ctx.fillRect(p.x - camX, p.y, p.size, p.size);
+            }
             p.x += p.vx;
             p.y += p.vy;
             p.vy += 0.08;
@@ -1799,6 +1942,7 @@
           }
           hazards.forEach((h) => {
             if (h.type === "lava") {
+              const lavaFx = getLavaFx(currentTheme);
               let glow = ctx.createRadialGradient(
                 h.x - camX + h.w / 2,
                 h.y + h.h / 2,
@@ -1807,15 +1951,15 @@
                 h.y + h.h / 2,
                 Math.max(20, h.h),
               );
-              glow.addColorStop(0, "rgba(255,150,0,0.7)");
-              glow.addColorStop(0.45, "rgba(255,80,0,0.45)");
-              glow.addColorStop(1, "rgba(255,0,0,0)");
+              glow.addColorStop(0, lavaFx.glowInner);
+              glow.addColorStop(0.45, lavaFx.glowMid);
+              glow.addColorStop(1, lavaFx.glowOuter);
               ctx.fillStyle = glow;
               ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
 
-              ctx.fillStyle = "rgba(255,120,20,0.95)";
+              ctx.fillStyle = lavaFx.fill;
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
-              ctx.strokeStyle = "rgba(255,210,50,0.8)";
+              ctx.strokeStyle = lavaFx.stroke;
               ctx.lineWidth = 2;
               ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
             } else {
