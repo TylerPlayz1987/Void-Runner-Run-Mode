@@ -662,6 +662,83 @@
         function getLavaFx(themeName) {
           return lavaThemeFx[themeName] || lavaThemeFx.classic;
         }
+        const wellThemeFx = {
+          classic: {
+            normalInner: "rgba(0,128,255,0.5)",
+            normalMid: "rgba(0,75,130,0.3)",
+            normalRing: "rgba(0,128,255,0.2)",
+            coreInner: "rgba(128,0,255,0.5)",
+            coreMid: "rgba(75,0,130,0.3)",
+            coreRing: "rgba(128,0,255,0.2)",
+            coreStroke: "#80f",
+          },
+          sunny: {
+            normalInner: "rgba(255,220,90,0.5)",
+            normalMid: "rgba(255,165,40,0.3)",
+            normalRing: "rgba(255,200,70,0.22)",
+            coreInner: "rgba(255,120,40,0.52)",
+            coreMid: "rgba(220,70,20,0.34)",
+            coreRing: "rgba(255,130,50,0.24)",
+            coreStroke: "#ff9a3c",
+          },
+          moony: {
+            normalInner: "rgba(180,180,255,0.5)",
+            normalMid: "rgba(90,90,170,0.3)",
+            normalRing: "rgba(180,180,255,0.2)",
+            coreInner: "rgba(200,120,255,0.52)",
+            coreMid: "rgba(95,50,150,0.34)",
+            coreRing: "rgba(210,150,255,0.24)",
+            coreStroke: "#c99bff",
+          },
+          toybox: {
+            normalInner: "rgba(90,255,170,0.5)",
+            normalMid: "rgba(0,180,220,0.3)",
+            normalRing: "rgba(90,255,190,0.22)",
+            coreInner: "rgba(255,80,140,0.52)",
+            coreMid: "rgba(180,20,80,0.34)",
+            coreRing: "rgba(255,110,170,0.24)",
+            coreStroke: "#ff66ad",
+          },
+          deepsea: {
+            normalInner: "rgba(90,220,255,0.5)",
+            normalMid: "rgba(0,90,170,0.3)",
+            normalRing: "rgba(90,220,255,0.22)",
+            coreInner: "rgba(60,180,255,0.52)",
+            coreMid: "rgba(0,65,140,0.34)",
+            coreRing: "rgba(110,210,255,0.24)",
+            coreStroke: "#58cfff",
+          },
+          cyber: {
+            normalInner: "rgba(0,255,255,0.5)",
+            normalMid: "rgba(0,120,200,0.3)",
+            normalRing: "rgba(0,255,255,0.22)",
+            coreInner: "rgba(255,0,180,0.52)",
+            coreMid: "rgba(120,0,130,0.34)",
+            coreRing: "rgba(255,60,210,0.24)",
+            coreStroke: "#ff4cd6",
+          },
+          magma: {
+            normalInner: "rgba(255,140,40,0.5)",
+            normalMid: "rgba(170,45,0,0.3)",
+            normalRing: "rgba(255,130,60,0.22)",
+            coreInner: "rgba(255,70,20,0.52)",
+            coreMid: "rgba(130,20,0,0.34)",
+            coreRing: "rgba(255,95,45,0.24)",
+            coreStroke: "#ff7a3a",
+          },
+          stardust: {
+            normalInner: "rgba(180,240,255,0.5)",
+            normalMid: "rgba(90,140,220,0.3)",
+            normalRing: "rgba(180,240,255,0.22)",
+            coreInner: "rgba(150,200,255,0.52)",
+            coreMid: "rgba(70,90,170,0.34)",
+            coreRing: "rgba(180,220,255,0.24)",
+            coreStroke: "#b4d7ff",
+          },
+        };
+        function getWellFx(themeName) {
+          return wellThemeFx[themeName] || wellThemeFx.classic;
+        }
         // Theme particles/background add-ons (cosmetic)
         const cyberBldgs = Array.from({ length: 12 }, () => ({
           x: Math.random() * 1200,
@@ -901,7 +978,7 @@
                 !platforms[platforms.length - 1].isPhase &&
                 Math.random() < 0.35,
               isSink = currentLevel >= 50 && !isG && !ph && Math.random() < 0.3;
-            const allowObstacleStacking = currentLevel >= 40;
+            const allowObstacleStacking = currentLevel >= 50;
             let platformHasObstacle = false;
             let hasSpike =
                 currentLevel >= 10 &&
@@ -1728,6 +1805,7 @@
           }
           if (t.glitch) ctx.globalAlpha = 0.8;
           wells.forEach((w) => {
+            const wellFx = getWellFx(currentTheme);
             ctx.beginPath();
             ctx.arc(w.x - camX, w.y, w.r, 0, Math.PI * 2);
             let g = ctx.createRadialGradient(
@@ -1739,11 +1817,11 @@
               w.r,
             );
             if (w.core > 0) {
-              g.addColorStop(0, "rgba(128,0,255,0.5)");
-              g.addColorStop(0.3, "rgba(75,0,130,0.3)");
+              g.addColorStop(0, wellFx.coreInner);
+              g.addColorStop(0.3, wellFx.coreMid);
             } else {
-              g.addColorStop(0, "rgba(0,128,255,0.5)");
-              g.addColorStop(0.3, "rgba(0,75,130,0.3)");
+              g.addColorStop(0, wellFx.normalInner);
+              g.addColorStop(0.3, wellFx.normalMid);
             }
             g.addColorStop(1, "transparent");
             ctx.fillStyle = g;
@@ -1759,7 +1837,7 @@
               );
               ctx.fillStyle = "#000";
               ctx.fill();
-              ctx.strokeStyle = "#80f";
+              ctx.strokeStyle = wellFx.coreStroke;
               ctx.lineWidth = 3;
               ctx.stroke();
             }
@@ -1773,7 +1851,7 @@
                 frameCount / 20 + i + 1,
               );
               ctx.strokeStyle =
-                w.core > 0 ? "rgba(128,0,255,0.2)" : "rgba(0,128,255,0.2)";
+                w.core > 0 ? wellFx.coreRing : wellFx.normalRing;
               ctx.stroke();
             }
           });
