@@ -900,19 +900,25 @@
                 !isG &&
                 !platforms[platforms.length - 1].isPhase &&
                 Math.random() < 0.35,
-              isSink = currentLevel >= 50 && !isG && !ph && Math.random() < 0.3,
-              hasSpike =
+              isSink = currentLevel >= 50 && !isG && !ph && Math.random() < 0.3;
+            const allowObstacleStacking = currentLevel >= 40;
+            let platformHasObstacle = false;
+            let hasSpike =
                 currentLevel >= 10 &&
                 !isG &&
                 !ph &&
                 !isSink &&
-                Math.random() < 0.3,
-              hasSeeker =
+                (allowObstacleStacking || !platformHasObstacle) &&
+                Math.random() < 0.3;
+            if (hasSpike) platformHasObstacle = true;
+            let hasSeeker =
                 currentLevel >= 40 &&
                 !isG &&
                 !ph &&
                 !isSink &&
+                (allowObstacleStacking || !platformHasObstacle) &&
                 Math.random() < 0.3;
+            if (hasSeeker) platformHasObstacle = true;
             const spikeProfile = hasSpike ? createSpikeProfile(currentLevel, false) : null;
             const seekerProfile = hasSeeker ? createSpikeProfile(currentLevel, true) : null;
             platforms.push({
@@ -943,18 +949,26 @@
               seekerShape: hasSeeker ? seekerProfile.shape : "triangle",
             });
             let lastP = platforms[platforms.length - 1];
-            if (currentLevel >= 10 && !isG && Math.random() < 0.25)
+            if (
+              currentLevel >= 10 &&
+              !isG &&
+              (allowObstacleStacking || !platformHasObstacle) &&
+              Math.random() < 0.25
+            ) {
               wells.push({
                 x: lx + 60,
                 y: ly - 100,
                 r: 110,
                 core: currentLevel >= 55 ? 10 : 0,
               });
+              platformHasObstacle = true;
+            }
 
             // lava wall hazard from this platform (bottom-up wall)
             if (
               currentLevel >= 15 &&
               !isG &&
+              (allowObstacleStacking || !platformHasObstacle) &&
               Math.random() < 0.22 &&
               Math.abs(lastP.x - 50) > 140 &&
               Math.abs(lastP.x - goal.x) > 120
@@ -974,6 +988,7 @@
                 holdMax: 40,
                 warned: false,
               });
+              platformHasObstacle = true;
             }
 
             if (
