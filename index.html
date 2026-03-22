@@ -619,6 +619,10 @@
           lavaParticles = [],
           keys = {},
           jumpDust = [];
+        const PLATFORM_W = 120,
+          SPIKE_W = 15,
+          SPIKE_H = 12,
+          SPIKE_HALF_W = SPIKE_W / 2;
         // Player state and physics
         const player = {
           x: 50,
@@ -727,13 +731,13 @@
             platforms.push({
               x: lx,
               y: ly,
-              w: 120,
+              w: PLATFORM_W,
               h: 15,
               isPhase: ph,
               isSinking: isSink,
               isTouched: false,
               hasSpike,
-              spikeX: hasSpike ? Math.random() * (120 - 15) : 0,
+              spikeX: hasSpike ? Math.random() * (PLATFORM_W - SPIKE_W) : 0,
               moveRange:
                 currentLevel >= 20 && !isG && Math.random() < 0.4
                   ? 50 + Math.random() * 50
@@ -1063,7 +1067,7 @@
             if (p.isSinking && p.isTouched) p.y += 2.5;
             if (p.hasSeeker) {
               p.seekerX += 2.5 * p.seekerDir;
-              if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1;
+              if (p.seekerX > p.w - SPIKE_W || p.seekerX < 0) p.seekerDir *= -1;
             }
           });
 
@@ -1185,8 +1189,8 @@
                 let sx = p.hasSpike ? p.x + p.spikeX : p.x + p.seekerX;
                 if (
                   nX + player.w > sx &&
-                  nX < sx + 15 &&
-                  nY + player.h > p.y - 12 &&
+                  nX < sx + SPIKE_W &&
+                  nY + player.h > p.y - SPIKE_H &&
                   nY < p.y
                 ) {
                   dead = true;
@@ -1773,8 +1777,8 @@
               ctx.beginPath();
               let sx = p.hasSpike ? p.x + p.spikeX : p.x + p.seekerX;
               ctx.moveTo(sx - camX, p.y);
-              ctx.lineTo(sx + 7.5 - camX, p.y - 12);
-              ctx.lineTo(sx + 15 - camX, p.y);
+              ctx.lineTo(sx + SPIKE_HALF_W - camX, p.y - SPIKE_H);
+              ctx.lineTo(sx + SPIKE_W - camX, p.y);
               ctx.fill();
             }
           });
