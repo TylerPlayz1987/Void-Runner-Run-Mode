@@ -888,7 +888,10 @@
         function getSwingBob(p) {
           const angle =
             Math.sin(frameCount * p.swingSpeed + p.swingPhase) * p.swingAmp;
-          const anchorX = p.x + p.swingAnchorX;
+          const anchorX =
+            typeof p.swingAnchorAbsX === "number"
+              ? p.swingAnchorAbsX
+              : p.x + p.swingAnchorX;
           const anchorY = p.swingAnchorY;
           return {
             angle,
@@ -923,6 +926,9 @@
           stretchY: 1,
           coyoteTime: 0,
           jumpBuffer: 0,
+          speedZoneTimer: 0,
+          speedZoneType: null,
+          speedZoneMul: 1,
         };
         let goal = { x: 0, y: 0, w: 40, h: 40 };
         function sfx(f, t, d, v, slide = 0) {
@@ -1034,19 +1040,24 @@
               !hasSwingObstacle &&
               !hasFakeHazard &&
               Math.random() < SPEED_ZONE_CHANCE;
+            const swingType = hasSwingObstacle
+              ? Math.random() < 0.65
+                ? "blade"
+                : "platform"
+              : null;
+            const isSwingPlatform = hasSwingObstacle && swingType === "platform";
+            const isSwingBlade = hasSwingObstacle && swingType === "blade";
+            const platformWidth = isSwingPlatform
+              ? 68 + Math.random() * 36
+              : PLATFORM_W;
             const speedZoneW = hasSpeedZone ? 34 + Math.random() * 36 : 0;
             const speedZoneX = hasSpeedZone
-              ? Math.random() * (PLATFORM_W - speedZoneW)
+              ? Math.random() * (platformWidth - speedZoneW)
               : 0;
             const speedZoneType = hasSpeedZone
               ? Math.random() < 0.5
                 ? "boost"
                 : "slow"
-              : null;
-            const swingType = hasSwingObstacle
-              ? Math.random() < 0.65
-                ? "blade"
-                : "platform"
               : null;
             const swingAnchorY = hasSwingObstacle ? 18 + Math.random() * 70 : 0;
             const swingLen = hasSwingObstacle
@@ -1072,7 +1083,7 @@
             platforms.push({
               x: lx,
               y: ly,
-              w: PLATFORM_W,
+              w: platformWidth,
               h: 15,
               isPhase: ph,
               isSinking: isSink,
@@ -1099,6 +1110,8 @@
               speedZoneType,
               speedZoneX,
               speedZoneW,
+              speedZoneDuration:
+                hasSpeedZone ? 600 + Math.floor(Math.random() * 301) : 0,
               speedZoneMul:
                 speedZoneType === "boost"
                   ? 1.55 + Math.random() * 0.25
@@ -1106,8 +1119,13 @@
                     ? 0.5 + Math.random() * 0.15
                     : 1,
               hasSwingObstacle,
+              isSwingPlatform,
+              isSwingBlade,
               swingType,
               swingAnchorX: hasSwingObstacle ? 20 + Math.random() * 80 : 0,
+              swingAnchorAbsX: hasSwingObstacle
+                ? lx + 20 + Math.random() * (platformWidth - 40)
+                : 0,
               swingAnchorY,
               swingLen,
               swingAmp: hasSwingObstacle ? 0.65 + Math.random() * 0.55 : 0,
@@ -1222,12 +1240,15 @@
           player.stretchY = 1;
           player.coyoteTime = 0;
           player.jumpBuffer = 0;
+          player.speedZoneTimer = 0;
+          player.speedZoneType = null;
+          player.speedZoneMul = 1;
         }
         function findSafePlatform() {
           let s = platforms;
           let minD = Infinity;
           platforms.forEach((p) => {
-            if (!p.isPhase && !p.hasSpike && !p.hasSeeker && !p.hasSwingObstacle) {
+            if (!p.isPhase && !p.hasSpike && !p.hasSeeker && !p.isSwingBlade) {
               let d = Math.abs(p.x - player.x);
               if (d < minD) {
                 minD = d;
@@ -1286,6 +1307,9 @@
           player.vy = 0;
           player.invincibleTimer = 0;
           player.isBeingRescued = false;
+          player.speedZoneTimer = 0;
+          player.speedZoneType = null;
+          player.speedZoneMul = 1;
           generateLevel();
         }
         // Main game simulation, runs every frame before draw()
@@ -1335,7 +1359,7 @@
           } else {
             player.trail = [];
           }
-          let speedZoneMul = 1;
+          let activeSpeedZone = null;
           for (let p of platforms) {
             if (!p.hasSpeedZone) continue;
             const zoneX = p.x + p.speedZoneX;
@@ -1345,15 +1369,29 @@
               player.y + player.h >= p.y - 6 &&
               player.y + player.h <= p.y + p.h + 8
             ) {
-              speedZoneMul = p.speedZoneMul;
+              activeSpeedZone = p;
               break;
             }
+          }
+          if (activeSpeedZone) {
+            player.speedZoneTimer = Math.max(
+              player.speedZoneTimer,
+              activeSpeedZone.speedZoneDuration,
+            );
+            player.speedZoneType = activeSpeedZone.speedZoneType;
+            player.speedZoneMul = activeSpeedZone.speedZoneMul;
+          }
+          if (player.speedZoneTimer > 0) {
+            player.speedZoneTimer--;
+          } else {
+            player.speedZoneType = null;
+            player.speedZoneMul = 1;
           }
           let s =
             keys["ShiftLeft"] || keys["ShiftRight"]
               ? player.runSpeed
               : player.speed;
-          s *= speedZoneMul;
+          s *= player.speedZoneMul;
           let inputDir =
             (keys["ArrowRight"] || keys["KeyD"] ? 1 : 0) -
             (keys["ArrowLeft"] || keys["KeyA"] ? 1 : 0);
@@ -1463,7 +1501,16 @@
           platforms.forEach((p) => {
             p.isSolidNow = !p.isPhase || frameCount % 300 < 240;
             let dX = 0;
-            if (p.moveRange > 0) {
+            let dY = 0;
+            if (p.isSwingPlatform) {
+              const oX = p.x;
+              const oY = p.y;
+              const swing = getSwingBob(p);
+              p.x = swing.x - p.w / 2;
+              p.y = swing.y - p.h / 2;
+              dX = p.x - oX;
+              dY = p.y - oY;
+            } else if (p.moveRange > 0) {
               let oX = p.x;
               p.x += p.moveSpeed * p.moveDir;
               if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange)
@@ -1471,6 +1518,7 @@
               dX = p.x - oX;
             }
             p.deltaX = dX;
+            p.deltaY = dY;
             if (p.isSinking && p.isTouched) p.y += 2.5;
             if (p.hasSeeker) {
               p.seekerX += 2.5 * p.seekerDir;
@@ -1499,6 +1547,7 @@
                 player.x < p.x + p.w - 1
               ) {
                 resolvedX += p.deltaX || 0;
+                resolvedY += p.deltaY || 0;
                 break;
               }
             }
@@ -1546,8 +1595,13 @@
                   nextY = p.y - player.h;
                   player.vy = 0;
                   player.grounded = true;
-                  if (!wasGrounded && !inheritedLandingMove && p.deltaX) {
+                  if (
+                    !wasGrounded &&
+                    !inheritedLandingMove &&
+                    (p.deltaX || p.deltaY)
+                  ) {
                     resolvedX += p.deltaX;
+                    resolvedY += p.deltaY || 0;
                     inheritedLandingMove = true;
                   }
                   if (p.isSinking) p.isTouched = true;
@@ -1606,35 +1660,21 @@
                   break;
                 }
               }
-              if (p.hasSwingObstacle) {
+              if (p.isSwingBlade) {
                 const swing = getSwingBob(p);
-                if (p.swingType === "blade") {
-                  const closestX = Math.max(
-                    nX,
-                    Math.min(swing.x, nX + player.w),
-                  );
-                  const closestY = Math.max(
-                    nY,
-                    Math.min(swing.y, nY + player.h),
-                  );
-                  const dx = swing.x - closestX;
-                  const dy = swing.y - closestY;
-                  if (dx * dx + dy * dy < p.swingSize * p.swingSize) {
-                    dead = true;
-                    break;
-                  }
-                } else {
-                  const bx = swing.x - p.swingSize / 2;
-                  const by = swing.y - p.swingThickness / 2;
-                  if (
-                    nX < bx + p.swingSize &&
-                    nX + player.w > bx &&
-                    nY < by + p.swingThickness &&
-                    nY + player.h > by
-                  ) {
-                    dead = true;
-                    break;
-                  }
+                const closestX = Math.max(
+                  nX,
+                  Math.min(swing.x, nX + player.w),
+                );
+                const closestY = Math.max(
+                  nY,
+                  Math.min(swing.y, nY + player.h),
+                );
+                const dx = swing.x - closestX;
+                const dy = swing.y - closestY;
+                if (dx * dx + dy * dy < p.swingSize * p.swingSize) {
+                  dead = true;
+                  break;
                 }
               }
             }
@@ -1759,6 +1799,24 @@
           } else {
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
+          }
+          if (player.speedZoneTimer > 0) {
+            const pulse = 0.45 + Math.sin(frameCount / 8) * 0.25;
+            if (player.speedZoneType === "boost") {
+              ctx.strokeStyle = `rgba(80,255,210,${0.55 + pulse})`;
+              ctx.lineWidth = 2;
+              ctx.strokeRect(x - 4, y - 4, player.w + 8, player.h + 8);
+              ctx.fillStyle = `rgba(120,255,230,${0.3 + pulse * 0.25})`;
+              ctx.fillRect(x - 8, y + 4, 3, 3);
+              ctx.fillRect(x - 12, y + 9, 2, 2);
+            } else if (player.speedZoneType === "slow") {
+              ctx.strokeStyle = `rgba(255,190,90,${0.55 + pulse})`;
+              ctx.lineWidth = 2;
+              ctx.strokeRect(x - 4, y - 4, player.w + 8, player.h + 8);
+              ctx.fillStyle = `rgba(255,210,130,${0.28 + pulse * 0.22})`;
+              ctx.fillRect(x + player.w + 5, y + 5, 3, 3);
+              ctx.fillRect(x + player.w + 10, y + 10, 2, 2);
+            }
           }
           ctx.restore();
         }
@@ -2298,9 +2356,13 @@
               ctx.lineWidth = 2;
               ctx.beginPath();
               ctx.moveTo(swing.anchorX - camX, swing.anchorY);
-              ctx.lineTo(swing.x - camX, swing.y);
+              if (p.isSwingPlatform) {
+                ctx.lineTo(swing.x - camX, swing.y - p.h / 2);
+              } else {
+                ctx.lineTo(swing.x - camX, swing.y);
+              }
               ctx.stroke();
-              if (p.swingType === "blade") {
+              if (p.isSwingBlade) {
                 ctx.fillStyle = "#ccc";
                 ctx.beginPath();
                 ctx.arc(swing.x - camX, swing.y, p.swingSize, 0, Math.PI * 2);
@@ -2308,22 +2370,11 @@
                 ctx.strokeStyle = "#666";
                 ctx.lineWidth = 2;
                 ctx.stroke();
-              } else {
-                ctx.fillStyle = "#aab";
-                ctx.fillRect(
-                  swing.x - camX - p.swingSize / 2,
-                  swing.y - p.swingThickness / 2,
-                  p.swingSize,
-                  p.swingThickness,
-                );
-                ctx.strokeStyle = "#667";
-                ctx.lineWidth = 2;
-                ctx.strokeRect(
-                  swing.x - camX - p.swingSize / 2,
-                  swing.y - p.swingThickness / 2,
-                  p.swingSize,
-                  p.swingThickness,
-                );
+              } else if (p.isSwingPlatform) {
+                ctx.fillStyle = "#d5d5d5";
+                ctx.beginPath();
+                ctx.arc(swing.anchorX - camX, swing.anchorY, 3, 0, Math.PI * 2);
+                ctx.fill();
               }
             }
           });
