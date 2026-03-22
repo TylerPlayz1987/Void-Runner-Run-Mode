@@ -622,7 +622,76 @@
         const PLATFORM_W = 120,
           SPIKE_W = 15,
           SPIKE_H = 12,
-          SPIKE_HALF_W = SPIKE_W / 2;
+          SPIKE_SHAPES = ["triangle", "needle", "wide", "split", "diamond"];
+        function createSpikeProfile() {
+          const shape = SPIKE_SHAPES[Math.floor(Math.random() * SPIKE_SHAPES.length)];
+          if (shape === "needle") {
+            return {
+              shape,
+              w: 8 + Math.floor(Math.random() * 5),
+              h: 16 + Math.floor(Math.random() * 9),
+            };
+          }
+          if (shape === "wide") {
+            return {
+              shape,
+              w: 20 + Math.floor(Math.random() * 9),
+              h: 8 + Math.floor(Math.random() * 6),
+            };
+          }
+          if (shape === "split") {
+            return {
+              shape,
+              w: 16 + Math.floor(Math.random() * 9),
+              h: 10 + Math.floor(Math.random() * 9),
+            };
+          }
+          if (shape === "diamond") {
+            return {
+              shape,
+              w: 12 + Math.floor(Math.random() * 10),
+              h: 10 + Math.floor(Math.random() * 8),
+            };
+          }
+          return {
+            shape,
+            w: 12 + Math.floor(Math.random() * 9),
+            h: 10 + Math.floor(Math.random() * 7),
+          };
+        }
+        function drawSpike(sx, sy, w, h, shape, camX) {
+          const drawX = sx - camX;
+          if (shape === "split") {
+            const gap = Math.max(2, Math.floor(w * 0.2));
+            const toothW = Math.max(4, (w - gap) / 2);
+            ctx.beginPath();
+            ctx.moveTo(drawX, sy);
+            ctx.lineTo(drawX + toothW / 2, sy - h);
+            ctx.lineTo(drawX + toothW, sy);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(drawX + toothW + gap, sy);
+            ctx.lineTo(drawX + toothW + gap + toothW / 2, sy - h);
+            ctx.lineTo(drawX + toothW + gap + toothW, sy);
+            ctx.fill();
+            return;
+          }
+          if (shape === "diamond") {
+            ctx.beginPath();
+            ctx.moveTo(drawX + w / 2, sy - h);
+            ctx.lineTo(drawX + w, sy - h / 2);
+            ctx.lineTo(drawX + w / 2, sy);
+            ctx.lineTo(drawX, sy - h / 2);
+            ctx.closePath();
+            ctx.fill();
+            return;
+          }
+          ctx.beginPath();
+          ctx.moveTo(drawX, sy);
+          ctx.lineTo(drawX + w / 2, sy - h);
+          ctx.lineTo(drawX + w, sy);
+          ctx.fill();
+        }
         // Player state and physics
         const player = {
           x: 50,
@@ -727,7 +796,15 @@
                 !isG &&
                 !ph &&
                 !isSink &&
+                Math.random() < 0.3,
+              hasSeeker =
+                currentLevel >= 40 &&
+                !isG &&
+                !ph &&
+                !isSink &&
                 Math.random() < 0.3;
+            const spikeProfile = hasSpike ? createSpikeProfile() : null;
+            const seekerProfile = hasSeeker ? createSpikeProfile() : null;
             platforms.push({
               x: lx,
               y: ly,
@@ -737,7 +814,10 @@
               isSinking: isSink,
               isTouched: false,
               hasSpike,
-              spikeX: hasSpike ? Math.random() * (PLATFORM_W - SPIKE_W) : 0,
+              spikeX: hasSpike ? Math.random() * (PLATFORM_W - spikeProfile.w) : 0,
+              spikeW: hasSpike ? spikeProfile.w : SPIKE_W,
+              spikeH: hasSpike ? spikeProfile.h : SPIKE_H,
+              spikeShape: hasSpike ? spikeProfile.shape : "triangle",
               moveRange:
                 currentLevel >= 20 && !isG && Math.random() < 0.4
                   ? 50 + Math.random() * 50
@@ -745,14 +825,12 @@
               startX: lx,
               moveDir: 1,
               moveSpeed: 1.5,
-              hasSeeker:
-                currentLevel >= 40 &&
-                !isG &&
-                !ph &&
-                !isSink &&
-                Math.random() < 0.3,
+              hasSeeker,
               seekerX: 0,
               seekerDir: 1,
+              seekerW: hasSeeker ? seekerProfile.w : SPIKE_W,
+              seekerH: hasSeeker ? seekerProfile.h : SPIKE_H,
+              seekerShape: hasSeeker ? seekerProfile.shape : "triangle",
             });
             let lastP = platforms[platforms.length - 1];
             if (currentLevel >= 10 && !isG && Math.random() < 0.25)
@@ -1067,7 +1145,7 @@
             if (p.isSinking && p.isTouched) p.y += 2.5;
             if (p.hasSeeker) {
               p.seekerX += 2.5 * p.seekerDir;
-              if (p.seekerX > p.w - SPIKE_W || p.seekerX < 0) p.seekerDir *= -1;
+              if (p.seekerX > p.w - p.seekerW || p.seekerX < 0) p.seekerDir *= -1;
             }
           });
 
@@ -1187,10 +1265,12 @@
             for (let p of platforms) {
               if (p.hasSpike || p.hasSeeker) {
                 let sx = p.hasSpike ? p.x + p.spikeX : p.x + p.seekerX;
+                let sw = p.hasSpike ? p.spikeW : p.seekerW;
+                let sh = p.hasSpike ? p.spikeH : p.seekerH;
                 if (
                   nX + player.w > sx &&
-                  nX < sx + SPIKE_W &&
-                  nY + player.h > p.y - SPIKE_H &&
+                  nX < sx + sw &&
+                  nY + player.h > p.y - sh &&
                   nY < p.y
                 ) {
                   dead = true;
@@ -1774,12 +1854,11 @@
             }
             if (p.hasSpike || p.hasSeeker) {
               ctx.fillStyle = t.hazards;
-              ctx.beginPath();
               let sx = p.hasSpike ? p.x + p.spikeX : p.x + p.seekerX;
-              ctx.moveTo(sx - camX, p.y);
-              ctx.lineTo(sx + SPIKE_HALF_W - camX, p.y - SPIKE_H);
-              ctx.lineTo(sx + SPIKE_W - camX, p.y);
-              ctx.fill();
+              let sw = p.hasSpike ? p.spikeW : p.seekerW;
+              let sh = p.hasSpike ? p.spikeH : p.seekerH;
+              let ss = p.hasSpike ? p.spikeShape : p.seekerShape;
+              drawSpike(sx, p.y, sw, sh, ss, camX);
             }
           });
           ctx.globalAlpha = 1;
@@ -1798,7 +1877,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.5.4", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.5.5", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
