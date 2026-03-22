@@ -783,7 +783,13 @@
           jumpDust = [];
         const PLATFORM_W = 120,
           SPIKE_W = 15,
-          SPIKE_H = 12;
+          SPIKE_H = 12,
+          SPEED_ZONE_START_LEVEL = 40,
+          SPEED_ZONE_CHANCE = 0.33,
+          SWING_START_LEVEL = 60,
+          SWING_CHANCE = 0.55,
+          FAKE_HAZARD_START_LEVEL = 70,
+          FAKE_HAZARD_CHANCE = 0.12;
         function createSpikeProfile(level = 1, isSeeker = false) {
           let shape = "triangle";
           const roll = Math.random();
@@ -878,6 +884,19 @@
           ctx.lineTo(drawX + w / 2, sy - h);
           ctx.lineTo(drawX + w, sy);
           ctx.fill();
+        }
+        function getSwingBob(p) {
+          const angle =
+            Math.sin(frameCount * p.swingSpeed + p.swingPhase) * p.swingAmp;
+          const anchorX = p.x + p.swingAnchorX;
+          const anchorY = p.swingAnchorY;
+          return {
+            angle,
+            anchorX,
+            anchorY,
+            x: anchorX + Math.sin(angle) * p.swingLen,
+            y: anchorY + Math.cos(angle) * p.swingLen,
+          };
         }
         // Player state and physics
         const player = {
@@ -978,24 +997,76 @@
                 !platforms[platforms.length - 1].isPhase &&
                 Math.random() < 0.35,
               isSink = currentLevel >= 50 && !isG && !ph && Math.random() < 0.3;
+            const canPlaceOnPlatform = !isG && !ph && !isSink;
             const allowObstacleStacking = currentLevel >= 50;
             let platformHasObstacle = false;
+            let hasSwingObstacle =
+              currentLevel >= SWING_START_LEVEL &&
+              canPlaceOnPlatform &&
+              Math.random() < SWING_CHANCE;
+            if (hasSwingObstacle) platformHasObstacle = true;
+            let hasFakeHazard =
+              !hasSwingObstacle &&
+              currentLevel >= FAKE_HAZARD_START_LEVEL &&
+              canPlaceOnPlatform &&
+              Math.random() < FAKE_HAZARD_CHANCE;
+            if (hasFakeHazard) platformHasObstacle = true;
             let hasSpike =
                 currentLevel >= 10 &&
-                !isG &&
-                !ph &&
-                !isSink &&
+                canPlaceOnPlatform &&
+                !hasSwingObstacle &&
+                !hasFakeHazard &&
                 (allowObstacleStacking || !platformHasObstacle) &&
                 Math.random() < 0.3;
             if (hasSpike) platformHasObstacle = true;
             let hasSeeker =
                 currentLevel >= 40 &&
-                !isG &&
-                !ph &&
-                !isSink &&
+                canPlaceOnPlatform &&
+                !hasSwingObstacle &&
+                !hasFakeHazard &&
                 (allowObstacleStacking || !platformHasObstacle) &&
                 Math.random() < 0.3;
             if (hasSeeker) platformHasObstacle = true;
+            const hasSpeedZone =
+              currentLevel >= SPEED_ZONE_START_LEVEL &&
+              !isG &&
+              !ph &&
+              !hasSwingObstacle &&
+              !hasFakeHazard &&
+              Math.random() < SPEED_ZONE_CHANCE;
+            const speedZoneW = hasSpeedZone ? 34 + Math.random() * 36 : 0;
+            const speedZoneX = hasSpeedZone
+              ? Math.random() * (PLATFORM_W - speedZoneW)
+              : 0;
+            const speedZoneType = hasSpeedZone
+              ? Math.random() < 0.5
+                ? "boost"
+                : "slow"
+              : null;
+            const swingType = hasSwingObstacle
+              ? Math.random() < 0.65
+                ? "blade"
+                : "platform"
+              : null;
+            const swingAnchorY = hasSwingObstacle ? 18 + Math.random() * 70 : 0;
+            const swingLen = hasSwingObstacle
+              ? Math.max(45, ly - swingAnchorY - 18)
+              : 0;
+            const fakeType = hasFakeHazard
+              ? Math.random() < 0.7
+                ? "ghostSpike"
+                : "ghostBlock"
+              : null;
+            const fakeW = hasFakeHazard
+              ? fakeType === "ghostSpike"
+                ? 16 + Math.random() * 14
+                : 20 + Math.random() * 18
+              : 0;
+            const fakeH = hasFakeHazard
+              ? fakeType === "ghostSpike"
+                ? 12 + Math.random() * 10
+                : 14 + Math.random() * 10
+              : 0;
             const spikeProfile = hasSpike ? createSpikeProfile(currentLevel, false) : null;
             const seekerProfile = hasSeeker ? createSpikeProfile(currentLevel, true) : null;
             platforms.push({
@@ -1024,11 +1095,45 @@
               seekerW: hasSeeker ? seekerProfile.w : SPIKE_W,
               seekerH: hasSeeker ? seekerProfile.h : SPIKE_H,
               seekerShape: hasSeeker ? seekerProfile.shape : "triangle",
+              hasSpeedZone,
+              speedZoneType,
+              speedZoneX,
+              speedZoneW,
+              speedZoneMul:
+                speedZoneType === "boost"
+                  ? 1.55 + Math.random() * 0.25
+                  : speedZoneType === "slow"
+                    ? 0.5 + Math.random() * 0.15
+                    : 1,
+              hasSwingObstacle,
+              swingType,
+              swingAnchorX: hasSwingObstacle ? 20 + Math.random() * 80 : 0,
+              swingAnchorY,
+              swingLen,
+              swingAmp: hasSwingObstacle ? 0.65 + Math.random() * 0.55 : 0,
+              swingSpeed: hasSwingObstacle ? 0.025 + Math.random() * 0.018 : 0,
+              swingPhase: hasSwingObstacle ? Math.random() * Math.PI * 2 : 0,
+              swingSize: hasSwingObstacle
+                ? swingType === "blade"
+                  ? 9 + Math.random() * 6
+                  : 34 + Math.random() * 20
+                : 0,
+              swingThickness:
+                hasSwingObstacle && swingType === "platform"
+                  ? 9 + Math.random() * 5
+                  : 0,
+              hasFakeHazard,
+              fakeType,
+              fakeX: hasFakeHazard ? Math.random() * (PLATFORM_W - fakeW) : 0,
+              fakeW,
+              fakeH,
             });
             let lastP = platforms[platforms.length - 1];
             if (
               currentLevel >= 10 &&
-              !isG &&
+              canPlaceOnPlatform &&
+              !hasSwingObstacle &&
+              !hasFakeHazard &&
               (allowObstacleStacking || !platformHasObstacle) &&
               Math.random() < 0.25
             ) {
@@ -1044,7 +1149,9 @@
             // lava wall hazard from this platform (bottom-up wall)
             if (
               currentLevel >= 15 &&
-              !isG &&
+              canPlaceOnPlatform &&
+              !hasSwingObstacle &&
+              !hasFakeHazard &&
               (allowObstacleStacking || !platformHasObstacle) &&
               Math.random() < 0.22 &&
               Math.abs(lastP.x - 50) > 140 &&
@@ -1120,7 +1227,7 @@
           let s = platforms;
           let minD = Infinity;
           platforms.forEach((p) => {
-            if (!p.isPhase && !p.hasSpike && !p.hasSeeker) {
+            if (!p.isPhase && !p.hasSpike && !p.hasSeeker && !p.hasSwingObstacle) {
               let d = Math.abs(p.x - player.x);
               if (d < minD) {
                 minD = d;
@@ -1228,10 +1335,25 @@
           } else {
             player.trail = [];
           }
+          let speedZoneMul = 1;
+          for (let p of platforms) {
+            if (!p.hasSpeedZone) continue;
+            const zoneX = p.x + p.speedZoneX;
+            if (
+              player.x + player.w > zoneX &&
+              player.x < zoneX + p.speedZoneW &&
+              player.y + player.h >= p.y - 6 &&
+              player.y + player.h <= p.y + p.h + 8
+            ) {
+              speedZoneMul = p.speedZoneMul;
+              break;
+            }
+          }
           let s =
             keys["ShiftLeft"] || keys["ShiftRight"]
               ? player.runSpeed
               : player.speed;
+          s *= speedZoneMul;
           let inputDir =
             (keys["ArrowRight"] || keys["KeyD"] ? 1 : 0) -
             (keys["ArrowLeft"] || keys["KeyA"] ? 1 : 0);
@@ -1482,6 +1604,37 @@
                 ) {
                   dead = true;
                   break;
+                }
+              }
+              if (p.hasSwingObstacle) {
+                const swing = getSwingBob(p);
+                if (p.swingType === "blade") {
+                  const closestX = Math.max(
+                    nX,
+                    Math.min(swing.x, nX + player.w),
+                  );
+                  const closestY = Math.max(
+                    nY,
+                    Math.min(swing.y, nY + player.h),
+                  );
+                  const dx = swing.x - closestX;
+                  const dy = swing.y - closestY;
+                  if (dx * dx + dy * dy < p.swingSize * p.swingSize) {
+                    dead = true;
+                    break;
+                  }
+                } else {
+                  const bx = swing.x - p.swingSize / 2;
+                  const by = swing.y - p.swingThickness / 2;
+                  if (
+                    nX < bx + p.swingSize &&
+                    nX + player.w > bx &&
+                    nY < by + p.swingThickness &&
+                    nY + player.h > by
+                  ) {
+                    dead = true;
+                    break;
+                  }
                 }
               }
             }
@@ -2089,6 +2242,32 @@
                       : t.plat;
               ctx.fillRect(p.x - camX, p.y, p.w, p.h);
             }
+            if (p.hasSpeedZone) {
+              const zoneX = p.x + p.speedZoneX - camX;
+              const zoneY = p.y + 1;
+              const pulse = 0.55 + Math.sin(frameCount / 8 + p.x * 0.01) * 0.25;
+              ctx.fillStyle =
+                p.speedZoneType === "boost"
+                  ? `rgba(0,255,180,${0.45 + pulse * 0.2})`
+                  : `rgba(255,170,40,${0.45 + pulse * 0.2})`;
+              ctx.fillRect(zoneX, zoneY, p.speedZoneW, p.h - 2);
+              ctx.strokeStyle =
+                p.speedZoneType === "boost"
+                  ? "rgba(180,255,240,0.8)"
+                  : "rgba(255,240,170,0.8)";
+              ctx.lineWidth = 1;
+              ctx.strokeRect(zoneX, zoneY, p.speedZoneW, p.h - 2);
+              ctx.strokeStyle =
+                p.speedZoneType === "boost"
+                  ? "rgba(20,180,140,0.7)"
+                  : "rgba(180,120,30,0.7)";
+              for (let zx = 0; zx < p.speedZoneW; zx += 6) {
+                ctx.beginPath();
+                ctx.moveTo(zoneX + zx, zoneY);
+                ctx.lineTo(zoneX + zx - 4, zoneY + p.h - 2);
+                ctx.stroke();
+              }
+            }
             if (p.hasSpike || p.hasSeeker) {
               ctx.fillStyle = t.hazards;
               let sx = p.hasSpike ? p.x + p.spikeX : p.x + p.seekerX;
@@ -2096,6 +2275,56 @@
               let sh = p.hasSpike ? p.spikeH : p.seekerH;
               let ss = p.hasSpike ? p.spikeShape : p.seekerShape;
               drawSpike(sx, p.y, sw, sh, ss, camX);
+            }
+            if (p.hasFakeHazard) {
+              const fx = p.x + p.fakeX;
+              ctx.save();
+              ctx.globalAlpha = 0.35 + Math.sin(frameCount / 12 + p.x * 0.01) * 0.15;
+              ctx.fillStyle = currentTheme === "cyber" ? "#0ff" : "#fff";
+              ctx.strokeStyle = currentTheme === "cyber" ? "#f0f" : "#88f";
+              if (p.fakeType === "ghostSpike") {
+                drawSpike(fx, p.y, p.fakeW, p.fakeH, "triangle", camX);
+              } else {
+                const bx = fx - camX;
+                const by = p.y - p.fakeH;
+                ctx.fillRect(bx, by, p.fakeW, p.fakeH);
+                ctx.strokeRect(bx, by, p.fakeW, p.fakeH);
+              }
+              ctx.restore();
+            }
+            if (p.hasSwingObstacle) {
+              const swing = getSwingBob(p);
+              ctx.strokeStyle = "rgba(210,210,210,0.85)";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(swing.anchorX - camX, swing.anchorY);
+              ctx.lineTo(swing.x - camX, swing.y);
+              ctx.stroke();
+              if (p.swingType === "blade") {
+                ctx.fillStyle = "#ccc";
+                ctx.beginPath();
+                ctx.arc(swing.x - camX, swing.y, p.swingSize, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "#666";
+                ctx.lineWidth = 2;
+                ctx.stroke();
+              } else {
+                ctx.fillStyle = "#aab";
+                ctx.fillRect(
+                  swing.x - camX - p.swingSize / 2,
+                  swing.y - p.swingThickness / 2,
+                  p.swingSize,
+                  p.swingThickness,
+                );
+                ctx.strokeStyle = "#667";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(
+                  swing.x - camX - p.swingSize / 2,
+                  swing.y - p.swingThickness / 2,
+                  p.swingSize,
+                  p.swingThickness,
+                );
+              }
             }
           });
           ctx.globalAlpha = 1;
