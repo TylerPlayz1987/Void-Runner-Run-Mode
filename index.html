@@ -1101,17 +1101,19 @@
                 resolvedY < p.y + p.h &&
                 resolvedY + player.h > p.y
               ) {
-                if (stepX > 0) nextX = p.x - player.w;
-                else if (stepX < 0) nextX = p.x + p.w;
-                  else {
-                    // Resolve stationary penetrations (e.g., platform moving into player).
-                    const pushLeft = p.x - player.w - nextX;
-                    const pushRight = p.x + p.w - nextX;
-                    nextX +=
-                      Math.abs(pushLeft) <= Math.abs(pushRight)
-                        ? pushLeft
-                        : pushRight;
-                  }
+                if (stepX > 0) {
+                  nextX = p.x - player.w;
+                } else if (stepX < 0) {
+                  nextX = p.x + p.w;
+                } else {
+                  // Resolve stationary penetrations (e.g., platform moving into player).
+                  const pushLeft = p.x - player.w - nextX;
+                  const pushRight = p.x + p.w - nextX;
+                  nextX +=
+                    Math.abs(pushLeft) <= Math.abs(pushRight)
+                      ? pushLeft
+                      : pushRight;
+                }
                 player.vx = 0;
                 player.momentumX = 0;
               }
