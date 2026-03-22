@@ -1030,7 +1030,7 @@
               if (h.h > 10 && Math.random() < 0.35) {
                 lavaParticles.push({
                   x: h.x + Math.random() * h.w,
-                  y: h.y + h.h,
+                  y: h.y,
                   vx: (Math.random() - 0.5) * 0.6,
                   vy: -1 - Math.random() * 0.8,
                   life: 24 + Math.floor(Math.random() * 12),
@@ -1075,6 +1075,7 @@
           const stepY = player.vy / steps;
           let resolvedX = player.x;
           let resolvedY = player.y;
+          let inheritedLandingMove = false;
 
           // Carry player with moving platforms when standing on top.
           if (wasGrounded) {
@@ -1107,6 +1108,15 @@
               ) {
                 if (stepX > 0) nextX = p.x - player.w;
                 else if (stepX < 0) nextX = p.x + p.w;
+                  else {
+                    // Resolve stationary penetrations (e.g., platform moving into player).
+                    const pushLeft = p.x - player.w - nextX;
+                    const pushRight = p.x + p.w - nextX;
+                    nextX +=
+                      Math.abs(pushLeft) <= Math.abs(pushRight)
+                        ? pushLeft
+                        : pushRight;
+                  }
                 player.vx = 0;
                 player.momentumX = 0;
               }
@@ -1128,6 +1138,10 @@
                   nextY = p.y - player.h;
                   player.vy = 0;
                   player.grounded = true;
+                    if (!inheritedLandingMove && p.deltaX) {
+                      resolvedX += p.deltaX;
+                      inheritedLandingMove = true;
+                    }
                   if (p.isSinking) p.isTouched = true;
                   if (!wasGrounded) {
                     player.stretchX = 1.5;
