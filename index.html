@@ -88,6 +88,21 @@
         z-index: 150;
       }
 
+      #tutorialHint {
+        position: absolute;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        pointer-events: none;
+        z-index: 180;
+        min-width: 420px;
+        max-width: 90%;
+        text-align: center;
+        color: #9ef;
+        border-color: #9ef;
+        font-size: 13px;
+      }
+
       #resetConfirm,
       #timeTravelAnimation {
         position: absolute;
@@ -195,6 +210,20 @@
         z-index: 200;
       }
 
+      #tourExplain {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(92%, 690px);
+        pointer-events: none;
+        z-index: 260;
+        text-align: center;
+        color: #9ef;
+        border-color: #9ef;
+        background: rgba(0, 0, 0, 0.93);
+      }
+
       .menu-page {
         display: flex;
         flex-direction: column;
@@ -261,6 +290,27 @@
         margin: 10px 0;
       }
 
+      .notes-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        max-height: 230px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
+      .notes-grid .setting-item {
+        margin: 0;
+      }
+
+      @media (max-width: 700px) {
+        .notes-grid {
+          grid-template-columns: 1fr;
+          max-height: 270px;
+        }
+      }
+
       input[type="range"],
       select {
         width: 100%;
@@ -298,6 +348,7 @@
           </div>
         </div>
         <div id="cp-notif">Checkpoint Reached</div>
+        <div id="tutorialHint" class="stat" style="display: none"></div>
 
         <div id="resetConfirm">
           <div class="confirm-box">
@@ -322,21 +373,42 @@
 
         <div id="startMenu" class="overlay">
           <h1>Void Runner</h1>
-          <button id="startBtn" style="width: 200px">Start(Run Mode)</button>
+          <button id="startBtn" style="width: 200px">Start</button>
+        </div>
+        <div id="modeMenu" class="overlay" style="display: none">
+          <h1>Select Mode</h1>
+          <button id="runModeBtn" style="width: 220px; margin-bottom: 8px">
+            Run Mode
+          </button>
+          <button id="tutorialBtn" style="width: 220px; margin-bottom: 8px">
+            Tutorial Level
+          </button>
+          <button id="modeBackBtn" class="small-btn" style="width: 220px">
+            Back
+          </button>
         </div>
         <div id="pauseMenu" class="overlay" style="display: none">
+          <div id="tourExplain" class="stat" style="display: none"></div>
           <div id="mainPausePage" class="menu-page">
             <h1>PAUSED</h1>
             <button id="resumeBtn">Resume</button
             ><button id="settingsBtn">Settings</button
             ><button id="cheatsBtn" style="background: #fa0">
               Cheats/Debug</button
+            ><button
+              id="exitTutorialBtn"
+              class="small-btn"
+              style="display: none; background: #0aa; color: #fff"
+            >
+              Exit Tutorial
+            </button
             ><button id="restartBtn" class="small-btn">Reset</button>
           </div>
           <div id="settingsPage" class="menu-page" style="display: none">
             <h1>SETTINGS</h1>
             <button id="openAudioBtn" style="width: 100%; margin-bottom: 8px;">Audio Settings</button>
             <button id="openThemeBtn" style="width: 100%; margin-bottom: 8px;">Theme Settings</button>
+            <button id="openTutorialNotesBtn" style="width: 100%; margin-bottom: 8px;">Tutorial Notes</button>
             <button id="settingsBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
           <div id="audioPage" class="menu-page" style="display: none">
@@ -383,6 +455,33 @@
               <button id="retroToggleBtn" class="small-btn">8-bit: OFF</button>
             </div>
             <button id="themeBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="tutorialNotesPage" class="menu-page" style="display: none">
+            <h1>Tutorial Notes</h1>
+            <div class="notes-grid">
+              <div class="setting-item" style="text-align: left; line-height: 1.4">
+                <span>Movement: A/D or Arrows</span>
+                <span>Jump: W/Up/Space</span>
+                <span>Run: Hold Shift</span>
+                <span>Double Jump: one extra jump in air; resets on landing</span>
+                <span>Shield: One safety hit</span>
+                <span>Gravity Wells: pull inward; fight pull with momentum and early jumps</span>
+                <span>Checkpoints: saved every 5 levels in Run Mode</span>
+              </div>
+              <div class="setting-item" style="text-align: left; line-height: 1.4">
+                <span>Settings: adjust master/music/SFX and toggle mutes</span>
+                <span>Themes: swap visual style and theme music (when available)</span>
+                <span>Debug/Cheats: invincibility and level warp for testing</span>
+                <span>High Score: tracks best level only while cheats are not used</span>
+                <span>If cheats are used, high score text shows CHEATS USED</span>
+                <span>
+                  Unlocks: L10 spikes+wells, L15 lava, L20 moving platforms, L30 phase platforms,
+                  L35 shield, L40 speed+seekers, L50 sinking platforms, L60 swing, L70 fake spikes
+                </span>
+                <span>At the end of tutorial, reopen this page for a full recap any time</span>
+              </div>
+            </div>
+            <button id="tutorialNotesBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
           <div id="cheatsPage" class="menu-page" style="display: none">
             <h1 style="color: #fa0">CHEATS</h1>
@@ -495,13 +594,19 @@
           lastCheckpoint = 1,
           deathCount = 0,
           cheatsUsed = false,
+          tutorialMode = false,
+          showingPostTutorialSettings = false,
+          loopStarted = false,
           shake = 0,
           winParticles = [],
           flashAlpha = 0;
+        let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
           container = document.getElementById("container"),
-          cpNotif = document.getElementById("cp-notif");
+          cpNotif = document.getElementById("cp-notif"),
+          tutorialHintEl = document.getElementById("tutorialHint"),
+          tourExplainEl = document.getElementById("tourExplain");
         let ctx = mainCtx;
         const retroCanvas = document.createElement("canvas");
         retroCanvas.width = 160;
@@ -790,6 +895,161 @@
           SWING_CHANCE = 0.55,
           FAKE_HAZARD_START_LEVEL = 70,
           FAKE_HAZARD_CHANCE = 0.12;
+        const tutorialGuide = [
+          {
+            minX: 0,
+            text: "Start easy: move with A/D or Arrows and jump with W/Up/Space.",
+          },
+          {
+            minX: 260,
+            text: "Hold Shift to run for longer jumps.",
+          },
+          {
+            minX: 540,
+            text: "Double jump: you get one extra jump in the air, then it resets on landing.",
+          },
+          {
+            minX: 860,
+            text: "Moving platform ahead: keep your jump timing and ride it safely.",
+          },
+          {
+            minX: 1120,
+            text: "Blue phase platform blinks in and out. Wait for solid timing.",
+          },
+          {
+            minX: 1360,
+            text: "Speed zones: teal boosts you, amber slows you down.",
+          },
+          {
+            minX: 1700,
+            text: "Hazards start here: spikes hurt on contact, so clear them cleanly.",
+          },
+          {
+            minX: 1960,
+            text: "Seekers slide side to side. Watch their rhythm before jumping.",
+          },
+          {
+            minX: 2260,
+            text: "Sinking platforms drop after touch, so keep moving.",
+          },
+          {
+            minX: 2480,
+            text: "Fake hazards can look dangerous but are harmless. Learn the difference.",
+          },
+          {
+            minX: 2660,
+            text: "Collect the shield for one extra save against danger.",
+          },
+          {
+            minX: 2920,
+            text: "Gravity wells pull you inward. Keep momentum and jump early to escape.",
+          },
+          {
+            minX: 3140,
+            text: "Lava walls rise and fall in cycles. Time your crossing.",
+          },
+          {
+            minX: 3600,
+            text: "Swing hazards are advanced: watch their arc, then move when the lane opens.",
+          },
+          {
+            minX: 3920,
+            text: "Run Mode checkpoints save every 5 levels. Reach one to set your restart point.",
+          },
+          {
+            minX: 4320,
+            text: "Obstacle unlocks: L10 spikes+wells, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L60 swing, L70 fake hazards.",
+          },
+          {
+            minX: 4760,
+            text: "Final stretch. Reach the goal, then review settings and notes after completion.",
+          },
+        ];
+        let tutorialHintText = "";
+
+        function setLevelDisplay() {
+          document.getElementById("lvl").textContent = tutorialMode
+            ? "TUTORIAL"
+            : currentLevel;
+        }
+
+        function setTutorialUiVisible(visible) {
+          tutorialHintEl.style.display = visible ? "block" : "none";
+          if (!visible) {
+            tutorialHintText = "";
+            tutorialHintEl.textContent = "";
+          }
+        }
+
+        function updateTutorialHint() {
+          if (!tutorialMode) return;
+          let nextText = tutorialGuide[0].text;
+          for (let i = 0; i < tutorialGuide.length; i++) {
+            if (player.x >= tutorialGuide[i].minX) {
+              nextText = tutorialGuide[i].text;
+            } else {
+              break;
+            }
+          }
+          if (nextText !== tutorialHintText) {
+            tutorialHintText = nextText;
+            tutorialHintEl.textContent = nextText;
+          }
+        }
+
+        function makeTutorialPlatform(x, y, w = PLATFORM_W, extra = {}) {
+          return Object.assign(
+            {
+              x,
+              y,
+              w,
+              h: 15,
+              isPhase: false,
+              isSinking: false,
+              isTouched: false,
+              hasSpike: false,
+              spikeX: 0,
+              spikeW: SPIKE_W,
+              spikeH: SPIKE_H,
+              spikeShape: "triangle",
+              moveRange: 0,
+              startX: x,
+              moveDir: 1,
+              moveSpeed: 1.5,
+              hasSeeker: false,
+              seekerX: 0,
+              seekerDir: 1,
+              seekerW: SPIKE_W,
+              seekerH: SPIKE_H,
+              seekerShape: "triangle",
+              hasSpeedZone: false,
+              speedZoneType: null,
+              speedZoneX: 0,
+              speedZoneW: 0,
+              speedZoneDuration: 0,
+              speedZoneMul: 1,
+              hasSwingObstacle: false,
+              isSwingPlatform: false,
+              isWreckingBall: false,
+              swingType: null,
+              swingAnchorX: 0,
+              swingAnchorAbsX: x + w / 2,
+              swingAnchorY: 0,
+              swingLen: 0,
+              swingAmp: 0,
+              swingSpeed: 0,
+              swingPhase: 0,
+              swingSize: 0,
+              swingThickness: 0,
+              hasFakeHazard: false,
+              fakeType: null,
+              fakeX: 0,
+              fakeW: 0,
+              fakeH: 0,
+            },
+            extra,
+          );
+        }
         function createSpikeProfile(level = 1, isSeeker = false) {
           let shape = "triangle";
           const roll = Math.random();
@@ -1211,6 +1471,174 @@
             }
           }
         }
+
+        function generateTutorialLevel() {
+          shieldItem = {
+            x: 2725,
+            y: 160,
+            w: 20,
+            h: 20,
+            collected: false,
+          };
+          wells = [
+            { x: 3040, y: 238, r: 95, core: 0 },
+            { x: 4300, y: 225, r: 105, core: 0 },
+          ];
+          hazards = [
+            {
+              type: "lava",
+              x: 3240,
+              w: 28,
+              y: 400,
+              h: 0,
+              maxH: 100,
+              speed: 1,
+              rising: true,
+              hold: 0,
+              holdMax: 100,
+              warned: false,
+            },
+            {
+              type: "lava",
+              x: 4400,
+              w: 28,
+              y: 400,
+              h: 0,
+              maxH: 110,
+              speed: 1.15,
+              rising: true,
+              hold: 0,
+              holdMax: 90,
+              warned: false,
+            },
+          ];
+
+          platforms = [
+            makeTutorialPlatform(0, 350, 520, { h: 50 }),
+            makeTutorialPlatform(610, 300, 140),
+            makeTutorialPlatform(840, 260, 130, {
+              moveRange: 70,
+              moveSpeed: 1.35,
+            }),
+            makeTutorialPlatform(1050, 240, 130, {
+              isPhase: true,
+            }),
+            makeTutorialPlatform(1270, 250, 150, {
+              hasSpeedZone: true,
+              speedZoneType: "boost",
+              speedZoneX: 35,
+              speedZoneW: 80,
+              speedZoneDuration: 420,
+              speedZoneMul: 1.6,
+            }),
+            makeTutorialPlatform(1500, 250, 145, {
+              hasSpeedZone: true,
+              speedZoneType: "slow",
+              speedZoneX: 34,
+              speedZoneW: 72,
+              speedZoneDuration: 360,
+              speedZoneMul: 0.6,
+            }),
+            makeTutorialPlatform(1730, 250, 160, {
+              hasSpike: true,
+              spikeX: 62,
+              spikeW: 26,
+              spikeH: 13,
+              spikeShape: "wide",
+            }),
+            makeTutorialPlatform(1980, 232, 150, {
+              hasSeeker: true,
+              seekerW: 18,
+              seekerH: 14,
+              seekerShape: "split",
+            }),
+            makeTutorialPlatform(2230, 250, 145, {
+              isSinking: true,
+            }),
+            makeTutorialPlatform(2460, 230, 150, {
+              hasFakeHazard: true,
+              fakeType: "ghostSpike",
+              fakeX: 72,
+              fakeW: 22,
+              fakeH: 16,
+            }),
+            makeTutorialPlatform(2680, 225, 150),
+            makeTutorialPlatform(2900, 210, 160),
+            makeTutorialPlatform(3160, 230, 155),
+            makeTutorialPlatform(3400, 210, 150, {
+              hasSpike: true,
+              spikeX: 52,
+              spikeW: 24,
+              spikeH: 15,
+              spikeShape: "split",
+            }),
+            makeTutorialPlatform(3620, 245, 170, {
+              hasSwingObstacle: true,
+              isSwingPlatform: true,
+              swingType: "platform",
+              swingAnchorAbsX: 3705,
+              swingAnchorY: 86,
+              swingLen: 92,
+              swingAmp: 0.36,
+              swingSpeed: 0.018,
+              swingPhase: 0.2,
+              swingSize: 54,
+              swingThickness: 11,
+            }),
+            makeTutorialPlatform(3860, 230, 180, {
+              hasSwingObstacle: true,
+              isWreckingBall: true,
+              swingType: "wreckingBall",
+              swingAnchorAbsX: 3950,
+              swingAnchorY: 90,
+              swingLen: 120,
+              swingAmp: 0.75,
+              swingSpeed: 0.03,
+              swingPhase: 1.2,
+              swingSize: 13,
+            }),
+            makeTutorialPlatform(4120, 220, 155, {
+              isPhase: true,
+              hasSpeedZone: true,
+              speedZoneType: "boost",
+              speedZoneX: 40,
+              speedZoneW: 70,
+              speedZoneDuration: 380,
+              speedZoneMul: 1.55,
+            }),
+            makeTutorialPlatform(4360, 220, 150, {
+              hasSeeker: true,
+              seekerW: 16,
+              seekerH: 14,
+              seekerShape: "wide",
+              hasSpeedZone: true,
+              speedZoneType: "slow",
+              speedZoneX: 18,
+              speedZoneW: 48,
+              speedZoneDuration: 330,
+              speedZoneMul: 0.58,
+            }),
+            makeTutorialPlatform(4600, 190, 160, {
+              hasFakeHazard: true,
+              fakeType: "ghostBlock",
+              fakeX: 96,
+              fakeW: 24,
+              fakeH: 16,
+            }),
+            makeTutorialPlatform(4820, 225, 170, {
+              isSinking: true,
+            }),
+            makeTutorialPlatform(5060, 210, 180),
+            makeTutorialPlatform(5300, 220, 170),
+          ];
+
+          goal.x = 5530;
+          goal.y = 175;
+          goal.w = 40;
+          goal.h = 40;
+          tutorialHintText = "";
+          updateTutorialHint();
+        }
         // Handle player death and reset after falling/out of bounds/hazard hit
         function resetPlayerForRun(spawnY = 200) {
           player.x = 50;
@@ -1234,12 +1662,18 @@
           shake = 15;
           deathCount++;
           document.getElementById("deaths").textContent = deathCount;
-          currentLevel = lastCheckpoint;
-          document.getElementById("lvl").textContent = currentLevel;
+          if (!tutorialMode) {
+            currentLevel = lastCheckpoint;
+          }
+          setLevelDisplay();
           play.di();
           container.style.borderColor = "#f44";
           setTimeout(() => (container.style.borderColor = "#333"), 200);
-          generateLevel();
+          if (tutorialMode) {
+            generateTutorialLevel();
+          } else {
+            generateLevel();
+          }
           resetPlayerForRun(330);
           player.hasShield = false;
           player.spaghettified = false;
@@ -1295,8 +1729,26 @@
         }
 
         function win() {
+          if (tutorialMode) {
+            play.cp();
+            const prevText = cpNotif.textContent;
+            cpNotif.textContent = "Tutorial Complete! Showing settings + notes next...";
+            cpNotif.style.opacity = "1";
+            container.style.borderColor = "#0f0";
+            container.style.boxShadow = "0 0 30px #0f0";
+            setTimeout(() => {
+              container.style.borderColor = "#333";
+              container.style.boxShadow = "none";
+              cpNotif.style.opacity = "0";
+              cpNotif.textContent = prevText;
+              tutorialMode = false;
+              setTutorialUiVisible(false);
+              runPostTutorialSettingsTour();
+            }, 2200);
+            return;
+          }
           currentLevel++;
-          document.getElementById("lvl").textContent = currentLevel;
+          setLevelDisplay();
           for (let i = 0; i < 30; i++)
             winParticles.push({
               x: goal.x + goal.w / 2,
@@ -1755,107 +2207,9 @@
               return;
             }
           }
-
-          hazards.forEach((h) => {
-            if (h.type === "lava") {
-              if (!h.warned && h.rising && h.h < 10) {
-                h.warned = true;
-                sfx(270, "sawtooth", 0.07, 0.11, 240);
-              }
-              if (h.h >= h.maxH && h.rising) {
-                h.h = h.maxH;
-                h.hold = (h.hold || 0) + 1;
-                if (h.hold >= h.holdMax) {
-                  h.rising = false;
-                  h.hold = 0;
-                }
-              } else if (h.h <= 0 && !h.rising) {
-                h.h = 0;
-                h.hold = (h.hold || 0) + 1;
-                if (h.hold >= h.holdMax) {
-                  h.rising = true;
-                  h.hold = 0;
-                  h.warned = false;
-                }
-              } else {
-                h.h += h.rising ? h.speed : -h.speed;
-                h.h = Math.max(0, Math.min(h.maxH, h.h));
-              }
-              h.y = 400 - h.h;
-
-              // emit rim particles while active
-              if (h.h > 10 && Math.random() < 0.35) {
-                lavaParticles.push({
-                  x: h.x + Math.random() * h.w,
-                  y: h.y,
-                  vx: (Math.random() - 0.5) * 0.6,
-                  vy: -1 - Math.random() * 0.8,
-                  life: 24 + Math.floor(Math.random() * 12),
-                  size: 1 + Math.random() * 2,
-                });
-              }
-            } else if (h.r) {
-              h.sy += h.s * h.dir;
-              if (h.sy > h.r || h.sy < 50) h.dir *= -1;
-              h.y = h.sy;
-            }
-          });
-          platforms.forEach((p) => {
-            let cycle = frameCount % 300,
-              solid = !p.isPhase || cycle < 240;
-            let dX = 0;
-            if (p.moveRange > 0) {
-              let oX = p.x;
-              p.x += p.moveSpeed * p.moveDir;
-              if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange)
-                p.moveDir *= -1;
-              dX = p.x - oX;
-            }
-            if (p.isSinking && p.isTouched) p.y += 2.5;
-            if (p.hasSeeker) {
-              p.seekerX += 2.5 * p.seekerDir;
-              if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1;
-            }
-            if (solid) {
-              let px1 = p.x,
-                px2 = p.x + p.w,
-                py1 = p.y,
-                py2 = p.y + p.h;
-              let overlapX = Math.min(nX + player.w, px2) - Math.max(nX, px1);
-              let overlapY = Math.min(nY + player.h, py2) - Math.max(nY, py1);
-              if (overlapX > 0 && overlapY > 0) {
-                // resolve smallest intersection axis first
-                if (overlapX < overlapY) {
-                  // horizontal hit
-                  if (player.x + player.w <= px1) {
-                    nX = px1 - player.w;
-                  } else if (player.x >= px2) {
-                    nX = px2;
-                  }
-                  player.vx = 0;
-                } else {
-                  // vertical hit
-                  if (player.y + player.h <= py1) {
-                    nY = py1 - player.h;
-                    player.vy = 0;
-                    player.grounded = true;
-                    player.hasAirJump = true;
-                    if (p.isSinking) p.isTouched = true;
-                    if (dX !== 0) nX += dX;
-                    if (!wasGrounded) {
-                      player.stretchX = 1.5;
-                      player.stretchY = 0.5;
-                    }
-                  } else if (player.y >= py2) {
-                    nY = py2;
-                    player.vy = 0;
-                  }
-                }
-              }
-            }
-          });
           player.x = nX;
           player.y = nY;
+          if (tutorialMode) updateTutorialHint();
           if (player.grounded) player.hasAirJump = true; // always restore while touching ground
           if (!player.grounded) player.standPlatform = null;
           if (!wasGrounded && player.grounded) emitJumpDust();
@@ -2601,14 +2955,149 @@
             : "none";
           document.getElementById("mainPausePage").style.display = "flex";
           document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("audioPage").style.display = "none";
+          document.getElementById("themePage").style.display = "none";
+          document.getElementById("tutorialNotesPage").style.display = "none";
           document.getElementById("cheatsPage").style.display = "none";
+          document.getElementById("exitTutorialBtn").style.display =
+            tutorialMode ? "block" : "none";
         }
-        document.getElementById("startBtn").onclick = () => {
+
+        function clearPostTutorialTour() {
+          for (const timerId of postTutorialTourTimers) clearTimeout(timerId);
+          postTutorialTourTimers = [];
+        }
+
+        function queuePostTutorialTourStep(delay, action) {
+          const timerId = setTimeout(action, delay);
+          postTutorialTourTimers.push(timerId);
+        }
+
+        function showPauseTourPage(pageId) {
+          const pageIds = [
+            "mainPausePage",
+            "settingsPage",
+            "audioPage",
+            "themePage",
+            "tutorialNotesPage",
+            "cheatsPage",
+          ];
+          for (const id of pageIds) {
+            document.getElementById(id).style.display = id === pageId ? "flex" : "none";
+          }
+        }
+
+        function runPostTutorialSettingsTour() {
+          clearPostTutorialTour();
+          showingPostTutorialSettings = true;
+          running = false;
+          isPaused = true;
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
+          document.getElementById("pauseBtn").style.display = "none";
+          document.getElementById("pauseMenu").style.display = "flex";
+
+          const steps = [
+            {
+              page: "settingsPage",
+              text: "Settings tour: this menu leads to Audio, Theme, and Tutorial Notes.",
+            },
+            {
+              page: "audioPage",
+              text: "Audio: Master controls all sound, Music controls soundtrack, SFX controls effects.",
+            },
+            {
+              page: "audioPage",
+              text: "Mute buttons let you instantly toggle Music and SFX.",
+            },
+            {
+              page: "themePage",
+              text: "Theme changes visuals and music. 8-bit filter.",
+            },
+            {
+              page: "cheatsPage",
+              text: "Cheats/Debug includes Invincibility and Warp for testing.",
+            },
+            {
+              page: "cheatsPage",
+              text: "Using debug tools marks score as CHEATS USED and blocks normal high score progress.",
+            },
+            {
+              page: "tutorialNotesPage",
+              text: "Tutorial Notes has the full recap. Reopen it anytime from Settings.",
+            },
+          ];
+
+          let elapsed = 120;
+          const stepDuration = 3500;
+          for (const step of steps) {
+            queuePostTutorialTourStep(elapsed, () => {
+              if (!showingPostTutorialSettings) return;
+              showPauseTourPage(step.page);
+              tourExplainEl.textContent = step.text;
+              tourExplainEl.style.display = "block";
+            });
+            elapsed += stepDuration;
+          }
+
+          queuePostTutorialTourStep(elapsed + 700, () => {
+            if (!showingPostTutorialSettings) return;
+            tourExplainEl.style.display = "none";
+            returnToStartMenu();
+          });
+        }
+
+        function returnToStartMenu() {
+          clearPostTutorialTour();
+          tutorialMode = false;
+          showingPostTutorialSettings = false;
+          setTutorialUiVisible(false);
+          running = false;
+          isPaused = false;
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
+          const m = document.getElementById("bgMusic");
+          if (m) m.pause();
+          cpNotif.textContent = "Checkpoint Reached";
+          cpNotif.style.opacity = "0";
+          tourExplainEl.textContent = "";
+          tourExplainEl.style.display = "none";
+          document.getElementById("pauseBtn").style.display = "none";
+          document.getElementById("pauseMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("startMenu").style.display = "flex";
+        }
+
+        function ensureAudioContext() {
           try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!audioCtx)
+              audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === "suspended") audioCtx.resume();
           } catch (e) {}
+        }
+
+        function startSelectedMode(isTutorial) {
+          ensureAudioContext();
+          clearPostTutorialTour();
+          tutorialMode = isTutorial;
+          showingPostTutorialSettings = false;
+          setTutorialUiVisible(tutorialMode);
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
           document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
           document.getElementById("pauseBtn").style.display = "block";
+
+          if (tutorialMode) {
+            generateTutorialLevel();
+          } else {
+            generateLevel();
+          }
+          resetPlayerForRun(330);
+
           const m = document.getElementById("bgMusic");
           if (m && themes[currentTheme] && themes[currentTheme].music) {
             m.src = themes[currentTheme].music;
@@ -2616,13 +3105,33 @@
             m.play().catch(() => {});
           }
           running = true;
-          generateLevel();
-          (function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-          })();
+          if (!loopStarted) {
+            loopStarted = true;
+            (function loop() {
+              update();
+              draw();
+              requestAnimationFrame(loop);
+            })();
+          }
         };
+
+        document.getElementById("startBtn").onclick = () => {
+          ensureAudioContext();
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "flex";
+        };
+        document.getElementById("modeBackBtn").onclick = () => {
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("startMenu").style.display = "flex";
+        };
+        document.getElementById("runModeBtn").onclick = () => startSelectedMode(false);
+        document.getElementById("tutorialBtn").onclick = () => startSelectedMode(true);
+        document.getElementById("exitTutorialBtn").onclick = () => {
+          returnToStartMenu();
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "flex";
+        };
+
         document.getElementById("pauseBtn").onclick = toggle;
         document.getElementById("resumeBtn").onclick = toggle;
         document.getElementById("settingsBtn").onclick = () => {
@@ -2630,6 +3139,7 @@
           document.getElementById("settingsPage").style.display = "flex";
           document.getElementById("audioPage").style.display = "none";
           document.getElementById("themePage").style.display = "none";
+          document.getElementById("tutorialNotesPage").style.display = "none";
         };
         document.getElementById("openAudioBtn").onclick = () => {
           document.getElementById("settingsPage").style.display = "none";
@@ -2639,7 +3149,15 @@
           document.getElementById("settingsPage").style.display = "none";
           document.getElementById("themePage").style.display = "flex";
         };
+        document.getElementById("openTutorialNotesBtn").onclick = () => {
+          document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("tutorialNotesPage").style.display = "flex";
+        };
         document.getElementById("settingsBackBtn").onclick = () => {
+          if (showingPostTutorialSettings) {
+            returnToStartMenu();
+            return;
+          }
           document.getElementById("settingsPage").style.display = "none";
           document.getElementById("mainPausePage").style.display = "flex";
         };
@@ -2649,6 +3167,10 @@
         };
         document.getElementById("themeBackBtn").onclick = () => {
           document.getElementById("themePage").style.display = "none";
+          document.getElementById("settingsPage").style.display = "flex";
+        };
+        document.getElementById("tutorialNotesBackBtn").onclick = () => {
+          document.getElementById("tutorialNotesPage").style.display = "none";
           document.getElementById("settingsPage").style.display = "flex";
         };
         document.getElementById("cheatsBtn").onclick = () => {
@@ -2686,6 +3208,10 @@
           sfxMuted = false;
           isRetro8bit = false;
           infiniteInvincibility = false;
+          tutorialMode = false;
+          showingPostTutorialSettings = false;
+          clearPostTutorialTour();
+          setTutorialUiVisible(false);
           currentTheme = "classic";
           document.getElementById("masterSlider").value = 50;
           document.getElementById("musicSlider").value = 50;
@@ -2759,9 +3285,13 @@
         }
 
         function checkpointRestart() {
-          currentLevel = lastCheckpoint;
-          document.getElementById("lvl").textContent = currentLevel;
-          generateLevel();
+          if (!tutorialMode) {
+            currentLevel = lastCheckpoint;
+            generateLevel();
+          } else {
+            generateTutorialLevel();
+          }
+          setLevelDisplay();
           respawnPlayer();
           isPaused = false;
           document.getElementById("pauseMenu").style.display = "none";
@@ -2770,13 +3300,15 @@
 
         function fullRestart() {
           const fromLevel = currentLevel;
+          tutorialMode = false;
+          setTutorialUiVisible(false);
           lastCheckpoint = 1;
           currentLevel = 1;
           deathCount = 0;
           bestLevel = 1;
           localStorage.setItem("core_best_v20", 1);
           document.getElementById("deaths").textContent = deathCount;
-          document.getElementById("lvl").textContent = currentLevel;
+          setLevelDisplay();
           document.getElementById("best").textContent = bestLevel;
           applyDefaults();
           generateLevel();
@@ -2869,9 +3401,11 @@
         document.getElementById("warpBtn").onclick = () => {
           let v = parseInt(document.getElementById("warpInput").value);
           if (v > 0) {
+            tutorialMode = false;
+            setTutorialUiVisible(false);
             currentLevel = v;
             lastCheckpoint = v;
-            document.getElementById("lvl").textContent = v;
+            setLevelDisplay();
             isPaused = false;
             document.getElementById("pauseMenu").style.display = "none";
             useCheat();
@@ -2882,11 +3416,17 @@
           const settingsPage = document.getElementById("settingsPage");
           const audioPage = document.getElementById("audioPage");
           const themePage = document.getElementById("themePage");
+          const tutorialNotesPage = document.getElementById("tutorialNotesPage");
           const cheatsPage = document.getElementById("cheatsPage");
 
-          if (audioPage.style.display === "flex" || themePage.style.display === "flex") {
+          if (
+            audioPage.style.display === "flex" ||
+            themePage.style.display === "flex" ||
+            tutorialNotesPage.style.display === "flex"
+          ) {
             audioPage.style.display = "none";
             themePage.style.display = "none";
+            tutorialNotesPage.style.display = "none";
             settingsPage.style.display = "flex";
             return true;
           }
@@ -2898,6 +3438,10 @@
           }
 
           if (settingsPage.style.display === "flex") {
+            if (showingPostTutorialSettings) {
+              returnToStartMenu();
+              return true;
+            }
             settingsPage.style.display = "none";
             document.getElementById("mainPausePage").style.display = "flex";
             return true;
