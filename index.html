@@ -804,6 +804,22 @@
           }
         }
         // Handle player death and reset after falling/out of bounds/hazard hit
+        function resetPlayerForRun(spawnY = 200) {
+          player.x = 50;
+          player.y = spawnY;
+          player.vx = 0;
+          player.vy = 0;
+          player.trail = [];
+          player.invincibleTimer = 0;
+          player.isBeingRescued = false;
+          player.rescueTarget = null;
+          player.stretchX = 1;
+          player.stretchY = 1;
+          player.coyoteTime = 0;
+          player.jumpBuffer = 0;
+          player.hasAirJump = true;
+        }
+
         function die() {
           if (player.spaghettified) return;
           shake = 15;
@@ -815,22 +831,11 @@
           container.style.borderColor = "#f44";
           setTimeout(() => (container.style.borderColor = "#333"), 200);
           generateLevel();
-          player.x = 50;
-          player.y = 330;
-          player.vx = 0;
-          player.vy = 0;
-          player.trail = [];
+          resetPlayerForRun(330);
           player.hasShield = false;
-          player.invincibleTimer = 0;
           player.spaghettified = false;
           player.deathScale = 1;
           player.deathRotate = 0;
-          player.isBeingRescued = false;
-          player.stretchX = 1;
-          player.stretchY = 1;
-          player.coyoteTime = 0;
-          player.jumpBuffer = 0;
-          player.hasAirJump = true;
         }
         function findSafePlatform() {
           let s = platforms;
@@ -858,6 +863,17 @@
               life: 18 + Math.floor(Math.random() * 8),
             });
           }
+        }
+
+        function performJump(useAirJump = false) {
+          player.vy = player.jump;
+          player.grounded = false;
+          player.jumpBuffer = 0;
+          if (useAirJump) player.hasAirJump = false;
+          play.jp();
+          player.stretchX = 0.6;
+          player.stretchY = 1.4;
+          emitJumpDust();
         }
 
         function win() {
@@ -889,12 +905,7 @@
             document.getElementById("best").textContent = bestLevel;
             localStorage.setItem("core_best_v20", bestLevel);
           }
-          player.x = 50;
-          player.y = 200;
-          player.vx = 0;
-          player.vy = 0;
-          player.invincibleTimer = 0;
-          player.isBeingRescued = false;
+          resetPlayerForRun(200);
           generateLevel();
         }
         // Main game simulation, runs every frame before draw()
@@ -992,22 +1003,10 @@
             player.jumpBuffer = 6;
           else if (player.jumpBuffer > 0) player.jumpBuffer--;
           if (player.jumpBuffer > 0 && player.coyoteTime > 0) {
-            player.vy = player.jump;
-            player.grounded = false;
             player.coyoteTime = 0;
-            player.jumpBuffer = 0;
-            play.jp();
-            player.stretchX = 0.6;
-            player.stretchY = 1.4;
-            emitJumpDust();
+            performJump(false);
           } else if (player.jumpBuffer > 0 && player.hasAirJump && player.coyoteTime === 0) {
-            player.vy = player.jump;
-            player.hasAirJump = false;
-            player.jumpBuffer = 0;
-            play.jp();
-            player.stretchX = 0.6;
-            player.stretchY = 1.4;
-            emitJumpDust();
+            performJump(true);
           }
           let nX = player.x + player.vx,
             nY = player.y + player.vy;
@@ -1749,7 +1748,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.5.3", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.5.5", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
@@ -1875,22 +1874,11 @@
         }
 
         function respawnPlayer() {
-          player.x = 50;
-          player.y = 200;
-          player.vx = 0;
-          player.vy = 0;
-          player.trail = [];
+          resetPlayerForRun(200);
           player.hasShield = false;
-          player.invincibleTimer = 0;
           player.spaghettified = false;
           player.deathScale = 1;
           player.deathRotate = 0;
-          player.isBeingRescued = false;
-          player.rescueTarget = null;
-          player.stretchX = 1;
-          player.stretchY = 1;
-          player.coyoteTime = 0;
-          player.jumpBuffer = 0;
         }
 
         function applyDefaults() {
