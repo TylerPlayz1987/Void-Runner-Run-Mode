@@ -831,7 +831,11 @@
         const tutorialGuide = [
           {
             minX: 0,
-            text: "Move with A/D or Arrows, jump with W/Up/Space, hold Shift to run.",
+            text: "Move with A/D or Arrows, jump with W/Up/Space, and hold Shift to run.",
+          },
+          {
+            minX: 320,
+            text: "Double jump: you get one air jump before landing again.",
           },
           {
             minX: 540,
@@ -859,6 +863,14 @@
           },
           {
             minX: 2280,
+            text: "Run Mode checkpoints save every 5 levels. Reach one to set your restart point.",
+          },
+          {
+            minX: 2460,
+            text: "Obstacle unlocks: L10 spikes+wells, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L60 swing, L70 fake hazards.",
+          },
+          {
+            minX: 2580,
             text: "Reach the green goal to finish the tutorial.",
           },
         ];
@@ -2029,105 +2041,6 @@
               return;
             }
           }
-
-          hazards.forEach((h) => {
-            if (h.type === "lava") {
-              if (!h.warned && h.rising && h.h < 10) {
-                h.warned = true;
-                sfx(270, "sawtooth", 0.07, 0.11, 240);
-              }
-              if (h.h >= h.maxH && h.rising) {
-                h.h = h.maxH;
-                h.hold = (h.hold || 0) + 1;
-                if (h.hold >= h.holdMax) {
-                  h.rising = false;
-                  h.hold = 0;
-                }
-              } else if (h.h <= 0 && !h.rising) {
-                h.h = 0;
-                h.hold = (h.hold || 0) + 1;
-                if (h.hold >= h.holdMax) {
-                  h.rising = true;
-                  h.hold = 0;
-                  h.warned = false;
-                }
-              } else {
-                h.h += h.rising ? h.speed : -h.speed;
-                h.h = Math.max(0, Math.min(h.maxH, h.h));
-              }
-              h.y = 400 - h.h;
-
-              // emit rim particles while active
-              if (h.h > 10 && Math.random() < 0.35) {
-                lavaParticles.push({
-                  x: h.x + Math.random() * h.w,
-                  y: h.y,
-                  vx: (Math.random() - 0.5) * 0.6,
-                  vy: -1 - Math.random() * 0.8,
-                  life: 24 + Math.floor(Math.random() * 12),
-                  size: 1 + Math.random() * 2,
-                });
-              }
-            } else if (h.r) {
-              h.sy += h.s * h.dir;
-              if (h.sy > h.r || h.sy < 50) h.dir *= -1;
-              h.y = h.sy;
-            }
-          });
-          platforms.forEach((p) => {
-            let cycle = frameCount % 300,
-              solid = !p.isPhase || cycle < 240;
-            let dX = 0;
-            if (p.moveRange > 0) {
-              let oX = p.x;
-              p.x += p.moveSpeed * p.moveDir;
-              if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange)
-                p.moveDir *= -1;
-              dX = p.x - oX;
-            }
-            if (p.isSinking && p.isTouched) p.y += 2.5;
-            if (p.hasSeeker) {
-              p.seekerX += 2.5 * p.seekerDir;
-              if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1;
-            }
-            if (solid) {
-              let px1 = p.x,
-                px2 = p.x + p.w,
-                py1 = p.y,
-                py2 = p.y + p.h;
-              let overlapX = Math.min(nX + player.w, px2) - Math.max(nX, px1);
-              let overlapY = Math.min(nY + player.h, py2) - Math.max(nY, py1);
-              if (overlapX > 0 && overlapY > 0) {
-                // resolve smallest intersection axis first
-                if (overlapX < overlapY) {
-                  // horizontal hit
-                  if (player.x + player.w <= px1) {
-                    nX = px1 - player.w;
-                  } else if (player.x >= px2) {
-                    nX = px2;
-                  }
-                  player.vx = 0;
-                } else {
-                  // vertical hit
-                  if (player.y + player.h <= py1) {
-                    nY = py1 - player.h;
-                    player.vy = 0;
-                    player.grounded = true;
-                    player.hasAirJump = true;
-                    if (p.isSinking) p.isTouched = true;
-                    if (dX !== 0) nX += dX;
-                    if (!wasGrounded) {
-                      player.stretchX = 1.5;
-                      player.stretchY = 0.5;
-                    }
-                  } else if (player.y >= py2) {
-                    nY = py2;
-                    player.vy = 0;
-                  }
-                }
-              }
-            }
-          });
           player.x = nX;
           player.y = nY;
           if (tutorialMode) updateTutorialHint();
