@@ -1265,7 +1265,7 @@
               if (h.h > 10 && Math.random() < 0.35) {
                 lavaParticles.push({
                   x: h.x + Math.random() * h.w,
-                  y: h.y + h.h,
+                  y: h.y,
                   vx: (Math.random() - 0.5) * 0.6,
                   vy: -1 - Math.random() * 0.8,
                   life: 24 + Math.floor(Math.random() * 12),
@@ -1334,6 +1334,7 @@
           });
           player.x = nX;
           player.y = nY;
+          if (player.grounded) player.hasAirJump = true; // always restore while touching ground
           if (!wasGrounded && player.grounded) emitJumpDust();
           if (
             player.x + player.w > goal.x &&
