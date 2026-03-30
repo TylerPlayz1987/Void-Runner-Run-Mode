@@ -372,6 +372,7 @@
             <h1>SETTINGS</h1>
             <button id="openAudioBtn" style="width: 100%; margin-bottom: 8px;">Audio Settings</button>
             <button id="openThemeBtn" style="width: 100%; margin-bottom: 8px;">Theme Settings</button>
+            <button id="openTutorialNotesBtn" style="width: 100%; margin-bottom: 8px;">Tutorial Notes</button>
             <button id="settingsBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
           <div id="audioPage" class="menu-page" style="display: none">
@@ -418,6 +419,22 @@
               <button id="retroToggleBtn" class="small-btn">8-bit: OFF</button>
             </div>
             <button id="themeBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="tutorialNotesPage" class="menu-page" style="display: none">
+            <h1>Tutorial Notes</h1>
+            <div class="setting-item" style="text-align: left; line-height: 1.4">
+              <span>Movement: A/D or Arrows</span>
+              <span>Jump: W/Up/Space</span>
+              <span>Run: Hold Shift</span>
+              <span>Double Jump: one extra jump in air; resets on landing</span>
+              <span>Checkpoints: saved every 5 levels in Run Mode</span>
+              <span>Shield: one safety hit, then consumed</span>
+              <span>
+                Unlocks: L10 spikes+wells, L15 lava, L20 moving, L30 phase,
+                L35 shield, L40 speed+seekers, L50 sinking, L60 swing, L70 fake
+              </span>
+            </div>
+            <button id="tutorialNotesBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
           <div id="cheatsPage" class="menu-page" style="display: none">
             <h1 style="color: #fa0">CHEATS</h1>
@@ -2870,6 +2887,7 @@
           document.getElementById("settingsPage").style.display = "flex";
           document.getElementById("audioPage").style.display = "none";
           document.getElementById("themePage").style.display = "none";
+          document.getElementById("tutorialNotesPage").style.display = "none";
         };
         document.getElementById("openAudioBtn").onclick = () => {
           document.getElementById("settingsPage").style.display = "none";
@@ -2878,6 +2896,10 @@
         document.getElementById("openThemeBtn").onclick = () => {
           document.getElementById("settingsPage").style.display = "none";
           document.getElementById("themePage").style.display = "flex";
+        };
+        document.getElementById("openTutorialNotesBtn").onclick = () => {
+          document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("tutorialNotesPage").style.display = "flex";
         };
         document.getElementById("settingsBackBtn").onclick = () => {
           document.getElementById("settingsPage").style.display = "none";
@@ -2889,6 +2911,10 @@
         };
         document.getElementById("themeBackBtn").onclick = () => {
           document.getElementById("themePage").style.display = "none";
+          document.getElementById("settingsPage").style.display = "flex";
+        };
+        document.getElementById("tutorialNotesBackBtn").onclick = () => {
+          document.getElementById("tutorialNotesPage").style.display = "none";
           document.getElementById("settingsPage").style.display = "flex";
         };
         document.getElementById("cheatsBtn").onclick = () => {
@@ -3132,11 +3158,17 @@
           const settingsPage = document.getElementById("settingsPage");
           const audioPage = document.getElementById("audioPage");
           const themePage = document.getElementById("themePage");
+          const tutorialNotesPage = document.getElementById("tutorialNotesPage");
           const cheatsPage = document.getElementById("cheatsPage");
 
-          if (audioPage.style.display === "flex" || themePage.style.display === "flex") {
+          if (
+            audioPage.style.display === "flex" ||
+            themePage.style.display === "flex" ||
+            tutorialNotesPage.style.display === "flex"
+          ) {
             audioPage.style.display = "none";
             themePage.style.display = "none";
+            tutorialNotesPage.style.display = "none";
             settingsPage.style.display = "flex";
             return true;
           }
