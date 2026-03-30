@@ -658,7 +658,8 @@
           speedRunMode = false,
           speedRunStartTime = 0,
           speedRunGameOverMode = false,
-          fullRestartResumeOnCancel = false;
+          fullRestartResumeOnCancel = false,
+          fullRestartOpenedFromResetPrompt = false;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -3401,9 +3402,10 @@
               m.play().catch(() => {});
             }
           }
-          if (isPaused) {
+          if (fullRestartOpenedFromResetPrompt) {
             document.getElementById("resetConfirm").style.display = "flex";
           }
+          fullRestartOpenedFromResetPrompt = false;
         }
 
         function showResetPrompt() {
@@ -3413,6 +3415,8 @@
         }
 
         function showFullRestartPrompt() {
+          fullRestartOpenedFromResetPrompt =
+            document.getElementById("resetConfirm").style.display === "flex";
           fullRestartResumeOnCancel = running && !isPaused;
           if (fullRestartResumeOnCancel) {
             isPaused = true;
@@ -3542,13 +3546,13 @@
 
           if (wasTutorial) {
             // In tutorial, full restart should restart tutorial from its start.
+            applyDefaults();
             tutorialMode = true;
             showingPostTutorialSettings = false;
             setTutorialUiVisible(true);
             lastCheckpoint = 1;
             currentLevel = 1;
             setLevelDisplay();
-            applyDefaults();
             generateTutorialLevel();
             respawnPlayer();
             isPaused = false;
@@ -3582,7 +3586,8 @@
         document.getElementById("checkpointRestartBtn").onclick = checkpointRestart;
         document.getElementById("fullRestartBtn").onclick = showFullRestartPrompt;
         document.getElementById("confirmFullRestartBtn").onclick = fullRestart;
-        document.getElementById("cancelFullRestartBtn").onclick = hideFullRestartPrompt;
+        document.getElementById("cancelFullRestartBtn").onclick = () =>
+          hideFullRestartPrompt(true);
 
         document.getElementById("masterSlider").oninput = (e) => {
           masterVol = e.target.value / 100;
