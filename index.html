@@ -61,6 +61,27 @@
 
       #ui-right {
         right: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+      }
+
+      #speedRunTimer {
+        background: rgba(0, 0, 0, 0.9);
+        padding: 6px 15px;
+        border: 2px solid #f44;
+        color: #f44;
+        font-weight: bold;
+        font-size: 18px;
+        border-radius: 2px;
+        font-family: "Courier New", monospace;
+        display: none;
+        text-shadow: 0 0 10px #f44;
+      }
+
+      #speedRunTimer.active {
+        display: block;
       }
 
       .stat {
@@ -339,6 +360,7 @@
           </div>
         </div>
         <div id="ui-right">
+          <div id="speedRunTimer">00:00</div>
           <div
             class="stat"
             id="best-stat"
@@ -383,9 +405,23 @@
           <button id="tutorialBtn" style="width: 220px; margin-bottom: 8px">
             Tutorial Level
           </button>
+          <button id="speedRunModeBtn" style="width: 220px; margin-bottom: 8px">
+            Speed Running
+          </button>
           <button id="modeBackBtn" class="small-btn" style="width: 220px">
             Back
           </button>
+        </div>
+        <div id="speedRunGameOver" class="overlay" style="display: none">
+          <div id="speedRunGameOverContent" style="text-align: center; color: #f44;">
+            <h1 style="font-size: 48px; margin: 20px 0; text-shadow: 0 0 20px #f44;">GAME OVER</h1>
+            <div style="background: rgba(0, 0, 0, 0.7); padding: 30px; border: 3px solid #f44; border-radius: 5px; margin: 20px auto; max-width: 400px;">
+              <div style="font-size: 24px; margin-bottom: 15px; color: #0f0;">Level: <span id="speedRunGameOverLevel">1</span></div>
+              <div style="font-size: 24px; margin-bottom: 30px; color: #0f0;">Time: <span id="speedRunGameOverTime">0:00</span></div>
+              <button id="speedRunRestartBtn" style="width: 200px; margin-bottom: 10px; background: #f44;">Restart</button>
+              <button id="speedRunMenuBtn" style="width: 200px; background: #444;">Back to Menu</button>
+            </div>
+          </div>
         </div>
         <div id="pauseMenu" class="overlay" style="display: none">
           <div id="tourExplain" class="stat" style="display: none"></div>
@@ -599,7 +635,10 @@
           loopStarted = false,
           shake = 0,
           winParticles = [],
-          flashAlpha = 0;
+          flashAlpha = 0,
+          speedRunMode = false,
+          speedRunStartTime = 0,
+          speedRunGameOverMode = false;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -1659,6 +1698,10 @@
 
         function die() {
           if (player.spaghettified) return;
+          if (speedRunMode) {
+            showSpeedRunGameOver();
+            return;
+          }
           shake = 15;
           deathCount++;
           document.getElementById("deaths").textContent = deathCount;
@@ -1749,6 +1792,27 @@
           }
           currentLevel++;
           setLevelDisplay();
+          // Check if speed run mode reached level 100
+          if (speedRunMode && currentLevel > 100) {
+            const elapsedTime = Date.now() - speedRunStartTime;
+            play.wn();
+            const prevText = cpNotif.textContent;
+            cpNotif.textContent = `Speed Run Complete! Final Time: ${formatSpeedRunTime(elapsedTime)}`;
+            cpNotif.style.opacity = "1";
+            container.style.borderColor = "#f44";
+            container.style.boxShadow = "0 0 30px #f44";
+            running = false;
+            setTimeout(() => {
+              container.style.borderColor = "#333";
+              container.style.boxShadow = "none";
+              cpNotif.style.opacity = "0";
+              cpNotif.textContent = prevText;
+              speedRunMode = false;
+              document.getElementById("speedRunTimer").classList.remove("active");
+              returnToStartMenu();
+            }, 3500);
+            return;
+          }
           for (let i = 0; i < 30; i++)
             winParticles.push({
               x: goal.x + goal.w / 2,
@@ -1796,6 +1860,11 @@
           if (flashAlpha > 0) flashAlpha -= 0.02;
           player.stretchX += (1 - player.stretchX) * 0.15;
           player.stretchY += (1 - player.stretchY) * 0.15;
+          // Update speed run timer display
+          if (speedRunMode && !speedRunGameOverMode) {
+            const elapsedTime = Date.now() - speedRunStartTime;
+            document.getElementById("speedRunTimer").textContent = formatSpeedRunTime(elapsedTime);
+          }
           for (let i = winParticles.length - 1; i >= 0; i--) {
             let p = winParticles[i];
             p.x += p.vx;
@@ -2940,7 +3009,7 @@
 
         // Pause/resume and menu toggling (also handles music pause/resume)
         function toggle() {
-          if (!running) return;
+          if (!running || speedRunGameOverMode) return;
           isPaused = !isPaused;
           const m = document.getElementById("bgMusic");
           if (m) {
@@ -3051,6 +3120,8 @@
         function returnToStartMenu() {
           clearPostTutorialTour();
           tutorialMode = false;
+          speedRunMode = false;
+          speedRunGameOverMode = false;
           showingPostTutorialSettings = false;
           setTutorialUiVisible(false);
           running = false;
@@ -3067,6 +3138,7 @@
           document.getElementById("pauseBtn").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("speedRunTimer").classList.remove("active");
           document.getElementById("startMenu").style.display = "flex";
         }
 
@@ -3082,6 +3154,7 @@
           ensureAudioContext();
           clearPostTutorialTour();
           tutorialMode = isTutorial;
+          speedRunMode = false;
           showingPostTutorialSettings = false;
           setTutorialUiVisible(tutorialMode);
           currentLevel = 1;
@@ -3090,6 +3163,7 @@
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
           document.getElementById("pauseBtn").style.display = "block";
+          document.getElementById("speedRunTimer").classList.remove("active");
 
           if (tutorialMode) {
             generateTutorialLevel();
@@ -3126,6 +3200,78 @@
         };
         document.getElementById("runModeBtn").onclick = () => startSelectedMode(false);
         document.getElementById("tutorialBtn").onclick = () => startSelectedMode(true);
+        document.getElementById("speedRunModeBtn").onclick = () => startSpeedRunMode();
+
+        function startSpeedRunMode() {
+          ensureAudioContext();
+          clearPostTutorialTour();
+          speedRunMode = true;
+          tutorialMode = false;
+          speedRunGameOverMode = false;
+          speedRunStartTime = Date.now();
+          showingPostTutorialSettings = false;
+          setTutorialUiVisible(false);
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          deathCount = 0;
+          document.getElementById("deaths").textContent = deathCount;
+          setLevelDisplay();
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("pauseBtn").style.display = "block";
+          document.getElementById("speedRunTimer").classList.add("active");
+          document.getElementById("speedRunGameOver").style.display = "none";
+
+          generateLevel();
+          resetPlayerForRun(330);
+
+          const m = document.getElementById("bgMusic");
+          if (m && themes[currentTheme] && themes[currentTheme].music) {
+            m.src = themes[currentTheme].music;
+            m.volume = musicMuted ? 0 : musicVol * masterVol;
+            m.play().catch(() => {});
+          }
+          running = true;
+          if (!loopStarted) {
+            loopStarted = true;
+            (function loop() {
+              update();
+              draw();
+              requestAnimationFrame(loop);
+            })();
+          }
+        }
+
+        function formatSpeedRunTime(ms) {
+          const totalSeconds = Math.floor(ms / 1000);
+          const minutes = Math.floor(totalSeconds / 60);
+          const seconds = totalSeconds % 60;
+          return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+        }
+
+        function showSpeedRunGameOver() {
+          if (!speedRunMode) return;
+          speedRunGameOverMode = true;
+          running = false;
+          isPaused = true;
+          const elapsedTime = Date.now() - speedRunStartTime;
+          document.getElementById("speedRunGameOverLevel").textContent = currentLevel;
+          document.getElementById("speedRunGameOverTime").textContent = formatSpeedRunTime(elapsedTime);
+          document.getElementById("speedRunGameOver").style.display = "flex";
+          document.getElementById("pauseBtn").style.display = "none";
+        }
+
+        document.getElementById("speedRunRestartBtn").onclick = () => {
+          startSpeedRunMode();
+        };
+
+        document.getElementById("speedRunMenuBtn").onclick = () => {
+          speedRunMode = false;
+          speedRunGameOverMode = false;
+          document.getElementById("speedRunGameOver").style.display = "none";
+          document.getElementById("speedRunTimer").classList.remove("active");
+          returnToStartMenu();
+        };
         document.getElementById("exitTutorialBtn").onclick = () => {
           returnToStartMenu();
           document.getElementById("startMenu").style.display = "none";
