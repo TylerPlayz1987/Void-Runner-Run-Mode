@@ -88,6 +88,21 @@
         z-index: 150;
       }
 
+      #tutorialHint {
+        position: absolute;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        pointer-events: none;
+        z-index: 180;
+        min-width: 420px;
+        max-width: 90%;
+        text-align: center;
+        color: #9ef;
+        border-color: #9ef;
+        font-size: 13px;
+      }
+
       #resetConfirm,
       #timeTravelAnimation {
         position: absolute;
@@ -298,6 +313,7 @@
           </div>
         </div>
         <div id="cp-notif">Checkpoint Reached</div>
+        <div id="tutorialHint" class="stat" style="display: none"></div>
 
         <div id="resetConfirm">
           <div class="confirm-box">
@@ -322,7 +338,19 @@
 
         <div id="startMenu" class="overlay">
           <h1>Void Runner</h1>
-          <button id="startBtn" style="width: 200px">Start(Run Mode)</button>
+          <button id="startBtn" style="width: 200px">Start</button>
+        </div>
+        <div id="modeMenu" class="overlay" style="display: none">
+          <h1>Select Mode</h1>
+          <button id="runModeBtn" style="width: 220px; margin-bottom: 8px">
+            Run Mode
+          </button>
+          <button id="tutorialBtn" style="width: 220px; margin-bottom: 8px">
+            Tutorial Level
+          </button>
+          <button id="modeBackBtn" class="small-btn" style="width: 220px">
+            Back
+          </button>
         </div>
         <div id="pauseMenu" class="overlay" style="display: none">
           <div id="mainPausePage" class="menu-page">
@@ -331,6 +359,13 @@
             ><button id="settingsBtn">Settings</button
             ><button id="cheatsBtn" style="background: #fa0">
               Cheats/Debug</button
+            ><button
+              id="exitTutorialBtn"
+              class="small-btn"
+              style="display: none; background: #0aa; color: #fff"
+            >
+              Exit Tutorial
+            </button
             ><button id="restartBtn" class="small-btn">Reset</button>
           </div>
           <div id="settingsPage" class="menu-page" style="display: none">
@@ -495,13 +530,16 @@
           lastCheckpoint = 1,
           deathCount = 0,
           cheatsUsed = false,
+          tutorialMode = false,
+          loopStarted = false,
           shake = 0,
           winParticles = [],
           flashAlpha = 0;
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
           container = document.getElementById("container"),
-          cpNotif = document.getElementById("cp-notif");
+          cpNotif = document.getElementById("cp-notif"),
+          tutorialHintEl = document.getElementById("tutorialHint");
         let ctx = mainCtx;
         const retroCanvas = document.createElement("canvas");
         retroCanvas.width = 160;
@@ -790,6 +828,125 @@
           SWING_CHANCE = 0.55,
           FAKE_HAZARD_START_LEVEL = 70,
           FAKE_HAZARD_CHANCE = 0.12;
+        const tutorialGuide = [
+          {
+            minX: 0,
+            text: "Move with A/D or Arrows, jump with W/Up/Space, hold Shift to run.",
+          },
+          {
+            minX: 540,
+            text: "Moving platform ahead: keep your jump timing and ride it safely.",
+          },
+          {
+            minX: 940,
+            text: "Blue phase platform blinks in and out. Wait for solid timing.",
+          },
+          {
+            minX: 1220,
+            text: "Speed zones: teal boosts you, amber slows you down.",
+          },
+          {
+            minX: 1480,
+            text: "Hazards hurt. Watch spikes and rising lava, then jump cleanly.",
+          },
+          {
+            minX: 1760,
+            text: "Collect the shield for one extra save against danger.",
+          },
+          {
+            minX: 1980,
+            text: "Sinking, fake hazards, and gravity well pull test your control.",
+          },
+          {
+            minX: 2280,
+            text: "Reach the green goal to finish the tutorial.",
+          },
+        ];
+        let tutorialHintText = "";
+
+        function setLevelDisplay() {
+          document.getElementById("lvl").textContent = tutorialMode
+            ? "TUTORIAL"
+            : currentLevel;
+        }
+
+        function setTutorialUiVisible(visible) {
+          tutorialHintEl.style.display = visible ? "block" : "none";
+          if (!visible) {
+            tutorialHintText = "";
+            tutorialHintEl.textContent = "";
+          }
+        }
+
+        function updateTutorialHint() {
+          if (!tutorialMode) return;
+          let nextText = tutorialGuide[0].text;
+          for (let i = 0; i < tutorialGuide.length; i++) {
+            if (player.x >= tutorialGuide[i].minX) {
+              nextText = tutorialGuide[i].text;
+            } else {
+              break;
+            }
+          }
+          if (nextText !== tutorialHintText) {
+            tutorialHintText = nextText;
+            tutorialHintEl.textContent = nextText;
+          }
+        }
+
+        function makeTutorialPlatform(x, y, w = PLATFORM_W, extra = {}) {
+          return Object.assign(
+            {
+              x,
+              y,
+              w,
+              h: 15,
+              isPhase: false,
+              isSinking: false,
+              isTouched: false,
+              hasSpike: false,
+              spikeX: 0,
+              spikeW: SPIKE_W,
+              spikeH: SPIKE_H,
+              spikeShape: "triangle",
+              moveRange: 0,
+              startX: x,
+              moveDir: 1,
+              moveSpeed: 1.5,
+              hasSeeker: false,
+              seekerX: 0,
+              seekerDir: 1,
+              seekerW: SPIKE_W,
+              seekerH: SPIKE_H,
+              seekerShape: "triangle",
+              hasSpeedZone: false,
+              speedZoneType: null,
+              speedZoneX: 0,
+              speedZoneW: 0,
+              speedZoneDuration: 0,
+              speedZoneMul: 1,
+              hasSwingObstacle: false,
+              isSwingPlatform: false,
+              isWreckingBall: false,
+              swingType: null,
+              swingAnchorX: 0,
+              swingAnchorAbsX: x + w / 2,
+              swingAnchorY: 0,
+              swingLen: 0,
+              swingAmp: 0,
+              swingSpeed: 0,
+              swingPhase: 0,
+              swingSize: 0,
+              swingThickness: 0,
+              hasFakeHazard: false,
+              fakeType: null,
+              fakeX: 0,
+              fakeW: 0,
+              fakeH: 0,
+            },
+            extra,
+          );
+        }
         function createSpikeProfile(level = 1, isSeeker = false) {
           let shape = "triangle";
           const roll = Math.random();
@@ -1211,6 +1368,100 @@
             }
           }
         }
+
+        function generateTutorialLevel() {
+          shieldItem = {
+            x: 1830,
+            y: 165,
+            w: 20,
+            h: 20,
+            collected: false,
+          };
+          wells = [{ x: 2220, y: 240, r: 95, core: 0 }];
+          hazards = [
+            {
+              type: "lava",
+              x: 1560,
+              w: 28,
+              y: 400,
+              h: 0,
+              maxH: 95,
+              speed: 1,
+              rising: true,
+              hold: 0,
+              holdMax: 100,
+              warned: false,
+            },
+          ];
+
+          platforms = [
+            makeTutorialPlatform(0, 350, 520, { h: 50 }),
+            makeTutorialPlatform(610, 300, 140),
+            makeTutorialPlatform(840, 260, 130, {
+              moveRange: 70,
+              moveSpeed: 1.35,
+            }),
+            makeTutorialPlatform(1050, 240, 130, {
+              isPhase: true,
+            }),
+            makeTutorialPlatform(1270, 250, 150, {
+              hasSpeedZone: true,
+              speedZoneType: "boost",
+              speedZoneX: 35,
+              speedZoneW: 80,
+              speedZoneDuration: 420,
+              speedZoneMul: 1.6,
+            }),
+            makeTutorialPlatform(1480, 260, 160, {
+              hasSpike: true,
+              spikeX: 62,
+              spikeW: 26,
+              spikeH: 13,
+              spikeShape: "wide",
+            }),
+            makeTutorialPlatform(1740, 230, 150, {
+              hasSeeker: true,
+              seekerW: 18,
+              seekerH: 14,
+              seekerShape: "split",
+              hasSpeedZone: true,
+              speedZoneType: "slow",
+              speedZoneX: 98,
+              speedZoneW: 42,
+              speedZoneDuration: 320,
+              speedZoneMul: 0.6,
+            }),
+            makeTutorialPlatform(1970, 255, 130, {
+              isSinking: true,
+            }),
+            makeTutorialPlatform(2130, 230, 150, {
+              hasFakeHazard: true,
+              fakeType: "ghostSpike",
+              fakeX: 72,
+              fakeW: 22,
+              fakeH: 16,
+            }),
+            makeTutorialPlatform(2360, 250, 180, {
+              hasSwingObstacle: true,
+              isWreckingBall: true,
+              swingType: "wreckingBall",
+              swingAnchorAbsX: 2450,
+              swingAnchorY: 90,
+              swingLen: 120,
+              swingAmp: 0.75,
+              swingSpeed: 0.03,
+              swingPhase: 1.2,
+              swingSize: 13,
+            }),
+          ];
+
+          goal.x = 2620;
+          goal.y = 205;
+          goal.w = 40;
+          goal.h = 40;
+          tutorialHintText = "";
+          updateTutorialHint();
+        }
         // Handle player death and reset after falling/out of bounds/hazard hit
         function resetPlayerForRun(spawnY = 200) {
           player.x = 50;
@@ -1234,12 +1485,18 @@
           shake = 15;
           deathCount++;
           document.getElementById("deaths").textContent = deathCount;
-          currentLevel = lastCheckpoint;
-          document.getElementById("lvl").textContent = currentLevel;
+          if (!tutorialMode) {
+            currentLevel = lastCheckpoint;
+          }
+          setLevelDisplay();
           play.di();
           container.style.borderColor = "#f44";
           setTimeout(() => (container.style.borderColor = "#333"), 200);
-          generateLevel();
+          if (tutorialMode) {
+            generateTutorialLevel();
+          } else {
+            generateLevel();
+          }
           resetPlayerForRun(330);
           player.hasShield = false;
           player.spaghettified = false;
@@ -1295,8 +1552,25 @@
         }
 
         function win() {
+          if (tutorialMode) {
+            play.cp();
+            const prevText = cpNotif.textContent;
+            cpNotif.textContent = "Tutorial Complete! You can now play Run Mode.";
+            cpNotif.style.opacity = "1";
+            container.style.borderColor = "#0f0";
+            container.style.boxShadow = "0 0 30px #0f0";
+            setTimeout(() => {
+              container.style.borderColor = "#333";
+              container.style.boxShadow = "none";
+              cpNotif.style.opacity = "0";
+              cpNotif.textContent = prevText;
+            }, 1800);
+            generateTutorialLevel();
+            resetPlayerForRun(330);
+            return;
+          }
           currentLevel++;
-          document.getElementById("lvl").textContent = currentLevel;
+          setLevelDisplay();
           for (let i = 0; i < 30; i++)
             winParticles.push({
               x: goal.x + goal.w / 2,
@@ -1856,6 +2130,7 @@
           });
           player.x = nX;
           player.y = nY;
+          if (tutorialMode) updateTutorialHint();
           if (player.grounded) player.hasAirJump = true; // always restore while touching ground
           if (!player.grounded) player.standPlatform = null;
           if (!wasGrounded && player.grounded) emitJumpDust();
@@ -2602,13 +2877,36 @@
           document.getElementById("mainPausePage").style.display = "flex";
           document.getElementById("settingsPage").style.display = "none";
           document.getElementById("cheatsPage").style.display = "none";
+          document.getElementById("exitTutorialBtn").style.display =
+            tutorialMode ? "block" : "none";
         }
-        document.getElementById("startBtn").onclick = () => {
+
+        function ensureAudioContext() {
           try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (!audioCtx)
+              audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === "suspended") audioCtx.resume();
           } catch (e) {}
+        }
+
+        function startSelectedMode(isTutorial) {
+          ensureAudioContext();
+          tutorialMode = isTutorial;
+          setTutorialUiVisible(tutorialMode);
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
           document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
           document.getElementById("pauseBtn").style.display = "block";
+
+          if (tutorialMode) {
+            generateTutorialLevel();
+          } else {
+            generateLevel();
+          }
+          resetPlayerForRun(330);
+
           const m = document.getElementById("bgMusic");
           if (m && themes[currentTheme] && themes[currentTheme].music) {
             m.src = themes[currentTheme].music;
@@ -2616,13 +2914,42 @@
             m.play().catch(() => {});
           }
           running = true;
-          generateLevel();
-          (function loop() {
-            update();
-            draw();
-            requestAnimationFrame(loop);
-          })();
+          if (!loopStarted) {
+            loopStarted = true;
+            (function loop() {
+              update();
+              draw();
+              requestAnimationFrame(loop);
+            })();
+          }
         };
+
+        document.getElementById("startBtn").onclick = () => {
+          ensureAudioContext();
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "flex";
+        };
+        document.getElementById("modeBackBtn").onclick = () => {
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("startMenu").style.display = "flex";
+        };
+        document.getElementById("runModeBtn").onclick = () => startSelectedMode(false);
+        document.getElementById("tutorialBtn").onclick = () => startSelectedMode(true);
+        document.getElementById("exitTutorialBtn").onclick = () => {
+          tutorialMode = false;
+          setTutorialUiVisible(false);
+          running = false;
+          isPaused = false;
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
+          const m = document.getElementById("bgMusic");
+          if (m) m.pause();
+          document.getElementById("pauseBtn").style.display = "none";
+          document.getElementById("pauseMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "flex";
+        };
+
         document.getElementById("pauseBtn").onclick = toggle;
         document.getElementById("resumeBtn").onclick = toggle;
         document.getElementById("settingsBtn").onclick = () => {
@@ -2686,6 +3013,8 @@
           sfxMuted = false;
           isRetro8bit = false;
           infiniteInvincibility = false;
+          tutorialMode = false;
+          setTutorialUiVisible(false);
           currentTheme = "classic";
           document.getElementById("masterSlider").value = 50;
           document.getElementById("musicSlider").value = 50;
@@ -2759,9 +3088,13 @@
         }
 
         function checkpointRestart() {
-          currentLevel = lastCheckpoint;
-          document.getElementById("lvl").textContent = currentLevel;
-          generateLevel();
+          if (!tutorialMode) {
+            currentLevel = lastCheckpoint;
+            generateLevel();
+          } else {
+            generateTutorialLevel();
+          }
+          setLevelDisplay();
           respawnPlayer();
           isPaused = false;
           document.getElementById("pauseMenu").style.display = "none";
@@ -2770,13 +3103,15 @@
 
         function fullRestart() {
           const fromLevel = currentLevel;
+          tutorialMode = false;
+          setTutorialUiVisible(false);
           lastCheckpoint = 1;
           currentLevel = 1;
           deathCount = 0;
           bestLevel = 1;
           localStorage.setItem("core_best_v20", 1);
           document.getElementById("deaths").textContent = deathCount;
-          document.getElementById("lvl").textContent = currentLevel;
+          setLevelDisplay();
           document.getElementById("best").textContent = bestLevel;
           applyDefaults();
           generateLevel();
@@ -2869,9 +3204,11 @@
         document.getElementById("warpBtn").onclick = () => {
           let v = parseInt(document.getElementById("warpInput").value);
           if (v > 0) {
+            tutorialMode = false;
+            setTutorialUiVisible(false);
             currentLevel = v;
             lastCheckpoint = v;
-            document.getElementById("lvl").textContent = v;
+            setLevelDisplay();
             isPaused = false;
             document.getElementById("pauseMenu").style.display = "none";
             useCheat();
