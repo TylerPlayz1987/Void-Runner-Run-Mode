@@ -67,6 +67,7 @@
         gap: 10px;
       }
 
+      /* Speed Running Mode: Stopwatch timer for speed run (displays MM:SS.mmm format) */
       #speedRunTimer {
         background: rgba(0, 0, 0, 0.9);
         padding: 6px 15px;
@@ -412,6 +413,7 @@
             Back
           </button>
         </div>
+        <!-- Speed Running Mode: Game Over screen overlay (shown when player dies during speed run) -->
         <div id="speedRunGameOver" class="overlay" style="display: none">
           <div id="speedRunGameOverContent" style="text-align: center; color: #f44;">
             <h1 style="font-size: 48px; margin: 20px 0; text-shadow: 0 0 20px #f44;">GAME OVER</h1>
@@ -636,6 +638,10 @@
           shake = 0,
           winParticles = [],
           flashAlpha = 0,
+          // Speed Running mode state
+          // speedRunMode: true while player is in speed run mode
+          // speedRunStartTime: timestamp used for stopwatch elapsed time
+          // speedRunGameOverMode: true while speed run game-over overlay is active
           speedRunMode = false,
           speedRunStartTime = 0,
           speedRunGameOverMode = false;
@@ -1698,6 +1704,7 @@
 
         function die() {
           if (player.spaghettified) return;
+          // Speed Running Mode: any death instantly shows game over (no respawn)
           if (speedRunMode) {
             showSpeedRunGameOver();
             return;
@@ -2969,7 +2976,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.5.7", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6.0", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
@@ -3010,6 +3017,7 @@
 
         // Pause/resume and menu toggling (also handles music pause/resume)
         function toggle() {
+          // Speed Running Mode: pause menu disabled during speed runs (no pausing allowed)
           if (!running || speedRunGameOverMode || speedRunMode) return;
           isPaused = !isPaused;
           const m = document.getElementById("bgMusic");
@@ -3201,20 +3209,26 @@
         };
         document.getElementById("runModeBtn").onclick = () => startSelectedMode(false);
         document.getElementById("tutorialBtn").onclick = () => startSelectedMode(true);
+        // Mode menu entry point for Speed Running mode
         document.getElementById("speedRunModeBtn").onclick = () => startSpeedRunMode();
 
+        // Speed Running Mode: Initialize and start a new speed run attempt
+        // Sets all vars to level 1, records start time, fully resets game state, begins main loop
+        // Goal: reach level 100 as quickly as possible without dying (any death = game over)
         function startSpeedRunMode() {
           ensureAudioContext();
           clearPostTutorialTour();
           speedRunMode = true;
           tutorialMode = false;
           speedRunGameOverMode = false;
+          // Record exact start time (milliseconds) for accurate timer
           speedRunStartTime = Date.now();
           showingPostTutorialSettings = false;
           setTutorialUiVisible(false);
           currentLevel = 1;
           lastCheckpoint = 1;
           deathCount = 0;
+          // Reset visual effects and counters from any previous attempt
           shake = 0;
           flashAlpha = 0;
           winParticles = [];
@@ -3223,13 +3237,15 @@
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
           document.getElementById("pauseBtn").style.display = "none";
+          // Show timer UI and reset stopwatch display
           document.getElementById("speedRunTimer").classList.add("active");
           document.getElementById("speedRunTimer").textContent = "00:00.000";
           document.getElementById("speedRunGameOver").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
+          // Keep pause state off because pausing is disabled in this mode
           isPaused = false;
 
-          // Fully reset platforms and hazards
+          // Fully reset generated world state before creating level 1
           platforms = [];
           hazards = [];
           wells = [];
@@ -3255,6 +3271,9 @@
           }
         }
 
+        // Speed Running Mode: Converts milliseconds to MM:SS.mmm format for timer display and game over screen
+        // Args: ms - elapsed time in milliseconds since speed run started
+        // Returns: formatted string like "01:23.456" (1 minute, 23 seconds, 456 milliseconds)
         function formatSpeedRunTime(ms) {
           const minutes = Math.floor(ms / 60000);
           const seconds = Math.floor((ms % 60000) / 1000);
@@ -3262,23 +3281,31 @@
           return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(milliseconds).padStart(3, "0")}`;
         }
 
+        // Speed Running Mode: Display game over screen showing level reached and elapsed time
+        // Called when player dies (any death = instant game over, no respawn or checkpoint)
+        // Shows final level and formatted time, offers restart or return to menu
         function showSpeedRunGameOver() {
           if (!speedRunMode) return;
           speedRunGameOverMode = true;
+          // Stop game and lock input
           running = false;
           isPaused = true;
+          // Calculate final time for display
           const elapsedTime = Date.now() - speedRunStartTime;
           document.getElementById("speedRunGameOverLevel").textContent = currentLevel;
           document.getElementById("speedRunGameOverTime").textContent = formatSpeedRunTime(elapsedTime);
+          // Show game over overlay and hide pause button  
           document.getElementById("speedRunGameOver").style.display = "flex";
           document.getElementById("pauseBtn").style.display = "none";
         }
 
         document.getElementById("speedRunRestartBtn").onclick = () => {
+          // Restart launches a brand-new speed run from level 1
           startSpeedRunMode();
         };
 
         document.getElementById("speedRunMenuBtn").onclick = () => {
+          // Exit speed run flow and return to main menu
           speedRunMode = false;
           speedRunGameOverMode = false;
           document.getElementById("speedRunGameOver").style.display = "none";
