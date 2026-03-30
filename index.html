@@ -513,6 +513,8 @@
                 <span>Jump: W/Up/Space</span>
                 <span>Run: Hold Shift</span>
                 <span>Double Jump: one extra jump in air; resets on landing</span>
+                <span>Quick Restart: press R to restart from your checkpoint</span>
+                <span>Full Restart: press Shift+R, then confirm to reset to Level 1</span>
                 <span>Shield: One safety hit</span>
                 <span>Gravity Wells: pull inward; fight pull with momentum and early jumps</span>
                 <span>Checkpoints: saved every 5 levels in Run Mode</span>
@@ -1012,6 +1014,10 @@
           {
             minX: 3920,
             text: "Run Mode checkpoints save every 5 levels. Reach one to set your restart point.",
+          },
+          {
+            minX: 4120,
+            text: "Quick restart keys: press R for checkpoint restart, or Shift+R for full restart with confirmation.",
           },
           {
             minX: 4320,
@@ -3693,11 +3699,25 @@
             (document.activeElement && document.activeElement.isContentEditable);
 
           if (e.code === "KeyR" && !typingInField) {
+            if (
+              document.getElementById("fullRestartConfirm").style.display ===
+              "flex"
+            ) {
+              e.preventDefault();
+              return;
+            }
             if (e.repeat) {
               e.preventDefault();
               return;
             }
-            if (running && !speedRunGameOverMode) {
+            // Hotkey restarts only while actively playing (not while paused/in pause UI)
+            if (
+              running &&
+              !isPaused &&
+              document.getElementById("pauseMenu").style.display !== "flex" &&
+              !speedRunMode &&
+              !speedRunGameOverMode
+            ) {
               e.preventDefault();
               if (e.shiftKey) {
                 // Quick keybind: Shift+R opens confirmation popup for full restart
