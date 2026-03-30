@@ -1011,6 +1011,7 @@
                 canPlaceOnPlatform &&
                 !hasSwingObstacle &&
                 !hasFakeHazard &&
+                !hasSpike &&
                 (allowObstacleStacking || !platformHasObstacle) &&
                 Math.random() < 0.3;
             if (hasSeeker) platformHasObstacle = true;
