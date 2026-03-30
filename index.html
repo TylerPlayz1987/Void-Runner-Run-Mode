@@ -585,6 +585,7 @@
           shake = 0,
           winParticles = [],
           flashAlpha = 0;
+        let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
           container = document.getElementById("container"),
@@ -1725,21 +1726,8 @@
               cpNotif.style.opacity = "0";
               cpNotif.textContent = prevText;
               tutorialMode = false;
-              showingPostTutorialSettings = true;
               setTutorialUiVisible(false);
-              running = false;
-              isPaused = true;
-              currentLevel = 1;
-              lastCheckpoint = 1;
-              setLevelDisplay();
-              document.getElementById("pauseBtn").style.display = "none";
-              document.getElementById("pauseMenu").style.display = "flex";
-              document.getElementById("mainPausePage").style.display = "none";
-              document.getElementById("settingsPage").style.display = "flex";
-              document.getElementById("audioPage").style.display = "none";
-              document.getElementById("themePage").style.display = "none";
-              document.getElementById("tutorialNotesPage").style.display = "none";
-              document.getElementById("cheatsPage").style.display = "none";
+              runPostTutorialSettingsTour();
             }, 2200);
             return;
           }
@@ -2956,7 +2944,93 @@
             tutorialMode ? "block" : "none";
         }
 
+        function clearPostTutorialTour() {
+          for (const timerId of postTutorialTourTimers) clearTimeout(timerId);
+          postTutorialTourTimers = [];
+        }
+
+        function queuePostTutorialTourStep(delay, action) {
+          const timerId = setTimeout(action, delay);
+          postTutorialTourTimers.push(timerId);
+        }
+
+        function showPauseTourPage(pageId) {
+          const pageIds = [
+            "mainPausePage",
+            "settingsPage",
+            "audioPage",
+            "themePage",
+            "tutorialNotesPage",
+            "cheatsPage",
+          ];
+          for (const id of pageIds) {
+            document.getElementById(id).style.display = id === pageId ? "flex" : "none";
+          }
+        }
+
+        function runPostTutorialSettingsTour() {
+          clearPostTutorialTour();
+          showingPostTutorialSettings = true;
+          running = false;
+          isPaused = true;
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
+          document.getElementById("pauseBtn").style.display = "none";
+          document.getElementById("pauseMenu").style.display = "flex";
+
+          const steps = [
+            {
+              page: "settingsPage",
+              text: "Settings tour: this menu leads to Audio, Theme, and Tutorial Notes.",
+            },
+            {
+              page: "audioPage",
+              text: "Audio: Master controls all sound, Music controls soundtrack, SFX controls effects.",
+            },
+            {
+              page: "audioPage",
+              text: "Mute buttons let you instantly toggle Music and SFX.",
+            },
+            {
+              page: "themePage",
+              text: "Theme changes visuals and music. 8-bit filter works on Classic.",
+            },
+            {
+              page: "cheatsPage",
+              text: "Cheats/Debug includes Invincibility and Warp for testing.",
+            },
+            {
+              page: "cheatsPage",
+              text: "Using debug tools marks score as CHEATS USED and blocks normal high score progress.",
+            },
+            {
+              page: "tutorialNotesPage",
+              text: "Tutorial Notes has the full recap. Reopen it anytime from Settings.",
+            },
+          ];
+
+          let elapsed = 120;
+          const stepDuration = 2500;
+          for (const step of steps) {
+            queuePostTutorialTourStep(elapsed, () => {
+              if (!showingPostTutorialSettings) return;
+              showPauseTourPage(step.page);
+              cpNotif.textContent = step.text;
+              cpNotif.style.opacity = "1";
+            });
+            elapsed += stepDuration;
+          }
+
+          queuePostTutorialTourStep(elapsed + 700, () => {
+            if (!showingPostTutorialSettings) return;
+            cpNotif.style.opacity = "0";
+            returnToStartMenu();
+          });
+        }
+
         function returnToStartMenu() {
+          clearPostTutorialTour();
           tutorialMode = false;
           showingPostTutorialSettings = false;
           setTutorialUiVisible(false);
@@ -2967,6 +3041,8 @@
           setLevelDisplay();
           const m = document.getElementById("bgMusic");
           if (m) m.pause();
+          cpNotif.textContent = "Checkpoint Reached";
+          cpNotif.style.opacity = "0";
           document.getElementById("pauseBtn").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
@@ -2983,6 +3059,7 @@
 
         function startSelectedMode(isTutorial) {
           ensureAudioContext();
+          clearPostTutorialTour();
           tutorialMode = isTutorial;
           showingPostTutorialSettings = false;
           setTutorialUiVisible(tutorialMode);
@@ -3111,6 +3188,8 @@
           isRetro8bit = false;
           infiniteInvincibility = false;
           tutorialMode = false;
+          showingPostTutorialSettings = false;
+          clearPostTutorialTour();
           setTutorialUiVisible(false);
           currentTheme = "classic";
           document.getElementById("masterSlider").value = 50;
