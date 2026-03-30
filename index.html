@@ -1371,10 +1371,14 @@
             }
           }
           if (activeSpeedZone) {
-            player.speedZoneTimer = Math.max(
-              player.speedZoneTimer,
-              activeSpeedZone.speedZoneDuration,
-            );
+            if (player.speedZoneType === activeSpeedZone.speedZoneType) {
+              player.speedZoneTimer = Math.max(
+                player.speedZoneTimer,
+                activeSpeedZone.speedZoneDuration,
+              );
+            } else {
+              player.speedZoneTimer = activeSpeedZone.speedZoneDuration;
+            }
             player.speedZoneType = activeSpeedZone.speedZoneType;
             player.speedZoneMul = activeSpeedZone.speedZoneMul;
           }
