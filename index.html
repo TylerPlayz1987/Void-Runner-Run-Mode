@@ -126,6 +126,7 @@
       }
 
       #resetConfirm,
+      #fullRestartConfirm,
       #timeTravelAnimation {
         position: absolute;
         width: 100%;
@@ -143,6 +144,7 @@
       }
 
       #resetConfirm .confirm-box,
+      #fullRestartConfirm .confirm-box,
       #timeTravelAnimation .confirm-box {
         width: 320px;
         max-width: 90%;
@@ -383,6 +385,15 @@
           </div>
         </div>
 
+        <div id="fullRestartConfirm">
+          <div class="confirm-box">
+            <h2>Confirm Full Restart</h2>
+            <p>This will reset to Level 1 and clear your best score. Continue?</p>
+            <button id="confirmFullRestartBtn" class="small-btn" style="background: #f44">Yes, Full Restart</button>
+            <button id="cancelFullRestartBtn" class="small-btn">No, Go Back</button>
+          </div>
+        </div>
+
         <div id="timeTravelAnimation">
           <div class="confirm-box">
             <div class="clock">
@@ -502,6 +513,8 @@
                 <span>Jump: W/Up/Space</span>
                 <span>Run: Hold Shift</span>
                 <span>Double Jump: one extra jump in air; resets on landing</span>
+                <span>Quick Restart: press R to restart from your checkpoint</span>
+                <span>Full Restart: press Shift+R, then confirm to reset to Level 1</span>
                 <span>Shield: One safety hit</span>
                 <span>Gravity Wells: pull inward; fight pull with momentum and early jumps</span>
                 <span>Checkpoints: saved every 5 levels in Run Mode</span>
@@ -644,7 +657,9 @@
           // speedRunGameOverMode: true while speed run game-over overlay is active
           speedRunMode = false,
           speedRunStartTime = 0,
-          speedRunGameOverMode = false;
+          speedRunGameOverMode = false,
+          fullRestartResumeOnCancel = false,
+          fullRestartOpenedFromResetPrompt = false;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -1000,6 +1015,10 @@
           {
             minX: 3920,
             text: "Run Mode checkpoints save every 5 levels. Reach one to set your restart point.",
+          },
+          {
+            minX: 4120,
+            text: "Quick restart keys: press R for checkpoint restart, or Shift+R for full restart with confirmation.",
           },
           {
             minX: 4320,
@@ -2976,7 +2995,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.6.0", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6.1", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
@@ -3373,9 +3392,40 @@
           document.getElementById("mainPausePage").style.display = "flex";
         }
 
+        function hideFullRestartPrompt(shouldResume = true) {
+          document.getElementById("fullRestartConfirm").style.display = "none";
+          if (shouldResume && fullRestartResumeOnCancel) {
+            fullRestartResumeOnCancel = false;
+            isPaused = false;
+            const m = document.getElementById("bgMusic");
+            if (m && themes[currentTheme] && themes[currentTheme].music) {
+              m.play().catch(() => {});
+            }
+          }
+          if (fullRestartOpenedFromResetPrompt) {
+            document.getElementById("resetConfirm").style.display = "flex";
+          }
+          fullRestartOpenedFromResetPrompt = false;
+        }
+
         function showResetPrompt() {
           document.getElementById("mainPausePage").style.display = "none";
+          document.getElementById("fullRestartConfirm").style.display = "none";
           document.getElementById("resetConfirm").style.display = "flex";
+        }
+
+        function showFullRestartPrompt() {
+          fullRestartOpenedFromResetPrompt =
+            document.getElementById("resetConfirm").style.display === "flex";
+          fullRestartResumeOnCancel = running && !isPaused;
+          if (fullRestartResumeOnCancel) {
+            isPaused = true;
+            const m = document.getElementById("bgMusic");
+            if (m) m.pause();
+          }
+          document.getElementById("resetConfirm").style.display = "none";
+          document.getElementById("mainPausePage").style.display = "none";
+          document.getElementById("fullRestartConfirm").style.display = "flex";
         }
 
         function respawnPlayer() {
@@ -3471,6 +3521,7 @@
         }
 
         function checkpointRestart() {
+          hideFullRestartPrompt(false);
           if (!tutorialMode) {
             currentLevel = lastCheckpoint;
             generateLevel();
@@ -3485,15 +3536,39 @@
         }
 
         function fullRestart() {
+          hideFullRestartPrompt(false);
+          fullRestartResumeOnCancel = false;
           const fromLevel = currentLevel;
+          const wasTutorial = tutorialMode;
+
+          deathCount = 0;
+          document.getElementById("deaths").textContent = deathCount;
+
+          if (wasTutorial) {
+            // In tutorial, full restart should restart tutorial from its start.
+            applyDefaults();
+            tutorialMode = true;
+            showingPostTutorialSettings = false;
+            setTutorialUiVisible(true);
+            lastCheckpoint = 1;
+            currentLevel = 1;
+            setLevelDisplay();
+            generateTutorialLevel();
+            respawnPlayer();
+            isPaused = false;
+            document.getElementById("pauseMenu").style.display = "none";
+            hideResetPrompt();
+            play.rewind();
+            runRewindAnimation(fromLevel);
+            return;
+          }
+
           tutorialMode = false;
           setTutorialUiVisible(false);
           lastCheckpoint = 1;
           currentLevel = 1;
-          deathCount = 0;
           bestLevel = 1;
           localStorage.setItem("core_best_v20", 1);
-          document.getElementById("deaths").textContent = deathCount;
           setLevelDisplay();
           document.getElementById("best").textContent = bestLevel;
           applyDefaults();
@@ -3509,7 +3584,10 @@
         document.getElementById("restartBtn").onclick = showResetPrompt;
         document.getElementById("cancelResetBtn").onclick = hideResetPrompt;
         document.getElementById("checkpointRestartBtn").onclick = checkpointRestart;
-        document.getElementById("fullRestartBtn").onclick = fullRestart;
+        document.getElementById("fullRestartBtn").onclick = showFullRestartPrompt;
+        document.getElementById("confirmFullRestartBtn").onclick = fullRestart;
+        document.getElementById("cancelFullRestartBtn").onclick = () =>
+          hideFullRestartPrompt(true);
 
         document.getElementById("masterSlider").oninput = (e) => {
           masterVol = e.target.value / 100;
@@ -3638,7 +3716,52 @@
 
         window.onkeydown = (e) => {
           keys[e.code] = 1;
+          const activeTag = document.activeElement
+            ? document.activeElement.tagName
+            : "";
+          const typingInField =
+            activeTag === "INPUT" ||
+            activeTag === "TEXTAREA" ||
+            activeTag === "SELECT" ||
+            (document.activeElement && document.activeElement.isContentEditable);
+
+          if (e.code === "KeyR" && !typingInField) {
+            if (
+              document.getElementById("fullRestartConfirm").style.display ===
+              "flex"
+            ) {
+              e.preventDefault();
+              return;
+            }
+            if (e.repeat) {
+              e.preventDefault();
+              return;
+            }
+            // Hotkey restarts only while actively playing (not while paused/in pause UI)
+            if (
+              running &&
+              !isPaused &&
+              document.getElementById("pauseMenu").style.display !== "flex" &&
+              !speedRunMode &&
+              !speedRunGameOverMode
+            ) {
+              e.preventDefault();
+              if (e.shiftKey) {
+                // Quick keybind: Shift+R opens confirmation popup for full restart
+                showFullRestartPrompt();
+              } else {
+                // Quick keybind: R restarts from checkpoint immediately
+                checkpointRestart();
+              }
+              return;
+            }
+          }
+
           if (e.code === "KeyP" || e.code === "Escape") {
+            if (document.getElementById("fullRestartConfirm").style.display === "flex") {
+              hideFullRestartPrompt();
+              return;
+            }
             if (document.getElementById("pauseMenu").style.display === "flex") {
               if (submenuBack()) return;
             }
