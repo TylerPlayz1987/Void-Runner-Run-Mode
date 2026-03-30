@@ -429,6 +429,11 @@
               <span>Double Jump: one extra jump in air; resets on landing</span>
               <span>Checkpoints: saved every 5 levels in Run Mode</span>
               <span>Shield: One safety hit</span>
+              <span>Settings: adjust master/music/SFX and toggle mutes</span>
+              <span>Themes: swap visual style and theme music (when available)</span>
+              <span>Debug/Cheats: invincibility and level warp for testing</span>
+              <span>High Score: tracks best level only while cheats are not used</span>
+              <span>If cheats are used, high score text shows CHEATS USED</span>
               <span>
                 Unlocks: L10 spikes+wells, L15 lava, L20 moving platforms, L30 phase platforms,
                 L35 shield, L40 speed+seekers, L50 sinking platforms, L60 swing, L70 fake spikes
@@ -879,16 +884,32 @@
             text: "Sinking, fake hazards, and gravity well pull test your control.",
           },
           {
-            minX: 2280,
+            minX: 2360,
             text: "Run Mode checkpoints save every 5 levels. Reach one to set your restart point.",
           },
           {
-            minX: 2460,
+            minX: 2680,
             text: "Obstacle unlocks: L10 spikes+wells, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L60 swing, L70 fake hazards.",
           },
           {
-            minX: 2580,
-            text: "Reach the green goal to finish the tutorial.",
+            minX: 3050,
+            text: "Press P or Esc anytime for Pause. Settings include audio sliders and theme choices.",
+          },
+          {
+            minX: 3500,
+            text: "Themes change visuals and music. 8-bit filter works on Classic theme.",
+          },
+          {
+            minX: 3920,
+            text: "Cheats/Debug offers invincibility and warp. Using cheats locks score as CHEATS USED.",
+          },
+          {
+            minX: 4250,
+            text: "High Score stores your best level in local storage when cheats are off.",
+          },
+          {
+            minX: 4470,
+            text: "Final stretch. Reach the green goal to complete tutorial mode.",
           },
         ];
         let tutorialHintText = "";
@@ -1400,13 +1421,16 @@
 
         function generateTutorialLevel() {
           shieldItem = {
-            x: 1830,
-            y: 165,
+            x: 3335,
+            y: 150,
             w: 20,
             h: 20,
             collected: false,
           };
-          wells = [{ x: 2220, y: 240, r: 95, core: 0 }];
+          wells = [
+            { x: 2220, y: 240, r: 95, core: 0 },
+            { x: 3860, y: 220, r: 105, core: 0 },
+          ];
           hazards = [
             {
               type: "lava",
@@ -1419,6 +1443,19 @@
               rising: true,
               hold: 0,
               holdMax: 100,
+              warned: false,
+            },
+            {
+              type: "lava",
+              x: 3520,
+              w: 28,
+              y: 400,
+              h: 0,
+              maxH: 110,
+              speed: 1.15,
+              rising: true,
+              hold: 0,
+              holdMax: 90,
               warned: false,
             },
           ];
@@ -1482,10 +1519,67 @@
               swingPhase: 1.2,
               swingSize: 13,
             }),
+            makeTutorialPlatform(2620, 220, 145, {
+              hasSwingObstacle: true,
+              isSwingPlatform: true,
+              swingType: "platform",
+              swingAnchorAbsX: 2690,
+              swingAnchorY: 85,
+              swingLen: 90,
+              swingAmp: 0.35,
+              swingSpeed: 0.018,
+              swingPhase: 0.25,
+              swingSize: 52,
+              swingThickness: 11,
+            }),
+            makeTutorialPlatform(2860, 245, 145, {
+              moveRange: 60,
+              moveSpeed: 1.5,
+            }),
+            makeTutorialPlatform(3090, 215, 145, {
+              isPhase: true,
+              hasSpeedZone: true,
+              speedZoneType: "boost",
+              speedZoneX: 40,
+              speedZoneW: 70,
+              speedZoneDuration: 380,
+              speedZoneMul: 1.55,
+            }),
+            makeTutorialPlatform(3310, 200, 150, {
+              hasSpike: true,
+              spikeX: 52,
+              spikeW: 24,
+              spikeH: 15,
+              spikeShape: "split",
+            }),
+            makeTutorialPlatform(3560, 220, 150, {
+              hasSeeker: true,
+              seekerW: 16,
+              seekerH: 14,
+              seekerShape: "wide",
+              hasSpeedZone: true,
+              speedZoneType: "slow",
+              speedZoneX: 18,
+              speedZoneW: 48,
+              speedZoneDuration: 330,
+              speedZoneMul: 0.58,
+            }),
+            makeTutorialPlatform(3800, 190, 160, {
+              hasFakeHazard: true,
+              fakeType: "ghostBlock",
+              fakeX: 96,
+              fakeW: 24,
+              fakeH: 16,
+            }),
+            makeTutorialPlatform(4040, 225, 170, {
+              isSinking: true,
+            }),
+            makeTutorialPlatform(4300, 210, 180),
+            makeTutorialPlatform(4525, 220, 170),
           ];
 
-          goal.x = 2620;
-          goal.y = 205;
+          goal.x = 4770;
+          goal.y = 175;
           goal.w = 40;
           goal.h = 40;
           tutorialHintText = "";
