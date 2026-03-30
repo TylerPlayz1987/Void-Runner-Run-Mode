@@ -3535,14 +3535,36 @@
           hideFullRestartPrompt(false);
           fullRestartResumeOnCancel = false;
           const fromLevel = currentLevel;
+          const wasTutorial = tutorialMode;
+
+          deathCount = 0;
+          document.getElementById("deaths").textContent = deathCount;
+
+          if (wasTutorial) {
+            // In tutorial, full restart should restart tutorial from its start.
+            tutorialMode = true;
+            showingPostTutorialSettings = false;
+            setTutorialUiVisible(true);
+            lastCheckpoint = 1;
+            currentLevel = 1;
+            setLevelDisplay();
+            applyDefaults();
+            generateTutorialLevel();
+            respawnPlayer();
+            isPaused = false;
+            document.getElementById("pauseMenu").style.display = "none";
+            hideResetPrompt();
+            play.rewind();
+            runRewindAnimation(fromLevel);
+            return;
+          }
+
           tutorialMode = false;
           setTutorialUiVisible(false);
           lastCheckpoint = 1;
           currentLevel = 1;
-          deathCount = 0;
           bestLevel = 1;
           localStorage.setItem("core_best_v20", 1);
-          document.getElementById("deaths").textContent = deathCount;
           setLevelDisplay();
           document.getElementById("best").textContent = bestLevel;
           applyDefaults();
