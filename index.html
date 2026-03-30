@@ -429,11 +429,13 @@
               <span>Double Jump: one extra jump in air; resets on landing</span>
               <span>Checkpoints: saved every 5 levels in Run Mode</span>
               <span>Shield: One safety hit</span>
+              <span>Gravity Wells: pull your player inward; fight pull with movement and early jumps</span>
               <span>Settings: adjust master/music/SFX and toggle mutes</span>
               <span>Themes: swap visual style and theme music (when available)</span>
               <span>Debug/Cheats: invincibility and level warp for testing</span>
               <span>High Score: tracks best level only while cheats are not used</span>
               <span>If cheats are used, high score text shows CHEATS USED</span>
+              <span>At the end of tutorial, reopen this page for a full recap any time</span>
               <span>
                 Unlocks: L10 spikes+wells, L15 lava, L20 moving platforms, L30 phase platforms,
                 L35 shield, L40 speed+seekers, L50 sinking platforms, L60 swing, L70 fake spikes
@@ -853,63 +855,87 @@
         const tutorialGuide = [
           {
             minX: 0,
-            text: "Move with A/D or Arrows, jump with W/Up/Space, and hold Shift to run.",
+            text: "Start easy: move with A/D or Arrows and jump with W/Up/Space.",
           },
           {
-            minX: 320,
-            text: "Double jump: you get one air jump before landing again.",
+            minX: 260,
+            text: "Hold Shift to run for longer jumps.",
           },
           {
             minX: 540,
+            text: "Double jump: you get one extra jump in the air, then it resets on landing.",
+          },
+          {
+            minX: 860,
             text: "Moving platform ahead: keep your jump timing and ride it safely.",
           },
           {
-            minX: 940,
+            minX: 1120,
             text: "Blue phase platform blinks in and out. Wait for solid timing.",
           },
           {
-            minX: 1220,
+            minX: 1360,
             text: "Speed zones: teal boosts you, amber slows you down.",
           },
           {
-            minX: 1480,
-            text: "Hazards hurt. Watch spikes and rising lava, then jump cleanly.",
+            minX: 1700,
+            text: "Hazards start here: spikes hurt on contact, so clear them cleanly.",
           },
           {
-            minX: 1760,
+            minX: 1960,
+            text: "Seekers slide side to side. Watch their rhythm before jumping.",
+          },
+          {
+            minX: 2260,
+            text: "Sinking platforms drop after touch, so keep moving.",
+          },
+          {
+            minX: 2480,
+            text: "Fake hazards can look dangerous but are harmless. Learn the difference.",
+          },
+          {
+            minX: 2660,
             text: "Collect the shield for one extra save against danger.",
           },
           {
-            minX: 1980,
-            text: "Sinking, fake hazards, and gravity well pull test your control.",
+            minX: 2920,
+            text: "Gravity wells pull you inward. Keep momentum and jump early to escape.",
           },
           {
-            minX: 2360,
-            text: "Run Mode checkpoints save every 5 levels. Reach one to set your restart point.",
+            minX: 3140,
+            text: "Lava walls rise and fall in cycles. Time your crossing.",
           },
           {
-            minX: 2680,
-            text: "Obstacle unlocks: L10 spikes+wells, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L60 swing, L70 fake hazards.",
-          },
-          {
-            minX: 3050,
-            text: "Press P or Esc anytime for Pause. Settings include audio sliders and theme choices.",
-          },
-          {
-            minX: 3500,
-            text: "Themes change visuals and music. 8-bit filter works on Classic theme.",
+            minX: 3600,
+            text: "Swing hazards are advanced: watch their arc, then move when the lane opens.",
           },
           {
             minX: 3920,
+            text: "Run Mode checkpoints save every 5 levels. Reach one to set your restart point.",
+          },
+          {
+            minX: 4120,
+            text: "Obstacle unlocks: L10 spikes+wells, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L60 swing, L70 fake hazards.",
+          },
+          {
+            minX: 4300,
+            text: "Press P or Esc anytime for Pause. Settings include audio sliders and theme choices.",
+          },
+          {
+            minX: 4460,
+            text: "Themes change visuals and music. 8-bit filter works on Classic theme.",
+          },
+          {
+            minX: 4620,
             text: "Cheats/Debug offers invincibility and warp. Using cheats locks score as CHEATS USED.",
           },
           {
-            minX: 4250,
+            minX: 4760,
             text: "High Score stores your best level in local storage when cheats are off.",
           },
           {
-            minX: 4470,
-            text: "Final stretch. Reach the green goal to complete tutorial mode.",
+            minX: 4880,
+            text: "You are done. Check Pause -> Settings -> Tutorial Notes anytime for a full recap.",
           },
         ];
         let tutorialHintText = "";
@@ -1421,24 +1447,24 @@
 
         function generateTutorialLevel() {
           shieldItem = {
-            x: 3335,
-            y: 150,
+            x: 2725,
+            y: 160,
             w: 20,
             h: 20,
             collected: false,
           };
           wells = [
-            { x: 2220, y: 240, r: 95, core: 0 },
-            { x: 3860, y: 220, r: 105, core: 0 },
+            { x: 3040, y: 238, r: 95, core: 0 },
+            { x: 4300, y: 225, r: 105, core: 0 },
           ];
           hazards = [
             {
               type: "lava",
-              x: 1560,
+              x: 3240,
               w: 28,
               y: 400,
               h: 0,
-              maxH: 95,
+              maxH: 100,
               speed: 1,
               rising: true,
               hold: 0,
@@ -1447,7 +1473,7 @@
             },
             {
               type: "lava",
-              x: 3520,
+              x: 4400,
               w: 28,
               y: 400,
               h: 0,
@@ -1478,40 +1504,65 @@
               speedZoneDuration: 420,
               speedZoneMul: 1.6,
             }),
-            makeTutorialPlatform(1480, 260, 160, {
+            makeTutorialPlatform(1500, 250, 145, {
+              hasSpeedZone: true,
+              speedZoneType: "slow",
+              speedZoneX: 34,
+              speedZoneW: 72,
+              speedZoneDuration: 360,
+              speedZoneMul: 0.6,
+            }),
+            makeTutorialPlatform(1730, 250, 160, {
               hasSpike: true,
               spikeX: 62,
               spikeW: 26,
               spikeH: 13,
               spikeShape: "wide",
             }),
-            makeTutorialPlatform(1740, 230, 150, {
+            makeTutorialPlatform(1980, 232, 150, {
               hasSeeker: true,
               seekerW: 18,
               seekerH: 14,
               seekerShape: "split",
-              hasSpeedZone: true,
-              speedZoneType: "slow",
-              speedZoneX: 98,
-              speedZoneW: 42,
-              speedZoneDuration: 320,
-              speedZoneMul: 0.6,
             }),
-            makeTutorialPlatform(1970, 255, 130, {
+            makeTutorialPlatform(2230, 250, 145, {
               isSinking: true,
             }),
-            makeTutorialPlatform(2130, 230, 150, {
+            makeTutorialPlatform(2460, 230, 150, {
               hasFakeHazard: true,
               fakeType: "ghostSpike",
               fakeX: 72,
               fakeW: 22,
               fakeH: 16,
             }),
-            makeTutorialPlatform(2360, 250, 180, {
+            makeTutorialPlatform(2680, 225, 150),
+            makeTutorialPlatform(2900, 210, 160),
+            makeTutorialPlatform(3160, 230, 155),
+            makeTutorialPlatform(3400, 210, 150, {
+              hasSpike: true,
+              spikeX: 52,
+              spikeW: 24,
+              spikeH: 15,
+              spikeShape: "split",
+            }),
+            makeTutorialPlatform(3620, 245, 170, {
+              hasSwingObstacle: true,
+              isSwingPlatform: true,
+              swingType: "platform",
+              swingAnchorAbsX: 3705,
+              swingAnchorY: 86,
+              swingLen: 92,
+              swingAmp: 0.36,
+              swingSpeed: 0.018,
+              swingPhase: 0.2,
+              swingSize: 54,
+              swingThickness: 11,
+            }),
+            makeTutorialPlatform(3860, 230, 180, {
               hasSwingObstacle: true,
               isWreckingBall: true,
               swingType: "wreckingBall",
-              swingAnchorAbsX: 2450,
+              swingAnchorAbsX: 3950,
               swingAnchorY: 90,
               swingLen: 120,
               swingAmp: 0.75,
@@ -1519,24 +1570,7 @@
               swingPhase: 1.2,
               swingSize: 13,
             }),
-            makeTutorialPlatform(2620, 220, 145, {
-              hasSwingObstacle: true,
-              isSwingPlatform: true,
-              swingType: "platform",
-              swingAnchorAbsX: 2690,
-              swingAnchorY: 85,
-              swingLen: 90,
-              swingAmp: 0.35,
-              swingSpeed: 0.018,
-              swingPhase: 0.25,
-              swingSize: 52,
-              swingThickness: 11,
-            }),
-            makeTutorialPlatform(2860, 245, 145, {
-              moveRange: 60,
-              moveSpeed: 1.5,
-            }),
-            makeTutorialPlatform(3090, 215, 145, {
+            makeTutorialPlatform(4120, 220, 155, {
               isPhase: true,
               hasSpeedZone: true,
               speedZoneType: "boost",
@@ -1545,14 +1579,7 @@
               speedZoneDuration: 380,
               speedZoneMul: 1.55,
             }),
-            makeTutorialPlatform(3310, 200, 150, {
-              hasSpike: true,
-              spikeX: 52,
-              spikeW: 24,
-              spikeH: 15,
-              spikeShape: "split",
-            }),
-            makeTutorialPlatform(3560, 220, 150, {
+            makeTutorialPlatform(4360, 220, 150, {
               hasSeeker: true,
               seekerW: 16,
               seekerH: 14,
@@ -1564,21 +1591,21 @@
               speedZoneDuration: 330,
               speedZoneMul: 0.58,
             }),
-            makeTutorialPlatform(3800, 190, 160, {
+            makeTutorialPlatform(4600, 190, 160, {
               hasFakeHazard: true,
               fakeType: "ghostBlock",
               fakeX: 96,
               fakeW: 24,
               fakeH: 16,
             }),
-            makeTutorialPlatform(4040, 225, 170, {
+            makeTutorialPlatform(4820, 225, 170, {
               isSinking: true,
             }),
-            makeTutorialPlatform(4300, 210, 180),
-            makeTutorialPlatform(4525, 220, 170),
+            makeTutorialPlatform(5060, 210, 180),
+            makeTutorialPlatform(5300, 220, 170),
           ];
 
-          goal.x = 4770;
+          goal.x = 5530;
           goal.y = 175;
           goal.w = 40;
           goal.h = 40;
@@ -1678,7 +1705,7 @@
           if (tutorialMode) {
             play.cp();
             const prevText = cpNotif.textContent;
-            cpNotif.textContent = "Tutorial Complete! You can now play Run Mode.";
+            cpNotif.textContent = "Tutorial Complete! Returning to start menu...";
             cpNotif.style.opacity = "1";
             container.style.borderColor = "#0f0";
             container.style.boxShadow = "0 0 30px #0f0";
@@ -1687,9 +1714,20 @@
               container.style.boxShadow = "none";
               cpNotif.style.opacity = "0";
               cpNotif.textContent = prevText;
-            }, 1800);
-            generateTutorialLevel();
-            resetPlayerForRun(330);
+              tutorialMode = false;
+              setTutorialUiVisible(false);
+              running = false;
+              isPaused = false;
+              currentLevel = 1;
+              lastCheckpoint = 1;
+              setLevelDisplay();
+              const m = document.getElementById("bgMusic");
+              if (m) m.pause();
+              document.getElementById("pauseBtn").style.display = "none";
+              document.getElementById("pauseMenu").style.display = "none";
+              document.getElementById("modeMenu").style.display = "none";
+              document.getElementById("startMenu").style.display = "flex";
+            }, 2200);
             return;
           }
           currentLevel++;
