@@ -2955,6 +2955,9 @@
             : "none";
           document.getElementById("mainPausePage").style.display = "flex";
           document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("audioPage").style.display = "none";
+          document.getElementById("themePage").style.display = "none";
+          document.getElementById("tutorialNotesPage").style.display = "none";
           document.getElementById("cheatsPage").style.display = "none";
           document.getElementById("exitTutorialBtn").style.display =
             tutorialMode ? "block" : "none";
@@ -3027,7 +3030,7 @@
           ];
 
           let elapsed = 120;
-          const stepDuration = 2500;
+          const stepDuration = 3500;
           for (const step of steps) {
             queuePostTutorialTourStep(elapsed, () => {
               if (!showingPostTutorialSettings) return;
