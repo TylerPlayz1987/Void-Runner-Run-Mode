@@ -1520,9 +1520,9 @@
             p.isSolidNow = !p.isPhase || frameCount % 300 < 240;
             let dX = 0;
             let dY = 0;
+            const oY = p.y;
             if (p.isSwingPlatform) {
               const oX = p.x;
-              const oY = p.y;
               const swing = getSwingBob(p);
               p.x = swing.x - p.w / 2;
               p.y = swing.y - p.h / 2;
@@ -1535,6 +1535,8 @@
                 p.moveDir *= -1;
               dX = p.x - oX;
             }
+            if (p.isSinking && p.isTouched) p.y += 2.5;
+            dY = p.y - oY;
             p.deltaX = dX;
             p.deltaY = dY;
             maxPlatformDelta = Math.max(
@@ -1542,7 +1544,6 @@
               Math.abs(dX),
               Math.abs(dY),
             );
-            if (p.isSinking && p.isTouched) p.y += 2.5;
             if (p.hasSeeker) {
               p.seekerX += 2.5 * p.seekerDir;
               if (p.seekerX > p.w - p.seekerW || p.seekerX < 0) p.seekerDir *= -1;
@@ -1720,6 +1721,7 @@
           }
           if (nY > 400) {
             if (player.hasShield || infiniteInvincibility) {
+              player.hasShield = false;
               player.isBeingRescued = true;
               player.rescueTarget = findSafePlatform();
               play.grab();
