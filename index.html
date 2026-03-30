@@ -906,6 +906,8 @@
           stretchY: 1,
           coyoteTime: 0,
           jumpBuffer: 0,
+          jumpHeld: false,
+          hasAirJump: true,
           speedZoneTimer: 0,
           speedZoneType: null,
           speedZoneMul: 1,
@@ -1210,6 +1212,23 @@
           }
         }
         // Handle player death and reset after falling/out of bounds/hazard hit
+        function resetPlayerForRun(spawnY = 200) {
+          player.x = 50;
+          player.y = spawnY;
+          player.vx = 0;
+          player.vy = 0;
+          player.trail = [];
+          player.invincibleTimer = 0;
+          player.isBeingRescued = false;
+          player.rescueTarget = null;
+          player.stretchX = 1;
+          player.stretchY = 1;
+          player.coyoteTime = 0;
+          player.jumpBuffer = 0;
+          player.jumpHeld = false;
+          player.hasAirJump = true;
+        }
+
         function die() {
           if (player.spaghettified) return;
           shake = 15;
@@ -1221,13 +1240,8 @@
           container.style.borderColor = "#f44";
           setTimeout(() => (container.style.borderColor = "#333"), 200);
           generateLevel();
-          player.x = 50;
-          player.y = 330;
-          player.vx = 0;
-          player.vy = 0;
-          player.trail = [];
+          resetPlayerForRun(330);
           player.hasShield = false;
-          player.invincibleTimer = 0;
           player.spaghettified = false;
           player.deathScale = 1;
           player.deathRotate = 0;
@@ -1269,6 +1283,17 @@
           }
         }
 
+        function performJump(useAirJump = false) {
+          player.vy = player.jump;
+          player.grounded = false;
+          player.jumpBuffer = 0;
+          if (useAirJump) player.hasAirJump = false;
+          play.jp();
+          player.stretchX = 0.6;
+          player.stretchY = 1.4;
+          emitJumpDust();
+        }
+
         function win() {
           currentLevel++;
           document.getElementById("lvl").textContent = currentLevel;
@@ -1298,6 +1323,7 @@
             document.getElementById("best").textContent = bestLevel;
             localStorage.setItem("core_best_v20", bestLevel);
           }
+          resetPlayerForRun(200);
           player.x = 50;
           player.y = 200;
           player.vx = 0;
@@ -1434,18 +1460,16 @@
           });
           if (player.grounded) player.coyoteTime = 6;
           else if (player.coyoteTime > 0) player.coyoteTime--;
-          if (keys["ArrowUp"] || keys["KeyW"] || keys["Space"])
-            player.jumpBuffer = 6;
+          const jumpPressed =
+            keys["ArrowUp"] || keys["KeyW"] || keys["Space"];
+          if (jumpPressed && !player.jumpHeld) player.jumpBuffer = 6;
           else if (player.jumpBuffer > 0) player.jumpBuffer--;
+          player.jumpHeld = jumpPressed;
           if (player.jumpBuffer > 0 && player.coyoteTime > 0) {
-            player.vy = player.jump;
-            player.grounded = false;
             player.coyoteTime = 0;
-            player.jumpBuffer = 0;
-            play.jp();
-            player.stretchX = 0.6;
-            player.stretchY = 1.4;
-            emitJumpDust();
+            performJump(false);
+          } else if (player.jumpBuffer > 0 && player.hasAirJump && player.coyoteTime === 0) {
+            performJump(true);
           }
           hazards.forEach((h) => {
             if (h.type === "lava") {
@@ -1619,11 +1643,8 @@
                   nextY = p.y - player.h;
                   player.vy = 0;
                   player.grounded = true;
-                  if (
-                    !wasGrounded &&
-                    !inheritedLandingMove &&
-                    (p.deltaX || p.deltaY)
-                  ) {
+                  player.hasAirJump = true; // restore air jump on landing
+                  if (!wasGrounded && !inheritedLandingMove && p.deltaX) {
                     resolvedX += p.deltaX;
                     resolvedY += p.deltaY || 0;
                     inheritedLandingMove = true;
@@ -1734,8 +1755,108 @@
               return;
             }
           }
+
+          hazards.forEach((h) => {
+            if (h.type === "lava") {
+              if (!h.warned && h.rising && h.h < 10) {
+                h.warned = true;
+                sfx(270, "sawtooth", 0.07, 0.11, 240);
+              }
+              if (h.h >= h.maxH && h.rising) {
+                h.h = h.maxH;
+                h.hold = (h.hold || 0) + 1;
+                if (h.hold >= h.holdMax) {
+                  h.rising = false;
+                  h.hold = 0;
+                }
+              } else if (h.h <= 0 && !h.rising) {
+                h.h = 0;
+                h.hold = (h.hold || 0) + 1;
+                if (h.hold >= h.holdMax) {
+                  h.rising = true;
+                  h.hold = 0;
+                  h.warned = false;
+                }
+              } else {
+                h.h += h.rising ? h.speed : -h.speed;
+                h.h = Math.max(0, Math.min(h.maxH, h.h));
+              }
+              h.y = 400 - h.h;
+
+              // emit rim particles while active
+              if (h.h > 10 && Math.random() < 0.35) {
+                lavaParticles.push({
+                  x: h.x + Math.random() * h.w,
+                  y: h.y,
+                  vx: (Math.random() - 0.5) * 0.6,
+                  vy: -1 - Math.random() * 0.8,
+                  life: 24 + Math.floor(Math.random() * 12),
+                  size: 1 + Math.random() * 2,
+                });
+              }
+            } else if (h.r) {
+              h.sy += h.s * h.dir;
+              if (h.sy > h.r || h.sy < 50) h.dir *= -1;
+              h.y = h.sy;
+            }
+          });
+          platforms.forEach((p) => {
+            let cycle = frameCount % 300,
+              solid = !p.isPhase || cycle < 240;
+            let dX = 0;
+            if (p.moveRange > 0) {
+              let oX = p.x;
+              p.x += p.moveSpeed * p.moveDir;
+              if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange)
+                p.moveDir *= -1;
+              dX = p.x - oX;
+            }
+            if (p.isSinking && p.isTouched) p.y += 2.5;
+            if (p.hasSeeker) {
+              p.seekerX += 2.5 * p.seekerDir;
+              if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1;
+            }
+            if (solid) {
+              let px1 = p.x,
+                px2 = p.x + p.w,
+                py1 = p.y,
+                py2 = p.y + p.h;
+              let overlapX = Math.min(nX + player.w, px2) - Math.max(nX, px1);
+              let overlapY = Math.min(nY + player.h, py2) - Math.max(nY, py1);
+              if (overlapX > 0 && overlapY > 0) {
+                // resolve smallest intersection axis first
+                if (overlapX < overlapY) {
+                  // horizontal hit
+                  if (player.x + player.w <= px1) {
+                    nX = px1 - player.w;
+                  } else if (player.x >= px2) {
+                    nX = px2;
+                  }
+                  player.vx = 0;
+                } else {
+                  // vertical hit
+                  if (player.y + player.h <= py1) {
+                    nY = py1 - player.h;
+                    player.vy = 0;
+                    player.grounded = true;
+                    player.hasAirJump = true;
+                    if (p.isSinking) p.isTouched = true;
+                    if (dX !== 0) nX += dX;
+                    if (!wasGrounded) {
+                      player.stretchX = 1.5;
+                      player.stretchY = 0.5;
+                    }
+                  } else if (player.y >= py2) {
+                    nY = py2;
+                    player.vy = 0;
+                  }
+                }
+              }
+            }
+          });
           player.x = nX;
           player.y = nY;
+          if (player.grounded) player.hasAirJump = true; // always restore while touching ground
           if (!player.grounded) player.standPlatform = null;
           if (!wasGrounded && player.grounded) emitJumpDust();
           if (
@@ -2424,7 +2545,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.5.5", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.5.7", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
@@ -2550,22 +2671,11 @@
         }
 
         function respawnPlayer() {
-          player.x = 50;
-          player.y = 200;
-          player.vx = 0;
-          player.vy = 0;
-          player.trail = [];
+          resetPlayerForRun(200);
           player.hasShield = false;
-          player.invincibleTimer = 0;
           player.spaghettified = false;
           player.deathScale = 1;
           player.deathRotate = 0;
-          player.isBeingRescued = false;
-          player.rescueTarget = null;
-          player.stretchX = 1;
-          player.stretchY = 1;
-          player.coyoteTime = 0;
-          player.jumpBuffer = 0;
         }
 
         function applyDefaults() {
