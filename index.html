@@ -126,6 +126,7 @@
       }
 
       #resetConfirm,
+      #fullRestartConfirm,
       #timeTravelAnimation {
         position: absolute;
         width: 100%;
@@ -143,6 +144,7 @@
       }
 
       #resetConfirm .confirm-box,
+      #fullRestartConfirm .confirm-box,
       #timeTravelAnimation .confirm-box {
         width: 320px;
         max-width: 90%;
@@ -380,6 +382,15 @@
             <button id="checkpointRestartBtn" class="small-btn">Restart from Checkpoint</button>
             <button id="fullRestartBtn" class="small-btn">Full Restart (Level 1)</button>
             <button id="cancelResetBtn" class="small-btn">Cancel</button>
+          </div>
+        </div>
+
+        <div id="fullRestartConfirm">
+          <div class="confirm-box">
+            <h2>Confirm Full Restart</h2>
+            <p>This will reset to Level 1 and clear your best score. Continue?</p>
+            <button id="confirmFullRestartBtn" class="small-btn" style="background: #f44">Yes, Full Restart</button>
+            <button id="cancelFullRestartBtn" class="small-btn">No, Go Back</button>
           </div>
         </div>
 
@@ -644,7 +655,8 @@
           // speedRunGameOverMode: true while speed run game-over overlay is active
           speedRunMode = false,
           speedRunStartTime = 0,
-          speedRunGameOverMode = false;
+          speedRunGameOverMode = false,
+          fullRestartResumeOnCancel = false;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -3373,9 +3385,37 @@
           document.getElementById("mainPausePage").style.display = "flex";
         }
 
+        function hideFullRestartPrompt(shouldResume = true) {
+          document.getElementById("fullRestartConfirm").style.display = "none";
+          if (shouldResume && fullRestartResumeOnCancel) {
+            fullRestartResumeOnCancel = false;
+            isPaused = false;
+            const m = document.getElementById("bgMusic");
+            if (m && themes[currentTheme] && themes[currentTheme].music) {
+              m.play().catch(() => {});
+            }
+          }
+          if (isPaused) {
+            document.getElementById("resetConfirm").style.display = "flex";
+          }
+        }
+
         function showResetPrompt() {
           document.getElementById("mainPausePage").style.display = "none";
+          document.getElementById("fullRestartConfirm").style.display = "none";
           document.getElementById("resetConfirm").style.display = "flex";
+        }
+
+        function showFullRestartPrompt() {
+          fullRestartResumeOnCancel = running && !isPaused;
+          if (fullRestartResumeOnCancel) {
+            isPaused = true;
+            const m = document.getElementById("bgMusic");
+            if (m) m.pause();
+          }
+          document.getElementById("resetConfirm").style.display = "none";
+          document.getElementById("mainPausePage").style.display = "none";
+          document.getElementById("fullRestartConfirm").style.display = "flex";
         }
 
         function respawnPlayer() {
@@ -3471,6 +3511,7 @@
         }
 
         function checkpointRestart() {
+          hideFullRestartPrompt(false);
           if (!tutorialMode) {
             currentLevel = lastCheckpoint;
             generateLevel();
@@ -3485,6 +3526,8 @@
         }
 
         function fullRestart() {
+          hideFullRestartPrompt(false);
+          fullRestartResumeOnCancel = false;
           const fromLevel = currentLevel;
           tutorialMode = false;
           setTutorialUiVisible(false);
@@ -3509,7 +3552,9 @@
         document.getElementById("restartBtn").onclick = showResetPrompt;
         document.getElementById("cancelResetBtn").onclick = hideResetPrompt;
         document.getElementById("checkpointRestartBtn").onclick = checkpointRestart;
-        document.getElementById("fullRestartBtn").onclick = fullRestart;
+        document.getElementById("fullRestartBtn").onclick = showFullRestartPrompt;
+        document.getElementById("confirmFullRestartBtn").onclick = fullRestart;
+        document.getElementById("cancelFullRestartBtn").onclick = hideFullRestartPrompt;
 
         document.getElementById("masterSlider").oninput = (e) => {
           masterVol = e.target.value / 100;
@@ -3638,7 +3683,38 @@
 
         window.onkeydown = (e) => {
           keys[e.code] = 1;
+          const activeTag = document.activeElement
+            ? document.activeElement.tagName
+            : "";
+          const typingInField =
+            activeTag === "INPUT" ||
+            activeTag === "TEXTAREA" ||
+            activeTag === "SELECT" ||
+            (document.activeElement && document.activeElement.isContentEditable);
+
+          if (e.code === "KeyR" && !typingInField) {
+            if (e.repeat) {
+              e.preventDefault();
+              return;
+            }
+            if (running && !speedRunGameOverMode) {
+              e.preventDefault();
+              if (e.shiftKey) {
+                // Quick keybind: Shift+R opens confirmation popup for full restart
+                showFullRestartPrompt();
+              } else {
+                // Quick keybind: R restarts from checkpoint immediately
+                checkpointRestart();
+              }
+              return;
+            }
+          }
+
           if (e.code === "KeyP" || e.code === "Escape") {
+            if (document.getElementById("fullRestartConfirm").style.display === "flex") {
+              hideFullRestartPrompt();
+              return;
+            }
             if (document.getElementById("pauseMenu").style.display === "flex") {
               if (submenuBack()) return;
             }

@@ -21,6 +21,8 @@ Void Runner is a browser-based 2D endless platformer in a single-page `index.htm
 - Jump: `W/Up/Space`
 - Run: `Shift`
 - Pause/Menu: `P/Escape` (disabled in Speed Running Mode)
+- Quick Restart from checkpoint: `R`
+- Full Restart to level 1: `Shift+R` (opens confirmation popup)
 - Pause overlay buttons for resume/settings/restart/cheats
 
 ## Game Modes
