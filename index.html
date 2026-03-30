@@ -929,6 +929,7 @@
           speedZoneTimer: 0,
           speedZoneType: null,
           speedZoneMul: 1,
+          standPlatform: null,
         };
         let goal = { x: 0, y: 0, w: 40, h: 40 };
         function sfx(f, t, d, v, slide = 0) {
@@ -1061,7 +1062,13 @@
               : null;
             const swingAnchorY = hasSwingObstacle ? 18 + Math.random() * 70 : 0;
             const swingLen = hasSwingObstacle
-              ? Math.max(45, ly - swingAnchorY - 18)
+              ? Math.max(
+                  45,
+                  Math.min(
+                    isSwingPlatform ? 140 : 220,
+                    ly - swingAnchorY - 18,
+                  ),
+                )
               : 0;
             const fakeType = hasFakeHazard
               ? Math.random() < 0.7
@@ -1128,8 +1135,16 @@
                 : 0,
               swingAnchorY,
               swingLen,
-              swingAmp: hasSwingObstacle ? 0.65 + Math.random() * 0.55 : 0,
-              swingSpeed: hasSwingObstacle ? 0.025 + Math.random() * 0.018 : 0,
+              swingAmp: hasSwingObstacle
+                ? isSwingPlatform
+                  ? 0.35 + Math.random() * 0.25
+                  : 0.65 + Math.random() * 0.55
+                : 0,
+              swingSpeed: hasSwingObstacle
+                ? isSwingPlatform
+                  ? 0.014 + Math.random() * 0.01
+                  : 0.025 + Math.random() * 0.018
+                : 0,
               swingPhase: hasSwingObstacle ? Math.random() * Math.PI * 2 : 0,
               swingSize: hasSwingObstacle
                 ? swingType === "blade"
@@ -1243,6 +1258,7 @@
           player.speedZoneTimer = 0;
           player.speedZoneType = null;
           player.speedZoneMul = 1;
+          player.standPlatform = null;
         }
         function findSafePlatform() {
           let s = platforms;
@@ -1310,6 +1326,7 @@
           player.speedZoneTimer = 0;
           player.speedZoneType = null;
           player.speedZoneMul = 1;
+          player.standPlatform = null;
           generateLevel();
         }
         // Main game simulation, runs every frame before draw()
@@ -1498,6 +1515,7 @@
             nY = player.y + player.vy;
           let wasGrounded = player.grounded;
           player.grounded = false;
+          let maxPlatformDelta = 0;
           platforms.forEach((p) => {
             p.isSolidNow = !p.isPhase || frameCount % 300 < 240;
             let dX = 0;
@@ -1519,6 +1537,11 @@
             }
             p.deltaX = dX;
             p.deltaY = dY;
+            maxPlatformDelta = Math.max(
+              maxPlatformDelta,
+              Math.abs(dX),
+              Math.abs(dY),
+            );
             if (p.isSinking && p.isTouched) p.y += 2.5;
             if (p.hasSeeker) {
               p.seekerX += 2.5 * p.seekerDir;
@@ -1529,7 +1552,10 @@
           // Sub-steps reduce tunneling and improve corner handling.
           const steps = Math.max(
             1,
-            Math.ceil(Math.max(Math.abs(player.vx), Math.abs(player.vy)) / 8),
+            Math.ceil(
+              Math.max(Math.abs(player.vx), Math.abs(player.vy), maxPlatformDelta) /
+                8,
+            ),
           );
           const stepX = player.vx / steps;
           const stepY = player.vy / steps;
@@ -1538,18 +1564,30 @@
           let inheritedLandingMove = false;
 
           // Carry player with moving platforms when standing on top.
-          if (wasGrounded) {
-            for (let p of platforms) {
-              if (!p.isSolidNow) continue;
-              if (
-                Math.abs(player.y + player.h - p.y) < 2 &&
-                player.x + player.w > p.x + 1 &&
-                player.x < p.x + p.w - 1
-              ) {
-                resolvedX += p.deltaX || 0;
-                resolvedY += p.deltaY || 0;
-                break;
+          if (wasGrounded && player.vy >= 0) {
+            let carryPlatform = null;
+            if (
+              player.standPlatform &&
+              player.standPlatform.isSolidNow &&
+              platforms.includes(player.standPlatform)
+            ) {
+              carryPlatform = player.standPlatform;
+            } else {
+              for (let p of platforms) {
+                if (!p.isSolidNow) continue;
+                if (
+                  Math.abs(player.y + player.h - p.y) < 10 &&
+                  player.x + player.w > p.x + 1 &&
+                  player.x < p.x + p.w - 1
+                ) {
+                  carryPlatform = p;
+                  break;
+                }
               }
+            }
+            if (carryPlatform) {
+              resolvedX += carryPlatform.deltaX || 0;
+              resolvedY += carryPlatform.deltaY || 0;
             }
           }
 
@@ -1605,6 +1643,7 @@
                     inheritedLandingMove = true;
                   }
                   if (p.isSinking) p.isTouched = true;
+                  player.standPlatform = p;
                   if (!wasGrounded) {
                     player.stretchX = 1.5;
                     player.stretchY = 0.5;
@@ -1707,6 +1746,7 @@
           }
           player.x = nX;
           player.y = nY;
+          if (!player.grounded) player.standPlatform = null;
           if (!wasGrounded && player.grounded) emitJumpDust();
           if (
             player.x + player.w > goal.x &&
