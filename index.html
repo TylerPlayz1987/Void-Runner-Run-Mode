@@ -1821,7 +1821,8 @@
               vy: (Math.random() - 0.5) * 12,
               l: 40,
             });
-          if (currentLevel % 5 === 0) {
+          // Skip checkpoint logic in speed run mode
+          if (!speedRunMode && currentLevel % 5 === 0) {
             lastCheckpoint = currentLevel;
             play.cp();
             flashAlpha = 0.5;
@@ -3214,14 +3215,26 @@
           currentLevel = 1;
           lastCheckpoint = 1;
           deathCount = 0;
+          shake = 0;
+          flashAlpha = 0;
+          winParticles = [];
           document.getElementById("deaths").textContent = deathCount;
           setLevelDisplay();
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
           document.getElementById("pauseBtn").style.display = "block";
           document.getElementById("speedRunTimer").classList.add("active");
+          document.getElementById("speedRunTimer").textContent = "00:00";
           document.getElementById("speedRunGameOver").style.display = "none";
+          document.getElementById("pauseMenu").style.display = "none";
+          isPaused = false;
 
+          // Fully reset platforms and hazards
+          platforms = [];
+          hazards = [];
+          wells = [];
+          shieldItem = null;
+          
           generateLevel();
           resetPlayerForRun(330);
 
