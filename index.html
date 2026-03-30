@@ -210,6 +210,20 @@
         z-index: 200;
       }
 
+      #tourExplain {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(92%, 690px);
+        pointer-events: none;
+        z-index: 260;
+        text-align: center;
+        color: #9ef;
+        border-color: #9ef;
+        background: rgba(0, 0, 0, 0.93);
+      }
+
       .menu-page {
         display: flex;
         flex-direction: column;
@@ -374,6 +388,7 @@
           </button>
         </div>
         <div id="pauseMenu" class="overlay" style="display: none">
+          <div id="tourExplain" class="stat" style="display: none"></div>
           <div id="mainPausePage" class="menu-page">
             <h1>PAUSED</h1>
             <button id="resumeBtn">Resume</button
@@ -590,7 +605,8 @@
           mainCtx = canvas.getContext("2d"),
           container = document.getElementById("container"),
           cpNotif = document.getElementById("cp-notif"),
-          tutorialHintEl = document.getElementById("tutorialHint");
+          tutorialHintEl = document.getElementById("tutorialHint"),
+          tourExplainEl = document.getElementById("tourExplain");
         let ctx = mainCtx;
         const retroCanvas = document.createElement("canvas");
         retroCanvas.width = 160;
@@ -3016,15 +3032,15 @@
             queuePostTutorialTourStep(elapsed, () => {
               if (!showingPostTutorialSettings) return;
               showPauseTourPage(step.page);
-              cpNotif.textContent = step.text;
-              cpNotif.style.opacity = "1";
+              tourExplainEl.textContent = step.text;
+              tourExplainEl.style.display = "block";
             });
             elapsed += stepDuration;
           }
 
           queuePostTutorialTourStep(elapsed + 700, () => {
             if (!showingPostTutorialSettings) return;
-            cpNotif.style.opacity = "0";
+            tourExplainEl.style.display = "none";
             returnToStartMenu();
           });
         }
@@ -3043,6 +3059,8 @@
           if (m) m.pause();
           cpNotif.textContent = "Checkpoint Reached";
           cpNotif.style.opacity = "0";
+          tourExplainEl.textContent = "";
+          tourExplainEl.style.display = "none";
           document.getElementById("pauseBtn").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
