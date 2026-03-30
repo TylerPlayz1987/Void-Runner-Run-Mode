@@ -276,6 +276,27 @@
         margin: 10px 0;
       }
 
+      .notes-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        max-height: 230px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
+      .notes-grid .setting-item {
+        margin: 0;
+      }
+
+      @media (max-width: 700px) {
+        .notes-grid {
+          grid-template-columns: 1fr;
+          max-height: 270px;
+        }
+      }
+
       input[type="range"],
       select {
         width: 100%;
@@ -422,24 +443,28 @@
           </div>
           <div id="tutorialNotesPage" class="menu-page" style="display: none">
             <h1>Tutorial Notes</h1>
-            <div class="setting-item" style="text-align: left; line-height: 1.4">
-              <span>Movement: A/D or Arrows</span>
-              <span>Jump: W/Up/Space</span>
-              <span>Run: Hold Shift</span>
-              <span>Double Jump: one extra jump in air; resets on landing</span>
-              <span>Checkpoints: saved every 5 levels in Run Mode</span>
-              <span>Shield: One safety hit</span>
-              <span>Gravity Wells: pull your player inward; fight pull with movement and early jumps</span>
-              <span>Settings: adjust master/music/SFX and toggle mutes</span>
-              <span>Themes: swap visual style and theme music (when available)</span>
-              <span>Debug/Cheats: invincibility and level warp for testing</span>
-              <span>High Score: tracks best level only while cheats are not used</span>
-              <span>If cheats are used, high score text shows CHEATS USED</span>
-              <span>At the end of tutorial, reopen this page for a full recap any time</span>
-              <span>
-                Unlocks: L10 spikes+wells, L15 lava, L20 moving platforms, L30 phase platforms,
-                L35 shield, L40 speed+seekers, L50 sinking platforms, L60 swing, L70 fake spikes
-              </span>
+            <div class="notes-grid">
+              <div class="setting-item" style="text-align: left; line-height: 1.4">
+                <span>Movement: A/D or Arrows</span>
+                <span>Jump: W/Up/Space</span>
+                <span>Run: Hold Shift</span>
+                <span>Double Jump: one extra jump in air; resets on landing</span>
+                <span>Shield: One safety hit</span>
+                <span>Gravity Wells: pull inward; fight pull with momentum and early jumps</span>
+                <span>Checkpoints: saved every 5 levels in Run Mode</span>
+              </div>
+              <div class="setting-item" style="text-align: left; line-height: 1.4">
+                <span>Settings: adjust master/music/SFX and toggle mutes</span>
+                <span>Themes: swap visual style and theme music (when available)</span>
+                <span>Debug/Cheats: invincibility and level warp for testing</span>
+                <span>High Score: tracks best level only while cheats are not used</span>
+                <span>If cheats are used, high score text shows CHEATS USED</span>
+                <span>
+                  Unlocks: L10 spikes+wells, L15 lava, L20 moving platforms, L30 phase platforms,
+                  L35 shield, L40 speed+seekers, L50 sinking platforms, L60 swing, L70 fake spikes
+                </span>
+                <span>At the end of tutorial, reopen this page for a full recap any time</span>
+              </div>
             </div>
             <button id="tutorialNotesBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
@@ -555,6 +580,7 @@
           deathCount = 0,
           cheatsUsed = false,
           tutorialMode = false,
+          showingPostTutorialSettings = false,
           loopStarted = false,
           shake = 0,
           winParticles = [],
@@ -914,28 +940,12 @@
             text: "Run Mode checkpoints save every 5 levels. Reach one to set your restart point.",
           },
           {
-            minX: 4120,
+            minX: 4320,
             text: "Obstacle unlocks: L10 spikes+wells, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L60 swing, L70 fake hazards.",
           },
           {
-            minX: 4300,
-            text: "Press P or Esc anytime for Pause. Settings include audio sliders and theme choices.",
-          },
-          {
-            minX: 4460,
-            text: "Themes change visuals and music. 8-bit filter works on Classic theme.",
-          },
-          {
-            minX: 4620,
-            text: "Cheats/Debug offers invincibility and warp. Using cheats locks score as CHEATS USED.",
-          },
-          {
             minX: 4760,
-            text: "High Score stores your best level in local storage when cheats are off.",
-          },
-          {
-            minX: 4880,
-            text: "You are done. Check Pause -> Settings -> Tutorial Notes anytime for a full recap.",
+            text: "Final stretch. Reach the goal, then review settings and notes after completion.",
           },
         ];
         let tutorialHintText = "";
@@ -1705,7 +1715,7 @@
           if (tutorialMode) {
             play.cp();
             const prevText = cpNotif.textContent;
-            cpNotif.textContent = "Tutorial Complete! Returning to start menu...";
+            cpNotif.textContent = "Tutorial Complete! Showing settings + notes next...";
             cpNotif.style.opacity = "1";
             container.style.borderColor = "#0f0";
             container.style.boxShadow = "0 0 30px #0f0";
@@ -1715,18 +1725,21 @@
               cpNotif.style.opacity = "0";
               cpNotif.textContent = prevText;
               tutorialMode = false;
+              showingPostTutorialSettings = true;
               setTutorialUiVisible(false);
               running = false;
-              isPaused = false;
+              isPaused = true;
               currentLevel = 1;
               lastCheckpoint = 1;
               setLevelDisplay();
-              const m = document.getElementById("bgMusic");
-              if (m) m.pause();
               document.getElementById("pauseBtn").style.display = "none";
-              document.getElementById("pauseMenu").style.display = "none";
-              document.getElementById("modeMenu").style.display = "none";
-              document.getElementById("startMenu").style.display = "flex";
+              document.getElementById("pauseMenu").style.display = "flex";
+              document.getElementById("mainPausePage").style.display = "none";
+              document.getElementById("settingsPage").style.display = "flex";
+              document.getElementById("audioPage").style.display = "none";
+              document.getElementById("themePage").style.display = "none";
+              document.getElementById("tutorialNotesPage").style.display = "none";
+              document.getElementById("cheatsPage").style.display = "none";
             }, 2200);
             return;
           }
@@ -2943,6 +2956,23 @@
             tutorialMode ? "block" : "none";
         }
 
+        function returnToStartMenu() {
+          tutorialMode = false;
+          showingPostTutorialSettings = false;
+          setTutorialUiVisible(false);
+          running = false;
+          isPaused = false;
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
+          const m = document.getElementById("bgMusic");
+          if (m) m.pause();
+          document.getElementById("pauseBtn").style.display = "none";
+          document.getElementById("pauseMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("startMenu").style.display = "flex";
+        }
+
         function ensureAudioContext() {
           try {
             if (!audioCtx)
@@ -2954,6 +2984,7 @@
         function startSelectedMode(isTutorial) {
           ensureAudioContext();
           tutorialMode = isTutorial;
+          showingPostTutorialSettings = false;
           setTutorialUiVisible(tutorialMode);
           currentLevel = 1;
           lastCheckpoint = 1;
@@ -2998,17 +3029,8 @@
         document.getElementById("runModeBtn").onclick = () => startSelectedMode(false);
         document.getElementById("tutorialBtn").onclick = () => startSelectedMode(true);
         document.getElementById("exitTutorialBtn").onclick = () => {
-          tutorialMode = false;
-          setTutorialUiVisible(false);
-          running = false;
-          isPaused = false;
-          currentLevel = 1;
-          lastCheckpoint = 1;
-          setLevelDisplay();
-          const m = document.getElementById("bgMusic");
-          if (m) m.pause();
-          document.getElementById("pauseBtn").style.display = "none";
-          document.getElementById("pauseMenu").style.display = "none";
+          returnToStartMenu();
+          document.getElementById("startMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "flex";
         };
 
@@ -3034,6 +3056,10 @@
           document.getElementById("tutorialNotesPage").style.display = "flex";
         };
         document.getElementById("settingsBackBtn").onclick = () => {
+          if (showingPostTutorialSettings) {
+            returnToStartMenu();
+            return;
+          }
           document.getElementById("settingsPage").style.display = "none";
           document.getElementById("mainPausePage").style.display = "flex";
         };
@@ -3312,6 +3338,10 @@
           }
 
           if (settingsPage.style.display === "flex") {
+            if (showingPostTutorialSettings) {
+              returnToStartMenu();
+              return true;
+            }
             settingsPage.style.display = "none";
             document.getElementById("mainPausePage").style.display = "flex";
             return true;
