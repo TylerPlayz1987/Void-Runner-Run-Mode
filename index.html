@@ -2040,8 +2040,8 @@
             ctx.globalAlpha = 1;
           }
           if (t.glitch) ctx.globalAlpha = 0.8;
+          const wellFx = getWellFx(currentTheme);
           wells.forEach((w) => {
-            const wellFx = getWellFx(currentTheme);
             ctx.beginPath();
             ctx.arc(w.x - camX, w.y, w.r, 0, Math.PI * 2);
             let g = ctx.createRadialGradient(
