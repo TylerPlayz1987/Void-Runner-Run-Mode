@@ -3010,7 +3010,7 @@
 
         // Pause/resume and menu toggling (also handles music pause/resume)
         function toggle() {
-          if (!running || speedRunGameOverMode) return;
+          if (!running || speedRunGameOverMode || speedRunMode) return;
           isPaused = !isPaused;
           const m = document.getElementById("bgMusic");
           if (m) {
@@ -3222,9 +3222,9 @@
           setLevelDisplay();
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
-          document.getElementById("pauseBtn").style.display = "block";
+          document.getElementById("pauseBtn").style.display = "none";
           document.getElementById("speedRunTimer").classList.add("active");
-          document.getElementById("speedRunTimer").textContent = "00:00";
+          document.getElementById("speedRunTimer").textContent = "00:00.000";
           document.getElementById("speedRunGameOver").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
           isPaused = false;
@@ -3256,10 +3256,10 @@
         }
 
         function formatSpeedRunTime(ms) {
-          const totalSeconds = Math.floor(ms / 1000);
-          const minutes = Math.floor(totalSeconds / 60);
-          const seconds = totalSeconds % 60;
-          return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+          const minutes = Math.floor(ms / 60000);
+          const seconds = Math.floor((ms % 60000) / 1000);
+          const milliseconds = ms % 1000;
+          return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(milliseconds).padStart(3, "0")}`;
         }
 
         function showSpeedRunGameOver() {
