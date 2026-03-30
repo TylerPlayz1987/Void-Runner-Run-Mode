@@ -2274,9 +2274,9 @@
             ctx.shadowBlur = 15;
             ctx.shadowColor = t.hazards;
           }
+          const lavaFx = getLavaFx(currentTheme);
           hazards.forEach((h) => {
             if (h.type === "lava") {
-              const lavaFx = getLavaFx(currentTheme);
               let glow = ctx.createRadialGradient(
                 h.x - camX + h.w / 2,
                 h.y + h.h / 2,
