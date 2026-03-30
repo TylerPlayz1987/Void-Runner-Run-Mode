@@ -1146,6 +1146,7 @@
                   nextY = p.y - player.h;
                   player.vy = 0;
                   player.grounded = true;
+                  player.hasAirJump = true; // restore air jump on landing
                   if (!wasGrounded && !inheritedLandingMove && p.deltaX) {
                     resolvedX += p.deltaX;
                     inheritedLandingMove = true;
