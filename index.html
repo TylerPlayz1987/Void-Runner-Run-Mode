@@ -961,7 +961,7 @@
           const notif = document.createElement("div");
           notif.style.cssText = `
             position: fixed;
-            bottom: 20px;
+            top: 20px;
             right: 20px;
             background: rgba(0, 0, 0, 0.95);
             border: 2px solid #ffd700;
@@ -973,8 +973,22 @@
             min-width: 220px;
             z-index: 500;
             box-shadow: 0 0 15px #ffd700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: none;
           `;
-          notif.innerHTML = `<div style="font-size: 14px;">ACHIEVEMENT UNLOCKED</div><div style="font-size: 12px; margin-top: 4px;">${achievement.name}</div>`;
+          const iconCanvas = document.createElement("canvas");
+          drawAchievementIcon(iconCanvas, achievement.id);
+          iconCanvas.style.width = "44px";
+          iconCanvas.style.height = "44px";
+          iconCanvas.style.flexShrink = "0";
+
+          const textWrap = document.createElement("div");
+          textWrap.innerHTML = `<div style="font-size: 14px;">ACHIEVEMENT UNLOCKED</div><div style="font-size: 12px; margin-top: 4px;">${achievement.name}</div>`;
+
+          notif.appendChild(iconCanvas);
+          notif.appendChild(textWrap);
           document.body.appendChild(notif);
           setTimeout(() => {
             notif.style.transition = "opacity 0.5s";
