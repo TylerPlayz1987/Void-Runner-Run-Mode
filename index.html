@@ -3197,14 +3197,14 @@
             ctx.fillStyle = wg;
             ctx.fillRect(0, 250, 800, 150);
             
-            // Water waves effect
-            ctx.strokeStyle = "rgba(100,150,200,0.3)";
-            ctx.lineWidth = 2;
-            for (let w = 0; w < 4; w++) {
-              let waveY = 250 + w * 35 + Math.sin((frameCount + w * 30) / 20) * 5;
+            // Water waves effect - more rough and dramatic
+            ctx.strokeStyle = "rgba(100,150,200,0.4)";
+            ctx.lineWidth = 3;
+            for (let w = 0; w < 5; w++) {
+              let waveY = 250 + w * 25 + Math.sin((frameCount + w * 20) / 15) * 12;
               ctx.beginPath();
-              for (let x = 0; x <= 800; x += 40) {
-                let y = waveY + Math.sin((x + frameCount) / 30 + w) * 3;
+              for (let x = 0; x <= 800; x += 30) {
+                let y = waveY + Math.sin((x + frameCount * 1.5) / 25 + w) * 6;
                 if (x === 0) ctx.moveTo(x, y);
                 else ctx.lineTo(x, y);
               }
@@ -3213,8 +3213,8 @@
             
             // Draw pirate ship in background with bobbing animation
             let shipX = 300 - camX * 0.2; // Parallax effect
-            let bobbing = Math.sin(frameCount / 30) * 8; // Bobbing animation
-            let shipY = 200 + bobbing; // Sits on water line and bobs with waves
+            let bobbing = Math.sin(frameCount / 25) * 12 + Math.sin(frameCount / 18) * 8; // More dramatic bobbing
+            let shipY = 230 + bobbing; // Sits lower in the water
             
             // Ship shadow underwater
             ctx.fillStyle = "rgba(0,0,0,0.1)";
