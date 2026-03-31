@@ -3018,16 +3018,10 @@
             ctx.fillRect(hX + 22, hY, 4, 10);
           }
           if (currentTheme === "moony") {
-            ctx.fillStyle = c;
+            ctx.fillStyle = "#fff";
             ctx.beginPath();
             ctx.arc(x + 10, y + 10, 10, 0, Math.PI * 2);
             ctx.fill();
-            ctx.globalCompositeOperation = "destination-out";
-            ctx.fillStyle = "#000";
-            ctx.beginPath();
-            ctx.arc(x + 14, y + 10, 10, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalCompositeOperation = "source-over";
           } else if (currentTheme === "sunny") {
             ctx.fillStyle = c;
             const cX = x + 10,
