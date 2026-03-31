@@ -122,6 +122,7 @@
         cursor: pointer;
         transition: box-shadow 0.2s;
         box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        position: relative;
       }
 
       .achievement-badge:hover {
@@ -134,9 +135,6 @@
         box-shadow: none;
       }
 
-      .achievement-badge {
-        position: relative;
-      }
 
       .achievement-tooltip {
         position: absolute;
@@ -462,18 +460,19 @@
       }
 
       h1 {
-        color: #0f0;
-        margin-bottom: 15px;
-        letter-spacing: 5px;
-        font-size: 24px;
-      }
-
-      button {
-        background: #0f0;
-        border: none;
-        padding: 12px;
-        font-size: 16px;
-        font-weight: bold;
+            .achievement-badge {
+              width: 50px;
+              height: 50px;
+              background: rgba(0, 0, 0, 0.95);
+              border: 2px solid #ffd700;
+              border-radius: 3px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              cursor: pointer;
+              transition: box-shadow 0.2s;
+              box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+              position: relative;
         cursor: pointer;
         border-radius: 5px;
         width: 100%;
