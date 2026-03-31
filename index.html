@@ -1539,15 +1539,16 @@
             Math.floor(Math.random() * 5)
           ],
         }));
-        const moonTreeTops = Array.from({ length: 26 }, () => ({
-          x: Math.random() * 2400,
-          w: 46 + Math.random() * 72,
-          h: 34 + Math.random() * 68,
-          trunkW: 6 + Math.random() * 6,
-          trunkH: 20 + Math.random() * 34,
-          parallax: 0.1 + Math.random() * 0.16,
+        const moonTreeTops = Array.from({ length: 44 }, () => ({
+          x: Math.random() * 2600,
+          baseY: 264 + Math.random() * 86,
+          w: 18 + Math.random() * 34,
+          h: 72 + Math.random() * 140,
+          trunkW: 2 + Math.random() * 3.2,
+          parallax: 0.08 + Math.random() * 0.22,
           sway: Math.random() * Math.PI * 2,
-          color: ["rgba(22,16,34,0.95)", "rgba(30,20,48,0.9)", "rgba(38,26,58,0.85)"][
+          swayAmp: 0.25 + Math.random() * 0.8,
+          tone: ["rgba(4,8,16,0.96)", "rgba(7,12,24,0.95)", "rgba(10,15,30,0.92)"][
             Math.floor(Math.random() * 3)
           ],
         }));
@@ -3181,27 +3182,38 @@
           }
           if (currentTheme === "moony") {
             moonTreeTops.forEach((tree, i) => {
-              let tx = (tree.x - camX * tree.parallax) % 2400;
-              if (tx < -200) tx += 2400;
-              const sway = Math.sin(frameCount / 55 + tree.sway + i * 0.13) * 1.2;
-              const canopyY = 292 + Math.sin(frameCount / 110 + tree.sway) * 2;
+              let tx = (tree.x - camX * tree.parallax) % 2600;
+              if (tx < -220) tx += 2600;
+              const sway =
+                Math.sin(frameCount / 95 + tree.sway + i * 0.12) * tree.swayAmp;
+              const topY = tree.baseY - tree.h;
 
               ctx.save();
               ctx.translate(tx + sway, 0);
-              ctx.fillStyle = tree.color;
-              ctx.fillRect(-tree.trunkW / 2, canopyY + 10, tree.trunkW, tree.trunkH);
-              ctx.beginPath();
-              ctx.arc(0, canopyY, tree.w * 0.42, Math.PI, Math.PI * 2);
-              ctx.arc(tree.w * 0.16, canopyY - tree.h * 0.2, tree.w * 0.3, Math.PI, Math.PI * 2);
-              ctx.arc(-tree.w * 0.2, canopyY - tree.h * 0.16, tree.w * 0.27, Math.PI, Math.PI * 2);
-              ctx.closePath();
-              ctx.fill();
+              ctx.fillStyle = tree.tone;
+
+              // Tall conifer silhouette made from stacked triangular layers.
+              for (let layer = 0; layer < 4; layer++) {
+                const p = layer / 3;
+                const yTop = topY + p * tree.h * 0.62;
+                const yBottom = yTop + tree.h * (0.35 - layer * 0.03);
+                const halfW = tree.w * (0.32 + p * 0.72);
+                ctx.beginPath();
+                ctx.moveTo(0, yTop);
+                ctx.lineTo(halfW, yBottom);
+                ctx.lineTo(-halfW, yBottom);
+                ctx.closePath();
+                ctx.fill();
+              }
+
+              const trunkH = Math.max(14, tree.h * 0.23);
+              ctx.fillRect(-tree.trunkW / 2, tree.baseY - 2, tree.trunkW, trunkH);
               ctx.restore();
             });
 
             let mist = ctx.createLinearGradient(0, 250, 0, 400);
-            mist.addColorStop(0, "rgba(170,150,220,0)");
-            mist.addColorStop(1, "rgba(12,8,24,0.3)");
+            mist.addColorStop(0, "rgba(32,42,72,0)");
+            mist.addColorStop(1, "rgba(4,8,18,0.35)");
             ctx.fillStyle = mist;
             ctx.fillRect(0, 250, 800, 150);
           }
