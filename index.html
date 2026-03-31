@@ -2362,6 +2362,7 @@
           player.dashSpeed = 15;
           player.dashDuration = 15;
           player.dashTimer = 0;
+          player.currentDashSpeed = 15;
           noMoveStartJumpCount = 0;
           noMoveStartMoved = false;
           noMoveStartX = player.x;
@@ -2663,7 +2664,15 @@
             let dashDir = player.momentumX !== 0 ? Math.sign(player.momentumX) : 
                          ((keys["ArrowRight"] || keys["KeyD"] ? 1 : 0) - (keys["ArrowLeft"] || keys["KeyA"] ? 1 : 0));
             if (dashDir === 0) dashDir = 1; // Default to right if no direction
-            player.vx = dashDir * player.dashSpeed;
+            
+            // Increase dash speed if sprinting
+            let currentDashSpeed = player.dashSpeed;
+            if (keys["ShiftLeft"] || keys["ShiftRight"]) {
+              currentDashSpeed *= 1.5; // 50% faster when sprinting
+            }
+            player.currentDashSpeed = currentDashSpeed;
+            
+            player.vx = dashDir * currentDashSpeed;
             player.vy = 0; // Reset vertical velocity for cleaner dash
             // Add dash trail effect
             player.trail.push({ x: player.x, y: player.y });
@@ -2690,7 +2699,7 @@
           // Apply dash velocity or normal momentum
           if (player.dashTimer > 0) {
             // During dash, maintain dash velocity
-            player.vx = Math.sign(player.vx) * player.dashSpeed;
+            player.vx = Math.sign(player.vx) * player.currentDashSpeed;
           } else {
             player.vx = player.momentumX;
           }
