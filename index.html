@@ -683,6 +683,7 @@
                 <option value="toybox">Toybox</option>
                 <option value="deepsea">Deep Sea</option>
                 <option value="cyber">Cyber</option>
+                <option value="glitchworld">Glitch World</option>
                 <option value="magma">Magma</option>
                 <option value="stardust">Star-Dust</option>
                 <option value="pirate">Pirate</option>
@@ -1297,6 +1298,15 @@
             glitch: true,
             music: "theme_bg/Neon.ogg",
           },
+          glitchworld: {
+            bg: "#05010f",
+            plat: "#6a35ff",
+            player: "#74fff2",
+            hazards: "#ff2e9e",
+            stars: true,
+            glitch: true,
+            music: "theme_bg/Glitchy.ogg",
+          },
           magma: {
             bg: "#1a0505",
             plat: "#fa9b6b",
@@ -1380,6 +1390,16 @@
             stroke: "rgba(120,255,255,0.84)",
             particleA: [255, 80, 200],
             particleB: [0, 240, 255],
+            particleStyle: "spark",
+          },
+          glitchworld: {
+            glowInner: "rgba(255,46,158,0.75)",
+            glowMid: "rgba(106,53,255,0.45)",
+            glowOuter: "rgba(50,0,100,0)",
+            fill: "rgba(220,40,160,0.92)",
+            stroke: "rgba(116,255,242,0.84)",
+            particleA: [255, 46, 158],
+            particleB: [106, 53, 255],
             particleStyle: "spark",
           },
           magma: {
@@ -1470,6 +1490,15 @@
             coreMid: "rgba(120,0,130,0.34)",
             coreRing: "rgba(255,60,210,0.24)",
             coreStroke: "#ff4cd6",
+          },
+          glitchworld: {
+            normalInner: "rgba(106,53,255,0.5)",
+            normalMid: "rgba(50,0,100,0.3)",
+            normalRing: "rgba(116,255,242,0.22)",
+            coreInner: "rgba(255,46,158,0.52)",
+            coreMid: "rgba(130,0,80,0.34)",
+            coreRing: "rgba(255,80,200,0.24)",
+            coreStroke: "#ff2e9e",
           },
           magma: {
             normalInner: "rgba(255,140,40,0.5)",
@@ -3146,6 +3175,20 @@
             ctx.beginPath();
             ctx.arc(x + 8, y + 11, 3, 0, Math.PI * 2);
             ctx.fill();
+          } else if (currentTheme === "glitchworld") {
+            const jitterX = Math.sin(frameCount * 0.25 + y) * 1.3;
+            const jitterY = Math.cos(frameCount * 0.18 + x) * 0.9;
+            ctx.fillStyle = c;
+            ctx.fillRect(x - 1 + jitterX, y + jitterY, 22, 20);
+            ctx.save();
+            ctx.globalAlpha = 0.55;
+            ctx.fillStyle = "#ff3bb5";
+            ctx.fillRect(x - 3 + jitterX, y + 2 + jitterY, 20, 16);
+            ctx.fillStyle = "#52e3ff";
+            ctx.fillRect(x + 2 + jitterX, y - 2 + jitterY, 16, 16);
+            ctx.restore();
+            ctx.fillStyle = "#0a0a14";
+            ctx.fillRect(x + 6 + jitterX, y + 6 + jitterY, 8, 8);
           } else if (currentTheme === "pirate") {
             // Draw pirate body
             ctx.fillStyle = c;
@@ -3295,6 +3338,41 @@
             g.addColorStop(1, "#6a1a7a");
             ctx.fillStyle = g;
             ctx.fillRect(0, 0, 800, 400);
+          } else if (currentTheme === "glitchworld") {
+            const base = ctx.createLinearGradient(0, 0, 800, 400);
+            base.addColorStop(0, "#04010e");
+            base.addColorStop(0.45, "#12062c");
+            base.addColorStop(1, "#020307");
+            ctx.fillStyle = base;
+            ctx.fillRect(0, 0, 800, 400);
+
+            const drift = frameCount * 1.35;
+            for (let i = 0; i < 16; i++) {
+              const bandY = (i * 29 + drift) % 420;
+              const width = 260 + ((i % 4) * 70);
+              const startX = ((i * 93 - camX * 0.2) % 1000) - 120;
+              const color = i % 2 === 0 ? "rgba(255,50,170,0.12)" : "rgba(80,255,245,0.1)";
+              ctx.fillStyle = color;
+              ctx.fillRect(startX, bandY, width, 2);
+            }
+
+            for (let y = 0; y < 400; y += 5) {
+              const alpha = 0.06 + Math.sin((frameCount + y) * 0.08) * 0.03;
+              ctx.fillStyle = `rgba(150,140,255,${alpha})`;
+              ctx.fillRect(0, y, 800, 1);
+            }
+
+            for (let i = 0; i < 14; i++) {
+              const shardX = ((i * 171 + frameCount * (0.9 + (i % 3) * 0.25)) % 980) - 90;
+              const shardY = (i * 51 + Math.sin(frameCount * 0.03 + i) * 18 + 20) % 380;
+              const len = 12 + (i % 5) * 6;
+              ctx.strokeStyle = i % 2 === 0 ? "rgba(255,70,190,0.45)" : "rgba(90,250,255,0.45)";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(shardX, shardY);
+              ctx.lineTo(shardX + len, shardY - len * 0.5);
+              ctx.stroke();
+            }
           } else if (currentTheme === "pirate") {
             // Sky gradient (day sky)
             let g = ctx.createLinearGradient(0, 0, 0, 250);
@@ -3556,7 +3634,8 @@
             currentTheme === "moony" ||
             currentTheme === "stardust" ||
             currentTheme === "deepsea" ||
-            currentTheme === "cyber"
+            currentTheme === "cyber" ||
+            currentTheme === "glitchworld"
           ) {
             stars.forEach((s) => {
               if (currentTheme === "deepsea") {
@@ -3569,7 +3648,8 @@
                 ctx.fillStyle =
                   currentTheme === "moony" ||
                   currentTheme === "stardust" ||
-                  currentTheme === "cyber"
+                  currentTheme === "cyber" ||
+                  currentTheme === "glitchworld"
                     ? "#FFF"
                     : "rgba(255,255,255,0.2)";
                 ctx.fillRect(s.x, s.y, s.s, s.s);
@@ -4007,6 +4087,25 @@
             ctx.lineTo(gw * 0.5, 0);
             ctx.lineTo(0, gh * 0.5);
             ctx.lineTo(-gw * 0.5, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+            ctx.restore();
+          } else if (currentTheme === "glitchworld") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            const pulse = 0.7 + Math.sin(frameCount * 0.18) * 0.2;
+            ctx.rotate(frameCount * 0.045);
+            ctx.fillStyle = `rgba(98,255,240,${0.35 + pulse * 0.2})`;
+            ctx.strokeStyle = "#ff2ec3";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(0, -gh * 0.55);
+            ctx.lineTo(gw * 0.35, -gh * 0.1);
+            ctx.lineTo(gw * 0.55, gh * 0.1);
+            ctx.lineTo(0, gh * 0.55);
+            ctx.lineTo(-gw * 0.55, gh * 0.1);
+            ctx.lineTo(-gw * 0.35, -gh * 0.1);
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
