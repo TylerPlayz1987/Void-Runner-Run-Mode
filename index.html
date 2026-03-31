@@ -513,8 +513,6 @@
             <button id="openAudioBtn" style="width: 100%; margin-bottom: 8px;">Audio Settings</button>
             <button id="openThemeBtn" style="width: 100%; margin-bottom: 8px;">Theme Settings</button>
             <button id="openMobileSupportBtn" style="width: 100%; margin-bottom: 8px;">Mobile Support</button>
-            <button id="openControlLayoutBtn" style="width: 100%; margin-bottom: 8px;">Button Size & Spot</button>
-            <button id="openScreenSizeBtn" style="width: 100%; margin-bottom: 8px;">Screen Size</button>
             <button id="openTutorialNotesBtn" style="width: 100%; margin-bottom: 8px;">Tutorial Notes</button>
             <button id="settingsBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
@@ -569,6 +567,8 @@
               <span>On-screen Controls</span>
               <button id="mobileSupportToggleBtn" class="small-btn">Mobile Support: OFF</button>
             </div>
+            <button id="openControlLayoutBtn" style="width: 100%; margin-top: 8px;">Button Size & Spot</button>
+            <button id="openScreenSizeBtn" style="width: 100%; margin-top: 8px;">Screen Size</button>
             <div class="setting-item" style="text-align: left; font-size: 12px; line-height: 1.4">
               <span>Shows left/right, jump, and run buttons on screen.</span>
             </div>
@@ -661,12 +661,12 @@
         </div>
         <div id="mobileControls">
           <div class="mobile-group">
-            <button class="mobile-btn" data-code="ArrowLeft">◀</button>
-            <button class="mobile-btn" data-code="ArrowRight">▶</button>
+            <button class="mobile-btn" data-code="ArrowLeft" aria-label="Move left" title="Move left">◀</button>
+            <button class="mobile-btn" data-code="ArrowRight" aria-label="Move right" title="Move right">▶</button>
           </div>
           <div class="mobile-group">
-            <button class="mobile-btn wide" data-code="ShiftLeft">RUN</button>
-            <button class="mobile-btn" data-code="Space">JUMP</button>
+            <button class="mobile-btn wide" data-code="ShiftLeft" aria-label="Run" title="Run">RUN</button>
+            <button class="mobile-btn" data-code="Space" aria-label="Jump" title="Jump">JUMP</button>
           </div>
         </div>
         <canvas id="canvas"></canvas>
@@ -3468,11 +3468,11 @@
           document.getElementById("mobileSupportPage").style.display = "flex";
         };
         document.getElementById("openControlLayoutBtn").onclick = () => {
-          document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("mobileSupportPage").style.display = "none";
           document.getElementById("controlLayoutPage").style.display = "flex";
         };
         document.getElementById("openScreenSizeBtn").onclick = () => {
-          document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("mobileSupportPage").style.display = "none";
           document.getElementById("screenSizePage").style.display = "flex";
         };
         document.getElementById("openTutorialNotesBtn").onclick = () => {
@@ -3501,11 +3501,11 @@
         };
         document.getElementById("controlLayoutBackBtn").onclick = () => {
           document.getElementById("controlLayoutPage").style.display = "none";
-          document.getElementById("settingsPage").style.display = "flex";
+          document.getElementById("mobileSupportPage").style.display = "flex";
         };
         document.getElementById("screenSizeBackBtn").onclick = () => {
           document.getElementById("screenSizePage").style.display = "none";
-          document.getElementById("settingsPage").style.display = "flex";
+          document.getElementById("mobileSupportPage").style.display = "flex";
         };
         document.getElementById("tutorialNotesBackBtn").onclick = () => {
           document.getElementById("tutorialNotesPage").style.display = "none";
@@ -3833,17 +3833,23 @@
             audioPage.style.display === "flex" ||
             themePage.style.display === "flex" ||
             mobileSupportPage.style.display === "flex" ||
-            controlLayoutPage.style.display === "flex" ||
-            screenSizePage.style.display === "flex" ||
             tutorialNotesPage.style.display === "flex"
           ) {
             audioPage.style.display = "none";
             themePage.style.display = "none";
             mobileSupportPage.style.display = "none";
-            controlLayoutPage.style.display = "none";
-            screenSizePage.style.display = "none";
             tutorialNotesPage.style.display = "none";
             settingsPage.style.display = "flex";
+            return true;
+          }
+
+          if (
+            controlLayoutPage.style.display === "flex" ||
+            screenSizePage.style.display === "flex"
+          ) {
+            controlLayoutPage.style.display = "none";
+            screenSizePage.style.display = "none";
+            mobileSupportPage.style.display = "flex";
             return true;
           }
 
@@ -3927,15 +3933,41 @@
         updateControlLayoutUi();
         updateScreenSizeUi();
 
+        const activePointerToCode = new Map();
+        const releasePointerFallback = (ev) => {
+          const activeCode = activePointerToCode.get(ev.pointerId);
+          if (!activeCode) return;
+          keys[activeCode] = 0;
+          activePointerToCode.delete(ev.pointerId);
+        };
+        window.addEventListener("pointerup", releasePointerFallback);
+        window.addEventListener("pointercancel", releasePointerFallback);
+
         for (const btn of document.querySelectorAll("#mobileControls [data-code]")) {
           const code = btn.dataset.code;
           const press = (ev) => {
             ev.preventDefault();
             keys[code] = 1;
+            activePointerToCode.set(ev.pointerId, code);
+            if (btn.setPointerCapture) {
+              try {
+                btn.setPointerCapture(ev.pointerId);
+              } catch (_err) {
+                // Some browsers can throw if capture is not allowed for this event target.
+              }
+            }
           };
           const release = (ev) => {
             ev.preventDefault();
             keys[code] = 0;
+            activePointerToCode.delete(ev.pointerId);
+            if (btn.hasPointerCapture && btn.hasPointerCapture(ev.pointerId)) {
+              try {
+                btn.releasePointerCapture(ev.pointerId);
+              } catch (_err) {
+                // Ignore release errors for already-released or invalid captures.
+              }
+            }
           };
           btn.addEventListener("pointerdown", press);
           btn.addEventListener("pointerup", release);
