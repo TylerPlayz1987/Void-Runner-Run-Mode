@@ -2920,12 +2920,15 @@
                   nextX = p.effectiveX + p.w;
                 } else {
                   // Resolve stationary penetrations (e.g., platform moving into player).
-                  const pushLeft = p.effectiveX - player.w - nextX;
-                  const pushRight = p.effectiveX + p.w - nextX;
-                  nextX +=
-                    Math.abs(pushLeft) <= Math.abs(pushRight)
-                      ? pushLeft
-                      : pushRight;
+                  // Skip for swinging platforms as their movement is unpredictable
+                  if (!p.isSwingPlatform) {
+                    const pushLeft = p.effectiveX - player.w - nextX;
+                    const pushRight = p.effectiveX + p.w - nextX;
+                    nextX +=
+                      Math.abs(pushLeft) <= Math.abs(pushRight)
+                        ? pushLeft
+                        : pushRight;
+                  }
                 }
                 player.vx = 0;
                 player.momentumX = 0;
@@ -2963,12 +2966,15 @@
                   player.vy = 0;
                 } else {
                   // Resolve stationary penetrations (e.g., platform moving into player).
-                  const pushUp = p.effectiveY - player.h - nextY;
-                  const pushDown = p.effectiveY + p.h - nextY;
-                  nextY +=
-                    Math.abs(pushUp) <= Math.abs(pushDown)
-                      ? pushUp
-                      : pushDown;
+                  // Skip for swinging platforms as their movement is unpredictable
+                  if (!p.isSwingPlatform) {
+                    const pushUp = p.effectiveY - player.h - nextY;
+                    const pushDown = p.effectiveY + p.h - nextY;
+                    nextY +=
+                      Math.abs(pushUp) <= Math.abs(pushDown)
+                        ? pushUp
+                        : pushDown;
+                  }
                 }
               }
             }
