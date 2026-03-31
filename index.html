@@ -3021,8 +3021,13 @@
             ctx.fillStyle = c;
             ctx.beginPath();
             ctx.arc(x + 10, y + 10, 10, 0, Math.PI * 2);
-            ctx.arc(x + 16, y + 6, 10, Math.PI, 0, true);
             ctx.fill();
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc(x + 14, y + 10, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalCompositeOperation = "source-over";
           } else if (currentTheme === "sunny") {
             ctx.fillStyle = c;
             const cX = x + 10,
@@ -3528,19 +3533,11 @@
             ctx.translate(gx + gw / 2, gy + gh / 2);
             ctx.shadowBlur = 15;
             ctx.shadowColor = "rgba(255,255,255,0.8)";
-            // Draw crescent moon as two overlapping circles
-            ctx.fillStyle = "#ffffff";
-            ctx.globalCompositeOperation = "source-over";
-            // Draw main moon circle
-            ctx.beginPath();
-            ctx.arc(0, 0, gw * 0.45, 0, Math.PI * 2);
-            ctx.fill();
-            // Create crescent by removing from the right side
-            ctx.globalCompositeOperation = "destination-out";
-            ctx.beginPath();
-            ctx.arc(gw * 0.2, 0, gw * 0.4, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalCompositeOperation = "source-over";
+            ctx.fillStyle = "rgba(200,180,255,0.6)";
+            ctx.fillRect(-gw / 2, -gh / 2, gw, gh);
+            ctx.strokeStyle = "#d0c0ff";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-gw / 2, -gh / 2, gw, gh);
             ctx.restore();
           } else if (currentTheme === "toybox") {
             ctx.fillStyle = "#f44336";
