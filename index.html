@@ -2951,6 +2951,14 @@
                 } else if (stepY < 0 && resolvedY >= p.y + p.h - 1) {
                   nextY = p.y + p.h;
                   player.vy = 0;
+                } else {
+                  // Resolve stationary penetrations (e.g., platform moving into player).
+                  const pushUp = p.y - player.h - nextY;
+                  const pushDown = p.y + p.h - nextY;
+                  nextY +=
+                    Math.abs(pushUp) <= Math.abs(pushDown)
+                      ? pushUp
+                      : pushDown;
                 }
               }
             }
@@ -3012,11 +3020,8 @@
                 const dx = swing.x - closestX;
                 const dy = swing.y - closestY;
                 if (dx * dx + dy * dy < p.swingSize * p.swingSize) {
-                  const dist = Math.sqrt(dx * dx + dy * dy) || 0.1;
-                  const pushX = (dx / dist) * 8;
-                  const pushY = (dy / dist) * 8;
-                  player.vx = pushX;
-                  player.vy = pushY - 5;
+                  dead = true;
+                  break;
                 }
               }
             }
