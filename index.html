@@ -1539,11 +1539,12 @@
             Math.floor(Math.random() * 5)
           ],
         }));
-        const moonTreeTops = Array.from({ length: 44 }, () => ({
+        const moonTreeTops = Array.from({ length: 52 }, () => ({
           x: Math.random() * 2600,
-          baseY: 264 + Math.random() * 86,
-          w: 18 + Math.random() * 34,
-          h: 72 + Math.random() * 140,
+          // Keep tree bases below the visible canvas so only the tops peek in.
+          baseY: 432 + Math.random() * 88,
+          w: 20 + Math.random() * 38,
+          h: 110 + Math.random() * 170,
           trunkW: 2 + Math.random() * 3.2,
           parallax: 0.08 + Math.random() * 0.22,
           sway: Math.random() * Math.PI * 2,
@@ -3205,17 +3206,14 @@
                 ctx.closePath();
                 ctx.fill();
               }
-
-              const trunkH = Math.max(14, tree.h * 0.23);
-              ctx.fillRect(-tree.trunkW / 2, tree.baseY - 2, tree.trunkW, trunkH);
               ctx.restore();
             });
 
-            let mist = ctx.createLinearGradient(0, 250, 0, 400);
+            let mist = ctx.createLinearGradient(0, 300, 0, 400);
             mist.addColorStop(0, "rgba(32,42,72,0)");
-            mist.addColorStop(1, "rgba(4,8,18,0.35)");
+            mist.addColorStop(1, "rgba(4,8,18,0.48)");
             ctx.fillStyle = mist;
-            ctx.fillRect(0, 250, 800, 150);
+            ctx.fillRect(0, 300, 800, 100);
           }
           if (currentTheme === "toybox") {
             fallingToys.forEach((toy, i) => {
