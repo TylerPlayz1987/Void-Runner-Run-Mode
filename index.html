@@ -685,6 +685,7 @@
                 <option value="cyber">Cyber</option>
                 <option value="magma">Magma</option>
                 <option value="stardust">Star-Dust</option>
+                <option value="pirate">Pirate</option>
               </select>
             </div>
             <div class="setting-item">
@@ -1339,6 +1340,14 @@
             aurora: true,
             music: "theme_bg/Starry.ogg",
           },
+          pirate: {
+            bg: "#1a0f08",
+            plat: "#5a3a2a",
+            player: "#ffd700",
+            hazards: "#cc0000",
+            pirate: true,
+            music: "Sea.ogg",
+          },
         };
         const lavaThemeFx = {
           classic: {
@@ -1421,6 +1430,16 @@
             particleB: [120, 180, 255],
             particleStyle: "spark",
           },
+          pirate: {
+            glowInner: "rgba(255,165,0,0.7)",
+            glowMid: "rgba(204,0,0,0.45)",
+            glowOuter: "rgba(139,69,19,0)",
+            fill: "rgba(255,140,0,0.95)",
+            stroke: "rgba(255,215,0,0.8)",
+            particleA: [255, 165, 0],
+            particleB: [255, 215, 0],
+            particleStyle: "spark",
+          },
         };
         function getLavaFx(themeName) {
           return lavaThemeFx[themeName] || lavaThemeFx.classic;
@@ -1497,6 +1516,15 @@
             coreMid: "rgba(70,90,170,0.34)",
             coreRing: "rgba(180,220,255,0.24)",
             coreStroke: "#b4d7ff",
+          },
+          pirate: {
+            normalInner: "rgba(255,165,0,0.5)",
+            normalMid: "rgba(204,0,0,0.3)",
+            normalRing: "rgba(255,215,0,0.22)",
+            coreInner: "rgba(255,140,0,0.52)",
+            coreMid: "rgba(139,69,19,0.34)",
+            coreRing: "rgba(255,165,0,0.24)",
+            coreStroke: "#ffa500",
           },
         };
         function getWellFx(themeName) {
