@@ -980,6 +980,23 @@
             mode: "speedrun" // This achievement is for speedrun mode only
           }
         };
+
+        const achievementIconImageSources = {
+          closeCall: "achievement_icons/3.png"
+        };
+        const achievementIconImageCache = {};
+
+        function getAchievementIconImage(achievementId) {
+          const src = achievementIconImageSources[achievementId];
+          if (!src) return null;
+          if (!achievementIconImageCache[achievementId]) {
+            const img = new Image();
+            img.src = src;
+            img.onload = () => renderAchievements();
+            achievementIconImageCache[achievementId] = img;
+          }
+          return achievementIconImageCache[achievementId];
+        }
         
         // Helper function to get achievements for a specific mode
         function getAchievementsForMode(mode) {
@@ -1062,6 +1079,13 @@
           const ctx = canvas.getContext("2d");
           canvas.width = 50;
           canvas.height = 50;
+
+          const imageIcon = getAchievementIconImage(achievementId);
+          if (imageIcon && imageIcon.complete && imageIcon.naturalWidth > 0) {
+            ctx.clearRect(0, 0, 50, 50);
+            ctx.drawImage(imageIcon, 0, 0, 50, 50);
+            return;
+          }
           
           if (achievementId === "floorIsLava") {
             // Draw orange/red door icon for "Floor is Lava"
