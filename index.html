@@ -2462,6 +2462,20 @@
           }
         }
 
+        function emitPlatformChips() {
+          for (let i = 0; i < 8; i++) {
+            jumpDust.push({
+              x: player.x + player.w / 2 + (Math.random() - 0.5) * 12,
+              y: player.y + player.h + 2,
+              vx: (Math.random() - 0.5) * 3,
+              vy: -2 - Math.random() * 2,
+              size: 1 + Math.random() * 2,
+              alpha: 0.9,
+              life: 25 + Math.floor(Math.random() * 10),
+            });
+          }
+        }
+
         function performJump(useAirJump = false) {
           player.vy = player.jump;
           player.grounded = false;
@@ -3005,7 +3019,13 @@
           if (tutorialMode) updateTutorialHint();
           if (player.grounded) player.hasAirJump = true; // always restore while touching ground
           if (!player.grounded) player.standPlatform = null;
-          if (!wasGrounded && player.grounded) emitJumpDust();
+          if (!wasGrounded && player.grounded) {
+            if (currentTheme === "pirate") {
+              emitPlatformChips();
+            } else {
+              emitJumpDust();
+            }
+          }
           if (
             player.x + player.w > goal.x &&
             player.x < goal.x + goal.w &&
@@ -3991,25 +4011,74 @@
           const lavaFx = getLavaFx(currentTheme);
           hazards.forEach((h) => {
             if (h.type === "lava") {
-              let glow = ctx.createRadialGradient(
-                h.x - camX + h.w / 2,
-                h.y + h.h / 2,
-                0,
-                h.x - camX + h.w / 2,
-                h.y + h.h / 2,
-                Math.max(20, h.h),
-              );
-              glow.addColorStop(0, lavaFx.glowInner);
-              glow.addColorStop(0.45, lavaFx.glowMid);
-              glow.addColorStop(1, lavaFx.glowOuter);
-              ctx.fillStyle = glow;
-              ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
+              if (currentTheme === "pirate") {
+                // Draw shark fin for pirate theme
+                ctx.fillStyle = "#2a2a2a";
+                ctx.strokeStyle = "#1a1a1a";
+                ctx.lineWidth = 1;
+                
+                // Shark fin shape
+                ctx.beginPath();
+                ctx.moveTo(h.x - camX, h.y + h.h);
+                ctx.lineTo(h.x - camX + h.w * 0.3, h.y + h.h - h.h * 0.7);
+                ctx.lineTo(h.x - camX + h.w * 0.5, h.y + h.h - h.h * 0.9);
+                ctx.lineTo(h.x - camX + h.w * 0.7, h.y + h.h - h.h * 0.7);
+                ctx.lineTo(h.x - camX + h.w, h.y + h.h);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+                
+                // Shark teeth
+                ctx.fillStyle = "#ffffff";
+                for (let i = 0; i < 5; i++) {
+                  let toothX = h.x - camX + h.w * 0.2 + i * h.w * 0.12;
+                  let toothY = h.y + h.h - h.h * 0.3;
+                  ctx.beginPath();
+                  ctx.moveTo(toothX, toothY);
+                  ctx.lineTo(toothX + 3, toothY - 8);
+                  ctx.lineTo(toothX + 6, toothY);
+                  ctx.closePath();
+                  ctx.fill();
+                }
+                
+                // Shark eye
+                ctx.fillStyle = "#ff0000";
+                ctx.beginPath();
+                ctx.arc(h.x - camX + h.w * 0.6, h.y + h.h - h.h * 0.6, 4, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Water splash effect around shark
+                ctx.strokeStyle = "rgba(100,150,200,0.6)";
+                ctx.lineWidth = 2;
+                for (let i = 0; i < 3; i++) {
+                  let splashX = h.x - camX + Math.random() * h.w;
+                  let splashY = h.y + h.h + Math.random() * 10;
+                  ctx.beginPath();
+                  ctx.moveTo(splashX, splashY);
+                  ctx.lineTo(splashX + (Math.random() - 0.5) * 20, splashY - 15);
+                  ctx.stroke();
+                }
+              } else {
+                let glow = ctx.createRadialGradient(
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  0,
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  Math.max(20, h.h),
+                );
+                glow.addColorStop(0, lavaFx.glowInner);
+                glow.addColorStop(0.45, lavaFx.glowMid);
+                glow.addColorStop(1, lavaFx.glowOuter);
+                ctx.fillStyle = glow;
+                ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
 
-              ctx.fillStyle = lavaFx.fill;
-              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
-              ctx.strokeStyle = lavaFx.stroke;
-              ctx.lineWidth = 2;
-              ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
+                ctx.fillStyle = lavaFx.fill;
+                ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+                ctx.strokeStyle = lavaFx.stroke;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
+              }
             } else {
               ctx.fillStyle = t.hazards;
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
@@ -4187,7 +4256,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.6.4", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6.5", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
