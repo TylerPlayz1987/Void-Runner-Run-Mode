@@ -3021,12 +3021,8 @@
             ctx.fillStyle = c;
             ctx.beginPath();
             ctx.arc(x + 10, y + 10, 10, 0, Math.PI * 2);
+            ctx.arc(x + 16, y + 6, 10, Math.PI, 0, true);
             ctx.fill();
-            ctx.globalCompositeOperation = "destination-out";
-            ctx.beginPath();
-            ctx.arc(x + 16, y + 6, 10, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalCompositeOperation = "source-over";
           } else if (currentTheme === "sunny") {
             ctx.fillStyle = c;
             const cX = x + 10,
