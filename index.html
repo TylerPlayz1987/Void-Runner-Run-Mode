@@ -1389,6 +1389,16 @@
             particleB: [0, 240, 255],
             particleStyle: "spark",
           },
+          glitchworld: {
+            glowInner: "rgba(255,46,158,0.75)",
+            glowMid: "rgba(106,53,255,0.45)",
+            glowOuter: "rgba(50,0,100,0)",
+            fill: "rgba(220,40,160,0.92)",
+            stroke: "rgba(116,255,242,0.84)",
+            particleA: [255, 46, 158],
+            particleB: [106, 53, 255],
+            particleStyle: "spark",
+          },
           magma: {
             glowInner: "rgba(255,120,0,0.75)",
             glowMid: "rgba(255,40,0,0.5)",
@@ -1477,6 +1487,15 @@
             coreMid: "rgba(120,0,130,0.34)",
             coreRing: "rgba(255,60,210,0.24)",
             coreStroke: "#ff4cd6",
+          },
+          glitchworld: {
+            normalInner: "rgba(106,53,255,0.5)",
+            normalMid: "rgba(50,0,100,0.3)",
+            normalRing: "rgba(116,255,242,0.22)",
+            coreInner: "rgba(255,46,158,0.52)",
+            coreMid: "rgba(130,0,80,0.34)",
+            coreRing: "rgba(255,80,200,0.24)",
+            coreStroke: "#ff2e9e",
           },
           magma: {
             normalInner: "rgba(255,140,40,0.5)",
@@ -3093,12 +3112,13 @@
             const jitterY = Math.cos(frameCount * 0.18 + x) * 0.9;
             ctx.fillStyle = c;
             ctx.fillRect(x - 1 + jitterX, y + jitterY, 22, 20);
+            ctx.save();
             ctx.globalAlpha = 0.55;
             ctx.fillStyle = "#ff3bb5";
             ctx.fillRect(x - 3 + jitterX, y + 2 + jitterY, 20, 16);
             ctx.fillStyle = "#52e3ff";
             ctx.fillRect(x + 2 + jitterX, y - 2 + jitterY, 16, 16);
-            ctx.globalAlpha = 1;
+            ctx.restore();
             ctx.fillStyle = "#0a0a14";
             ctx.fillRect(x + 6 + jitterX, y + 6 + jitterY, 8, 8);
           } else if (currentTheme === "pirate") {
