@@ -221,131 +221,6 @@
         position: absolute;
       }
 
-      #buttonCustomizationOverlay {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        background: rgba(0, 0, 0, 0.5);
-        display: none;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
-        z-index: 260;
-        color: #0f0;
-        padding-top: 20px;
-      }
-
-      #buttonCustomizationOverlay.active {
-        display: flex;
-      }
-
-      #customizationControls {
-        background: #111;
-        border: 2px solid #0aa;
-        padding: 15px;
-        border-radius: 5px;
-        text-align: center;
-        color: #0aa;
-        max-width: 300px;
-      }
-
-      .selected-button-info {
-        font-size: 14px;
-        color: #0f0;
-        margin: 10px 0;
-      }
-
-      #customizationHint {
-        font-size: 13px;
-        color: #9ef;
-        margin: 10px 0;
-      }
-
-      .customize-size-controls {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin: 10px 0;
-      }
-
-      .mobile-btn.customizing {
-        border: 3px dashed #0aa;
-        opacity: 0.8;
-        box-shadow: 0 0 10px rgba(0, 170, 170, 0.5);
-      }
-
-      #buttonCustomizationOverlay {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        top: 0;
-        left: 0;
-        background: rgba(0, 0, 0, 0.3);
-        display: none;
-        flex-direction: column;
-        justify-content: flex-end;
-        align-items: center;
-        z-index: 180;
-        pointer-events: auto;
-      }
-
-      #buttonCustomizationOverlay.active {
-        display: flex;
-      }
-
-      #customizationControls {
-        background: rgba(0, 0, 0, 0.95);
-        border: 3px solid #0ff;
-        padding: 20px;
-        border-radius: 8px;
-        margin-bottom: 15px;
-        text-align: center;
-        color: #0ff;
-      }
-
-      #customizationControls h2 {
-        margin: 0 0 12px 0;
-        font-size: 18px;
-        color: #0ff;
-      }
-
-      #customizationControls p {
-        margin: 0 0 15px 0;
-        font-size: 12px;
-        color: #0f0;
-      }
-
-      .selected-button-info {
-        font-size: 14px;
-        margin-bottom: 15px;
-        color: #0ff;
-        font-weight: bold;
-      }
-
-      .customize-size-controls {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-        margin-bottom: 15px;
-      }
-
-      .customize-size-controls button {
-        background: #0aa;
-        border: none;
-        color: #000;
-        padding: 8px 16px;
-        font-weight: bold;
-        cursor: pointer;
-        border-radius: 4px;
-        font-size: 12px;
-      }
-
-      .customize-size-controls button:hover {
-        background: #0ff;
-      }
-
       #confirmCustomizeBtn {
         background: #0f0;
         border: none;
@@ -944,7 +819,6 @@
           mobileBtnLeft = 14,
           screenScale = 100,
           buttonCustomizationActive = false,
-          selectedButtonForCustomize = null,
           touchStartDistance = 0,
           buttonPositions = {
             "btn-left": { x: 14, y: 0 },
@@ -3795,7 +3669,7 @@
           mobileBtnBottom = 10;
           mobileBtnLeft = 14;
           screenScale = 100;
-          customizationMode = false;
+          buttonCustomizationActive = false;
           document.getElementById("screenSizeSlider").value = screenScale;
           updateControlLayoutUi();
           updateScreenSizeUi();
@@ -4107,19 +3981,9 @@
           updateMobileSupportUi();
         };
 
-        document.getElementById("openControlLayoutBtn").onclick = () => {
-          // Start button customization mode - keep game paused
-          buttonCustomizationActive = true;
-          document.getElementById("pauseMenu").style.display = "none";
-          document.getElementById("mobileControls").classList.add("customizing");
-          document.getElementById("customizeConfirmBar").classList.add("active");
-          
-          // Position buttons absolutely based on saved positions
-          updateButtonPositions();
-        };
-
         document.getElementById("confirmCustomizeBtn").onclick = () => {
           // Exit customization mode and return to mobile settings
+          forceReleaseAllMobileInputs();
           buttonCustomizationActive = false;
           currentCustomizingButton = null;
           document.getElementById("mobileControls").classList.remove("customizing");
@@ -4138,6 +4002,8 @@
         };
 
         function updateButtonPositions() {
+          const controlsContainer = document.getElementById("mobileControls");
+          const containerHeight = controlsContainer.getBoundingClientRect().height;
           const buttons = document.querySelectorAll("#mobileControls .mobile-btn");
           buttons.forEach(btn => {
             const btnId = btn.id;
@@ -4146,7 +4012,7 @@
             
             btn.style.position = "absolute";
             btn.style.left = pos.x + "px";
-            btn.style.bottom = (390 - pos.y - size) + "px"; // Calculate bottom from y position
+            btn.style.bottom = (containerHeight - pos.y - size) + "px";
             btn.style.width = (btn.classList.contains("wide") ? size * 1.35 : size) + "px";
             btn.style.height = size + "px";
             if (btn.id === "btn-jump") {
@@ -4239,7 +4105,7 @@
               startSize: buttonSizes[draggedButton.id]
             };
           }
-        });
+        }, { passive: false });
 
         document.addEventListener("touchmove", (e) => {
           if (!buttonCustomizationActive) return;
@@ -4271,7 +4137,7 @@
               e.preventDefault();
             }
           }
-        });
+        }, { passive: false });
 
         document.addEventListener("touchend", () => {
           isDragging = false;
@@ -4290,6 +4156,16 @@
         updateMobileSupportUi();
 
         const activePointerToCode = new Map();
+        function forceReleaseAllMobileInputs() {
+          for (const activeCode of activePointerToCode.values()) {
+            keys[activeCode] = 0;
+          }
+          activePointerToCode.clear();
+          for (const btn of document.querySelectorAll("#mobileControls [data-code]")) {
+            const code = btn.dataset.code;
+            if (code) keys[code] = 0;
+          }
+        }
         const releasePointerFallback = (ev) => {
           const activeCode = activePointerToCode.get(ev.pointerId);
           if (!activeCode) return;
