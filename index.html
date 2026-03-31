@@ -4012,50 +4012,91 @@
           hazards.forEach((h) => {
             if (h.type === "lava") {
               if (currentTheme === "pirate") {
-                // Draw shark fin for pirate theme
-                ctx.fillStyle = "#2a2a2a";
-                ctx.strokeStyle = "#1a1a1a";
-                ctx.lineWidth = 1;
-                
-                // Shark fin shape
+                const hx = h.x - camX;
+                const hy = h.y;
+                const hw = h.w;
+                const hh = h.h;
+                // Shark body
+                ctx.fillStyle = "#2d2d2d";
                 ctx.beginPath();
-                ctx.moveTo(h.x - camX, h.y + h.h);
-                ctx.lineTo(h.x - camX + h.w * 0.3, h.y + h.h - h.h * 0.7);
-                ctx.lineTo(h.x - camX + h.w * 0.5, h.y + h.h - h.h * 0.9);
-                ctx.lineTo(h.x - camX + h.w * 0.7, h.y + h.h - h.h * 0.7);
-                ctx.lineTo(h.x - camX + h.w, h.y + h.h);
+                ctx.moveTo(hx, hy + hh);
+                ctx.lineTo(hx + hw * 0.18, hy + hh * 0.5);
+                ctx.quadraticCurveTo(hx + hw * 0.35, hy + hh * 0.2, hx + hw * 0.5, hy + hh * 0.25);
+                ctx.quadraticCurveTo(hx + hw * 0.65, hy + hh * 0.3, hx + hw * 0.82, hy + hh * 0.5);
+                ctx.lineTo(hx + hw, hy + hh);
                 ctx.closePath();
                 ctx.fill();
-                ctx.stroke();
-                
-                // Shark teeth
-                ctx.fillStyle = "#ffffff";
-                for (let i = 0; i < 5; i++) {
-                  let toothX = h.x - camX + h.w * 0.2 + i * h.w * 0.12;
-                  let toothY = h.y + h.h - h.h * 0.3;
+
+                // Shark back fin
+                ctx.fillStyle = "#282828";
+                ctx.beginPath();
+                ctx.moveTo(hx + hw * 0.18, hy + hh * 0.5);
+                ctx.lineTo(hx + hw * 0.1, hy + hh * 0.35);
+                ctx.lineTo(hx + hw * 0.24, hy + hh * 0.43);
+                ctx.closePath();
+                ctx.fill();
+
+                // Shark tail
+                ctx.beginPath();
+                ctx.moveTo(hx + hw, hy + hh);
+                ctx.lineTo(hx + hw * 0.97, hy + hh * 0.8);
+                ctx.lineTo(hx + hw * 0.89, hy + hh * 0.95);
+                ctx.closePath();
+                ctx.fill();
+
+                // Shark belly highlight
+                ctx.fillStyle = "rgba(220,220,220,0.55)";
+                ctx.beginPath();
+                ctx.moveTo(hx + hw * 0.18, hy + hh * 0.55);
+                ctx.quadraticCurveTo(hx + hw * 0.5, hy + hh * 0.78, hx + hw * 0.82, hy + hh * 0.55);
+                ctx.lineTo(hx + hw * 0.82, hy + hh * 0.58);
+                ctx.quadraticCurveTo(hx + hw * 0.5, hy + hh * 0.8, hx + hw * 0.18, hy + hh * 0.58);
+                ctx.closePath();
+                ctx.fill();
+
+                // Shark mouth and teeth
+                ctx.fillStyle = "#b42121";
+                ctx.beginPath();
+                ctx.moveTo(hx + hw * 0.17, hy + hh * 0.55);
+                ctx.quadraticCurveTo(hx + hw * 0.35, hy + hh * 0.35, hx + hw * 0.57, hy + hh * 0.5);
+                ctx.lineTo(hx + hw * 0.57, hy + hh * 0.55);
+                ctx.quadraticCurveTo(hx + hw * 0.35, hy + hh * 0.4, hx + hw * 0.17, hy + hh * 0.57);
+                ctx.closePath();
+                ctx.fill();
+
+                // Teeth
+                ctx.fillStyle = "#fff";
+                const teethCount = 6;
+                for (let i = 0; i < teethCount; i++) {
+                  const tx = hx + hw * (0.2 + i * 0.055);
+                  const ty = hy + hh * (0.52 - Math.sin(i * 1.2) * 0.01);
                   ctx.beginPath();
-                  ctx.moveTo(toothX, toothY);
-                  ctx.lineTo(toothX + 3, toothY - 8);
-                  ctx.lineTo(toothX + 6, toothY);
+                  ctx.moveTo(tx, ty);
+                  ctx.lineTo(tx + 3, ty - 7);
+                  ctx.lineTo(tx + 6, ty);
                   ctx.closePath();
                   ctx.fill();
                 }
-                
-                // Shark eye
-                ctx.fillStyle = "#ff0000";
+
+                // Eye
+                ctx.fillStyle = "#fff";
                 ctx.beginPath();
-                ctx.arc(h.x - camX + h.w * 0.6, h.y + h.h - h.h * 0.6, 4, 0, Math.PI * 2);
+                ctx.arc(hx + hw * 0.65, hy + hh * 0.42, 4, 0, Math.PI * 2);
                 ctx.fill();
-                
-                // Water splash effect around shark
-                ctx.strokeStyle = "rgba(100,150,200,0.6)";
+                ctx.fillStyle = "#000";
+                ctx.beginPath();
+                ctx.arc(hx + hw * 0.66, hy + hh * 0.42, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Splash detail
+                ctx.strokeStyle = "rgba(160,220,255,0.75)";
                 ctx.lineWidth = 2;
-                for (let i = 0; i < 3; i++) {
-                  let splashX = h.x - camX + Math.random() * h.w;
-                  let splashY = h.y + h.h + Math.random() * 10;
+                for (let i = 0; i < 4; i++) {
+                  const sx = hx + Math.random() * hw;
+                  const sy = hy + hh + Math.random() * 8;
                   ctx.beginPath();
-                  ctx.moveTo(splashX, splashY);
-                  ctx.lineTo(splashX + (Math.random() - 0.5) * 20, splashY - 15);
+                  ctx.moveTo(sx, sy);
+                  ctx.bezierCurveTo(sx + 3, sy - 8, sx + 10, sy - 12, sx + 14, sy - 6);
                   ctx.stroke();
                 }
               } else {
