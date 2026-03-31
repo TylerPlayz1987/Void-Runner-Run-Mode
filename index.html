@@ -134,15 +134,16 @@
 
       #mobileControls {
         position: absolute;
-        left: 0;
-        right: 0;
+        left: 14px;
         bottom: 10px;
-        padding: 0 14px;
+        padding: 0;
         display: none;
         justify-content: space-between;
         align-items: flex-end;
         pointer-events: none;
         z-index: 170;
+        transition: all 0.05s ease-out;
+        gap: 15px;
       }
 
       #mobileControls.active {
@@ -576,13 +577,14 @@
           </div>
           <div id="controlLayoutPage" class="menu-page" style="display: none">
             <h1>Button Size & Spot</h1>
-            <div class="setting-item" style="width: 100%">
-              <span>Button Size: <span id="mobileBtnSizeValue">64px</span></span>
-              <input type="range" id="mobileBtnSizeSlider" min="40" max="100" value="64" />
+            <div class="setting-item" style="width: 100%; text-align: left; font-size: 12px; line-height: 1.5">
+              <span>Press the button below to customize buttons:</span>
             </div>
-            <div class="setting-item" style="width: 100%">
-              <span>Button Spot (Bottom): <span id="mobileBtnSpotValue">10px</span></span>
-              <input type="range" id="mobileBtnSpotSlider" min="0" max="50" value="10" />
+            <button id="customizeButtonsBtn" style="width: 100%; margin-bottom: 8px; background: #0aa; margin-top: 8px;">Customize Buttons</button>
+            <div class="setting-item" style="width: 100%; text-align: left; font-size: 11px; line-height: 1.4; color: #0f0">
+              <span>• Drag buttons to move them</span>
+              <span>• Pinch (two fingers) to resize</span>
+              <span>• Press again when done</span>
             </div>
             <button id="controlLayoutBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
@@ -762,7 +764,10 @@
           mobileSupportEnabled = false,
           mobileBtnSize = 64,
           mobileBtnBottom = 10,
-          screenScale = 100;
+          mobileBtnLeft = 14,
+          screenScale = 100,
+          customizationMode = false,
+          touchStartDistance = 0;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -3596,9 +3601,9 @@
           mobileSupportEnabled = false;
           mobileBtnSize = 64;
           mobileBtnBottom = 10;
+          mobileBtnLeft = 14;
           screenScale = 100;
-          document.getElementById("mobileBtnSizeSlider").value = mobileBtnSize;
-          document.getElementById("mobileBtnSpotSlider").value = mobileBtnBottom;
+          customizationMode = false;
           document.getElementById("screenSizeSlider").value = screenScale;
           updateControlLayoutUi();
           updateScreenSizeUi();
@@ -3883,12 +3888,8 @@
 
         function updateControlLayoutUi() {
           const controls = document.getElementById("mobileControls");
-          document.getElementById("mobileBtnSizeValue").textContent =
-            mobileBtnSize + "px";
-          document.getElementById("mobileBtnSpotValue").textContent =
-            mobileBtnBottom + "px";
-
           controls.style.bottom = mobileBtnBottom + "px";
+          controls.style.left = mobileBtnLeft + "px";
           for (const btn of document.querySelectorAll("#mobileControls .mobile-btn")) {
             btn.style.height = mobileBtnSize + "px";
             btn.style.fontSize = Math.round(mobileBtnSize * 0.28) + "px";
@@ -3900,6 +3901,11 @@
               btn.style.width = mobileBtnSize + "px";
               btn.style.borderRadius = Math.round(mobileBtnSize * 0.5) + "px";
             }
+          }
+          const customizeBtn = document.getElementById("customizeButtonsBtn");
+          if (customizeBtn) {
+            customizeBtn.textContent = customizationMode ? "Done - Exit Customize" : "Customize Buttons";
+            customizeBtn.style.background = customizationMode ? "#f44" : "#0aa";
           }
         }
 
@@ -3915,15 +3921,108 @@
           updateMobileSupportUi();
         };
 
-        document.getElementById("mobileBtnSizeSlider").oninput = (e) => {
-          mobileBtnSize = parseInt(e.target.value, 10);
+        document.getElementById("customizeButtonsBtn").onclick = () => {
+          customizationMode = !customizationMode;
           updateControlLayoutUi();
+          const controls = document.getElementById("mobileControls");
+          if (customizationMode) {
+            controls.style.pointerEvents = "auto";
+            controls.style.opacity = "0.9";
+            controls.style.border = "2px dashed #0ff";
+            controls.style.padding = "3px";
+          } else {
+            controls.style.pointerEvents = "none";
+            controls.style.opacity = "1";
+            controls.style.border = "none";
+            controls.style.padding = "0px";
+          }
         };
 
-        document.getElementById("mobileBtnSpotSlider").oninput = (e) => {
-          mobileBtnBottom = parseInt(e.target.value, 10);
-          updateControlLayoutUi();
-        };
+        // Touch/mouse drag and pinch handling for custom button positioning
+        let isDragging = false;
+        let dragOffsetX = 0;
+        let dragOffsetY = 0;
+        let lastTouchX = 0;
+        let lastTouchY = 0;
+
+        const mobileControls = document.getElementById("mobileControls");
+
+        mobileControls.addEventListener("mousedown", (e) => {
+          if (!customizationMode) return;
+          isDragging = true;
+          dragOffsetX = e.clientX - mobileControls.offsetLeft;
+          dragOffsetY = e.clientY - (window.innerHeight - mobileControls.offsetHeight - mobileControls.offsetParent.clientHeight + parseInt(window.getComputedStyle(mobileControls).bottom));
+          e.preventDefault();
+        });
+
+        document.addEventListener("mousemove", (e) => {
+          if (!isDragging || !customizationMode) return;
+          let newLeft = e.clientX - dragOffsetX;
+          let newBottom = window.innerHeight - e.clientY - dragOffsetY - mobileControls.offsetParent.offsetHeight;
+          newLeft = Math.max(0, Math.min(newLeft, window.innerWidth - mobileControls.offsetWidth - 30));
+          newBottom = Math.max(0, Math.min(newBottom, window.innerHeight - mobileControls.offsetParent.offsetTop - 200));
+          mobileBtnLeft = Math.round(newLeft);
+          mobileBtnBottom = Math.round(newBottom);
+          mobileControls.style.left = mobileBtnLeft + "px";
+          mobileControls.style.bottom = mobileBtnBottom + "px";
+        });
+
+        document.addEventListener("mouseup", () => {
+          isDragging = false;
+        });
+
+        mobileControls.addEventListener("touchstart", (e) => {
+          if (!customizationMode) return;
+          if (e.touches.length === 1) {
+            isDragging = true;
+            dragOffsetX = e.touches[0].clientX - mobileControls.getBoundingClientRect().left;
+            dragOffsetY = e.touches[0].clientY - mobileControls.getBoundingClientRect().top;
+            lastTouchX = e.touches[0].clientX;
+            lastTouchY = e.touches[0].clientY;
+          } else if (e.touches.length === 2) {
+            // Start pinch
+            isDragging = false;
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            touchStartDistance = Math.sqrt(dx * dx + dy * dy);
+          }
+        });
+
+        mobileControls.addEventListener("touchmove", (e) => {
+          if (!customizationMode) return;
+          e.preventDefault();
+          if (e.touches.length === 1 && isDragging) {
+            // Drag
+            const rect = mobileControls.getBoundingClientRect();
+            const containerRect = mobileControls.offsetParent.getBoundingClientRect();
+            let newLeft = e.touches[0].clientX - containerRect.left - dragOffsetX;
+            let newBottom = containerRect.bottom - e.touches[0].clientY - dragOffsetY;
+            newLeft = Math.max(0, Math.min(newLeft, containerRect.width - rect.width - 30));
+            newBottom = Math.max(0, Math.min(newBottom, containerRect.height - 100));
+            mobileBtnLeft = Math.round(newLeft);
+            mobileBtnBottom = Math.round(newBottom);
+            mobileControls.style.left = mobileBtnLeft + "px";
+            mobileControls.style.bottom = mobileBtnBottom + "px";
+          } else if (e.touches.length === 2) {
+            // Pinch to resize
+            const dx = e.touches[0].clientX - e.touches[1].clientX;
+            const dy = e.touches[0].clientY - e.touches[1].clientY;
+            const currentDistance = Math.sqrt(dx * dx + dy * dy);
+            if (touchStartDistance > 0) {
+              const scale = currentDistance / touchStartDistance;
+              let newSize = Math.round(mobileBtnSize * scale);
+              newSize = Math.max(40, Math.min(100, newSize));
+              mobileBtnSize = newSize;
+              updateControlLayoutUi();
+              touchStartDistance = currentDistance;
+            }
+          }
+        });
+
+        mobileControls.addEventListener("touchend", () => {
+          isDragging = false;
+          touchStartDistance = 0;
+        });
 
         document.getElementById("screenSizeSlider").oninput = (e) => {
           screenScale = parseInt(e.target.value, 10);
