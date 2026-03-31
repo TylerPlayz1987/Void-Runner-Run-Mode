@@ -3945,7 +3945,22 @@
         };
 
         document.getElementById("pauseBtn").onclick = toggle;
-        document.getElementById("resumeBtn").onclick = toggle;
+        document.getElementById("resumeBtn").onclick = () => {
+          if (
+            speedRunMode &&
+            isPaused &&
+            document.getElementById("pauseMenu").style.display === "flex"
+          ) {
+            isPaused = false;
+            document.getElementById("pauseMenu").style.display = "none";
+            const m = document.getElementById("bgMusic");
+            if (m && themes[currentTheme] && themes[currentTheme].music) {
+              m.play().catch(() => {});
+            }
+            return;
+          }
+          toggle();
+        };
         document.getElementById("settingsBtn").onclick = () => {
           document.getElementById("mainPausePage").style.display = "none";
           document.getElementById("settingsPage").style.display = "flex";
@@ -4723,6 +4738,54 @@
               hideFullRestartPrompt();
               return;
             }
+
+            if (
+              speedRunMode &&
+              running &&
+              !speedRunGameOverMode &&
+              !typingInField
+            ) {
+              e.preventDefault();
+              const pauseMenu = document.getElementById("pauseMenu");
+              const mainPausePage = document.getElementById("mainPausePage");
+              const settingsPage = document.getElementById("settingsPage");
+              const audioPage = document.getElementById("audioPage");
+              const themePage = document.getElementById("themePage");
+              const mobileSupportPage = document.getElementById("mobileSupportPage");
+              const screenSizePage = document.getElementById("screenSizePage");
+              const tutorialNotesPage = document.getElementById("tutorialNotesPage");
+              const cheatsPage = document.getElementById("cheatsPage");
+              const achievementsPage = document.getElementById("achievementsPage");
+              const m = document.getElementById("bgMusic");
+
+              if (
+                pauseMenu.style.display === "flex" &&
+                achievementsPage.style.display === "flex"
+              ) {
+                isPaused = false;
+                pauseMenu.style.display = "none";
+                if (m && themes[currentTheme] && themes[currentTheme].music) {
+                  m.play().catch(() => {});
+                }
+                return;
+              }
+
+              isPaused = true;
+              if (m) m.pause();
+              pauseMenu.style.display = "flex";
+              mainPausePage.style.display = "none";
+              settingsPage.style.display = "none";
+              audioPage.style.display = "none";
+              themePage.style.display = "none";
+              mobileSupportPage.style.display = "none";
+              screenSizePage.style.display = "none";
+              tutorialNotesPage.style.display = "none";
+              cheatsPage.style.display = "none";
+              achievementsPage.style.display = "flex";
+              renderAchievements();
+              return;
+            }
+
             if (document.getElementById("pauseMenu").style.display === "flex") {
               if (submenuBack()) return;
             }
