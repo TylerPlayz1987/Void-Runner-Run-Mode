@@ -3267,7 +3267,7 @@
             // Draw pirate ship in background with bobbing animation
             let shipX = 300 - camX * 0.2; // Parallax effect
             let bobbing = Math.sin(frameCount / 30) * 8; // Bobbing animation
-            let shipY = 160 + bobbing; // Sits on top of water
+            let shipY = 200 + bobbing; // Sits on water line and bobs with waves
             
             // Ship shadow underwater
             ctx.fillStyle = "rgba(0,0,0,0.1)";
