@@ -3064,29 +3064,30 @@
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
             
-            // Draw eyepatch on left eye
-            ctx.fillStyle = "#000";
+            // Draw beard
+            ctx.fillStyle = "#3d3d3d";
+            // Beard shape - triangular
             ctx.beginPath();
-            ctx.arc(x + 5, y + 5, 3, 0, Math.PI * 2);
+            ctx.moveTo(x + 4, y + 12);
+            ctx.lineTo(x + 16, y + 12);
+            ctx.lineTo(x + 10, y + 18);
+            ctx.closePath();
             ctx.fill();
             
-            // Draw eye patch strap across face
-            ctx.strokeStyle = "#000";
+            // Beard texture lines
+            ctx.strokeStyle = "#2a2a2a";
             ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(x + 2, y + 5);
-            ctx.lineTo(x + 18, y + 6);
-            ctx.stroke();
-            
-            // Draw right eye (visible)
-            ctx.fillStyle = "#fff";
-            ctx.beginPath();
-            ctx.arc(x + 15, y + 5, 2, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#000";
-            ctx.beginPath();
-            ctx.arc(x + 15, y + 5, 1, 0, Math.PI * 2);
-            ctx.fill();
+            for (let i = 1; i < 5; i++) {
+              let progress = i / 5;
+              let startX = 4 + (16 - 4) * progress;
+              let endX = 10;
+              let startY = 12 + (18 - 12) * progress;
+              let endY = 18;
+              ctx.beginPath();
+              ctx.moveTo(x + startX, y + startY);
+              ctx.lineTo(x + endX + (Math.random() - 0.5) * 2, y + endY);
+              ctx.stroke();
+            }
             
             // Draw pirate hat (tricorn/bicorne style)
             // Hat brim
