@@ -801,37 +801,37 @@
       id="bgSunnyMusic"
       loop
       crossorigin="anonymous"
-      src="Smile.ogg"
+      src="theme_bg/Smile.ogg"
     ></audio>
     <audio
       id="bgMoonyMusic"
       loop
       crossorigin="anonymous"
-      src="Dark.ogg"
+      src="theme_bg/Dark.ogg"
     ></audio>
     <audio
       id="bgToyBoxMusic"
       loop
       crossorigin="anonymous"
-      src="Funny.ogg"
+      src="theme_bg/Funny.ogg"
     ></audio>
     <audio
       id="bgCyberMusic"
       loop
       crossorigin="anonymous"
-      src="Neon.ogg"
+      src="theme_bg/Neon.ogg"
     ></audio>
     <audio
       id="bgMagmaMusic"
       loop
       crossorigin="anonymous"
-      src="Boom.ogg"
+      src="theme_bg/Boom.ogg"
     ></audio>
     <audio
       id="bgStardustMusic"
       loop
       crossorigin="anonymous"
-      src="Starry.ogg"
+      src="theme_bg/Starry.ogg"
     ></audio>
     <audio id="bgMusic" loop crossorigin="anonymous"></audio>
     <script>
@@ -1291,7 +1291,7 @@
             plat: "#fff",
             player: "#FFFF00",
             hazards: "#f33",
-            music: "Smile.ogg",
+            music: "theme_bg/Smile.ogg",
           },
           moony: {
             bg: "#000000",
@@ -1299,21 +1299,21 @@
             player: "#FFF",
             hazards: "#FFFF33",
             stars: true,
-            music: "Dark.ogg",
+            music: "theme_bg/Dark.ogg",
           },
           toybox: {
             bg: "#ffeb3b",
             plat: "#f44336",
             player: "#2196f3",
             hazards: "#4caf50",
-            music: "Funny.ogg",
+            music: "theme_bg/Funny.ogg",
           },
           deepsea: {
             bg: "#001a33",
             plat: "#2c3e50",
             player: "#f1c40f",
             hazards: "#e74c3c",
-            music: "Sea.ogg",
+            music: "theme_bg/Sea.ogg",
           },
           cyber: {
             bg: "#1a0a2e",
@@ -1321,15 +1321,15 @@
             player: "#f0f",
             hazards: "#ff0055",
             glitch: true,
-            music: "Neon.ogg",
+            music: "theme_bg/Neon.ogg",
           },
           magma: {
             bg: "#1a0505",
-            plat: "#111",
+            plat: "#fa9b6b",
             player: "#ffa500",
             hazards: "#ff4500",
             glow: true,
-            music: "Boom.ogg",
+            music: "theme_bg/Boom.ogg",
           },
           stardust: {
             bg: "#000033",
@@ -1337,7 +1337,7 @@
             player: "#fff",
             hazards: "#00ffcc",
             aurora: true,
-            music: "Starry.ogg",
+            music: "theme_bg/Starry.ogg",
           },
         };
         const lavaThemeFx = {
@@ -1524,6 +1524,41 @@
           w: 3,
           l: 80 + Math.random() * 100,
         }));
+        const fallingToys = Array.from({ length: 14 }, () => ({
+          x: Math.random() * 860 - 30,
+          y: Math.random() * -500,
+          size: 10 + Math.random() * 18,
+          vy: 0.45 + Math.random() * 1.2,
+          drift: (Math.random() - 0.5) * 0.6,
+          rot: Math.random() * Math.PI * 2,
+          rotSpeed: (Math.random() - 0.5) * 0.035,
+          shape: ["block", "duck", "ball", "spinner"][
+            Math.floor(Math.random() * 4)
+          ],
+          color: ["#f44336", "#2196f3", "#4caf50", "#ff9800", "#9c27b0"][
+            Math.floor(Math.random() * 5)
+          ],
+        }));
+        const moonTreeTops = Array.from({ length: 52 }, () => ({
+          x: Math.random() * 2600,
+          // Keep tree bases below the visible canvas so only the tops peek in.
+          baseY: 432 + Math.random() * 88,
+          w: 20 + Math.random() * 38,
+          h: 110 + Math.random() * 170,
+          parallax: 0.08 + Math.random() * 0.22,
+          sway: Math.random() * Math.PI * 2,
+          swayAmp: 0.25 + Math.random() * 0.8,
+          tone: ["rgba(4,8,16,0.96)", "rgba(7,12,24,0.95)", "rgba(10,15,30,0.92)"][
+            Math.floor(Math.random() * 3)
+          ],
+        }));
+        const sunnyClouds = [
+          { x: 50, y: 50, w: 100, h: 40 },
+          { x: 300, y: 80, w: 120, h: 45 },
+          { x: 600, y: 40, w: 90, h: 35 },
+          { x: 850, y: 100, w: 110, h: 40 },
+          { x: 1100, y: 60, w: 100, h: 38 },
+        ];
         const magmaDots = Array.from({ length: 30 }, () => ({
           x: Math.random() * 800,
           y: Math.random() * 400,
@@ -2989,15 +3024,10 @@
             ctx.fillRect(hX + 22, hY, 4, 10);
           }
           if (currentTheme === "moony") {
-            ctx.fillStyle = c;
+            ctx.fillStyle = "#fff";
             ctx.beginPath();
             ctx.arc(x + 10, y + 10, 10, 0, Math.PI * 2);
             ctx.fill();
-            ctx.globalCompositeOperation = "destination-out";
-            ctx.beginPath();
-            ctx.arc(x + 16, y + 6, 10, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.globalCompositeOperation = "source-over";
           } else if (currentTheme === "sunny") {
             ctx.fillStyle = c;
             const cX = x + 10,
@@ -3072,6 +3102,29 @@
             g.addColorStop(1, "#660099");
             ctx.fillStyle = g;
             ctx.fillRect(0, 0, 800, 400);
+          } else if (currentTheme === "sunny") {
+            let g = ctx.createLinearGradient(0, 0, 0, 400);
+            g.addColorStop(0, "#87CEEB");
+            g.addColorStop(1, "#e0f6ff");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 800, 400);
+            // Draw clouds
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.globalAlpha = 0.8;
+            const cloudOffset = (camX * 0.3) % 800;
+            sunnyClouds.forEach((cloud) => {
+              const cx = cloud.x - cloudOffset;
+              if (cx > -cloud.w && cx < 800) {
+                const r = cloud.h * 0.5;
+                const midR = cloud.h * 0.62;
+                ctx.beginPath();
+                ctx.arc(cx, cloud.y, r, 0, Math.PI * 2);
+                ctx.arc(cx + cloud.w * 0.3, cloud.y - cloud.h * 0.25, midR, 0, Math.PI * 2);
+                ctx.arc(cx + cloud.w * 0.6, cloud.y, r, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            });
+            ctx.globalAlpha = 1;
           } else if (currentTheme === "toybox") {
             let g = ctx.createLinearGradient(0, 0, 0, 400);
             g.addColorStop(0, "#ffeb3b");
@@ -3150,6 +3203,116 @@
               ctx.shadowColor = "white";
               ctx.fill();
               ctx.shadowBlur = 0;
+            });
+          }
+          if (currentTheme === "moony") {
+            moonTreeTops.forEach((tree, i) => {
+              let tx = (tree.x - camX * tree.parallax) % 2600;
+              if (tx < -220) tx += 2600;
+              const sway =
+                Math.sin(frameCount / 95 + tree.sway + i * 0.12) * tree.swayAmp;
+              const topY = tree.baseY - tree.h;
+
+              ctx.save();
+              ctx.translate(tx + sway, 0);
+              ctx.fillStyle = tree.tone;
+
+              // Tall conifer silhouette made from stacked triangular layers.
+              for (let layer = 0; layer < 4; layer++) {
+                const p = layer / 3;
+                const yTop = topY + p * tree.h * 0.62;
+                const yBottom = yTop + tree.h * (0.35 - layer * 0.03);
+                const halfW = tree.w * (0.32 + p * 0.72);
+                ctx.beginPath();
+                ctx.moveTo(0, yTop);
+                ctx.lineTo(halfW, yBottom);
+                ctx.lineTo(-halfW, yBottom);
+                ctx.closePath();
+                ctx.fill();
+              }
+              ctx.restore();
+            });
+
+            let mist = ctx.createLinearGradient(0, 300, 0, 400);
+            mist.addColorStop(0, "rgba(32,42,72,0)");
+            mist.addColorStop(1, "rgba(4,8,18,0.48)");
+            ctx.fillStyle = mist;
+            ctx.fillRect(0, 300, 800, 100);
+          }
+          if (currentTheme === "toybox") {
+            fallingToys.forEach((toy, i) => {
+              toy.y += toy.vy;
+              toy.x += toy.drift + Math.sin((frameCount + i * 7) / 28) * 0.25;
+              toy.rot += toy.rotSpeed;
+
+              if (toy.y > 440) {
+                toy.y = -30 - Math.random() * 220;
+                toy.x = Math.random() * 860 - 30;
+                toy.size = 10 + Math.random() * 18;
+                toy.vy = 0.45 + Math.random() * 1.2;
+                toy.drift = (Math.random() - 0.5) * 0.6;
+                toy.rotSpeed = (Math.random() - 0.5) * 0.035;
+                toy.shape = ["block", "duck", "ball", "spinner"][
+                  Math.floor(Math.random() * 4)
+                ];
+                toy.color = [
+                  "#f44336",
+                  "#2196f3",
+                  "#4caf50",
+                  "#ff9800",
+                  "#9c27b0",
+                ][Math.floor(Math.random() * 5)];
+              }
+
+              ctx.save();
+              ctx.translate(toy.x, toy.y);
+              ctx.rotate(toy.rot);
+              ctx.globalAlpha = 0.45;
+              if (toy.shape === "block") {
+                ctx.fillStyle = toy.color;
+                ctx.fillRect(-toy.size / 2, -toy.size / 2, toy.size, toy.size);
+                ctx.fillStyle = "rgba(255,255,255,0.4)";
+                ctx.fillRect(
+                  -toy.size * 0.32,
+                  -toy.size * 0.32,
+                  toy.size * 0.64,
+                  toy.size * 0.64,
+                );
+              } else if (toy.shape === "duck") {
+                ctx.fillStyle = toy.color;
+                ctx.beginPath();
+                ctx.arc(0, 0, toy.size * 0.32, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(toy.size * 0.24, -toy.size * 0.2, toy.size * 0.18, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#ffcc66";
+                ctx.fillRect(toy.size * 0.34, -toy.size * 0.2, toy.size * 0.16, toy.size * 0.1);
+              } else if (toy.shape === "ball") {
+                ctx.fillStyle = toy.color;
+                ctx.beginPath();
+                ctx.arc(0, 0, toy.size * 0.34, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = "rgba(255,255,255,0.65)";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, toy.size * 0.18, 0, Math.PI * 2);
+                ctx.stroke();
+              } else {
+                ctx.strokeStyle = toy.color;
+                ctx.lineWidth = Math.max(2, toy.size * 0.14);
+                ctx.beginPath();
+                ctx.moveTo(-toy.size * 0.4, 0);
+                ctx.lineTo(toy.size * 0.4, 0);
+                ctx.moveTo(0, -toy.size * 0.4);
+                ctx.lineTo(0, toy.size * 0.4);
+                ctx.stroke();
+                ctx.fillStyle = "rgba(255,255,255,0.75)";
+                ctx.beginPath();
+                ctx.arc(0, 0, toy.size * 0.12, 0, Math.PI * 2);
+                ctx.fill();
+              }
+              ctx.restore();
             });
           }
           if (currentTheme === "cyber") {
@@ -3389,13 +3552,16 @@
             ctx.lineWidth = 3;
             ctx.strokeRect(gx, gy, gw, gh);
           } else if (currentTheme === "moony") {
-            ctx.fillStyle = "#ab47bc";
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "#d89eff";
-            ctx.fillRect(gx, gy, gw, gh);
-            ctx.strokeStyle = "#7e1b9f";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(gx, gy, gw, gh);
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "rgba(255,255,255,0.8)";
+            ctx.fillStyle = "rgba(200,180,255,0.6)";
+            ctx.fillRect(-gw / 2, -gh / 2, gw, gh);
+            ctx.strokeStyle = "#d0c0ff";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(-gw / 2, -gh / 2, gw, gh);
+            ctx.restore();
           } else if (currentTheme === "toybox") {
             ctx.fillStyle = "#f44336";
             ctx.fillRect(gx, gy, gw, gh);
@@ -3629,13 +3795,13 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.6.3", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6.4", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
         // Converts main rendering to low-res offscreen buffer when 8-bit mode is enabled.
         function draw() {
-          const isRetro = isRetro8bit && currentTheme === "classic";
+          const isRetro = isRetro8bit;
           if (isRetro) {
             retroCtx.setTransform(1, 0, 0, 1, 0, 0);
             retroCtx.imageSmoothingEnabled = false;
