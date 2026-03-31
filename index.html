@@ -2731,8 +2731,18 @@
           player.jumpHeld = jumpPressed;
           if (player.jumpBuffer > 0 && player.coyoteTime > 0) {
             player.coyoteTime = 0;
+            // Cancel dash if jumping from ground
+            if (player.dashTimer > 0) {
+              player.dashTimer = 0;
+              player.dashCooldown = 90; // Reset cooldown when canceling dash with jump
+            }
             performJump(false);
           } else if (player.jumpBuffer > 0 && player.hasAirJump && player.coyoteTime === 0) {
+            // Cancel dash if using air jump
+            if (player.dashTimer > 0) {
+              player.dashTimer = 0;
+              player.dashCooldown = 90; // Reset cooldown when canceling dash with jump
+            }
             performJump(true);
           }
           hazards.forEach((h) => {
