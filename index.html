@@ -3211,67 +3211,202 @@
               ctx.stroke();
             }
             
-            // Draw pirate ship in background
+            // Draw pirate ship in background with bobbing animation
             let shipX = 300 - camX * 0.2; // Parallax effect
-            let shipY = 180;
+            let bobbing = Math.sin(frameCount / 30) * 8; // Bobbing animation
+            let shipY = 160 + bobbing; // Sits on top of water
             
-            // Ship hull
+            // Ship shadow underwater
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.beginPath();
+            ctx.ellipse(shipX, shipY + 65, 100, 20, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Ship hull (larger)
             ctx.fillStyle = "#5a3a2a";
             ctx.beginPath();
-            ctx.moveTo(shipX - 80, shipY);
-            ctx.lineTo(shipX + 80, shipY);
-            ctx.lineTo(shipX + 70, shipY + 30);
-            ctx.lineTo(shipX - 70, shipY + 30);
+            ctx.moveTo(shipX - 100, shipY);
+            ctx.lineTo(shipX + 100, shipY);
+            ctx.lineTo(shipX + 90, shipY + 50);
+            ctx.lineTo(shipX - 90, shipY + 50);
             ctx.closePath();
             ctx.fill();
             ctx.strokeStyle = "#3a2a1a";
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.stroke();
+            
+            // Hull planks detail
+            ctx.strokeStyle = "rgba(60,40,20,0.4)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 4; i++) {
+              ctx.beginPath();
+              ctx.moveTo(shipX - 85, shipY + 12 + i * 10);
+              ctx.lineTo(shipX + 85, shipY + 12 + i * 10);
+              ctx.stroke();
+            }
+            
+            // Portholes in hull
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            for (let ph = 0; ph < 3; ph++) {
+              ctx.beginPath();
+              ctx.arc(shipX - 50 + ph * 50, shipY + 25, 6, 0, Math.PI * 2);
+              ctx.fill();
+            }
             
             // Ship deck
             ctx.fillStyle = "#8a6a5a";
-            ctx.fillRect(shipX - 75, shipY - 5, 150, 8);
+            ctx.fillRect(shipX - 95, shipY - 8, 190, 10);
             
-            // Ship cabin/castle
-            ctx.fillStyle = "#6a4a3a";
-            ctx.fillRect(shipX - 50, shipY - 25, 100, 25);
-            ctx.strokeStyle = "#3a2a1a";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(shipX - 50, shipY - 25, 100, 25);
+            // Deck planks
+            ctx.strokeStyle = "rgba(60,40,20,0.3)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 8; i++) {
+              ctx.beginPath();
+              ctx.moveTo(shipX - 90 + i * 25, shipY - 6);
+              ctx.lineTo(shipX - 90 + i * 25, shipY + 2);
+              ctx.stroke();
+            }
             
-            // Window on cabin
-            ctx.fillStyle = "#ffd700";
-            ctx.fillRect(shipX - 35, shipY - 20, 10, 10);
-            ctx.fillRect(shipX + 15, shipY - 20, 10, 10);
-            
-            // Ship mast
-            ctx.strokeStyle = "#4a3a2a";
-            ctx.lineWidth = 4;
+            // Barrels on deck
+            ctx.fillStyle = "#7a5a4a";
             ctx.beginPath();
-            ctx.moveTo(shipX, shipY - 5);
-            ctx.lineTo(shipX, shipY - 80);
+            ctx.ellipse(shipX - 60, shipY - 15, 10, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(shipX + 60, shipY - 15, 10, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#4a3a2a";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(shipX - 60, shipY - 15, 10, 8, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(shipX + 60, shipY - 15, 10, 8, 0, 0, Math.PI * 2);
             ctx.stroke();
             
-            // Pirate flag
-            ctx.fillStyle = "#2a1a0a";
+            // Ship cabin/castle (main structure)
+            ctx.fillStyle = "#6a4a3a";
+            ctx.fillRect(shipX - 50, shipY - 45, 100, 40);
+            ctx.strokeStyle = "#3a2a1a";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(shipX - 50, shipY - 45, 100, 40);
+            
+            // Cabin roof/peaked
+            ctx.fillStyle = "#7a5a4a";
             ctx.beginPath();
-            ctx.moveTo(shipX, shipY - 75);
-            ctx.lineTo(shipX + 40, shipY - 65);
-            ctx.lineTo(shipX, shipY - 55);
+            ctx.moveTo(shipX - 50, shipY - 45);
+            ctx.lineTo(shipX, shipY - 60);
+            ctx.lineTo(shipX + 50, shipY - 45);
             ctx.closePath();
             ctx.fill();
             
-            // Skull on flag
+            // Windows on cabin
             ctx.fillStyle = "#ffd700";
+            ctx.fillRect(shipX - 35, shipY - 35, 12, 12);
+            ctx.fillRect(shipX + 10, shipY - 35, 12, 12);
+            ctx.fillRect(shipX - 10, shipY - 20, 12, 12);
+            
+            // Window panes
+            ctx.strokeStyle = "#aa8800";
+            ctx.lineWidth = 1;
+            for (let win of [[-35, -35], [10, -35], [-10, -20]]) {
+              ctx.beginPath();
+              ctx.moveTo(shipX + win[0] + 6, shipY + win[1]);
+              ctx.lineTo(shipX + win[0] + 6, shipY + win[1] + 12);
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(shipX + win[0], shipY + win[1] + 6);
+              ctx.lineTo(shipX + win[0] + 12, shipY + win[1] + 6);
+              ctx.stroke();
+            }
+            
+            // Front mast (taller)
+            ctx.strokeStyle = "#4a3a2a";
+            ctx.lineWidth = 5;
             ctx.beginPath();
-            ctx.arc(shipX + 20, shipY - 65, 5, 0, Math.PI * 2);
+            ctx.moveTo(shipX - 30, shipY - 8);
+            ctx.lineTo(shipX - 30, shipY - 110);
+            ctx.stroke();
+            
+            // Back mast (rear mast)
+            ctx.strokeStyle = "#4a3a2a";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(shipX + 20, shipY - 8);
+            ctx.lineTo(shipX + 20, shipY - 70);
+            ctx.stroke();
+            
+            // Rigging lines
+            ctx.strokeStyle = "rgba(100,80,60,0.4)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(shipX - 30, shipY - 110);
+            ctx.lineTo(shipX - 80, shipY + 5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(shipX - 30, shipY - 110);
+            ctx.lineTo(shipX + 80, shipY + 5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(shipX + 20, shipY - 70);
+            ctx.lineTo(shipX - 80, shipY + 5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(shipX + 20, shipY - 70);
+            ctx.lineTo(shipX + 80, shipY + 5);
+            ctx.stroke();
+            
+            // Animated sails (billowing effect)
+            let sway = Math.sin(frameCount / 40) * 15;
+            ctx.fillStyle = "rgba(200,150,100,0.7)";
+            
+            // Front sail
+            ctx.beginPath();
+            ctx.moveTo(shipX - 30, shipY - 100);
+            ctx.lineTo(shipX - 30 - 80 - sway, shipY + 30);
+            ctx.lineTo(shipX - 30 - 60 - sway, shipY - 90);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Back sail
+            ctx.beginPath();
+            ctx.moveTo(shipX + 20, shipY - 60);
+            ctx.lineTo(shipX + 20 - 50 - sway * 0.7, shipY + 20);
+            ctx.lineTo(shipX + 20 - 35 - sway * 0.7, shipY - 50);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Pirate flag (animated fluttering)
+            let flagWave = Math.sin(frameCount / 20) * 3;
+            ctx.fillStyle = "#2a1a0a";
+            ctx.beginPath();
+            ctx.moveTo(shipX - 30, shipY - 105);
+            ctx.lineTo(shipX - 30 + 50 + flagWave, shipY - 90);
+            ctx.lineTo(shipX - 30 + 50 + flagWave, shipY - 75);
+            ctx.lineTo(shipX - 30, shipY - 90);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Skull and crossbones on flag
+            ctx.fillStyle = "#ffd700";
+            // Skull
+            ctx.beginPath();
+            ctx.arc(shipX - 10, shipY - 90, 6, 0, Math.PI * 2);
+            ctx.fill();
+            // Eye sockets
+            ctx.fillStyle = "#2a1a0a";
+            ctx.beginPath();
+            ctx.arc(shipX - 13, shipY - 92, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(shipX - 7, shipY - 92, 2, 0, Math.PI * 2);
             ctx.fill();
             // Crossbones on flag
-            ctx.strokeStyle = "#ffd700";
+            ctx.fillStyle = "#ffd700";
             ctx.lineWidth = 1.5;
             ctx.beginPath();
-            ctx.moveTo(shipX + 16, shipY - 65);
-            ctx.lineTo(shipX + 24, shipY - 65);
+            ctx.moveTo(shipX - 15, shipY - 88);
+            ctx.lineTo(shipX - 5, shipY - 88);
             ctx.stroke();
           } else {
             ctx.fillStyle = t.bg;
