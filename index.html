@@ -102,6 +102,38 @@
         border-radius: 2px;
       }
 
+      #achievements-container {
+        margin-top: 10px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        max-width: 200px;
+      }
+
+      .achievement-badge {
+        width: 50px;
+        height: 50px;
+        background: rgba(0, 0, 0, 0.95);
+        border: 2px solid #ffd700;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: box-shadow 0.2s;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      }
+
+      .achievement-badge:hover {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+      }
+
+      .achievement-badge-locked {
+        opacity: 0.4;
+        border-color: #666;
+        box-shadow: none;
+      }
+
       #cp-notif {
         position: absolute;
         width: 100%;
@@ -492,6 +524,7 @@
           >
             High Score: <span id="best">1</span>
           </div>
+          <div id="achievements-container"></div>
         </div>
         <div id="cp-notif">Checkpoint Reached</div>
         <div id="tutorialHint" class="stat" style="display: none"></div>
@@ -850,6 +883,110 @@
         canvas.height = 400;
         let bestLevel = localStorage.getItem("core_best_v20") || 1;
         document.getElementById("best").textContent = bestLevel;
+        
+        // Achievements system
+        const achievements = {
+          floorIsLava: {
+            id: "floorIsLava",
+            name: "Floor is Lava",
+            description: "Die by touching the floor within the first 2 seconds",
+            unlocked: false
+          }
+        };
+        
+        // Load unlocked achievements from localStorage
+        const storedAchievements = JSON.parse(localStorage.getItem("void_achievements") || "{}");
+        for (let key in achievements) {
+          achievements[key].unlocked = storedAchievements[key] || false;
+        }
+        
+        // Render achievements on initialization
+        renderAchievements();
+        
+        let gameLevelStartTime = 0;
+        
+        function unlockAchievement(achievementId) {
+          if (achievements[achievementId] && !achievements[achievementId].unlocked) {
+            achievements[achievementId].unlocked = true;
+            storedAchievements[achievementId] = true;
+            localStorage.setItem("void_achievements", JSON.stringify(storedAchievements));
+            showAchievementNotification(achievements[achievementId]);
+          }
+        }
+        
+        function showAchievementNotification(achievement) {
+          const notif = document.createElement("div");
+          notif.style.cssText = `
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.95);
+            border: 2px solid #ffd700;
+            padding: 12px;
+            color: #ffd700;
+            font-family: "Courier New", monospace;
+            font-weight: bold;
+            border-radius: 5px;
+            min-width: 220px;
+            z-index: 500;
+            box-shadow: 0 0 15px #ffd700;
+          `;
+          notif.innerHTML = `<div style="font-size: 14px;">ACHIEVEMENT UNLOCKED</div><div style="font-size: 12px; margin-top: 4px;">${achievement.name}</div>`;
+          document.body.appendChild(notif);
+          setTimeout(() => {
+            notif.style.transition = "opacity 0.5s";
+            notif.style.opacity = "0";
+            setTimeout(() => notif.remove(), 500);
+          }, 3000);
+          renderAchievements();
+        }
+        
+        function drawAchievementIcon(canvas, achievementId) {
+          const ctx = canvas.getContext("2d");
+          canvas.width = 50;
+          canvas.height = 50;
+          
+          if (achievementId === "floorIsLava") {
+            // Draw orange/red door icon for "Floor is Lava"
+            ctx.fillStyle = "#ff6600";
+            ctx.fillRect(5, 8, 40, 34);
+            ctx.fillStyle = "#ff3300";
+            ctx.fillRect(10, 13, 30, 24);
+            ctx.fillStyle = "#ffaa00";
+            ctx.beginPath();
+            ctx.arc(32, 25, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#ffcc00";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(5, 8, 40, 34);
+          }
+        }
+        
+        function renderAchievements() {
+          const container = document.getElementById("achievements-container");
+          container.innerHTML = "";
+          
+          for (let key in achievements) {
+            const achievement = achievements[key];
+            const badge = document.createElement("div");
+            badge.className = "achievement-badge" + (achievement.unlocked ? "" : " achievement-badge-locked");
+            
+            const canvas = document.createElement("canvas");
+            drawAchievementIcon(canvas, key);
+            canvas.style.width = "100%";
+            canvas.style.height = "100%";
+            
+            badge.appendChild(canvas);
+            badge.title = achievement.name + (achievement.unlocked ? "" : " (Locked)");
+            
+            if (achievement.unlocked) {
+              badge.title += "\n" + achievement.description;
+            }
+            
+            container.appendChild(badge);
+          }
+        }
+        
         let shieldItem = null,
           wells = [],
           currentTheme = "classic",
@@ -1893,15 +2030,25 @@
           player.jumpBuffer = 0;
           player.jumpHeld = false;
           player.hasAirJump = true;
+          gameLevelStartTime = Date.now();
         }
 
-        function die() {
+        function die(fromFloor = false) {
           if (player.spaghettified) return;
           // Speed Running Mode: any death instantly shows game over (no respawn)
           if (speedRunMode) {
             showSpeedRunGameOver();
             return;
           }
+          
+          // Check for "Floor is Lava" achievement
+          if (fromFloor && !tutorialMode) {
+            const elapsedSinceLevelStart = Date.now() - gameLevelStartTime;
+            if (elapsedSinceLevelStart < 2000) {
+              unlockAchievement("floorIsLava");
+            }
+          }
+          
           shake = 15;
           deathCount++;
           document.getElementById("deaths").textContent = deathCount;
@@ -2458,7 +2605,7 @@
               play.grab();
               return;
             } else {
-              die();
+              die(true);
               return;
             }
           }
@@ -2473,7 +2620,7 @@
               play.well();
               return;
             } else {
-              die();
+              die(false);
               return;
             }
           }
