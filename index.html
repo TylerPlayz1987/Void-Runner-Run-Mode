@@ -3059,6 +3059,68 @@
             ctx.beginPath();
             ctx.arc(x + 8, y + 11, 3, 0, Math.PI * 2);
             ctx.fill();
+          } else if (currentTheme === "pirate") {
+            // Draw pirate body
+            ctx.fillStyle = c;
+            ctx.fillRect(x, y, player.w, player.h);
+            
+            // Draw eyepatch on left eye
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc(x + 5, y + 5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw eye patch strap across face
+            ctx.strokeStyle = "#000";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x + 2, y + 5);
+            ctx.lineTo(x + 18, y + 6);
+            ctx.stroke();
+            
+            // Draw right eye (visible)
+            ctx.fillStyle = "#fff";
+            ctx.beginPath();
+            ctx.arc(x + 15, y + 5, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#000";
+            ctx.beginPath();
+            ctx.arc(x + 15, y + 5, 1, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Draw pirate hat (tricorn/bicorne style)
+            // Hat brim
+            ctx.fillStyle = "#1a1a1a";
+            ctx.beginPath();
+            ctx.ellipse(x + 10, y - 3, 12, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Hat crown (pointed top)
+            ctx.fillStyle = "#2a2a2a";
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 8);
+            ctx.lineTo(x + 4, y - 2);
+            ctx.lineTo(x + 16, y - 2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Skull and crossbones on hat
+            ctx.fillStyle = "#ffd700";
+            // Skull
+            ctx.beginPath();
+            ctx.arc(x + 10, y - 5, 2, 0, Math.PI * 2);
+            ctx.fill();
+            // Crossbones
+            ctx.strokeStyle = "#ffd700";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x + 8, y - 5);
+            ctx.lineTo(x + 12, y - 5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + 9, y - 4.5);
+            ctx.lineTo(x + 11, y - 5.5);
+            ctx.stroke();
           } else {
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
