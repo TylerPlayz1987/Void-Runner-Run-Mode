@@ -944,13 +944,22 @@
             description: "Press jump 50 times without moving at the start of a level",
             unlocked: false,
             mode: "run" // This achievement is for run mode only
+          },
+          staringIntoTheVoid: {
+            id: "staringIntoTheVoid",
+            name: "Staring into the Void",
+            description:
+              "Spend a cumulative 3 minutes on the main menu screen without starting",
+            unlocked: false,
+            mode: "run" // This achievement is for run mode only
           }
         };
 
         const achievementIconImageSources = {
           floorIsLava: "achievement_icons/1.png",
           spacebarCrusher: "achievement_icons/2.png",
-          isThisThingOn: "achievement_icons/3.png"
+          isThisThingOn: "achievement_icons/3.png",
+          staringIntoTheVoid: "achievement_icons/4.png"
         };
         const achievementIconImageCache = {};
 
@@ -982,6 +991,46 @@
         if (!Number.isFinite(totalRunModeJumps) || totalRunModeJumps < 0) {
           totalRunModeJumps = 0;
         }
+
+        // Persistent cumulative main-menu idle progress for "Staring into the Void".
+        let mainMenuIdleMs = parseInt(
+          localStorage.getItem("void_main_menu_idle_ms") || "0",
+          10
+        );
+        if (!Number.isFinite(mainMenuIdleMs) || mainMenuIdleMs < 0) {
+          mainMenuIdleMs = 0;
+        }
+        let mainMenuIdleLastTick = Date.now();
+
+        function isOnStartMenuScreen() {
+          return (
+            document.getElementById("startMenu").style.display !== "none" &&
+            document.getElementById("modeMenu").style.display === "none" &&
+            !running
+          );
+        }
+
+        function trackMainMenuIdleTime() {
+          const now = Date.now();
+          const deltaMs = Math.min(1000, Math.max(0, now - mainMenuIdleLastTick));
+          mainMenuIdleLastTick = now;
+
+          if (document.hidden) return;
+          if (!isOnStartMenuScreen()) return;
+          if (achievements.staringIntoTheVoid.unlocked) return;
+
+          mainMenuIdleMs += deltaMs;
+          localStorage.setItem("void_main_menu_idle_ms", String(mainMenuIdleMs));
+
+          if (mainMenuIdleMs >= 180000) {
+            unlockAchievement("staringIntoTheVoid");
+          }
+        }
+
+        setInterval(trackMainMenuIdleTime, 250);
+        document.addEventListener("visibilitychange", () => {
+          mainMenuIdleLastTick = Date.now();
+        });
 
         // Per-level challenge tracking for "Is This Thing On?"
         let noMoveStartJumpCount = 0;
@@ -4198,6 +4247,8 @@
           }
           totalRunModeJumps = 0;
           localStorage.removeItem("void_total_run_jumps");
+          mainMenuIdleMs = 0;
+          localStorage.removeItem("void_main_menu_idle_ms");
           renderAchievements();
 
           if (wasTutorial) {
