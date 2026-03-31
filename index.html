@@ -1869,6 +1869,12 @@
           speedZoneType: null,
           speedZoneMul: 1,
           standPlatform: null,
+          dashCooldown: 0,
+          dashSpeed: 15,
+          dashDuration: 15,
+          dashTimer: 0,
+          currentDashSpeed: 15,
+          dashHeld: false,
         };
         let goal = { x: 0, y: 0, w: 40, h: 40 };
         function sfx(f, t, d, v, slide = 0) {
@@ -2363,6 +2369,7 @@
           player.dashDuration = 15;
           player.dashTimer = 0;
           player.currentDashSpeed = 15;
+          player.dashHeld = false;
           noMoveStartJumpCount = 0;
           noMoveStartMoved = false;
           noMoveStartX = player.x;
@@ -2611,7 +2618,7 @@
           }
           if (keys["ShiftLeft"] || keys["ShiftRight"] || player.dashTimer > 0) {
             player.trail.push({ x: player.x, y: player.y });
-            if (player.trail.length > 8) player.trail.shift();
+          if (player.trail.length > 12) player.trail.shift();
           } else {
             player.trail = [];
           }
@@ -2657,8 +2664,11 @@
             }
           }
           
-          // Check for dash input (Q key)
-          if (keys["KeyQ"] && player.dashCooldown === 0 && player.dashTimer === 0) {
+          // Check for dash input (Q key) using edge detection so dash only triggers on a fresh press
+          const dashKeyDown = !!keys["KeyQ"];
+          const dashPressed = dashKeyDown && !player.dashHeld;
+          player.dashHeld = dashKeyDown;
+          if (dashPressed && player.dashCooldown === 0 && player.dashTimer === 0) {
             player.dashTimer = player.dashDuration;
             // Determine dash direction based on current momentum or input
             let dashDir = player.momentumX !== 0 ? Math.sign(player.momentumX) : 
