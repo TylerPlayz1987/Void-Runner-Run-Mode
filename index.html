@@ -2360,7 +2360,7 @@
           player.hasAirJump = true;
           player.dashCooldown = 0;
           player.dashSpeed = 15;
-          player.dashDuration = 8;
+          player.dashDuration = 15;
           player.dashTimer = 0;
           noMoveStartJumpCount = 0;
           noMoveStartMoved = false;
@@ -2652,7 +2652,7 @@
           if (player.dashTimer > 0) {
             player.dashTimer--;
             if (player.dashTimer === 0) {
-              player.dashCooldown = 60; // 1 second cooldown at 60fps
+              player.dashCooldown = 90; // 1.5 second cooldown at 60fps
             }
           }
           
