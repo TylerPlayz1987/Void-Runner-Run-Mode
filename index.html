@@ -637,6 +637,7 @@
             >
               Exit Tutorial
             </button
+            ><button id="pauseMainMenuBtn" class="small-btn" style="background: #666">Main Menu</button
             ><button id="restartBtn" class="small-btn">Reset</button>
           </div>
           <div id="settingsPage" class="menu-page" style="display: none">
@@ -3556,7 +3557,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.6.2", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6.3", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
@@ -4237,6 +4238,7 @@
         }
 
         document.getElementById("restartBtn").onclick = showResetPrompt;
+        document.getElementById("pauseMainMenuBtn").onclick = returnToStartMenu;
         document.getElementById("cancelResetBtn").onclick = hideResetPrompt;
         document.getElementById("checkpointRestartBtn").onclick = checkpointRestart;
         document.getElementById("fullRestartBtn").onclick = showFullRestartPrompt;
