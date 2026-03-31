@@ -791,6 +791,7 @@
           <button class="mobile-btn" id="btn-right" data-code="ArrowRight" aria-label="Move right" title="Move right">▶</button>
           <button class="mobile-btn wide" id="btn-run" data-code="ShiftLeft" aria-label="Run" title="Run">RUN</button>
           <button class="mobile-btn" id="btn-jump" data-code="Space" aria-label="Jump" title="Jump">JUMP</button>
+          <button class="mobile-btn" id="btn-dash" data-code="KeyQ" aria-label="Dash" title="Dash">DASH</button>
           <div id="customizeConfirmBar">
             <button id="confirmCustomizeBtn" class="small-btn" style="background: #0aa; color: #000;">Done</button>
           </div>
@@ -866,13 +867,15 @@
             "btn-left": { x: 14, y: 0 },
             "btn-right": { x: 90, y: 0 },
             "btn-run": { x: 14, y: 80 },
-            "btn-jump": { x: 108, y: 80 }
+            "btn-jump": { x: 108, y: 80 },
+            "btn-dash": { x: 166, y: 80 }
           },
           buttonSizes = {
             "btn-left": 64,
             "btn-right": 64,
             "btn-run": 64,
-            "btn-jump": 64
+            "btn-jump": 64,
+            "btn-dash": 64
           },
           currentCustomizingButton = null,
           customizeStartData = null;
@@ -2355,6 +2358,10 @@
           player.jumpBuffer = 0;
           player.jumpHeld = false;
           player.hasAirJump = true;
+          player.dashCooldown = 0;
+          player.dashSpeed = 15;
+          player.dashDuration = 8;
+          player.dashTimer = 0;
           noMoveStartJumpCount = 0;
           noMoveStartMoved = false;
           noMoveStartX = player.x;
@@ -2601,7 +2608,7 @@
             }
             return;
           }
-          if (keys["ShiftLeft"] || keys["ShiftRight"]) {
+          if (keys["ShiftLeft"] || keys["ShiftRight"] || player.dashTimer > 0) {
             player.trail.push({ x: player.x, y: player.y });
             if (player.trail.length > 8) player.trail.shift();
           } else {
@@ -2639,6 +2646,30 @@
             player.speedZoneType = null;
             player.speedZoneMul = 1;
           }
+          
+          // Handle dash cooldown and duration
+          if (player.dashCooldown > 0) player.dashCooldown--;
+          if (player.dashTimer > 0) {
+            player.dashTimer--;
+            if (player.dashTimer === 0) {
+              player.dashCooldown = 60; // 1 second cooldown at 60fps
+            }
+          }
+          
+          // Check for dash input (Q key)
+          if (keys["KeyQ"] && player.dashCooldown === 0 && player.dashTimer === 0) {
+            player.dashTimer = player.dashDuration;
+            // Determine dash direction based on current momentum or input
+            let dashDir = player.momentumX !== 0 ? Math.sign(player.momentumX) : 
+                         ((keys["ArrowRight"] || keys["KeyD"] ? 1 : 0) - (keys["ArrowLeft"] || keys["KeyA"] ? 1 : 0));
+            if (dashDir === 0) dashDir = 1; // Default to right if no direction
+            player.vx = dashDir * player.dashSpeed;
+            player.vy = 0; // Reset vertical velocity for cleaner dash
+            // Add dash trail effect
+            player.trail.push({ x: player.x, y: player.y });
+            if (player.trail.length > 12) player.trail.shift();
+          }
+          
           let s =
             keys["ShiftLeft"] || keys["ShiftRight"]
               ? player.runSpeed
@@ -2655,7 +2686,15 @@
             player.momentumX *= 0.8;
             if (Math.abs(player.momentumX) < 0.03) player.momentumX = 0;
           }
-          player.vx = player.momentumX;
+          
+          // Apply dash velocity or normal momentum
+          if (player.dashTimer > 0) {
+            // During dash, maintain dash velocity
+            player.vx = Math.sign(player.vx) * player.dashSpeed;
+          } else {
+            player.vx = player.momentumX;
+          }
+          
           player.vy += 0.6;
           let dead = false,
             suckedIn = false;
