@@ -798,42 +798,12 @@
         <canvas id="canvas"></canvas>
       </div>
     </div>
-    <audio
-      id="bgSunnyMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Smile.ogg"
-    ></audio>
-    <audio
-      id="bgMoonyMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Dark.ogg"
-    ></audio>
-    <audio
-      id="bgToyBoxMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Funny.ogg"
-    ></audio>
-    <audio
-      id="bgCyberMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Neon.ogg"
-    ></audio>
-    <audio
-      id="bgMagmaMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Boom.ogg"
-    ></audio>
-    <audio
-      id="bgStardustMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Starry.ogg"
-    ></audio>
+    <audio id="bgSunnyMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgMoonyMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgToyBoxMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgCyberMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgMagmaMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgStardustMusic" loop crossorigin="anonymous" preload="none"></audio>
     <audio id="bgMusic" loop crossorigin="anonymous"></audio>
     <script>
       // Entry point: run once DOM is ready
@@ -1345,7 +1315,6 @@
             plat: "#5a3a2a",
             player: "#ffd700",
             hazards: "#cc0000",
-            pirate: true,
             music: "theme_bg/Pirate.ogg",
           },
         };
@@ -3133,9 +3102,12 @@
               let endX = 10;
               let startY = 12 + (18 - 12) * progress;
               let endY = 18;
+              // Deterministic offset so beard does not flicker between frames
+              const beardSeed = Math.sin(x * 12.9898 + y * 78.233 + i * 37.719) * 10000;
+              const offset = (beardSeed - Math.floor(beardSeed) - 0.5) * 2;
               ctx.beginPath();
               ctx.moveTo(x + startX, y + startY);
-              ctx.lineTo(x + endX + (Math.random() - 0.5) * 2, y + endY);
+              ctx.lineTo(x + endX + offset, y + endY);
               ctx.stroke();
             }
             
@@ -4043,13 +4015,18 @@
                   ctx.stroke();
                 }
                 
-                // Water droplets/reflection effect
+                // Water droplets/reflection effect - use deterministic positions to avoid frame flicker
                 ctx.fillStyle = "rgba(150, 220, 255, 0.4)";
+                const dropBaseSeed = h.x * 374761 + h.y * 668265263;
                 for (let i = 0; i < 5; i++) {
-                  const dropletX = h.x - camX + Math.random() * h.w;
-                  const dropletY = h.y + Math.random() * h.h;
+                  const rx = Math.abs(Math.sin(dropBaseSeed + i * 12.9898)) % 1;
+                  const ry = Math.abs(Math.sin(dropBaseSeed + i * 78.233)) % 1;
+                  const rr = Math.abs(Math.sin(dropBaseSeed + i * 37.719)) % 1;
+                  const dropletX = h.x - camX + rx * h.w;
+                  const dropletY = h.y + ry * h.h;
+                  const radius = 1 + rr * 2;
                   ctx.beginPath();
-                  ctx.arc(dropletX, dropletY, 1 + Math.random() * 2, 0, Math.PI * 2);
+                  ctx.arc(dropletX, dropletY, radius, 0, Math.PI * 2);
                   ctx.fill();
                 }
               } else {
@@ -4072,7 +4049,6 @@
                 ctx.lineWidth = 2;
                 ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
               }
-              ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
             } else {
               ctx.fillStyle = t.hazards;
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
@@ -4110,12 +4086,14 @@
                 ctx.fillStyle = base;
                 ctx.fillRect(p.x - camX, p.y, p.w, p.h);
 
-                // Add wood grain/splinter details
+                // Add wood grain/splinter details - use deterministic positions based on platform coords
                 ctx.strokeStyle = "rgba(80,50,30,0.5)";
                 ctx.lineWidth = 1;
                 let plankCount = Math.max(3, Math.floor(p.w / 30));
                 for (let i = 1; i < plankCount; i++) {
-                  let px = p.x - camX + (p.w / plankCount) * i + (Math.random() - 0.5) * 3;
+                  const grainSeed = Math.sin(p.x * 12.9898 + i * 78.233) * 43758.5453;
+                  const grainOff = (grainSeed - Math.floor(grainSeed) - 0.5) * 3;
+                  let px = p.x - camX + (p.w / plankCount) * i + grainOff;
                   ctx.beginPath();
                   ctx.moveTo(px, p.y + 2);
                   ctx.lineTo(px, p.y + p.h - 2);
@@ -4123,10 +4101,14 @@
                 }
 
                 for (let i = 0; i < 4; i++) {
-                  let sx = p.x - camX + Math.random() * p.w;
-                  let sy = p.y + Math.random() * p.h;
-                  let ex = sx + (Math.random() - 0.5) * 10;
-                  let ey = sy + (Math.random() - 0.5) * 6;
+                  const s1 = Math.abs(Math.sin(p.x * 37.719 + p.y * 12.9898 + i * 100)) % 1;
+                  const s2 = Math.abs(Math.sin(p.x * 78.233 + p.y * 37.719 + i * 200)) % 1;
+                  const s3 = Math.abs(Math.sin(p.x * 21.533 + p.y * 43.758 + i * 300)) % 1;
+                  const s4 = Math.abs(Math.sin(p.x * 65.438 + p.y * 21.533 + i * 400)) % 1;
+                  let sx = p.x - camX + s1 * p.w;
+                  let sy = p.y + s2 * p.h;
+                  let ex = sx + (s3 - 0.5) * 10;
+                  let ey = sy + (s4 - 0.5) * 6;
                   ctx.beginPath();
                   ctx.moveTo(sx, sy);
                   ctx.lineTo(ex, ey);
