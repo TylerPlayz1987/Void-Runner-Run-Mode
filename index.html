@@ -189,9 +189,20 @@
         color: #0f0;
         font-size: 18px;
         font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 1;
+        padding: 0;
         pointer-events: auto;
         user-select: none;
         touch-action: none;
+      }
+
+      #btn-jump {
+        font-size: 15px;
+        letter-spacing: 0.5px;
       }
 
       .mobile-btn.wide {
@@ -3284,7 +3295,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.6.1", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6.2", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
@@ -4056,10 +4067,14 @@
         function updateMobileSupportUi() {
           const toggleBtn = document.getElementById("mobileSupportToggleBtn");
           const controls = document.getElementById("mobileControls");
+          const customizeBtn = document.getElementById("openControlLayoutBtn");
+          const screenBtn = document.getElementById("openScreenSizeBtn");
           toggleBtn.textContent =
             "Mobile Support: " + (mobileSupportEnabled ? "ON" : "OFF");
           if (mobileSupportEnabled) controls.classList.add("active");
           else controls.classList.remove("active");
+          customizeBtn.style.display = mobileSupportEnabled ? "block" : "none";
+          screenBtn.style.display = mobileSupportEnabled ? "block" : "none";
         }
 
         function updateControlLayoutUi() {
@@ -4134,7 +4149,11 @@
             btn.style.bottom = (390 - pos.y - size) + "px"; // Calculate bottom from y position
             btn.style.width = (btn.classList.contains("wide") ? size * 1.35 : size) + "px";
             btn.style.height = size + "px";
-            btn.style.fontSize = Math.round(size * 0.28) + "px";
+            if (btn.id === "btn-jump") {
+              btn.style.fontSize = Math.max(11, Math.round(size * 0.22)) + "px";
+            } else {
+              btn.style.fontSize = Math.round(size * 0.28) + "px";
+            }
             btn.style.borderRadius = Math.round(size * 0.5) + "px";
             btn.style.transition = "none";
           });
@@ -4268,6 +4287,7 @@
 
         updateControlLayoutUi();
         updateScreenSizeUi();
+        updateMobileSupportUi();
 
         const activePointerToCode = new Map();
         const releasePointerFallback = (ev) => {
