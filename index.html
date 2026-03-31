@@ -134,6 +134,34 @@
         box-shadow: none;
       }
 
+      .achievement-badge {
+        position: relative;
+      }
+
+      .achievement-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.95);
+        border: 1px solid #ffd700;
+        color: #ffd700;
+        padding: 8px 12px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-family: "Courier New", monospace;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        margin-bottom: 5px;
+        z-index: 1000;
+      }
+
+      .achievement-badge:hover .achievement-tooltip {
+        opacity: 1;
+      }
+
       #cp-notif {
         position: absolute;
         width: 100%;
@@ -899,9 +927,15 @@
             id: "floorIsLava",
             name: "Floor is Lava",
             description: "Die by touching the floor within the first 2 seconds",
-            unlocked: false
+            unlocked: false,
+            mode: "run" // This achievement is for run mode only
           }
         };
+        
+        // Helper function to get achievements for a specific mode
+        function getAchievementsForMode(mode) {
+          return Object.values(achievements).filter(ach => (!ach.mode || ach.mode === mode));
+        }
         
         // Load unlocked achievements from localStorage
         const storedAchievements = JSON.parse(localStorage.getItem("void_achievements") || "{}");
@@ -975,8 +1009,22 @@
           const container = document.getElementById("achievements-container");
           container.innerHTML = "";
           
+          // Determine which mode we're in and render appropriate achievements
+          let currentMode = "run"; // Default to run mode
+          if (tutorialMode) {
+            currentMode = "tutorial"; // Tutorial mode has no achievements
+          } else if (speedRunMode) {
+            currentMode = "speedrun"; // Speedrun mode has its own achievements
+          }
+          
+          // Only render achievements if not in tutorial mode
+          if (tutorialMode) return;
+          
           for (let key in achievements) {
             const achievement = achievements[key];
+            // Only show achievements for the current mode
+            if (achievement.mode && achievement.mode !== currentMode) continue;
+            
             const badge = document.createElement("div");
             badge.className = "achievement-badge" + (achievement.unlocked ? "" : " achievement-badge-locked");
             
@@ -986,10 +1034,15 @@
             canvas.style.height = "100%";
             
             badge.appendChild(canvas);
-            badge.title = achievement.name + (achievement.unlocked ? "" : " (Locked)");
             
             if (achievement.unlocked) {
-              badge.title += "\n" + achievement.description;
+              const tooltip = document.createElement("div");
+              tooltip.className = "achievement-tooltip";
+              tooltip.textContent = achievement.description;
+              badge.appendChild(tooltip);
+              badge.title = achievement.name;
+            } else {
+              badge.title = achievement.name + " (Locked)";
             }
             
             container.appendChild(badge);
@@ -2050,8 +2103,8 @@
             return;
           }
           
-          // Check for "Floor is Lava" achievement
-          if (fromFloor && !tutorialMode) {
+          // Check for "Floor is Lava" achievement (run mode only, not tutorial or speedrun)
+          if (fromFloor && !tutorialMode && !speedRunMode) {
             const elapsedSinceLevelStart = Date.now() - gameLevelStartTime;
             if (elapsedSinceLevelStart < 2000) {
               unlockAchievement("floorIsLava");
@@ -3934,7 +3987,9 @@
 
           if (resetAchievements) {
             localStorage.removeItem("void_achievements");
-            unlockedAchievements = {};
+            for (let key in achievements) {
+              achievements[key].unlocked = false;
+            }
             renderAchievements();
           }
 
