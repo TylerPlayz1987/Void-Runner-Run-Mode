@@ -1033,6 +1033,7 @@
             achievements[achievementId].unlocked = true;
             storedAchievements[achievementId] = true;
             localStorage.setItem("void_achievements", JSON.stringify(storedAchievements));
+            play.ach();
             showAchievementNotification(achievements[achievementId]);
           }
         }
@@ -1891,6 +1892,12 @@
           wn: () => {
             sfx(523, "triangle", 0.1, 0.1);
             setTimeout(() => sfx(659, "triangle", 0.1, 0.1), 80);
+          },
+          ach: () => {
+            // Bright three-note chime for achievement unlocks.
+            sfx(784, "triangle", 0.08, 0.1);
+            setTimeout(() => sfx(988, "triangle", 0.1, 0.1), 80);
+            setTimeout(() => sfx(1175, "triangle", 0.12, 0.11), 170);
           },
           di: () => sfx(150, "sawtooth", 0.4, 0.1, 40),
           rewind: () => {
