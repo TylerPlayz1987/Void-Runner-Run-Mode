@@ -572,11 +572,8 @@
         <div id="fullRestartConfirm">
           <div class="confirm-box">
             <h2>Confirm Full Restart</h2>
-            <p>This will reset to Level 1 and clear your best score. Continue?</p>
-            <label style="display: flex; align-items: center; gap: 8px; margin: 12px 0;">
-              <input type="checkbox" id="resetAchievementsCheckbox" style="width: 18px; height: 18px;">
-              <span>Also reset achievements</span>
-            </label>
+            <p>This will reset to Level 1 and clear your best score.</p>
+            <p style="color: #f88; margin-top: 8px;">Warning: all your achievements will be gone.</p>
             <button id="confirmFullRestartBtn" class="small-btn" style="background: #f44">Yes, Full Restart</button>
             <button id="cancelFullRestartBtn" class="small-btn">No, Go Back</button>
           </div>
@@ -3826,7 +3823,6 @@
 
         function hideFullRestartPrompt(shouldResume = true) {
           document.getElementById("fullRestartConfirm").style.display = "none";
-          document.getElementById("resetAchievementsCheckbox").checked = false;
           if (shouldResume && fullRestartResumeOnCancel) {
             fullRestartResumeOnCancel = false;
             isPaused = false;
@@ -3983,19 +3979,16 @@
           fullRestartResumeOnCancel = false;
           const fromLevel = currentLevel;
           const wasTutorial = tutorialMode;
-          const resetAchievements = document.getElementById("resetAchievementsCheckbox").checked;
 
           deathCount = 0;
           document.getElementById("deaths").textContent = deathCount;
 
-          if (resetAchievements) {
-            localStorage.removeItem("void_achievements");
-            storedAchievements = {};
-            for (let key in achievements) {
-              achievements[key].unlocked = false;
-            }
-            renderAchievements();
+          localStorage.removeItem("void_achievements");
+          storedAchievements = {};
+          for (let key in achievements) {
+            achievements[key].unlocked = false;
           }
+          renderAchievements();
 
           if (wasTutorial) {
             // In tutorial, full restart should restart tutorial from its start.
