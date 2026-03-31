@@ -2422,7 +2422,7 @@
           let s = platforms;
           let minD = Infinity;
           platforms.forEach((p) => {
-            if (!p.isPhase && !p.hasSpike && !p.hasSeeker && !p.isWreckingBall && !p.isSinking) {
+            if (!p.isPhase && !p.hasSpike && !p.hasSeeker && !p.isWreckingBall && !p.isSinking && !p.isSwingPlatform && p.moveRange === 0) {
               let d = Math.abs(p.x - player.x);
               if (d < minD) {
                 minD = d;
@@ -3020,8 +3020,11 @@
                 const dx = swing.x - closestX;
                 const dy = swing.y - closestY;
                 if (dx * dx + dy * dy < p.swingSize * p.swingSize) {
-                  dead = true;
-                  break;
+                  const dist = Math.sqrt(dx * dx + dy * dy) || 0.1;
+                  const pushX = (dx / dist) * 8;
+                  const pushY = (dy / dist) * 8;
+                  player.vx = pushX;
+                  player.vy = pushY - 5;
                 }
               }
             }
