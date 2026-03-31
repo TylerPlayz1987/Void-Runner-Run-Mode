@@ -4012,92 +4012,45 @@
           hazards.forEach((h) => {
             if (h.type === "lava") {
               if (currentTheme === "pirate") {
-                const hx = h.x - camX;
-                const hy = h.y;
-                const hw = h.w;
-                const hh = h.h;
-                // Shark body
-                ctx.fillStyle = "#2d2d2d";
-                ctx.beginPath();
-                ctx.moveTo(hx, hy + hh);
-                ctx.lineTo(hx + hw * 0.18, hy + hh * 0.5);
-                ctx.quadraticCurveTo(hx + hw * 0.35, hy + hh * 0.2, hx + hw * 0.5, hy + hh * 0.25);
-                ctx.quadraticCurveTo(hx + hw * 0.65, hy + hh * 0.3, hx + hw * 0.82, hy + hh * 0.5);
-                ctx.lineTo(hx + hw, hy + hh);
-                ctx.closePath();
-                ctx.fill();
-
-                // Shark back fin
-                ctx.fillStyle = "#282828";
-                ctx.beginPath();
-                ctx.moveTo(hx + hw * 0.18, hy + hh * 0.5);
-                ctx.lineTo(hx + hw * 0.1, hy + hh * 0.35);
-                ctx.lineTo(hx + hw * 0.24, hy + hh * 0.43);
-                ctx.closePath();
-                ctx.fill();
-
-                // Shark tail
-                ctx.beginPath();
-                ctx.moveTo(hx + hw, hy + hh);
-                ctx.lineTo(hx + hw * 0.97, hy + hh * 0.8);
-                ctx.lineTo(hx + hw * 0.89, hy + hh * 0.95);
-                ctx.closePath();
-                ctx.fill();
-
-                // Shark belly highlight
-                ctx.fillStyle = "rgba(220,220,220,0.55)";
-                ctx.beginPath();
-                ctx.moveTo(hx + hw * 0.18, hy + hh * 0.55);
-                ctx.quadraticCurveTo(hx + hw * 0.5, hy + hh * 0.78, hx + hw * 0.82, hy + hh * 0.55);
-                ctx.lineTo(hx + hw * 0.82, hy + hh * 0.58);
-                ctx.quadraticCurveTo(hx + hw * 0.5, hy + hh * 0.8, hx + hw * 0.18, hy + hh * 0.58);
-                ctx.closePath();
-                ctx.fill();
-
-                // Shark mouth and teeth
-                ctx.fillStyle = "#b42121";
-                ctx.beginPath();
-                ctx.moveTo(hx + hw * 0.17, hy + hh * 0.55);
-                ctx.quadraticCurveTo(hx + hw * 0.35, hy + hh * 0.35, hx + hw * 0.57, hy + hh * 0.5);
-                ctx.lineTo(hx + hw * 0.57, hy + hh * 0.55);
-                ctx.quadraticCurveTo(hx + hw * 0.35, hy + hh * 0.4, hx + hw * 0.17, hy + hh * 0.57);
-                ctx.closePath();
-                ctx.fill();
-
-                // Teeth
-                ctx.fillStyle = "#fff";
-                const teethCount = 6;
-                for (let i = 0; i < teethCount; i++) {
-                  const tx = hx + hw * (0.2 + i * 0.055);
-                  const ty = hy + hh * (0.52 - Math.sin(i * 1.2) * 0.01);
-                  ctx.beginPath();
-                  ctx.moveTo(tx, ty);
-                  ctx.lineTo(tx + 3, ty - 7);
-                  ctx.lineTo(tx + 6, ty);
-                  ctx.closePath();
-                  ctx.fill();
-                }
-
-                // Eye
-                ctx.fillStyle = "#fff";
-                ctx.beginPath();
-                ctx.arc(hx + hw * 0.65, hy + hh * 0.42, 4, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.fillStyle = "#000";
-                ctx.beginPath();
-                ctx.arc(hx + hw * 0.66, hy + hh * 0.42, 1.5, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Splash detail
-                ctx.strokeStyle = "rgba(160,220,255,0.75)";
+                // Water wall effect for pirate theme
+                let waterGlow = ctx.createRadialGradient(
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  0,
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  Math.max(20, h.h),
+                );
+                waterGlow.addColorStop(0, "rgba(100, 200, 255, 0.8)");
+                waterGlow.addColorStop(0.45, "rgba(150, 220, 255, 0.6)");
+                waterGlow.addColorStop(1, "rgba(200, 240, 255, 0.3)");
+                ctx.fillStyle = waterGlow;
+                ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
+                
+                // Water base
+                ctx.fillStyle = "rgba(50, 150, 255, 0.8)";
+                ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+                
+                // Water surface waves
+                ctx.strokeStyle = "rgba(100, 200, 255, 0.9)";
                 ctx.lineWidth = 2;
-                for (let i = 0; i < 4; i++) {
-                  const sx = hx + Math.random() * hw;
-                  const sy = hy + hh + Math.random() * 8;
+                const waveOffset = frameCount * 0.05;
+                for (let i = 0; i < 3; i++) {
+                  const y = h.y + i * 4 + Math.sin((h.x - camX) * 0.1 + waveOffset + i) * 2;
                   ctx.beginPath();
-                  ctx.moveTo(sx, sy);
-                  ctx.bezierCurveTo(sx + 3, sy - 8, sx + 10, sy - 12, sx + 14, sy - 6);
+                  ctx.moveTo(h.x - camX, y);
+                  ctx.lineTo(h.x - camX + h.w, y);
                   ctx.stroke();
+                }
+                
+                // Water droplets/reflection effect
+                ctx.fillStyle = "rgba(150, 220, 255, 0.4)";
+                for (let i = 0; i < 5; i++) {
+                  const dropletX = h.x - camX + Math.random() * h.w;
+                  const dropletY = h.y + Math.random() * h.h;
+                  ctx.beginPath();
+                  ctx.arc(dropletX, dropletY, 1 + Math.random() * 2, 0, Math.PI * 2);
+                  ctx.fill();
                 }
               } else {
                 let glow = ctx.createRadialGradient(
@@ -4119,6 +4072,7 @@
                 ctx.lineWidth = 2;
                 ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
               }
+              ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
             } else {
               ctx.fillStyle = t.hazards;
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
