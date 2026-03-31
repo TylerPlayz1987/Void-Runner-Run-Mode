@@ -791,6 +791,7 @@
           <button class="mobile-btn" id="btn-right" data-code="ArrowRight" aria-label="Move right" title="Move right">▶</button>
           <button class="mobile-btn wide" id="btn-run" data-code="ShiftLeft" aria-label="Run" title="Run">RUN</button>
           <button class="mobile-btn" id="btn-jump" data-code="Space" aria-label="Jump" title="Jump">JUMP</button>
+          <button class="mobile-btn" id="btn-dash" data-code="KeyQ" aria-label="Dash" title="Dash">DASH</button>
           <div id="customizeConfirmBar">
             <button id="confirmCustomizeBtn" class="small-btn" style="background: #0aa; color: #000;">Done</button>
           </div>
@@ -866,13 +867,15 @@
             "btn-left": { x: 14, y: 0 },
             "btn-right": { x: 90, y: 0 },
             "btn-run": { x: 14, y: 80 },
-            "btn-jump": { x: 108, y: 80 }
+            "btn-jump": { x: 108, y: 80 },
+            "btn-dash": { x: 166, y: 80 }
           },
           buttonSizes = {
             "btn-left": 64,
             "btn-right": 64,
             "btn-run": 64,
-            "btn-jump": 64
+            "btn-jump": 64,
+            "btn-dash": 64
           },
           currentCustomizingButton = null,
           customizeStartData = null;
@@ -1866,6 +1869,12 @@
           speedZoneType: null,
           speedZoneMul: 1,
           standPlatform: null,
+          dashCooldown: 0,
+          dashSpeed: 15,
+          dashDuration: 15,
+          dashTimer: 0,
+          currentDashSpeed: 15,
+          dashHeld: false,
         };
         let goal = { x: 0, y: 0, w: 40, h: 40 };
         function sfx(f, t, d, v, slide = 0) {
@@ -2355,6 +2364,12 @@
           player.jumpBuffer = 0;
           player.jumpHeld = false;
           player.hasAirJump = true;
+          player.dashCooldown = 0;
+          player.dashSpeed = 15;
+          player.dashDuration = 15;
+          player.dashTimer = 0;
+          player.currentDashSpeed = 15;
+          player.dashHeld = false;
           noMoveStartJumpCount = 0;
           noMoveStartMoved = false;
           noMoveStartX = player.x;
@@ -2601,9 +2616,9 @@
             }
             return;
           }
-          if (keys["ShiftLeft"] || keys["ShiftRight"]) {
+          if (keys["ShiftLeft"] || keys["ShiftRight"] || player.dashTimer > 0) {
             player.trail.push({ x: player.x, y: player.y });
-            if (player.trail.length > 8) player.trail.shift();
+          if (player.trail.length > 12) player.trail.shift();
           } else {
             player.trail = [];
           }
@@ -2639,6 +2654,41 @@
             player.speedZoneType = null;
             player.speedZoneMul = 1;
           }
+          
+          // Handle dash cooldown and duration
+          if (player.dashCooldown > 0) player.dashCooldown--;
+          if (player.dashTimer > 0) {
+            player.dashTimer--;
+            if (player.dashTimer === 0) {
+              player.dashCooldown = 90; // 1.5 second cooldown at 60fps
+            }
+          }
+          
+          // Check for dash input (Q key) using edge detection so dash only triggers on a fresh press
+          const dashKeyDown = !!keys["KeyQ"];
+          const dashPressed = dashKeyDown && !player.dashHeld;
+          player.dashHeld = dashKeyDown;
+          if (dashPressed && player.dashCooldown === 0 && player.dashTimer === 0) {
+            player.dashTimer = player.dashDuration;
+            // Determine dash direction based on current momentum or input
+            let dashDir = player.momentumX !== 0 ? Math.sign(player.momentumX) : 
+                         ((keys["ArrowRight"] || keys["KeyD"] ? 1 : 0) - (keys["ArrowLeft"] || keys["KeyA"] ? 1 : 0));
+            if (dashDir === 0) dashDir = 1; // Default to right if no direction
+            
+            // Increase dash speed if sprinting
+            let currentDashSpeed = player.dashSpeed;
+            if (keys["ShiftLeft"] || keys["ShiftRight"]) {
+              currentDashSpeed *= 1.5; // 50% faster when sprinting
+            }
+            player.currentDashSpeed = currentDashSpeed;
+            
+            player.vx = dashDir * currentDashSpeed;
+            player.vy = 0; // Reset vertical velocity for cleaner dash
+            // Add dash trail effect
+            player.trail.push({ x: player.x, y: player.y });
+            if (player.trail.length > 12) player.trail.shift();
+          }
+          
           let s =
             keys["ShiftLeft"] || keys["ShiftRight"]
               ? player.runSpeed
@@ -2655,7 +2705,15 @@
             player.momentumX *= 0.8;
             if (Math.abs(player.momentumX) < 0.03) player.momentumX = 0;
           }
-          player.vx = player.momentumX;
+          
+          // Apply dash velocity or normal momentum
+          if (player.dashTimer > 0) {
+            // During dash, maintain dash velocity
+            player.vx = Math.sign(player.vx) * player.currentDashSpeed;
+          } else {
+            player.vx = player.momentumX;
+          }
+          
           player.vy += 0.6;
           let dead = false,
             suckedIn = false;
@@ -2692,8 +2750,18 @@
           player.jumpHeld = jumpPressed;
           if (player.jumpBuffer > 0 && player.coyoteTime > 0) {
             player.coyoteTime = 0;
+            // Cancel dash if jumping from ground
+            if (player.dashTimer > 0) {
+              player.dashTimer = 0;
+              player.dashCooldown = 90; // Reset cooldown when canceling dash with jump
+            }
             performJump(false);
           } else if (player.jumpBuffer > 0 && player.hasAirJump && player.coyoteTime === 0) {
+            // Cancel dash if using air jump
+            if (player.dashTimer > 0) {
+              player.dashTimer = 0;
+              player.dashCooldown = 90; // Reset cooldown when canceling dash with jump
+            }
             performJump(true);
           }
           hazards.forEach((h) => {
@@ -4232,7 +4300,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.6.5", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6.6", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
