@@ -103,11 +103,11 @@
       }
 
       #achievements-container {
-        margin-top: 10px;
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        max-width: 200px;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 15px;
       }
 
       .achievement-badge {
@@ -524,7 +524,6 @@
           >
             High Score: <span id="best">1</span>
           </div>
-          <div id="achievements-container"></div>
         </div>
         <div id="cp-notif">Checkpoint Reached</div>
         <div id="tutorialHint" class="stat" style="display: none"></div>
@@ -543,6 +542,10 @@
           <div class="confirm-box">
             <h2>Confirm Full Restart</h2>
             <p>This will reset to Level 1 and clear your best score. Continue?</p>
+            <label style="display: flex; align-items: center; gap: 8px; margin: 12px 0;">
+              <input type="checkbox" id="resetAchievementsCheckbox" style="width: 18px; height: 18px;">
+              <span>Also reset achievements</span>
+            </label>
             <button id="confirmFullRestartBtn" class="small-btn" style="background: #f44">Yes, Full Restart</button>
             <button id="cancelFullRestartBtn" class="small-btn">No, Go Back</button>
           </div>
@@ -596,6 +599,7 @@
             <h1>PAUSED</h1>
             <button id="resumeBtn">Resume</button
             ><button id="settingsBtn">Settings</button
+            ><button id="achievementsBtn">Achievements</button
             ><button id="cheatsBtn" style="background: #fa0">
               Cheats/Debug</button
             ><button
@@ -710,6 +714,11 @@
               </div>
             </div>
             <button id="tutorialNotesBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="achievementsPage" class="menu-page" style="display: none">
+            <h1>ACHIEVEMENTS</h1>
+            <div id="achievements-container"></div>
+            <button id="achievementsBackBtn" class="small-btn" style="margin-top: 15px;">Back</button>
           </div>
           <div id="cheatsPage" class="menu-page" style="display: none">
             <h1 style="color: #fa0">CHEATS</h1>
@@ -3379,6 +3388,7 @@
           document.getElementById("screenSizePage").style.display = "none";
           document.getElementById("tutorialNotesPage").style.display = "none";
           document.getElementById("cheatsPage").style.display = "none";
+          document.getElementById("achievementsPage").style.display = "none";
           document.getElementById("exitTutorialBtn").style.display =
             tutorialMode ? "block" : "none";
         }
@@ -3670,6 +3680,8 @@
           document.getElementById("mobileSupportPage").style.display = "none";
           document.getElementById("screenSizePage").style.display = "none";
           document.getElementById("tutorialNotesPage").style.display = "none";
+          document.getElementById("achievementsPage").style.display = "none";
+          document.getElementById("cheatsPage").style.display = "none";
         };
         document.getElementById("openAudioBtn").onclick = () => {
           document.getElementById("settingsPage").style.display = "none";
@@ -3732,9 +3744,22 @@
         document.getElementById("cheatsBtn").onclick = () => {
           document.getElementById("mainPausePage").style.display = "none";
           document.getElementById("cheatsPage").style.display = "flex";
+          document.getElementById("achievementsPage").style.display = "none";
+          document.getElementById("settingsPage").style.display = "none";
         };
         document.getElementById("cheatBackBtn").onclick = () => {
           document.getElementById("cheatsPage").style.display = "none";
+          document.getElementById("mainPausePage").style.display = "flex";
+        };
+        document.getElementById("achievementsBtn").onclick = () => {
+          document.getElementById("mainPausePage").style.display = "none";
+          document.getElementById("achievementsPage").style.display = "flex";
+          document.getElementById("cheatsPage").style.display = "none";
+          document.getElementById("settingsPage").style.display = "none";
+          renderAchievements();
+        };
+        document.getElementById("achievementsBackBtn").onclick = () => {
+          document.getElementById("achievementsPage").style.display = "none";
           document.getElementById("mainPausePage").style.display = "flex";
         };
 
@@ -3745,6 +3770,7 @@
 
         function hideFullRestartPrompt(shouldResume = true) {
           document.getElementById("fullRestartConfirm").style.display = "none";
+          document.getElementById("resetAchievementsCheckbox").checked = false;
           if (shouldResume && fullRestartResumeOnCancel) {
             fullRestartResumeOnCancel = false;
             isPaused = false;
@@ -3901,9 +3927,16 @@
           fullRestartResumeOnCancel = false;
           const fromLevel = currentLevel;
           const wasTutorial = tutorialMode;
+          const resetAchievements = document.getElementById("resetAchievementsCheckbox").checked;
 
           deathCount = 0;
           document.getElementById("deaths").textContent = deathCount;
+
+          if (resetAchievements) {
+            localStorage.removeItem("void_achievements");
+            unlockedAchievements = {};
+            renderAchievements();
+          }
 
           if (wasTutorial) {
             // In tutorial, full restart should restart tutorial from its start.
