@@ -3524,13 +3524,24 @@
             ctx.lineWidth = 3;
             ctx.strokeRect(gx, gy, gw, gh);
           } else if (currentTheme === "moony") {
-            ctx.fillStyle = "#ab47bc";
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "#d89eff";
-            ctx.fillRect(gx, gy, gw, gh);
-            ctx.strokeStyle = "#7e1b9f";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(gx, gy, gw, gh);
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "rgba(255,255,255,0.8)";
+            // Draw crescent moon as two overlapping circles
+            ctx.fillStyle = "#ffffff";
+            ctx.globalCompositeOperation = "source-over";
+            // Draw main moon circle
+            ctx.beginPath();
+            ctx.arc(0, 0, gw * 0.45, 0, Math.PI * 2);
+            ctx.fill();
+            // Create crescent by removing from the right side
+            ctx.globalCompositeOperation = "destination-out";
+            ctx.beginPath();
+            ctx.arc(gw * 0.2, 0, gw * 0.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalCompositeOperation = "source-over";
+            ctx.restore();
           } else if (currentTheme === "toybox") {
             ctx.fillStyle = "#f44336";
             ctx.fillRect(gx, gy, gw, gh);
