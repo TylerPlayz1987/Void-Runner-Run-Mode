@@ -4021,28 +4021,77 @@
               sol = !p.isPhase || cy < 240;
             ctx.globalAlpha = sol ? 1 : 0.1;
             if (p.isSinking) {
-              ctx.fillStyle = p.isTouched ? "#444" : "#888";
-              ctx.fillRect(p.x - camX, p.y, p.w, p.h);
-              ctx.strokeStyle = "rgba(255,255,255,0.3)";
-              ctx.beginPath();
-              ctx.moveTo(p.x - camX + 10, p.y);
-              ctx.lineTo(p.x - camX + 20, p.y + 8);
-              ctx.moveTo(p.x - camX + 80, p.y + 2);
-              ctx.lineTo(p.x - camX + 70, p.y + 12);
-              ctx.stroke();
+              if (currentTheme === "pirate") {
+                ctx.fillStyle = p.isTouched ? "#664" : "#885";
+                ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+                ctx.strokeStyle = "rgba(100,60,40,0.8)";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(p.x - camX + 5, p.y + p.h / 2);
+                ctx.lineTo(p.x - camX + p.w - 5, p.y + p.h / 2);
+                ctx.stroke();
+              } else {
+                ctx.fillStyle = p.isTouched ? "#444" : "#888";
+                ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+                ctx.strokeStyle = "rgba(255,255,255,0.3)";
+                ctx.beginPath();
+                ctx.moveTo(p.x - camX + 10, p.y);
+                ctx.lineTo(p.x - camX + 20, p.y + 8);
+                ctx.moveTo(p.x - camX + 80, p.y + 2);
+                ctx.lineTo(p.x - camX + 70, p.y + 12);
+                ctx.stroke();
+              }
             } else {
-              ctx.fillStyle =
-                p.isPhase &&
-                cy >= 120 &&
-                cy < 240 &&
-                Math.floor(frameCount / 10) % 2
-                  ? "#fff"
-                  : p.isPhase
-                    ? "#08f"
-                    : p.moveRange > 0
-                      ? "#555"
-                      : t.plat;
-              ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+              if (currentTheme === "pirate") {
+                const base = p.moveRange > 0 ? "#6d4c3c" : "#7a5a45";
+                ctx.fillStyle = base;
+                ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+
+                // Add wood grain/splinter details
+                ctx.strokeStyle = "rgba(80,50,30,0.5)";
+                ctx.lineWidth = 1;
+                let plankCount = Math.max(3, Math.floor(p.w / 30));
+                for (let i = 1; i < plankCount; i++) {
+                  let px = p.x - camX + (p.w / plankCount) * i + (Math.random() - 0.5) * 3;
+                  ctx.beginPath();
+                  ctx.moveTo(px, p.y + 2);
+                  ctx.lineTo(px, p.y + p.h - 2);
+                  ctx.stroke();
+                }
+
+                for (let i = 0; i < 4; i++) {
+                  let sx = p.x - camX + Math.random() * p.w;
+                  let sy = p.y + Math.random() * p.h;
+                  let ex = sx + (Math.random() - 0.5) * 10;
+                  let ey = sy + (Math.random() - 0.5) * 6;
+                  ctx.beginPath();
+                  ctx.moveTo(sx, sy);
+                  ctx.lineTo(ex, ey);
+                  ctx.stroke();
+                }
+
+                ctx.strokeStyle = "rgba(255,230,180,0.2)";
+                for (let i = 0; i < 2; i++) {
+                  let sx = p.x - camX + 5 + i * 20;
+                  ctx.beginPath();
+                  ctx.moveTo(sx, p.y + 4);
+                  ctx.lineTo(sx + 4, p.y + p.h - 6);
+                  ctx.stroke();
+                }
+              } else {
+                ctx.fillStyle =
+                  p.isPhase &&
+                  cy >= 120 &&
+                  cy < 240 &&
+                  Math.floor(frameCount / 10) % 2
+                    ? "#fff"
+                    : p.isPhase
+                      ? "#08f"
+                      : p.moveRange > 0
+                        ? "#555"
+                        : t.plat;
+                ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+              }
             }
             if (p.hasSpeedZone) {
               const zoneX = p.x + p.speedZoneX - camX;
