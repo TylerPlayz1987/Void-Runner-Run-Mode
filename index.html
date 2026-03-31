@@ -977,11 +977,22 @@
         
         // Helper function to get achievements for a specific mode
         function getAchievementsForMode(mode) {
-          return Object.values(achievements).filter(ach => (!ach.mode || ach.mode === mode));
+          return Object.entries(achievements).filter(
+            ([, ach]) => !ach.mode || ach.mode === mode
+          );
         }
-        
-        // Load unlocked achievements from localStorage
-        let storedAchievements = JSON.parse(localStorage.getItem("void_achievements") || "{}");
+
+        // Load unlocked achievements from localStorage with corruption recovery.
+        let storedAchievements = {};
+        try {
+          const rawStoredAchievements = localStorage.getItem("void_achievements");
+          storedAchievements = rawStoredAchievements
+            ? JSON.parse(rawStoredAchievements)
+            : {};
+        } catch (_err) {
+          storedAchievements = {};
+          localStorage.removeItem("void_achievements");
+        }
         for (let key in achievements) {
           achievements[key].unlocked = storedAchievements[key] || false;
         }
@@ -1001,6 +1012,17 @@
           mainMenuIdleMs = 0;
         }
         let mainMenuIdleLastTick = Date.now();
+        let mainMenuIdleDirty = false;
+        let mainMenuIdleLastPersist = 0;
+
+        function persistMainMenuIdleProgress(force = false) {
+          if (!force && !mainMenuIdleDirty) return;
+          const now = Date.now();
+          if (!force && now - mainMenuIdleLastPersist < 5000) return;
+          localStorage.setItem("void_main_menu_idle_ms", String(mainMenuIdleMs));
+          mainMenuIdleDirty = false;
+          mainMenuIdleLastPersist = now;
+        }
 
         function isOnStartMenuScreen() {
           return (
@@ -1020,16 +1042,24 @@
           if (achievements.staringIntoTheVoid.unlocked) return;
 
           mainMenuIdleMs += deltaMs;
-          localStorage.setItem("void_main_menu_idle_ms", String(mainMenuIdleMs));
+          mainMenuIdleDirty = true;
+          persistMainMenuIdleProgress();
 
           if (mainMenuIdleMs >= 180000) {
             unlockAchievement("staringIntoTheVoid");
+            persistMainMenuIdleProgress(true);
           }
         }
 
         setInterval(trackMainMenuIdleTime, 250);
         document.addEventListener("visibilitychange", () => {
+          if (document.hidden) {
+            persistMainMenuIdleProgress(true);
+          }
           mainMenuIdleLastTick = Date.now();
+        });
+        window.addEventListener("beforeunload", () => {
+          persistMainMenuIdleProgress(true);
         });
 
         // Per-level challenge tracking for "Is This Thing On?"
@@ -1039,8 +1069,6 @@
         
         // Render achievements on initialization
         renderAchievements();
-        
-        let gameLevelStartTime = 0;
         
         function unlockAchievement(achievementId) {
           if (achievements[achievementId] && !achievements[achievementId].unlocked) {
@@ -1218,10 +1246,9 @@
           // Only render achievements if not in tutorial mode
           if (tutorialMode) return;
           
-          for (let key in achievements) {
-            const achievement = achievements[key];
-            // Only show achievements for the current mode
-            if (achievement.mode && achievement.mode !== currentMode) continue;
+          const visibleAchievements = getAchievementsForMode(currentMode);
+
+          for (const [key, achievement] of visibleAchievements) {
             
             const badge = document.createElement("div");
             badge.className = "achievement-badge" + (achievement.unlocked ? "" : " achievement-badge-locked");
@@ -2296,14 +2323,12 @@
           player.jumpBuffer = 0;
           player.jumpHeld = false;
           player.hasAirJump = true;
-          gameLevelStartTime = Date.now();
-
           noMoveStartJumpCount = 0;
           noMoveStartMoved = false;
           noMoveStartX = player.x;
         }
 
-        function die(fromFloor = false) {
+        function die() {
           if (player.spaghettified) return;
           // Speed Running Mode: any death instantly shows game over (no respawn)
           if (speedRunMode) {
@@ -2578,8 +2603,6 @@
             (keys["ArrowLeft"] || keys["KeyA"] ? 1 : 0);
           if (inputDir !== 0) {
             noMoveStartMoved = true;
-          }
-          if (inputDir !== 0) {
             player.momentumX += inputDir * 0.6;
             player.momentumX = Math.max(-s, Math.min(s, player.momentumX));
           } else {
@@ -2892,7 +2915,7 @@
               play.grab();
               return;
             } else {
-              die(true);
+              die();
               return;
             }
           }
@@ -2907,7 +2930,7 @@
               play.well();
               return;
             } else {
-              die(false);
+              die();
               return;
             }
           }
@@ -4108,6 +4131,10 @@
           player.spaghettified = false;
           player.deathScale = 1;
           player.deathRotate = 0;
+          player.speedZoneTimer = 0;
+          player.speedZoneType = null;
+          player.speedZoneMul = 1;
+          player.standPlatform = null;
 
           isPaused = false;
           document.getElementById("pauseMenu").style.display = "none";
@@ -4248,6 +4275,8 @@
           totalRunModeJumps = 0;
           localStorage.removeItem("void_total_run_jumps");
           mainMenuIdleMs = 0;
+          mainMenuIdleDirty = false;
+          mainMenuIdleLastPersist = Date.now();
           localStorage.removeItem("void_main_menu_idle_ms");
           renderAchievements();
 
