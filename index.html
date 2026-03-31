@@ -932,7 +932,7 @@
           floorIsLava: {
             id: "floorIsLava",
             name: "Floor is Lava",
-            description: "Die by touching the floor within the first 2 seconds",
+            description: "Die while using the magma theme",
             unlocked: false,
             mode: "run" // This achievement is for run mode only
           },
@@ -2157,12 +2157,9 @@
             return;
           }
           
-          // Check for "Floor is Lava" achievement (run mode only, not tutorial or speedrun)
-          if (fromFloor && !tutorialMode && !speedRunMode) {
-            const elapsedSinceLevelStart = Date.now() - gameLevelStartTime;
-            if (elapsedSinceLevelStart < 2000) {
-              unlockAchievement("floorIsLava");
-            }
+          // Check for "Floor is Lava" achievement (run mode only, magma theme).
+          if (!tutorialMode && !speedRunMode && currentTheme === "magma") {
+            unlockAchievement("floorIsLava");
           }
           
           shake = 15;
