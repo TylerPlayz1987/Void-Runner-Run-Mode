@@ -3800,7 +3800,7 @@
         // Top-level draw entry - handles retro scaling wrapper
         // Converts main rendering to low-res offscreen buffer when 8-bit mode is enabled.
         function draw() {
-          const isRetro = isRetro8bit && currentTheme === "classic";
+          const isRetro = isRetro8bit;
           if (isRetro) {
             retroCtx.setTransform(1, 0, 0, 1, 0, 0);
             retroCtx.imageSmoothingEnabled = false;
