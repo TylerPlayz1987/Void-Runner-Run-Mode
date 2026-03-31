@@ -2823,22 +2823,32 @@
             let dX = 0;
             let dY = 0;
             const oY = p.y;
+            let effectiveX = p.x;
+            let effectiveY = p.y;
+            
             if (p.isSwingPlatform) {
               const oX = p.x;
               const swing = getSwingBob(p);
-              p.x = swing.x - p.w / 2;
-              p.y = swing.y - p.h / 2;
-              dX = p.x - oX;
-              dY = p.y - oY;
+              effectiveX = swing.x - p.w / 2;
+              effectiveY = swing.y - p.h / 2;
+              dX = effectiveX - oX;
+              dY = effectiveY - oY;
             } else if (p.moveRange > 0) {
               let oX = p.x;
               p.x += p.moveSpeed * p.moveDir;
               if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange)
                 p.moveDir *= -1;
               dX = p.x - oX;
+              effectiveX = p.x;
             }
-            if (p.isSinking && p.isTouched) p.y += 2.5;
-            dY = p.y - oY;
+            if (p.isSinking && p.isTouched) {
+              effectiveY += 2.5;
+              dY += 2.5;
+            }
+            
+            // Store effective position for collision detection
+            p.effectiveX = effectiveX;
+            p.effectiveY = effectiveY;
             p.deltaX = dX;
             p.deltaY = dY;
             maxPlatformDelta = Math.max(
@@ -2879,9 +2889,9 @@
               for (let p of platforms) {
                 if (!p.isSolidNow) continue;
                 if (
-                  Math.abs(player.y + player.h - p.y) < 10 &&
-                  player.x + player.w > p.x + 1 &&
-                  player.x < p.x + p.w - 1
+                  Math.abs(player.y + player.h - p.effectiveY) < 10 &&
+                  player.x + player.w > p.effectiveX + 1 &&
+                  player.x < p.effectiveX + p.w - 1
                 ) {
                   carryPlatform = p;
                   break;
@@ -2899,19 +2909,19 @@
             for (let p of platforms) {
               if (!p.isSolidNow) continue;
               if (
-                nextX < p.x + p.w &&
-                nextX + player.w > p.x &&
-                resolvedY < p.y + p.h &&
-                resolvedY + player.h > p.y
+                nextX < p.effectiveX + p.w &&
+                nextX + player.w > p.effectiveX &&
+                resolvedY < p.effectiveY + p.h &&
+                resolvedY + player.h > p.effectiveY
               ) {
                 if (stepX > 0) {
-                  nextX = p.x - player.w;
+                  nextX = p.effectiveX - player.w;
                 } else if (stepX < 0) {
-                  nextX = p.x + p.w;
+                  nextX = p.effectiveX + p.w;
                 } else {
                   // Resolve stationary penetrations (e.g., platform moving into player).
-                  const pushLeft = p.x - player.w - nextX;
-                  const pushRight = p.x + p.w - nextX;
+                  const pushLeft = p.effectiveX - player.w - nextX;
+                  const pushRight = p.effectiveX + p.w - nextX;
                   nextX +=
                     Math.abs(pushLeft) <= Math.abs(pushRight)
                       ? pushLeft
@@ -2927,13 +2937,13 @@
             for (let p of platforms) {
               if (!p.isSolidNow) continue;
               if (
-                resolvedX < p.x + p.w &&
-                resolvedX + player.w > p.x &&
-                nextY < p.y + p.h &&
-                nextY + player.h > p.y
+                resolvedX < p.effectiveX + p.w &&
+                resolvedX + player.w > p.effectiveX &&
+                nextY < p.effectiveY + p.h &&
+                nextY + player.h > p.effectiveY
               ) {
-                if (stepY >= 0 && resolvedY + player.h <= p.y + 1) {
-                  nextY = p.y - player.h;
+                if (stepY >= 0 && resolvedY + player.h <= p.effectiveY + 1) {
+                  nextY = p.effectiveY - player.h;
                   player.vy = 0;
                   player.grounded = true;
                   player.hasAirJump = true; // restore air jump on landing
@@ -2948,13 +2958,13 @@
                     player.stretchX = 1.5;
                     player.stretchY = 0.5;
                   }
-                } else if (stepY < 0 && resolvedY >= p.y + p.h - 1) {
-                  nextY = p.y + p.h;
+                } else if (stepY < 0 && resolvedY >= p.effectiveY + p.h - 1) {
+                  nextY = p.effectiveY + p.h;
                   player.vy = 0;
                 } else {
                   // Resolve stationary penetrations (e.g., platform moving into player).
-                  const pushUp = p.y - player.h - nextY;
-                  const pushDown = p.y + p.h - nextY;
+                  const pushUp = p.effectiveY - player.h - nextY;
+                  const pushDown = p.effectiveY + p.h - nextY;
                   nextY +=
                     Math.abs(pushUp) <= Math.abs(pushDown)
                       ? pushUp
@@ -2994,14 +3004,14 @@
             }
             for (let p of platforms) {
               if (p.hasSpike || p.hasSeeker) {
-                let sx = p.hasSpike ? p.x + p.spikeX : p.x + p.seekerX;
+                let sx = p.hasSpike ? p.effectiveX + p.spikeX : p.effectiveX + p.seekerX;
                 let sw = p.hasSpike ? p.spikeW : p.seekerW;
                 let sh = p.hasSpike ? p.spikeH : p.seekerH;
                 if (
                   nX + player.w > sx &&
                   nX < sx + sw &&
-                  nY + player.h > p.y - sh &&
-                  nY < p.y
+                  nY + player.h > p.effectiveY - sh &&
+                  nY < p.effectiveY
                 ) {
                   dead = true;
                   break;
