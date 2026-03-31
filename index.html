@@ -776,6 +776,12 @@
               </button>
             </div>
             <button
+              id="setJumps990Btn"
+              style="background: #fa0; margin-top: 10px; font-size: 12px"
+            >
+              Set Jumps to 990
+            </button>
+            <button
               id="cheatBackBtn"
               class="small-btn"
               style="margin-top: 20px"
@@ -929,6 +935,13 @@
             description: "Die by touching the floor within the first 2 seconds",
             unlocked: false,
             mode: "run" // This achievement is for run mode only
+          },
+          spacebarCrusher: {
+            id: "spacebarCrusher",
+            name: "Spacebar Crusher",
+            description: "Jump a total of 1,000 times",
+            unlocked: false,
+            mode: "run" // This achievement is for run mode only
           }
         };
         
@@ -941,6 +954,12 @@
         let storedAchievements = JSON.parse(localStorage.getItem("void_achievements") || "{}");
         for (let key in achievements) {
           achievements[key].unlocked = storedAchievements[key] || false;
+        }
+
+        // Persistent run-mode jump progress for run achievements.
+        let totalRunModeJumps = parseInt(localStorage.getItem("void_total_run_jumps") || "0", 10);
+        if (!Number.isFinite(totalRunModeJumps) || totalRunModeJumps < 0) {
+          totalRunModeJumps = 0;
         }
         
         // Render achievements on initialization
@@ -1016,6 +1035,27 @@
             ctx.strokeStyle = "#ffcc00";
             ctx.lineWidth = 2;
             ctx.strokeRect(5, 8, 40, 34);
+          } else if (achievementId === "spacebarCrusher") {
+            // Pixel-style icon: night sky, white block, and dark platform.
+            ctx.fillStyle = "#05070a";
+            ctx.fillRect(0, 0, 50, 50);
+
+            ctx.fillStyle = "#6f7782";
+            ctx.fillRect(0, 34, 50, 16);
+            ctx.fillStyle = "#2f3338";
+            ctx.fillRect(0, 34, 50, 4);
+
+            ctx.fillStyle = "#f2f4f8";
+            ctx.fillRect(16, 24, 18, 10);
+
+            ctx.fillStyle = "#8893a1";
+            ctx.fillRect(6, 8, 2, 2);
+            ctx.fillRect(10, 6, 1, 1);
+            ctx.fillRect(13, 10, 1, 1);
+            ctx.fillRect(21, 7, 2, 2);
+            ctx.fillRect(28, 9, 1, 1);
+            ctx.fillRect(36, 6, 2, 2);
+            ctx.fillRect(41, 10, 1, 1);
           }
         }
         
@@ -2188,6 +2228,16 @@
           player.grounded = false;
           player.jumpBuffer = 0;
           if (useAirJump) player.hasAirJump = false;
+
+          // Count only run-mode jumps (exclude tutorial and speedrun achievements).
+          if (!tutorialMode && !speedRunMode) {
+            totalRunModeJumps++;
+            localStorage.setItem("void_total_run_jumps", String(totalRunModeJumps));
+            if (totalRunModeJumps >= 1000) {
+              unlockAchievement("spacebarCrusher");
+            }
+          }
+
           play.jp();
           player.stretchX = 0.6;
           player.stretchY = 1.4;
@@ -4002,6 +4052,8 @@
           for (let key in achievements) {
             achievements[key].unlocked = false;
           }
+          totalRunModeJumps = 0;
+          localStorage.removeItem("void_total_run_jumps");
           renderAchievements();
 
           if (wasTutorial) {
@@ -4135,6 +4187,18 @@
             useCheat();
             die();
           }
+        };
+        document.getElementById("setJumps990Btn").onclick = () => {
+          totalRunModeJumps = 990;
+          localStorage.setItem("void_total_run_jumps", String(totalRunModeJumps));
+          useCheat();
+          const prevText = cpNotif.textContent;
+          cpNotif.textContent = "Debug: Run jumps set to 990";
+          cpNotif.style.opacity = "1";
+          setTimeout(() => {
+            cpNotif.style.opacity = "0";
+            cpNotif.textContent = prevText;
+          }, 1000);
         };
         function submenuBack() {
           const settingsPage = document.getElementById("settingsPage");
