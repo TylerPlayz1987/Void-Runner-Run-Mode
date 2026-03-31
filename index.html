@@ -746,6 +746,28 @@
           <div id="achievementsPage" class="menu-page" style="display: none">
             <h1>ACHIEVEMENTS</h1>
             <div id="achievements-container"></div>
+            <div
+              id="speedRunAchWarpControls"
+              style="display: none; gap: 5px; width: 100%; margin-top: 10px"
+            >
+              <input
+                type="number"
+                id="speedRunAchWarpInput"
+                placeholder="Level"
+                style="
+                  flex: 1;
+                  background: #222;
+                  border: 1px solid #fa0;
+                  color: #fa0;
+                  text-align: center;
+                "
+              /><button
+                id="speedRunAchWarpBtn"
+                style="background: #fa0; width: 140px; font-size: 12px"
+              >
+                Warp (Debug)
+              </button>
+            </div>
             <button id="achievementsBackBtn" class="small-btn" style="margin-top: 15px;">Back</button>
           </div>
           <div id="cheatsPage" class="menu-page" style="display: none">
@@ -953,7 +975,7 @@
           closeCall: {
             id: "closeCall",
             name: "Close Call",
-            description: "Die within level 99",
+            description: "Die at level 99",
             unlocked: false,
             mode: "speedrun" // This achievement is for speedrun mode only
           }
@@ -1202,6 +1224,10 @@
         function renderAchievements() {
           const container = document.getElementById("achievements-container");
           container.innerHTML = "";
+          const speedRunWarpControls = document.getElementById("speedRunAchWarpControls");
+          if (speedRunWarpControls) {
+            speedRunWarpControls.style.display = speedRunMode ? "flex" : "none";
+          }
           
           // Determine which mode we're in and render appropriate achievements
           let currentMode = "run"; // Default to run mode
@@ -2297,7 +2323,7 @@
           if (player.spaghettified) return;
           // Speed Running Mode: any death instantly shows game over (no respawn)
           if (speedRunMode) {
-            if (currentLevel <= 99) {
+            if (currentLevel === 99) {
               unlockAchievement("closeCall");
             }
             showSpeedRunGameOver();
@@ -4101,6 +4127,35 @@
           player.deathRotate = 0;
         }
 
+        function warpToLevel(targetLevel, markCheat = true) {
+          const level = Math.max(1, Math.floor(targetLevel));
+          if (!Number.isFinite(level)) return;
+
+          tutorialMode = false;
+          setTutorialUiVisible(false);
+          currentLevel = level;
+          lastCheckpoint = level;
+          setLevelDisplay();
+          generateLevel();
+          resetPlayerForRun(330);
+          player.hasShield = false;
+          player.spaghettified = false;
+          player.deathScale = 1;
+          player.deathRotate = 0;
+
+          isPaused = false;
+          document.getElementById("pauseMenu").style.display = "none";
+
+          const m = document.getElementById("bgMusic");
+          if (m && running && themes[currentTheme] && themes[currentTheme].music) {
+            m.play().catch(() => {});
+          }
+
+          if (markCheat) {
+            useCheat();
+          }
+        }
+
         function applyDefaults() {
           masterVol = 0.5;
           musicVol = 0.5;
@@ -4349,15 +4404,13 @@
         document.getElementById("warpBtn").onclick = () => {
           let v = parseInt(document.getElementById("warpInput").value);
           if (v > 0) {
-            tutorialMode = false;
-            setTutorialUiVisible(false);
-            currentLevel = v;
-            lastCheckpoint = v;
-            setLevelDisplay();
-            isPaused = false;
-            document.getElementById("pauseMenu").style.display = "none";
-            useCheat();
-            die();
+            warpToLevel(v, true);
+          }
+        };
+        document.getElementById("speedRunAchWarpBtn").onclick = () => {
+          let v = parseInt(document.getElementById("speedRunAchWarpInput").value);
+          if (v > 0 && speedRunMode) {
+            warpToLevel(v, true);
           }
         };
         document.getElementById("setJumps990Btn").onclick = () => {
