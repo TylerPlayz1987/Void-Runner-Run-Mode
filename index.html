@@ -29,6 +29,13 @@
         align-self: flex-end;
       }
 
+      #gameShell {
+        width: 800px;
+        display: flex;
+        flex-direction: column;
+        transform-origin: top center;
+      }
+
       #container {
         position: relative;
         border: 4px solid #333;
@@ -166,6 +173,11 @@
         width: 86px;
         border-radius: 32px;
         font-size: 13px;
+      }
+
+      #screenSizePage input[type="range"],
+      #controlLayoutPage input[type="range"] {
+        width: 100%;
       }
 
       #resetConfirm,
@@ -392,7 +404,7 @@
   </head>
 
   <body>
-    <div style="width: 800px; display: flex; flex-direction: column">
+    <div id="gameShell">
       <button id="pauseBtn">Pause [P/Esc]</button>
       <div id="container">
         <div id="ui-left">
@@ -501,6 +513,8 @@
             <button id="openAudioBtn" style="width: 100%; margin-bottom: 8px;">Audio Settings</button>
             <button id="openThemeBtn" style="width: 100%; margin-bottom: 8px;">Theme Settings</button>
             <button id="openMobileSupportBtn" style="width: 100%; margin-bottom: 8px;">Mobile Support</button>
+            <button id="openControlLayoutBtn" style="width: 100%; margin-bottom: 8px;">Button Size & Spot</button>
+            <button id="openScreenSizeBtn" style="width: 100%; margin-bottom: 8px;">Screen Size</button>
             <button id="openTutorialNotesBtn" style="width: 100%; margin-bottom: 8px;">Tutorial Notes</button>
             <button id="settingsBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
@@ -559,6 +573,26 @@
               <span>Shows left/right, jump, and run buttons on screen.</span>
             </div>
             <button id="mobileSupportBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="controlLayoutPage" class="menu-page" style="display: none">
+            <h1>Button Size & Spot</h1>
+            <div class="setting-item" style="width: 100%">
+              <span>Button Size: <span id="mobileBtnSizeValue">64px</span></span>
+              <input type="range" id="mobileBtnSizeSlider" min="40" max="100" value="64" />
+            </div>
+            <div class="setting-item" style="width: 100%">
+              <span>Button Spot (Bottom): <span id="mobileBtnSpotValue">10px</span></span>
+              <input type="range" id="mobileBtnSpotSlider" min="0" max="50" value="10" />
+            </div>
+            <button id="controlLayoutBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="screenSizePage" class="menu-page" style="display: none">
+            <h1>Screen Size</h1>
+            <div class="setting-item" style="width: 100%">
+              <span>Screen Scale: <span id="screenSizeValue">100%</span></span>
+              <input type="range" id="screenSizeSlider" min="70" max="130" value="100" />
+            </div>
+            <button id="screenSizeBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
           <div id="tutorialNotesPage" class="menu-page" style="display: none">
             <h1>Tutorial Notes</h1>
@@ -725,7 +759,10 @@
           speedRunGameOverMode = false,
           fullRestartResumeOnCancel = false,
           fullRestartOpenedFromResetPrompt = false,
-          mobileSupportEnabled = false;
+          mobileSupportEnabled = false,
+          mobileBtnSize = 64,
+          mobileBtnBottom = 10,
+          screenScale = 100;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -3121,6 +3158,8 @@
           document.getElementById("audioPage").style.display = "none";
           document.getElementById("themePage").style.display = "none";
           document.getElementById("mobileSupportPage").style.display = "none";
+          document.getElementById("controlLayoutPage").style.display = "none";
+          document.getElementById("screenSizePage").style.display = "none";
           document.getElementById("tutorialNotesPage").style.display = "none";
           document.getElementById("cheatsPage").style.display = "none";
           document.getElementById("exitTutorialBtn").style.display =
@@ -3412,6 +3451,8 @@
           document.getElementById("audioPage").style.display = "none";
           document.getElementById("themePage").style.display = "none";
           document.getElementById("mobileSupportPage").style.display = "none";
+          document.getElementById("controlLayoutPage").style.display = "none";
+          document.getElementById("screenSizePage").style.display = "none";
           document.getElementById("tutorialNotesPage").style.display = "none";
         };
         document.getElementById("openAudioBtn").onclick = () => {
@@ -3425,6 +3466,14 @@
         document.getElementById("openMobileSupportBtn").onclick = () => {
           document.getElementById("settingsPage").style.display = "none";
           document.getElementById("mobileSupportPage").style.display = "flex";
+        };
+        document.getElementById("openControlLayoutBtn").onclick = () => {
+          document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("controlLayoutPage").style.display = "flex";
+        };
+        document.getElementById("openScreenSizeBtn").onclick = () => {
+          document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("screenSizePage").style.display = "flex";
         };
         document.getElementById("openTutorialNotesBtn").onclick = () => {
           document.getElementById("settingsPage").style.display = "none";
@@ -3448,6 +3497,14 @@
         };
         document.getElementById("mobileSupportBackBtn").onclick = () => {
           document.getElementById("mobileSupportPage").style.display = "none";
+          document.getElementById("settingsPage").style.display = "flex";
+        };
+        document.getElementById("controlLayoutBackBtn").onclick = () => {
+          document.getElementById("controlLayoutPage").style.display = "none";
+          document.getElementById("settingsPage").style.display = "flex";
+        };
+        document.getElementById("screenSizeBackBtn").onclick = () => {
+          document.getElementById("screenSizePage").style.display = "none";
           document.getElementById("settingsPage").style.display = "flex";
         };
         document.getElementById("tutorialNotesBackBtn").onclick = () => {
@@ -3537,6 +3594,14 @@
           document.getElementById("retroToggleBtn").textContent = "8-bit: OFF";
           document.getElementById("invincibleBtn").textContent = "Invincibility: OFF";
           mobileSupportEnabled = false;
+          mobileBtnSize = 64;
+          mobileBtnBottom = 10;
+          screenScale = 100;
+          document.getElementById("mobileBtnSizeSlider").value = mobileBtnSize;
+          document.getElementById("mobileBtnSpotSlider").value = mobileBtnBottom;
+          document.getElementById("screenSizeSlider").value = screenScale;
+          updateControlLayoutUi();
+          updateScreenSizeUi();
           updateMobileSupportUi();
           const m = document.getElementById("bgMusic");
           if (m) {
@@ -3759,6 +3824,8 @@
           const audioPage = document.getElementById("audioPage");
           const themePage = document.getElementById("themePage");
           const mobileSupportPage = document.getElementById("mobileSupportPage");
+          const controlLayoutPage = document.getElementById("controlLayoutPage");
+          const screenSizePage = document.getElementById("screenSizePage");
           const tutorialNotesPage = document.getElementById("tutorialNotesPage");
           const cheatsPage = document.getElementById("cheatsPage");
 
@@ -3766,11 +3833,15 @@
             audioPage.style.display === "flex" ||
             themePage.style.display === "flex" ||
             mobileSupportPage.style.display === "flex" ||
+            controlLayoutPage.style.display === "flex" ||
+            screenSizePage.style.display === "flex" ||
             tutorialNotesPage.style.display === "flex"
           ) {
             audioPage.style.display = "none";
             themePage.style.display = "none";
             mobileSupportPage.style.display = "none";
+            controlLayoutPage.style.display = "none";
+            screenSizePage.style.display = "none";
             tutorialNotesPage.style.display = "none";
             settingsPage.style.display = "flex";
             return true;
@@ -3804,10 +3875,57 @@
           else controls.classList.remove("active");
         }
 
+        function updateControlLayoutUi() {
+          const controls = document.getElementById("mobileControls");
+          document.getElementById("mobileBtnSizeValue").textContent =
+            mobileBtnSize + "px";
+          document.getElementById("mobileBtnSpotValue").textContent =
+            mobileBtnBottom + "px";
+
+          controls.style.bottom = mobileBtnBottom + "px";
+          for (const btn of document.querySelectorAll("#mobileControls .mobile-btn")) {
+            btn.style.height = mobileBtnSize + "px";
+            btn.style.fontSize = Math.round(mobileBtnSize * 0.28) + "px";
+            if (btn.classList.contains("wide")) {
+              btn.style.width = Math.round(mobileBtnSize * 1.35) + "px";
+              btn.style.borderRadius = Math.round(mobileBtnSize * 0.5) + "px";
+              btn.style.fontSize = Math.max(11, Math.round(mobileBtnSize * 0.22)) + "px";
+            } else {
+              btn.style.width = mobileBtnSize + "px";
+              btn.style.borderRadius = Math.round(mobileBtnSize * 0.5) + "px";
+            }
+          }
+        }
+
+        function updateScreenSizeUi() {
+          document.getElementById("screenSizeValue").textContent =
+            screenScale + "%";
+          document.getElementById("gameShell").style.transform =
+            `scale(${screenScale / 100})`;
+        }
+
         document.getElementById("mobileSupportToggleBtn").onclick = () => {
           mobileSupportEnabled = !mobileSupportEnabled;
           updateMobileSupportUi();
         };
+
+        document.getElementById("mobileBtnSizeSlider").oninput = (e) => {
+          mobileBtnSize = parseInt(e.target.value, 10);
+          updateControlLayoutUi();
+        };
+
+        document.getElementById("mobileBtnSpotSlider").oninput = (e) => {
+          mobileBtnBottom = parseInt(e.target.value, 10);
+          updateControlLayoutUi();
+        };
+
+        document.getElementById("screenSizeSlider").oninput = (e) => {
+          screenScale = parseInt(e.target.value, 10);
+          updateScreenSizeUi();
+        };
+
+        updateControlLayoutUi();
+        updateScreenSizeUi();
 
         for (const btn of document.querySelectorAll("#mobileControls [data-code]")) {
           const code = btn.dataset.code;
