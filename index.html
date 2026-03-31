@@ -125,6 +125,49 @@
         font-size: 13px;
       }
 
+      #mobileControls {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 10px;
+        padding: 0 14px;
+        display: none;
+        justify-content: space-between;
+        align-items: flex-end;
+        pointer-events: none;
+        z-index: 170;
+      }
+
+      #mobileControls.active {
+        display: flex;
+      }
+
+      .mobile-group {
+        display: flex;
+        gap: 10px;
+        pointer-events: none;
+      }
+
+      .mobile-btn {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        border: 2px solid #0f0;
+        background: rgba(0, 0, 0, 0.7);
+        color: #0f0;
+        font-size: 18px;
+        font-weight: bold;
+        pointer-events: auto;
+        user-select: none;
+        touch-action: none;
+      }
+
+      .mobile-btn.wide {
+        width: 86px;
+        border-radius: 32px;
+        font-size: 13px;
+      }
+
       #resetConfirm,
       #fullRestartConfirm,
       #timeTravelAnimation {
@@ -457,6 +500,7 @@
             <h1>SETTINGS</h1>
             <button id="openAudioBtn" style="width: 100%; margin-bottom: 8px;">Audio Settings</button>
             <button id="openThemeBtn" style="width: 100%; margin-bottom: 8px;">Theme Settings</button>
+            <button id="openMobileSupportBtn" style="width: 100%; margin-bottom: 8px;">Mobile Support</button>
             <button id="openTutorialNotesBtn" style="width: 100%; margin-bottom: 8px;">Tutorial Notes</button>
             <button id="settingsBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
@@ -504,6 +548,17 @@
               <button id="retroToggleBtn" class="small-btn">8-bit: OFF</button>
             </div>
             <button id="themeBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="mobileSupportPage" class="menu-page" style="display: none">
+            <h1>Mobile Support</h1>
+            <div class="setting-item" style="width: 100%">
+              <span>On-screen Controls</span>
+              <button id="mobileSupportToggleBtn" class="small-btn">Mobile Support: OFF</button>
+            </div>
+            <div class="setting-item" style="text-align: left; font-size: 12px; line-height: 1.4">
+              <span>Shows left/right, jump, and run buttons on screen.</span>
+            </div>
+            <button id="mobileSupportBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
           <div id="tutorialNotesPage" class="menu-page" style="display: none">
             <h1>Tutorial Notes</h1>
@@ -568,6 +623,16 @@
             >
               Back
             </button>
+          </div>
+        </div>
+        <div id="mobileControls">
+          <div class="mobile-group">
+            <button class="mobile-btn" data-code="ArrowLeft">◀</button>
+            <button class="mobile-btn" data-code="ArrowRight">▶</button>
+          </div>
+          <div class="mobile-group">
+            <button class="mobile-btn wide" data-code="ShiftLeft">RUN</button>
+            <button class="mobile-btn" data-code="Space">JUMP</button>
           </div>
         </div>
         <canvas id="canvas"></canvas>
@@ -659,7 +724,8 @@
           speedRunStartTime = 0,
           speedRunGameOverMode = false,
           fullRestartResumeOnCancel = false,
-          fullRestartOpenedFromResetPrompt = false;
+          fullRestartOpenedFromResetPrompt = false,
+          mobileSupportEnabled = false;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -3054,6 +3120,7 @@
           document.getElementById("settingsPage").style.display = "none";
           document.getElementById("audioPage").style.display = "none";
           document.getElementById("themePage").style.display = "none";
+          document.getElementById("mobileSupportPage").style.display = "none";
           document.getElementById("tutorialNotesPage").style.display = "none";
           document.getElementById("cheatsPage").style.display = "none";
           document.getElementById("exitTutorialBtn").style.display =
@@ -3344,6 +3411,7 @@
           document.getElementById("settingsPage").style.display = "flex";
           document.getElementById("audioPage").style.display = "none";
           document.getElementById("themePage").style.display = "none";
+          document.getElementById("mobileSupportPage").style.display = "none";
           document.getElementById("tutorialNotesPage").style.display = "none";
         };
         document.getElementById("openAudioBtn").onclick = () => {
@@ -3353,6 +3421,10 @@
         document.getElementById("openThemeBtn").onclick = () => {
           document.getElementById("settingsPage").style.display = "none";
           document.getElementById("themePage").style.display = "flex";
+        };
+        document.getElementById("openMobileSupportBtn").onclick = () => {
+          document.getElementById("settingsPage").style.display = "none";
+          document.getElementById("mobileSupportPage").style.display = "flex";
         };
         document.getElementById("openTutorialNotesBtn").onclick = () => {
           document.getElementById("settingsPage").style.display = "none";
@@ -3372,6 +3444,10 @@
         };
         document.getElementById("themeBackBtn").onclick = () => {
           document.getElementById("themePage").style.display = "none";
+          document.getElementById("settingsPage").style.display = "flex";
+        };
+        document.getElementById("mobileSupportBackBtn").onclick = () => {
+          document.getElementById("mobileSupportPage").style.display = "none";
           document.getElementById("settingsPage").style.display = "flex";
         };
         document.getElementById("tutorialNotesBackBtn").onclick = () => {
@@ -3460,6 +3536,8 @@
           document.getElementById("themeSelect").value = "classic";
           document.getElementById("retroToggleBtn").textContent = "8-bit: OFF";
           document.getElementById("invincibleBtn").textContent = "Invincibility: OFF";
+          mobileSupportEnabled = false;
+          updateMobileSupportUi();
           const m = document.getElementById("bgMusic");
           if (m) {
             if (themes[currentTheme].music) {
@@ -3680,16 +3758,19 @@
           const settingsPage = document.getElementById("settingsPage");
           const audioPage = document.getElementById("audioPage");
           const themePage = document.getElementById("themePage");
+          const mobileSupportPage = document.getElementById("mobileSupportPage");
           const tutorialNotesPage = document.getElementById("tutorialNotesPage");
           const cheatsPage = document.getElementById("cheatsPage");
 
           if (
             audioPage.style.display === "flex" ||
             themePage.style.display === "flex" ||
+            mobileSupportPage.style.display === "flex" ||
             tutorialNotesPage.style.display === "flex"
           ) {
             audioPage.style.display = "none";
             themePage.style.display = "none";
+            mobileSupportPage.style.display = "none";
             tutorialNotesPage.style.display = "none";
             settingsPage.style.display = "flex";
             return true;
@@ -3712,6 +3793,37 @@
           }
 
           return false;
+        }
+
+        function updateMobileSupportUi() {
+          const toggleBtn = document.getElementById("mobileSupportToggleBtn");
+          const controls = document.getElementById("mobileControls");
+          toggleBtn.textContent =
+            "Mobile Support: " + (mobileSupportEnabled ? "ON" : "OFF");
+          if (mobileSupportEnabled) controls.classList.add("active");
+          else controls.classList.remove("active");
+        }
+
+        document.getElementById("mobileSupportToggleBtn").onclick = () => {
+          mobileSupportEnabled = !mobileSupportEnabled;
+          updateMobileSupportUi();
+        };
+
+        for (const btn of document.querySelectorAll("#mobileControls [data-code]")) {
+          const code = btn.dataset.code;
+          const press = (ev) => {
+            ev.preventDefault();
+            keys[code] = 1;
+          };
+          const release = (ev) => {
+            ev.preventDefault();
+            keys[code] = 0;
+          };
+          btn.addEventListener("pointerdown", press);
+          btn.addEventListener("pointerup", release);
+          btn.addEventListener("pointercancel", release);
+          btn.addEventListener("pointerleave", release);
+          btn.addEventListener("contextmenu", (ev) => ev.preventDefault());
         }
 
         window.onkeydown = (e) => {
