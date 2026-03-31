@@ -685,6 +685,7 @@
                 <option value="cyber">Cyber</option>
                 <option value="magma">Magma</option>
                 <option value="stardust">Star-Dust</option>
+                <option value="pirate">Pirate</option>
               </select>
             </div>
             <div class="setting-item">
@@ -797,42 +798,12 @@
         <canvas id="canvas"></canvas>
       </div>
     </div>
-    <audio
-      id="bgSunnyMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Smile.ogg"
-    ></audio>
-    <audio
-      id="bgMoonyMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Dark.ogg"
-    ></audio>
-    <audio
-      id="bgToyBoxMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Funny.ogg"
-    ></audio>
-    <audio
-      id="bgCyberMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Neon.ogg"
-    ></audio>
-    <audio
-      id="bgMagmaMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Boom.ogg"
-    ></audio>
-    <audio
-      id="bgStardustMusic"
-      loop
-      crossorigin="anonymous"
-      src="theme_bg/Starry.ogg"
-    ></audio>
+    <audio id="bgSunnyMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgMoonyMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgToyBoxMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgCyberMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgMagmaMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgStardustMusic" loop crossorigin="anonymous" preload="none"></audio>
     <audio id="bgMusic" loop crossorigin="anonymous"></audio>
     <script>
       // Entry point: run once DOM is ready
@@ -1339,6 +1310,13 @@
             aurora: true,
             music: "theme_bg/Starry.ogg",
           },
+          pirate: {
+            bg: "#1a0f08",
+            plat: "#5a3a2a",
+            player: "#ffd700",
+            hazards: "#cc0000",
+            music: "theme_bg/Pirate.ogg",
+          },
         };
         const lavaThemeFx = {
           classic: {
@@ -1421,6 +1399,16 @@
             particleB: [120, 180, 255],
             particleStyle: "spark",
           },
+          pirate: {
+            glowInner: "rgba(255,165,0,0.7)",
+            glowMid: "rgba(204,0,0,0.45)",
+            glowOuter: "rgba(139,69,19,0)",
+            fill: "rgba(255,140,0,0.95)",
+            stroke: "rgba(255,215,0,0.8)",
+            particleA: [255, 165, 0],
+            particleB: [255, 215, 0],
+            particleStyle: "spark",
+          },
         };
         function getLavaFx(themeName) {
           return lavaThemeFx[themeName] || lavaThemeFx.classic;
@@ -1497,6 +1485,15 @@
             coreMid: "rgba(70,90,170,0.34)",
             coreRing: "rgba(180,220,255,0.24)",
             coreStroke: "#b4d7ff",
+          },
+          pirate: {
+            normalInner: "rgba(255,165,0,0.5)",
+            normalMid: "rgba(204,0,0,0.3)",
+            normalRing: "rgba(255,215,0,0.22)",
+            coreInner: "rgba(255,140,0,0.52)",
+            coreMid: "rgba(139,69,19,0.34)",
+            coreRing: "rgba(255,165,0,0.24)",
+            coreStroke: "#ffa500",
           },
         };
         function getWellFx(themeName) {
@@ -2434,6 +2431,20 @@
           }
         }
 
+        function emitPlatformChips() {
+          for (let i = 0; i < 8; i++) {
+            jumpDust.push({
+              x: player.x + player.w / 2 + (Math.random() - 0.5) * 12,
+              y: player.y + player.h + 2,
+              vx: (Math.random() - 0.5) * 3,
+              vy: -2 - Math.random() * 2,
+              size: 1 + Math.random() * 2,
+              alpha: 0.9,
+              life: 25 + Math.floor(Math.random() * 10),
+            });
+          }
+        }
+
         function performJump(useAirJump = false) {
           player.vy = player.jump;
           player.grounded = false;
@@ -2977,7 +2988,13 @@
           if (tutorialMode) updateTutorialHint();
           if (player.grounded) player.hasAirJump = true; // always restore while touching ground
           if (!player.grounded) player.standPlatform = null;
-          if (!wasGrounded && player.grounded) emitJumpDust();
+          if (!wasGrounded && player.grounded) {
+            if (currentTheme === "pirate") {
+              emitPlatformChips();
+            } else {
+              emitJumpDust();
+            }
+          }
           if (
             player.x + player.w > goal.x &&
             player.x < goal.x + goal.w &&
@@ -3061,6 +3078,72 @@
             ctx.beginPath();
             ctx.arc(x + 8, y + 11, 3, 0, Math.PI * 2);
             ctx.fill();
+          } else if (currentTheme === "pirate") {
+            // Draw pirate body
+            ctx.fillStyle = c;
+            ctx.fillRect(x, y, player.w, player.h);
+            
+            // Draw beard
+            ctx.fillStyle = "#3d3d3d";
+            // Beard shape - triangular
+            ctx.beginPath();
+            ctx.moveTo(x + 4, y + 12);
+            ctx.lineTo(x + 16, y + 12);
+            ctx.lineTo(x + 10, y + 18);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Beard texture lines
+            ctx.strokeStyle = "#2a2a2a";
+            ctx.lineWidth = 1;
+            for (let i = 1; i < 5; i++) {
+              let progress = i / 5;
+              let startX = 4 + (16 - 4) * progress;
+              let endX = 10;
+              let startY = 12 + (18 - 12) * progress;
+              let endY = 18;
+              // Deterministic offset so beard does not flicker between frames
+              const beardSeed = Math.sin(x * 12.9898 + y * 78.233 + i * 37.719) * 10000;
+              const offset = (beardSeed - Math.floor(beardSeed) - 0.5) * 2;
+              ctx.beginPath();
+              ctx.moveTo(x + startX, y + startY);
+              ctx.lineTo(x + endX + offset, y + endY);
+              ctx.stroke();
+            }
+            
+            // Draw pirate hat (tricorn/bicorne style)
+            // Hat brim
+            ctx.fillStyle = "#1a1a1a";
+            ctx.beginPath();
+            ctx.ellipse(x + 10, y - 3, 12, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Hat crown (pointed top)
+            ctx.fillStyle = "#2a2a2a";
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 8);
+            ctx.lineTo(x + 4, y - 2);
+            ctx.lineTo(x + 16, y - 2);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Skull and crossbones on hat
+            ctx.fillStyle = "#ffd700";
+            // Skull
+            ctx.beginPath();
+            ctx.arc(x + 10, y - 5, 2, 0, Math.PI * 2);
+            ctx.fill();
+            // Crossbones
+            ctx.strokeStyle = "#ffd700";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x + 8, y - 5);
+            ctx.lineTo(x + 12, y - 5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x + 9, y - 4.5);
+            ctx.lineTo(x + 11, y - 5.5);
+            ctx.stroke();
           } else {
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
@@ -3144,6 +3227,258 @@
             g.addColorStop(1, "#6a1a7a");
             ctx.fillStyle = g;
             ctx.fillRect(0, 0, 800, 400);
+          } else if (currentTheme === "pirate") {
+            // Sky gradient (day sky)
+            let g = ctx.createLinearGradient(0, 0, 0, 250);
+            g.addColorStop(0, "#4a7a9a");
+            g.addColorStop(1, "#8ab4d5");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 800, 250);
+            
+            // Water gradient
+            let wg = ctx.createLinearGradient(0, 250, 0, 400);
+            wg.addColorStop(0, "#1a4f7a");
+            wg.addColorStop(1, "#0a2a4a");
+            ctx.fillStyle = wg;
+            ctx.fillRect(0, 250, 800, 150);
+            
+            // Water waves effect - more rough and dramatic with shading
+            for (let w = 0; w < 5; w++) {
+              let waveY = 250 + w * 25 + Math.sin((frameCount + w * 20) / 15) * 12;
+              
+              // Draw wave fill with shading
+              ctx.fillStyle = "rgba(20,60,120,0.15)";
+              ctx.beginPath();
+              for (let x = 0; x <= 800; x += 30) {
+                let y = waveY + Math.sin((x + frameCount * 1.5) / 25 + w) * 6;
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+              }
+              ctx.lineTo(800, 400);
+              ctx.lineTo(0, 400);
+              ctx.closePath();
+              ctx.fill();
+              
+              // Draw wave outline
+              ctx.strokeStyle = "rgba(100,150,200,0.5)";
+              ctx.lineWidth = 2.5;
+              ctx.beginPath();
+              for (let x = 0; x <= 800; x += 30) {
+                let y = waveY + Math.sin((x + frameCount * 1.5) / 25 + w) * 6;
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+              }
+              ctx.stroke();
+              
+              // Draw shadow under wave crest for depth
+              ctx.strokeStyle = "rgba(0,30,80,0.3)";
+              ctx.lineWidth = 3;
+              ctx.beginPath();
+              for (let x = 0; x <= 800; x += 30) {
+                let y = waveY + Math.sin((x + frameCount * 1.5) / 25 + w) * 6 + 8;
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+              }
+              ctx.stroke();
+            }
+            
+            // Draw pirate ship in background with bobbing animation
+            let shipX = 300 - camX * 0.2; // Parallax effect
+            let bobbing = Math.sin(frameCount / 25) * 12 + Math.sin(frameCount / 18) * 8; // More dramatic bobbing
+            let shipY = 230 + bobbing; // Sits lower in the water
+            
+            // Ship shadow underwater
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.beginPath();
+            ctx.ellipse(shipX, shipY + 65, 100, 20, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Ship hull (larger)
+            ctx.fillStyle = "#5a3a2a";
+            ctx.beginPath();
+            ctx.moveTo(shipX - 100, shipY);
+            ctx.lineTo(shipX + 100, shipY);
+            ctx.lineTo(shipX + 90, shipY + 50);
+            ctx.lineTo(shipX - 90, shipY + 50);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = "#3a2a1a";
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Hull planks detail
+            ctx.strokeStyle = "rgba(60,40,20,0.4)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 4; i++) {
+              ctx.beginPath();
+              ctx.moveTo(shipX - 85, shipY + 12 + i * 10);
+              ctx.lineTo(shipX + 85, shipY + 12 + i * 10);
+              ctx.stroke();
+            }
+            
+            // Portholes in hull
+            ctx.fillStyle = "rgba(0,0,0,0.3)";
+            for (let ph = 0; ph < 3; ph++) {
+              ctx.beginPath();
+              ctx.arc(shipX - 50 + ph * 50, shipY + 25, 6, 0, Math.PI * 2);
+              ctx.fill();
+            }
+            
+            // Ship deck
+            ctx.fillStyle = "#8a6a5a";
+            ctx.fillRect(shipX - 95, shipY - 8, 190, 10);
+            
+            // Deck planks
+            ctx.strokeStyle = "rgba(60,40,20,0.3)";
+            ctx.lineWidth = 1;
+            for (let i = 0; i < 8; i++) {
+              ctx.beginPath();
+              ctx.moveTo(shipX - 90 + i * 25, shipY - 6);
+              ctx.lineTo(shipX - 90 + i * 25, shipY + 2);
+              ctx.stroke();
+            }
+            
+            // Barrels on deck
+            ctx.fillStyle = "#7a5a4a";
+            ctx.beginPath();
+            ctx.ellipse(shipX - 60, shipY - 15, 10, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(shipX + 60, shipY - 15, 10, 8, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#4a3a2a";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(shipX - 60, shipY - 15, 10, 8, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.ellipse(shipX + 60, shipY - 15, 10, 8, 0, 0, Math.PI * 2);
+            ctx.stroke();
+            
+            // Ship cabin/castle (main structure)
+            ctx.fillStyle = "#6a4a3a";
+            ctx.fillRect(shipX - 50, shipY - 45, 100, 40);
+            ctx.strokeStyle = "#3a2a1a";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(shipX - 50, shipY - 45, 100, 40);
+            
+            // Cabin roof/peaked
+            ctx.fillStyle = "#7a5a4a";
+            ctx.beginPath();
+            ctx.moveTo(shipX - 50, shipY - 45);
+            ctx.lineTo(shipX, shipY - 60);
+            ctx.lineTo(shipX + 50, shipY - 45);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Windows on cabin
+            ctx.fillStyle = "#ffd700";
+            ctx.fillRect(shipX - 35, shipY - 35, 12, 12);
+            ctx.fillRect(shipX + 10, shipY - 35, 12, 12);
+            ctx.fillRect(shipX - 10, shipY - 20, 12, 12);
+            
+            // Window panes
+            ctx.strokeStyle = "#aa8800";
+            ctx.lineWidth = 1;
+            for (let win of [[-35, -35], [10, -35], [-10, -20]]) {
+              ctx.beginPath();
+              ctx.moveTo(shipX + win[0] + 6, shipY + win[1]);
+              ctx.lineTo(shipX + win[0] + 6, shipY + win[1] + 12);
+              ctx.stroke();
+              ctx.beginPath();
+              ctx.moveTo(shipX + win[0], shipY + win[1] + 6);
+              ctx.lineTo(shipX + win[0] + 12, shipY + win[1] + 6);
+              ctx.stroke();
+            }
+            
+            // Front mast (taller)
+            ctx.strokeStyle = "#4a3a2a";
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(shipX - 30, shipY - 8);
+            ctx.lineTo(shipX - 30, shipY - 110);
+            ctx.stroke();
+            
+            // Back mast (rear mast)
+            ctx.strokeStyle = "#4a3a2a";
+            ctx.lineWidth = 4;
+            ctx.beginPath();
+            ctx.moveTo(shipX + 20, shipY - 8);
+            ctx.lineTo(shipX + 20, shipY - 70);
+            ctx.stroke();
+            
+            // Rigging lines
+            ctx.strokeStyle = "rgba(100,80,60,0.4)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(shipX - 30, shipY - 110);
+            ctx.lineTo(shipX - 80, shipY + 5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(shipX - 30, shipY - 110);
+            ctx.lineTo(shipX + 80, shipY + 5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(shipX + 20, shipY - 70);
+            ctx.lineTo(shipX - 80, shipY + 5);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(shipX + 20, shipY - 70);
+            ctx.lineTo(shipX + 80, shipY + 5);
+            ctx.stroke();
+            
+            // Animated sails (billowing effect)
+            let sway = Math.sin(frameCount / 40) * 15;
+            ctx.fillStyle = "rgba(200,150,100,0.7)";
+            
+            // Front sail
+            ctx.beginPath();
+            ctx.moveTo(shipX - 30, shipY - 100);
+            ctx.lineTo(shipX - 30 - 80 - sway, shipY + 30);
+            ctx.lineTo(shipX - 30 - 60 - sway, shipY - 90);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Back sail
+            ctx.beginPath();
+            ctx.moveTo(shipX + 20, shipY - 60);
+            ctx.lineTo(shipX + 20 - 50 - sway * 0.7, shipY + 20);
+            ctx.lineTo(shipX + 20 - 35 - sway * 0.7, shipY - 50);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Pirate flag (animated fluttering)
+            let flagWave = Math.sin(frameCount / 20) * 3;
+            ctx.fillStyle = "#2a1a0a";
+            ctx.beginPath();
+            ctx.moveTo(shipX - 30, shipY - 105);
+            ctx.lineTo(shipX - 30 + 50 + flagWave, shipY - 90);
+            ctx.lineTo(shipX - 30 + 50 + flagWave, shipY - 75);
+            ctx.lineTo(shipX - 30, shipY - 90);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Skull and crossbones on flag
+            ctx.fillStyle = "#ffd700";
+            // Skull
+            ctx.beginPath();
+            ctx.arc(shipX - 10, shipY - 90, 6, 0, Math.PI * 2);
+            ctx.fill();
+            // Eye sockets
+            ctx.fillStyle = "#2a1a0a";
+            ctx.beginPath();
+            ctx.arc(shipX - 13, shipY - 92, 2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(shipX - 7, shipY - 92, 2, 0, Math.PI * 2);
+            ctx.fill();
+            // Crossbones on flag
+            ctx.fillStyle = "#ffd700";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.moveTo(shipX - 15, shipY - 88);
+            ctx.lineTo(shipX - 5, shipY - 88);
+            ctx.stroke();
           } else {
             ctx.fillStyle = t.bg;
             ctx.fillRect(0, 0, 800, 400);
@@ -3648,25 +3983,72 @@
           const lavaFx = getLavaFx(currentTheme);
           hazards.forEach((h) => {
             if (h.type === "lava") {
-              let glow = ctx.createRadialGradient(
-                h.x - camX + h.w / 2,
-                h.y + h.h / 2,
-                0,
-                h.x - camX + h.w / 2,
-                h.y + h.h / 2,
-                Math.max(20, h.h),
-              );
-              glow.addColorStop(0, lavaFx.glowInner);
-              glow.addColorStop(0.45, lavaFx.glowMid);
-              glow.addColorStop(1, lavaFx.glowOuter);
-              ctx.fillStyle = glow;
-              ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
-
-              ctx.fillStyle = lavaFx.fill;
-              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
-              ctx.strokeStyle = lavaFx.stroke;
-              ctx.lineWidth = 2;
-              ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
+              if (currentTheme === "pirate") {
+                // Water wall effect for pirate theme
+                let waterGlow = ctx.createRadialGradient(
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  0,
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  Math.max(20, h.h),
+                );
+                waterGlow.addColorStop(0, "rgba(100, 200, 255, 0.8)");
+                waterGlow.addColorStop(0.45, "rgba(150, 220, 255, 0.6)");
+                waterGlow.addColorStop(1, "rgba(200, 240, 255, 0.3)");
+                ctx.fillStyle = waterGlow;
+                ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
+                
+                // Water base
+                ctx.fillStyle = "rgba(50, 150, 255, 0.8)";
+                ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+                
+                // Water surface waves
+                ctx.strokeStyle = "rgba(100, 200, 255, 0.9)";
+                ctx.lineWidth = 2;
+                const waveOffset = frameCount * 0.05;
+                for (let i = 0; i < 3; i++) {
+                  const y = h.y + i * 4 + Math.sin((h.x - camX) * 0.1 + waveOffset + i) * 2;
+                  ctx.beginPath();
+                  ctx.moveTo(h.x - camX, y);
+                  ctx.lineTo(h.x - camX + h.w, y);
+                  ctx.stroke();
+                }
+                
+                // Water droplets/reflection effect - use deterministic positions to avoid frame flicker
+                ctx.fillStyle = "rgba(150, 220, 255, 0.4)";
+                const dropBaseSeed = h.x * 374761 + h.y * 668265263;
+                for (let i = 0; i < 5; i++) {
+                  const rx = Math.abs(Math.sin(dropBaseSeed + i * 12.9898)) % 1;
+                  const ry = Math.abs(Math.sin(dropBaseSeed + i * 78.233)) % 1;
+                  const rr = Math.abs(Math.sin(dropBaseSeed + i * 37.719)) % 1;
+                  const dropletX = h.x - camX + rx * h.w;
+                  const dropletY = h.y + ry * h.h;
+                  const radius = 1 + rr * 2;
+                  ctx.beginPath();
+                  ctx.arc(dropletX, dropletY, radius, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              } else {
+                let glow = ctx.createRadialGradient(
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  0,
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  Math.max(20, h.h),
+                );
+                glow.addColorStop(0, lavaFx.glowInner);
+                glow.addColorStop(0.45, lavaFx.glowMid);
+                glow.addColorStop(1, lavaFx.glowOuter);
+                ctx.fillStyle = glow;
+                ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
+                ctx.fillStyle = lavaFx.fill;
+                ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+                ctx.strokeStyle = lavaFx.stroke;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
+              }
             } else {
               ctx.fillStyle = t.hazards;
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
@@ -3678,28 +4060,83 @@
               sol = !p.isPhase || cy < 240;
             ctx.globalAlpha = sol ? 1 : 0.1;
             if (p.isSinking) {
-              ctx.fillStyle = p.isTouched ? "#444" : "#888";
-              ctx.fillRect(p.x - camX, p.y, p.w, p.h);
-              ctx.strokeStyle = "rgba(255,255,255,0.3)";
-              ctx.beginPath();
-              ctx.moveTo(p.x - camX + 10, p.y);
-              ctx.lineTo(p.x - camX + 20, p.y + 8);
-              ctx.moveTo(p.x - camX + 80, p.y + 2);
-              ctx.lineTo(p.x - camX + 70, p.y + 12);
-              ctx.stroke();
+              if (currentTheme === "pirate") {
+                ctx.fillStyle = p.isTouched ? "#664" : "#885";
+                ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+                ctx.strokeStyle = "rgba(100,60,40,0.8)";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(p.x - camX + 5, p.y + p.h / 2);
+                ctx.lineTo(p.x - camX + p.w - 5, p.y + p.h / 2);
+                ctx.stroke();
+              } else {
+                ctx.fillStyle = p.isTouched ? "#444" : "#888";
+                ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+                ctx.strokeStyle = "rgba(255,255,255,0.3)";
+                ctx.beginPath();
+                ctx.moveTo(p.x - camX + 10, p.y);
+                ctx.lineTo(p.x - camX + 20, p.y + 8);
+                ctx.moveTo(p.x - camX + 80, p.y + 2);
+                ctx.lineTo(p.x - camX + 70, p.y + 12);
+                ctx.stroke();
+              }
             } else {
-              ctx.fillStyle =
-                p.isPhase &&
-                cy >= 120 &&
-                cy < 240 &&
-                Math.floor(frameCount / 10) % 2
-                  ? "#fff"
-                  : p.isPhase
-                    ? "#08f"
-                    : p.moveRange > 0
-                      ? "#555"
-                      : t.plat;
-              ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+              if (currentTheme === "pirate") {
+                const base = p.moveRange > 0 ? "#6d4c3c" : "#7a5a45";
+                ctx.fillStyle = base;
+                ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+
+                // Add wood grain/splinter details - use deterministic positions based on platform coords
+                ctx.strokeStyle = "rgba(80,50,30,0.5)";
+                ctx.lineWidth = 1;
+                let plankCount = Math.max(3, Math.floor(p.w / 30));
+                for (let i = 1; i < plankCount; i++) {
+                  const grainSeed = Math.sin(p.x * 12.9898 + i * 78.233) * 43758.5453;
+                  const grainOff = (grainSeed - Math.floor(grainSeed) - 0.5) * 3;
+                  let px = p.x - camX + (p.w / plankCount) * i + grainOff;
+                  ctx.beginPath();
+                  ctx.moveTo(px, p.y + 2);
+                  ctx.lineTo(px, p.y + p.h - 2);
+                  ctx.stroke();
+                }
+
+                for (let i = 0; i < 4; i++) {
+                  const s1 = Math.abs(Math.sin(p.x * 37.719 + p.y * 12.9898 + i * 100)) % 1;
+                  const s2 = Math.abs(Math.sin(p.x * 78.233 + p.y * 37.719 + i * 200)) % 1;
+                  const s3 = Math.abs(Math.sin(p.x * 21.533 + p.y * 43.758 + i * 300)) % 1;
+                  const s4 = Math.abs(Math.sin(p.x * 65.438 + p.y * 21.533 + i * 400)) % 1;
+                  let sx = p.x - camX + s1 * p.w;
+                  let sy = p.y + s2 * p.h;
+                  let ex = sx + (s3 - 0.5) * 10;
+                  let ey = sy + (s4 - 0.5) * 6;
+                  ctx.beginPath();
+                  ctx.moveTo(sx, sy);
+                  ctx.lineTo(ex, ey);
+                  ctx.stroke();
+                }
+
+                ctx.strokeStyle = "rgba(255,230,180,0.2)";
+                for (let i = 0; i < 2; i++) {
+                  let sx = p.x - camX + 5 + i * 20;
+                  ctx.beginPath();
+                  ctx.moveTo(sx, p.y + 4);
+                  ctx.lineTo(sx + 4, p.y + p.h - 6);
+                  ctx.stroke();
+                }
+              } else {
+                ctx.fillStyle =
+                  p.isPhase &&
+                  cy >= 120 &&
+                  cy < 240 &&
+                  Math.floor(frameCount / 10) % 2
+                    ? "#fff"
+                    : p.isPhase
+                      ? "#08f"
+                      : p.moveRange > 0
+                        ? "#555"
+                        : t.plat;
+                ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+              }
             }
             if (p.hasSpeedZone) {
               const zoneX = p.x + p.speedZoneX - camX;
@@ -3795,7 +4232,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.6.4", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6.5", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
