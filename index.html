@@ -3987,6 +3987,7 @@
 
           if (resetAchievements) {
             localStorage.removeItem("void_achievements");
+            storedAchievements = {};
             for (let key in achievements) {
               achievements[key].unlocked = false;
             }
