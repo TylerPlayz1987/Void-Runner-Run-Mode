@@ -1325,7 +1325,7 @@
           },
           magma: {
             bg: "#1a0505",
-            plat: "#111",
+            plat: "#cc4400",
             player: "#ffa500",
             hazards: "#ff4500",
             glow: true,
@@ -3096,6 +3096,34 @@
             g.addColorStop(1, "#660099");
             ctx.fillStyle = g;
             ctx.fillRect(0, 0, 800, 400);
+          } else if (currentTheme === "sunny") {
+            let g = ctx.createLinearGradient(0, 0, 0, 400);
+            g.addColorStop(0, "#87CEEB");
+            g.addColorStop(1, "#e0f6ff");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 800, 400);
+            // Draw clouds
+            ctx.fillStyle = "rgba(255, 255, 255, 0.7)";
+            ctx.globalAlpha = 0.8;
+            const cloudOffset = (camX * 0.3) % 800;
+            const clouds = [
+              { x: 50, y: 50, w: 100, h: 40 },
+              { x: 300, y: 80, w: 120, h: 45 },
+              { x: 600, y: 40, w: 90, h: 35 },
+              { x: 850, y: 100, w: 110, h: 40 },
+              { x: 1100, y: 60, w: 100, h: 38 },
+            ];
+            clouds.forEach((cloud) => {
+              const cx = cloud.x - cloudOffset;
+              if (cx > -cloud.w && cx < 800) {
+                ctx.beginPath();
+                ctx.arc(cx, cloud.y, 20, 0, Math.PI * 2);
+                ctx.arc(cx + 30, cloud.y - 10, 25, 0, Math.PI * 2);
+                ctx.arc(cx + 60, cloud.y, 20, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            });
+            ctx.globalAlpha = 1;
           } else if (currentTheme === "toybox") {
             let g = ctx.createLinearGradient(0, 0, 0, 400);
             g.addColorStop(0, "#ffeb3b");
