@@ -554,7 +554,7 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 10px;
-        max-height: min(40vh, 280px);
+        max-height: 172px;
         overflow-y: auto;
         padding-right: 4px;
         align-content: start;
@@ -570,7 +570,14 @@
       }
 
       #themePage {
-        max-height: 86vh;
+        max-height: 100%;
+        overflow: hidden;
+      }
+
+      @media (max-height: 520px) {
+        .theme-buttons {
+          max-height: 146px;
+        }
       }
 
       .theme-btn.active {
