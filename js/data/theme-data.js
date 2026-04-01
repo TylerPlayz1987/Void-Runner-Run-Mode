@@ -90,7 +90,7 @@ const themes = {
     player: "#d7f18b",
     hazards: "#e0b464",
     vines: true,
-    music: null,
+    music: "theme_bg/Jungle.ogg",
   },
 };
 const lavaThemeFx = {
