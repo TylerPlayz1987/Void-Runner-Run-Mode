@@ -432,6 +432,31 @@
         background: rgba(0, 0, 0, 0.93);
       }
 
+      #codeFlashMessage {
+        margin-top: 10px;
+        color: #fc3;
+        font-size: 18px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        opacity: 0;
+        text-shadow: 0 0 12px #fc3;
+        pointer-events: none;
+      }
+
+      #codeFlashMessage.active {
+        animation: codeFlashPulse 1s ease-in-out 3;
+      }
+
+      @keyframes codeFlashPulse {
+        0%,
+        100% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
       .menu-page {
         display: flex;
         flex-direction: column;
@@ -593,6 +618,8 @@
         <div id="startMenu" class="overlay">
           <h1>Void Runner</h1>
           <button id="startBtn" style="width: 200px">Start</button>
+          <button id="menuCodesBtn" style="width: 200px; margin-top: 8px; background: #fc3; color: #111">Codes</button>
+          <div id="codeFlashMessage">test done</div>
         </div>
         <div id="modeMenu" class="overlay" style="display: none">
           <h1>Select Mode</h1>
@@ -4818,6 +4845,22 @@
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "flex";
         };
+        const code1 = "test";
+        function flashCodeMessage(text) {
+          const flashEl = document.getElementById("codeFlashMessage");
+          flashEl.textContent = text;
+          flashEl.classList.remove("active");
+          void flashEl.offsetWidth;
+          flashEl.classList.add("active");
+        }
+        document.getElementById("menuCodesBtn").onclick = () => {
+          const entered = prompt("Enter code:");
+          if (!entered) return;
+          const normalized = entered.trim().toLowerCase();
+          if (normalized === code1) {
+            flashCodeMessage("test done");
+          }
+        };
         document.getElementById("modeBackBtn").onclick = () => {
           document.getElementById("modeMenu").style.display = "none";
           document.getElementById("startMenu").style.display = "flex";
@@ -5004,11 +5047,14 @@
           document.getElementById("tutorialNotesPage").style.display = "none";
           document.getElementById("settingsPage").style.display = "flex";
         };
-        document.getElementById("cheatsBtn").onclick = () => {
+        const openCheatsPage = () => {
           document.getElementById("mainPausePage").style.display = "none";
           document.getElementById("cheatsPage").style.display = "flex";
           document.getElementById("achievementsPage").style.display = "none";
           document.getElementById("settingsPage").style.display = "none";
+        };
+        document.getElementById("cheatsBtn").onclick = () => {
+          openCheatsPage();
         };
         document.getElementById("cheatBackBtn").onclick = () => {
           document.getElementById("cheatsPage").style.display = "none";
