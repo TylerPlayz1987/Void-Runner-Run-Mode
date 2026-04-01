@@ -3752,8 +3752,26 @@
           document.getElementById("topControls").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("speedRunMenu").style.display = "none";
           document.getElementById("speedRunTimer").classList.remove("active");
           document.getElementById("startMenu").style.display = "flex";
+        }
+
+        function showSpeedRunMenu() {
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("speedRunMenu").style.display = "flex";
+          updateSpeedRunThemeUi();
+        }
+
+        function hideSpeedRunMenu() {
+          document.getElementById("speedRunMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "flex";
+        }
+
+        function updateSpeedRunThemeUi() {
+          updateThemeButtonsUi();
+          updateThemeLabel();
         }
 
         function setTopControlsVisible(visible) {
@@ -3863,7 +3881,9 @@
         document.getElementById("runModeBtn").onclick = () => startSelectedMode(false);
         document.getElementById("tutorialBtn").onclick = () => startSelectedMode(true);
         // Mode menu entry point for Speed Running mode
-        document.getElementById("speedRunModeBtn").onclick = () => startSpeedRunMode();
+        document.getElementById("speedRunModeBtn").onclick = () => showSpeedRunMenu();
+        document.getElementById("speedRunBackBtn").onclick = () => hideSpeedRunMenu();
+        document.getElementById("speedRunStartBtn").onclick = () => startSpeedRunMode();
 
         // Speed Running Mode: Initialize and start a new speed run attempt
         // Sets all vars to level 1, records start time, fully resets game state, begins main loop
@@ -3889,6 +3909,7 @@
           setLevelDisplay();
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("speedRunMenu").style.display = "none";
           setTopControlsVisible(false);
           // Show timer UI and reset stopwatch display
           document.getElementById("speedRunTimer").classList.add("active");
@@ -4550,6 +4571,10 @@
           const label = document.getElementById("activeThemeLabel");
           if (label) {
             label.textContent = `Active Theme: ${getThemeDisplayName(currentTheme)}`;
+          }
+          const speedRunLabel = document.getElementById("speedRunThemeLabel");
+          if (speedRunLabel) {
+            speedRunLabel.textContent = `Active Theme: ${getThemeDisplayName(currentTheme)}`;
           }
         }
 
