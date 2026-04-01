@@ -689,6 +689,7 @@
                 <option value="stardust">Star-Dust</option>
                 <option value="pirate">Pirate</option>
                 <option value="jungle">Jungle</option>
+                <option value="aprilfools">April Fools</option>
               </select>
             </div>
             <div class="setting-item">
@@ -1347,6 +1348,14 @@
             vines: true,
             music: null,
           },
+          aprilfools: {
+            bg: "#1a2d1a",
+            plat: "#4a5b42",
+            player: "#7fb069",
+            hazards: "#8b5a3c",
+            fog: true,
+            music: null,
+          },
         };
         const lavaThemeFx = {
           classic: {
@@ -1469,6 +1478,16 @@
             particleB: [60, 180, 90],
             particleStyle: "bubble",
           },
+          aprilfools: {
+            glowInner: "rgba(100,180,80,0.65)",
+            glowMid: "rgba(60,140,50,0.38)",
+            glowOuter: "rgba(40,80,30,0)",
+            fill: "rgba(80,160,70,0.92)",
+            stroke: "rgba(120,200,100,0.75)",
+            particleA: [100, 170, 90],
+            particleB: [70, 140, 60],
+            particleStyle: "bubble",
+          },
         };
         function getLavaFx(themeName) {
           return lavaThemeFx[themeName] || lavaThemeFx.classic;
@@ -1573,6 +1592,15 @@
             coreMid: "rgba(95,215,120,0.34)",
             coreRing: "rgba(80,185,100,0.24)",
             coreStroke: "#88dd8c",
+          },
+          aprilfools: {
+            normalInner: "rgba(100,160,90,0.5)",
+            normalMid: "rgba(60,110,50,0.3)",
+            normalRing: "rgba(50,100,70,0.22)",
+            coreInner: "rgba(140,200,110,0.52)",
+            coreMid: "rgba(80,150,70,0.34)",
+            coreRing: "rgba(100,170,90,0.24)",
+            coreStroke: "#7db577",
           },
           pirate: {
             normalInner: "rgba(255,165,0,0.5)",
@@ -3251,6 +3279,33 @@
             ctx.moveTo(x + player.w - 4, y + player.h - 6);
             ctx.quadraticCurveTo(x + player.w + 4, y + player.h - 12, x + player.w + 2, y + player.h - 2);
             ctx.stroke();
+          } else if (currentTheme === "aprilfools") {
+            // Green ogre player model
+            const ogreeGreen = "#5d8c4a";
+            const skinGreen = "#6fa85c";
+            const darkGreen = "#3d5a2f";
+
+            // thick body
+            ctx.fillStyle = ogreeGreen;
+            ctx.fillRect(x + 1, y + 4, player.w - 2, player.h - 4);
+
+            // chest/belly highlight
+            ctx.fillStyle = skinGreen;
+            ctx.fillRect(x + 4, y + 6, player.w - 8, player.h - 10);
+
+            // head (larger squared off)
+            ctx.fillStyle = ogreeGreen;
+            ctx.fillRect(x + 3, y - 4, player.w - 6, 8);
+
+            // tusks (small white marks)
+            ctx.fillStyle = "#f0f0f0";
+            ctx.fillRect(x + 4, y + 3, 2, 3);
+            ctx.fillRect(x + player.w - 6, y + 3, 2, 3);
+
+            // eyes (dark)
+            ctx.fillStyle = darkGreen;
+            ctx.fillRect(x + 6, y - 1, 2, 2);
+            ctx.fillRect(x + player.w - 8, y - 1, 2, 2);
           } else if (currentTheme === "glitchworld") {
             const jitterX = Math.sin(frameCount * 0.25 + y) * 1.3;
             const jitterY = Math.cos(frameCount * 0.18 + x) * 0.9;
@@ -3544,6 +3599,68 @@
               const r = 1 + 0.9 * (0.5 + Math.sin(frameCount * 0.03 + i) * 0.45);
               ctx.beginPath();
               ctx.arc(fx, fy, r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          } else if (currentTheme === "aprilfools") {
+            let g = ctx.createLinearGradient(0, 0, 0, 400);
+            g.addColorStop(0, "#1a3a1f");
+            g.addColorStop(0.5, "#233426");
+            g.addColorStop(1, "#0f1f14");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 800, 400);
+
+            // murky water effect at bottom
+            let wg = ctx.createLinearGradient(0, 250, 0, 400);
+            wg.addColorStop(0, "transparent");
+            wg.addColorStop(0.5, "rgba(40,70,50,0.4)");
+            wg.addColorStop(1, "rgba(20,40,25,0.6)");
+            ctx.fillStyle = wg;
+            ctx.fillRect(0, 250, 800, 150);
+
+            // Swamp fog layers
+            for (let f = 0; f < 3; f++) {
+              const fogY = 200 + f * 50 + Math.sin(frameCount * 0.008 + f) * 8;
+              ctx.fillStyle = `rgba(80,100,85,${0.25 - f * 0.08})`;
+              ctx.fillRect(0, fogY, 800, 40);
+            }
+
+            // Muddy bog patches
+            for (let b = 0; b < 6; b++) {
+              const bx = (b * 140 - camX * 0.08 + frameCount * 0.05) % 900 - 50;
+              const by = 280 + Math.sin(frameCount * 0.015 + b) * 6;
+              ctx.fillStyle = "rgba(30,50,35,0.7)";
+              ctx.beginPath();
+              ctx.ellipse(bx, by, 50 + (b % 2) * 20, 20, 0, 0, Math.PI * 2);
+              ctx.fill();
+              // ripples on water
+              ctx.strokeStyle = "rgba(60,90,70,0.4)";
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.ellipse(bx, by, 60 + (b % 3) * 15, 25 + Math.sin(frameCount * 0.02 + b) * 3, 0, 0, Math.PI * 2);
+              ctx.stroke();
+            }
+
+            // Dead trees/logs and stumps
+            for (let i = 0; i < 8; i++) {
+              const tx = (i * 110 - camX * 0.12 + frameCount * 0.04) % 900 - 60;
+              const ty = 290 + (i % 2) * 15;
+              ctx.fillStyle = "rgba(50,60,45,0.9)";
+              ctx.fillRect(tx, ty, 70 + (i % 3) * 20, 8);
+              // moss on logs
+              ctx.fillStyle = "rgba(70,110,75,0.6)";
+              for (let m = 0; m < 3; m++) {
+                ctx.fillRect(tx + m * 20 + Math.sin(frameCount * 0.01 + i + m) * 3, ty - 2, 12, 3);
+              }
+            }
+
+            // Swamp gas bubbles floating up
+            for (let i = 0; i < 12; i++) {
+              const bx = (i * 65 + frameCount * 0.8) % 860 - 30;
+              const by = 350 - ((frameCount * 2 + i * 30) % 200);
+              const size = 1.5 + Math.sin(frameCount * 0.04 + i) * 0.8;
+              ctx.fillStyle = `rgba(150,180,140,${0.4 + 0.2 * Math.sin(frameCount * 0.05 + i)})`;
+              ctx.beginPath();
+              ctx.arc(bx, by, size, 0, Math.PI * 2);
               ctx.fill();
             }
           } else if (currentTheme === "cyber") {
@@ -4414,6 +4531,22 @@
             ctx.lineTo(0, gh/2);
             ctx.closePath();
             ctx.fill();
+            ctx.restore();
+          } else if (currentTheme === "aprilfools") {
+            // Glowing swamp stone/moss covered block
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            ctx.fillStyle = "#5a6f50";
+            ctx.fillRect(-gw / 2, -gh / 2, gw, gh);
+            // moss glow
+            ctx.fillStyle = "rgba(120,160,100,0.6)";
+            ctx.shadowBlur = 12;
+            ctx.shadowColor = "rgba(100,150,80,0.8)";
+            ctx.fillRect(-gw / 2 + 2, -gh / 2 + 2, gw - 4, gh - 4);
+            ctx.shadowBlur = 0;
+            // wet shine
+            ctx.fillStyle = "rgba(200,220,180,0.2)";
+            ctx.fillRect(-gw / 2, -gh / 2, gw / 2, gh / 2);
             ctx.restore();
           } else if (currentTheme === "pirate") {
             ctx.save();
