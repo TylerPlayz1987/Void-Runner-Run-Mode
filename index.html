@@ -14,19 +14,45 @@
         overflow: hidden;
       }
 
-      #pauseBtn {
+      #topControls {
         display: none;
-        background: #0f0;
+        align-self: flex-end;
+        gap: 6px;
+        margin-bottom: 5px;
+        z-index: 10;
+      }
+
+      #pauseBtn,
+      .top-control-btn {
         border: none;
-        color: #000;
-        padding: 5px 12px;
         cursor: pointer;
         font-weight: bold;
-        margin-bottom: 5px;
         border-radius: 3px;
-        z-index: 10;
-        font-size: 12px;
-        align-self: flex-end;
+        font-size: 11px;
+        padding: 4px 8px;
+        line-height: 1.1;
+      }
+
+      #pauseBtn {
+        background: #0f0;
+        color: #000;
+      }
+
+      .top-control-btn {
+        color: #000;
+      }
+
+      #topAchBtn {
+        background: #ff0;
+      }
+
+      #topMobileBtn {
+        background: #0aa;
+        color: #fff;
+      }
+
+      #topCheatsBtn {
+        background: #fa0;
       }
 
       #gameShell {
@@ -559,7 +585,12 @@
 
   <body>
     <div id="gameShell">
-      <button id="pauseBtn">Pause [P/Esc]</button>
+      <div id="topControls">
+        <button id="pauseBtn">Pause</button>
+        <button id="topAchBtn" class="top-control-btn">Achievements</button>
+        <button id="topMobileBtn" class="top-control-btn">Mobile</button>
+        <button id="topCheatsBtn" class="top-control-btn">Cheats</button>
+      </div>
       <div id="container">
         <div id="ui-left">
           <div class="stat">Level: <span id="lvl">1</span></div>
@@ -4715,7 +4746,7 @@
           currentLevel = 1;
           lastCheckpoint = 1;
           setLevelDisplay();
-          document.getElementById("pauseBtn").style.display = "none";
+          setTopControlsVisible(false);
           document.getElementById("pauseMenu").style.display = "flex";
 
           const steps = [
@@ -4786,11 +4817,43 @@
           cpNotif.style.opacity = "0";
           tourExplainEl.textContent = "";
           tourExplainEl.style.display = "none";
-          document.getElementById("pauseBtn").style.display = "none";
+          document.getElementById("topControls").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
           document.getElementById("speedRunTimer").classList.remove("active");
           document.getElementById("startMenu").style.display = "flex";
+        }
+
+        function setTopControlsVisible(visible) {
+          document.getElementById("topControls").style.display = visible ? "flex" : "none";
+        }
+
+        function showPauseMenuPage(pageId) {
+          const pageIds = [
+            "mainPausePage",
+            "settingsPage",
+            "audioPage",
+            "themePage",
+            "mobileSupportPage",
+            "screenSizePage",
+            "tutorialNotesPage",
+            "cheatsPage",
+            "achievementsPage",
+          ];
+          for (const id of pageIds) {
+            document.getElementById(id).style.display = id === pageId ? "flex" : "none";
+          }
+        }
+
+        function openPauseShortcut(pageId) {
+          if (!running || speedRunMode || speedRunGameOverMode) return;
+          isPaused = true;
+          const m = document.getElementById("bgMusic");
+          if (m) m.pause();
+          document.getElementById("pauseMenu").style.display = "flex";
+          showPauseMenuPage(pageId);
+          document.getElementById("exitTutorialBtn").style.display =
+            tutorialMode ? "block" : "none";
         }
 
         function ensureAudioContext() {
@@ -4813,7 +4876,7 @@
           setLevelDisplay();
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
-          document.getElementById("pauseBtn").style.display = "block";
+          setTopControlsVisible(true);
           document.getElementById("speedRunTimer").classList.remove("active");
 
           if (tutorialMode) {
@@ -4894,7 +4957,7 @@
           setLevelDisplay();
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
-          document.getElementById("pauseBtn").style.display = "none";
+          setTopControlsVisible(false);
           // Show timer UI and reset stopwatch display
           document.getElementById("speedRunTimer").classList.add("active");
           document.getElementById("speedRunTimer").textContent = "00:00.000";
@@ -4954,7 +5017,7 @@
           document.getElementById("speedRunGameOverTime").textContent = formatSpeedRunTime(elapsedTime);
           // Show game over overlay and hide pause button  
           document.getElementById("speedRunGameOver").style.display = "flex";
-          document.getElementById("pauseBtn").style.display = "none";
+          setTopControlsVisible(false);
         }
 
         document.getElementById("speedRunRestartBtn").onclick = () => {
@@ -4977,6 +5040,16 @@
         };
 
         document.getElementById("pauseBtn").onclick = toggle;
+        document.getElementById("topAchBtn").onclick = () => {
+          openPauseShortcut("achievementsPage");
+          renderAchievements();
+        };
+        document.getElementById("topMobileBtn").onclick = () => {
+          openPauseShortcut("mobileSupportPage");
+        };
+        document.getElementById("topCheatsBtn").onclick = () => {
+          openPauseShortcut("cheatsPage");
+        };
         document.getElementById("resumeBtn").onclick = toggle;
         document.getElementById("settingsBtn").onclick = () => {
           document.getElementById("mainPausePage").style.display = "none";
@@ -5048,10 +5121,7 @@
           document.getElementById("settingsPage").style.display = "flex";
         };
         const openCheatsPage = () => {
-          document.getElementById("mainPausePage").style.display = "none";
-          document.getElementById("cheatsPage").style.display = "flex";
-          document.getElementById("achievementsPage").style.display = "none";
-          document.getElementById("settingsPage").style.display = "none";
+          showPauseMenuPage("cheatsPage");
         };
         document.getElementById("cheatsBtn").onclick = () => {
           openCheatsPage();
@@ -5061,10 +5131,7 @@
           document.getElementById("mainPausePage").style.display = "flex";
         };
         document.getElementById("achievementsBtn").onclick = () => {
-          document.getElementById("mainPausePage").style.display = "none";
-          document.getElementById("achievementsPage").style.display = "flex";
-          document.getElementById("cheatsPage").style.display = "none";
-          document.getElementById("settingsPage").style.display = "none";
+          showPauseMenuPage("achievementsPage");
           renderAchievements();
         };
         document.getElementById("achievementsBackBtn").onclick = () => {
