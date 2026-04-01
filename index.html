@@ -4233,6 +4233,55 @@
             ctx.beginPath();
             ctx.arc(gx + gw / 2, gy + gh / 2, gw * 0.25, 0, Math.PI * 2);
             ctx.fill();
+          } else if (currentTheme === "pirate") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+
+            // Open chest lid.
+            ctx.fillStyle = "#7f4f24";
+            ctx.strokeStyle = "#3b230f";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-gw * 0.42, -gh * 0.1);
+            ctx.lineTo(gw * 0.42, -gh * 0.1);
+            ctx.lineTo(gw * 0.32, -gh * 0.55);
+            ctx.lineTo(-gw * 0.32, -gh * 0.55);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Gold inside chest.
+            ctx.fillStyle = "#ffd24a";
+            ctx.fillRect(-gw * 0.32, -gh * 0.05, gw * 0.64, gh * 0.2);
+            ctx.fillStyle = "#ffec8a";
+            for (let i = 0; i < 5; i++) {
+              const cx = -gw * 0.25 + i * (gw * 0.13);
+              const cy = -gh * 0.08 + Math.sin(frameCount * 0.12 + i) * 1.5;
+              ctx.beginPath();
+              ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // Chest body.
+            ctx.fillStyle = "#9b6535";
+            ctx.fillRect(-gw * 0.45, -gh * 0.02, gw * 0.9, gh * 0.62);
+            ctx.strokeStyle = "#4a2d15";
+            ctx.strokeRect(-gw * 0.45, -gh * 0.02, gw * 0.9, gh * 0.62);
+
+            // Metal straps and lock.
+            ctx.fillStyle = "#d8a73b";
+            ctx.fillRect(-gw * 0.42, gh * 0.1, gw * 0.84, 3);
+            ctx.fillRect(-gw * 0.42, gh * 0.34, gw * 0.84, 3);
+            ctx.fillStyle = "#f2c14e";
+            ctx.fillRect(-3, gh * 0.18, 6, 8);
+
+            // Soft treasure glow.
+            ctx.globalAlpha = 0.35 + Math.sin(frameCount * 0.08) * 0.1;
+            ctx.fillStyle = "#ffe17a";
+            ctx.beginPath();
+            ctx.ellipse(0, -gh * 0.1, gw * 0.45, gh * 0.2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
           } else {
             ctx.fillStyle = "#0f0";
             ctx.shadowBlur = 15;
