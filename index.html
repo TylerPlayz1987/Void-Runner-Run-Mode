@@ -51,6 +51,11 @@
         color: #fff;
       }
 
+      #topThemeBtn {
+        background: #88f;
+        color: #000;
+      }
+
       #topCheatsBtn {
         background: #fa0;
       }
@@ -625,6 +630,7 @@
         <button id="pauseBtn">Pause</button>
         <button id="topAchBtn" class="top-control-btn">Achievements</button>
         <button id="topMobileBtn" class="top-control-btn">Mobile</button>
+        <button id="topThemeBtn" class="top-control-btn">Theme</button>
         <button id="topCheatsBtn" class="top-control-btn">Cheats</button>
       </div>
       <div id="container">
@@ -5082,6 +5088,9 @@
         };
         document.getElementById("topMobileBtn").onclick = () => {
           openPauseShortcut("mobileSupportPage");
+        };
+        document.getElementById("topThemeBtn").onclick = () => {
+          openPauseShortcut("themePage");
         };
         document.getElementById("topCheatsBtn").onclick = () => {
           openPauseShortcut("cheatsPage");
