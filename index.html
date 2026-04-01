@@ -3198,18 +3198,30 @@
             ctx.fillStyle = "#0a0a14";
             ctx.fillRect(x + 6 + jitterX, y + 6 + jitterY, 8, 8);
           } else if (currentTheme === "easter") {
-            // Egg-like body with pastel spots.
+            // Classic cube body with bunny ears and a small basket.
             ctx.fillStyle = c;
-            ctx.beginPath();
-            ctx.ellipse(x + 10, y + 10, 8, 10, 0, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.fillRect(x, y, player.w, player.h);
+
+            // Bunny ears.
             ctx.fillStyle = "#fff";
-            ctx.fillRect(x + 6, y + 6, 2, 2);
-            ctx.fillRect(x + 12, y + 8, 2, 2);
-            ctx.fillStyle = "#ffd56a";
-            ctx.fillRect(x + 9, y + 12, 2, 2);
-            ctx.fillStyle = "#7ddfc7";
-            ctx.fillRect(x + 7, y + 15, 2, 2);
+            ctx.fillRect(x + 4, y - 10, 4, 10);
+            ctx.fillRect(x + 12, y - 10, 4, 10);
+            ctx.fillStyle = "#ffb7d8";
+            ctx.fillRect(x + 5, y - 8, 2, 7);
+            ctx.fillRect(x + 13, y - 8, 2, 7);
+
+            // Basket held in front.
+            ctx.fillStyle = "#9c6a3a";
+            ctx.fillRect(x + 11, y + 9, 9, 7);
+            ctx.strokeStyle = "#74471f";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x + 15.5, y + 9, 4, Math.PI, 0);
+            ctx.stroke();
+            ctx.fillStyle = "#ffd27f";
+            ctx.fillRect(x + 12, y + 11, 2, 2);
+            ctx.fillStyle = "#9de4c9";
+            ctx.fillRect(x + 15, y + 12, 2, 2);
           } else if (currentTheme === "pirate") {
             // Draw pirate body
             ctx.fillStyle = c;
