@@ -422,50 +422,7 @@
       #codesMenu {
         overflow: hidden;
         background:
-          radial-gradient(circle at 20% 18%, rgba(0,255,0,0.14) 0 10%, transparent 11%),
-          radial-gradient(circle at 82% 18%, rgba(0,255,0,0.1) 0 8%, transparent 9%),
-          radial-gradient(circle at 30% 80%, rgba(0,255,0,0.08) 0 9%, transparent 10%),
           linear-gradient(180deg, #040604 0%, #071107 52%, #020202 100%);
-      }
-
-      .menu-bubbles {
-        position: absolute;
-        inset: 0;
-        pointer-events: none;
-      }
-
-      .menu-bubble {
-        position: absolute;
-        border-radius: 50%;
-        border: 2px solid rgba(255,255,255,0.45);
-        background: rgba(255,255,255,0.12);
-        box-shadow: inset 0 0 18px rgba(255,255,255,0.35);
-        animation: floatBubble linear infinite;
-      }
-
-      .menu-bubble::after {
-        content: "";
-        position: absolute;
-        left: 20%;
-        top: 18%;
-        width: 22%;
-        height: 16%;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.85);
-        filter: blur(1px);
-      }
-
-      .menu-bubble.b1 { width: 70px; height: 70px; left: 8%; bottom: 12%; animation-duration: 12s; }
-      .menu-bubble.b2 { width: 42px; height: 42px; left: 18%; top: 18%; animation-duration: 10s; animation-delay: -3s; }
-      .menu-bubble.b3 { width: 96px; height: 96px; right: 7%; top: 10%; animation-duration: 14s; animation-delay: -6s; }
-      .menu-bubble.b4 { width: 58px; height: 58px; right: 16%; bottom: 18%; animation-duration: 11s; animation-delay: -4s; }
-      .menu-bubble.b5 { width: 28px; height: 28px; left: 52%; top: 16%; animation-duration: 9s; animation-delay: -2s; }
-      .menu-bubble.b6 { width: 120px; height: 120px; left: 40%; bottom: -28px; animation-duration: 16s; animation-delay: -8s; }
-
-      @keyframes floatBubble {
-        0% { transform: translateY(18px) scale(0.96); opacity: 0.72; }
-        50% { transform: translateY(-18px) scale(1.04); opacity: 1; }
-        100% { transform: translateY(18px) scale(0.96); opacity: 0.72; }
       }
 
       .menu-card,
@@ -798,14 +755,6 @@
         </div>
 
         <div id="startMenu" class="overlay">
-          <div class="menu-bubbles" aria-hidden="true">
-            <span class="menu-bubble b1"></span>
-            <span class="menu-bubble b2"></span>
-            <span class="menu-bubble b3"></span>
-            <span class="menu-bubble b4"></span>
-            <span class="menu-bubble b5"></span>
-            <span class="menu-bubble b6"></span>
-          </div>
           <div class="menu-card">
             <div class="menu-logo" aria-label="Void Runner logo">
               <svg viewBox="0 0 360 140" role="img" aria-hidden="true">
@@ -831,7 +780,7 @@
                 <path d="M286 42 L286 98 M286 42 L326 42 M286 70 L316 70 M286 98 L326 98" fill="none" stroke="#0f0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            <div class="menu-tagline">Classic void sprint</div>
+            <div class="menu-tagline">Play tutorial if it's your first time!</div>
             <div class="menu-actions">
               <button id="startBtn" style="width: 100%">Start</button>
               <button id="openCodesBtn" style="width: 100%">Codes</button>
@@ -999,14 +948,6 @@
                 <span>
                   Unlocks: L10 spikes+wells, L15 lava, L20 moving platforms, L30 phase platforms,
                   L35 shield, L40 speed+seekers, L50 sinking platforms, L60 swing, L70 fake spikes
-                </span>
-                <span>At the end of tutorial, reopen this page for a full recap any time</span>
-              </div>
-            </div>
-            <button id="tutorialNotesBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
-          </div>
-          <div id="achievementsPage" class="menu-page" style="display: none">
-            <h1>ACHIEVEMENTS</h1>
             <div id="achievements-container"></div>
             <button id="achievementsBackBtn" class="small-btn" style="margin-top: 15px;">Back</button>
           </div>
@@ -1057,7 +998,7 @@
           </div>
         </div>
         <div id="codeToast">test done</div>
-        <div id="versionTag">v0.6.8</div>
+        <div id="versionTag">v0.7.0</div>
         <canvas id="canvas"></canvas>
       </div>
     </div>
@@ -1090,7 +1031,7 @@
         // winParticles: victory particle effect storage
         // flashAlpha: white flash overlay timer for checkpoints
         let audioCtx,
-          gameVersion = "v0.6.8",
+          gameVersion = "v0.7.0",
           masterVol = 0.5,
           musicVol = 0.5,
           sfxVol = 0.5,
