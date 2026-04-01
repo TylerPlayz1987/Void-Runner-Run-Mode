@@ -3771,7 +3771,6 @@
 
         function updateSpeedRunThemeUi() {
           updateThemeButtonsUi();
-          updateThemeLabel();
         }
 
         function setTopControlsVisible(visible) {
@@ -4224,7 +4223,6 @@
           updateScreenSizeUi();
           updateMobileSupportUi();
           updateAudioButtonsUi();
-          updateThemeLabel();
           const m = document.getElementById("bgMusic");
           if (m) {
             if (themes[currentTheme].music) {
@@ -4434,7 +4432,6 @@
         function setTheme(themeName) {
           currentTheme = themeName;
           updateThemeButtonsUi();
-          updateThemeLabel();
           const m = document.getElementById("bgMusic");
           if (m && themes[currentTheme] && themes[currentTheme].music) {
             m.src = themes[currentTheme].music;
@@ -4555,35 +4552,6 @@
           }
           for (const btnId of Object.keys(buttonSizes)) {
             buttonSizes[btnId] = Math.max(40, Math.round(buttonSizes[btnId] / gridSize) * gridSize);
-          }
-        }
-
-        function getThemeDisplayName(themeName) {
-          const labels = {
-            classic: "Classic",
-            sunny: "Sunny",
-            moony: "Moony",
-            toybox: "Toybox",
-            deepsea: "Deep Sea",
-            cyber: "Cyber",
-            glitchworld: "Glitch World",
-            easter: "Easter",
-            magma: "Magma",
-            stardust: "Star-Dust",
-            pirate: "Pirate",
-            jungle: "Jungle",
-          };
-          return labels[themeName] || themeName;
-        }
-
-        function updateThemeLabel() {
-          const label = document.getElementById("activeThemeLabel");
-          if (label) {
-            label.textContent = `Active Theme: ${getThemeDisplayName(currentTheme)}`;
-          }
-          const speedRunLabel = document.getElementById("speedRunThemeLabel");
-          if (speedRunLabel) {
-            speedRunLabel.textContent = `Active Theme: ${getThemeDisplayName(currentTheme)}`;
           }
         }
 
@@ -4829,7 +4797,6 @@
         updateScreenSizeUi();
         updateMobileSupportUi();
         updateThemeButtonsUi();
-        updateThemeLabel();
         updateAudioButtonsUi();
 
         const activePointerToCode = new Map();
