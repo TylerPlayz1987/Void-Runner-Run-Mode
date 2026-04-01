@@ -1410,6 +1410,16 @@
             particleB: [106, 53, 255],
             particleStyle: "spark",
           },
+          easter: {
+            glowInner: "rgba(255,198,224,0.72)",
+            glowMid: "rgba(168,238,217,0.45)",
+            glowOuter: "rgba(255,226,170,0)",
+            fill: "rgba(255,210,229,0.92)",
+            stroke: "rgba(255,246,205,0.86)",
+            particleA: [255, 186, 219],
+            particleB: [156, 229, 205],
+            particleStyle: "spark",
+          },
           magma: {
             glowInner: "rgba(255,120,0,0.75)",
             glowMid: "rgba(255,40,0,0.5)",
@@ -1507,6 +1517,16 @@
             coreMid: "rgba(130,0,80,0.34)",
             coreRing: "rgba(255,80,200,0.24)",
             coreStroke: "#ff2e9e",
+          },
+          easter: {
+            normalInner: "rgba(255,195,226,0.52)",
+            normalMid: "rgba(171,233,214,0.34)",
+            normalRing: "rgba(255,228,170,0.24)",
+            coreInner: "rgba(255,215,167,0.56)",
+            coreMid: "rgba(247,175,210,0.36)",
+            coreRing: "rgba(197,236,218,0.28)",
+            coreStroke: "#f7a8cf",
+            coreFill: "#ffe9f5",
           },
           magma: {
             normalInner: "rgba(255,140,40,0.5)",
@@ -3991,7 +4011,7 @@
                 0,
                 Math.PI * 2,
               );
-              ctx.fillStyle = "#000";
+              ctx.fillStyle = wellFx.coreFill || "#000";
               ctx.fill();
               ctx.strokeStyle = wellFx.coreStroke;
               ctx.lineWidth = 3;
@@ -4449,13 +4469,32 @@
               }
               ctx.stroke();
               if (p.isWreckingBall) {
-                ctx.fillStyle = "#888";
-                ctx.beginPath();
-                ctx.arc(swing.x - camX, swing.y, p.swingSize, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = "#333";
-                ctx.lineWidth = 3;
-                ctx.stroke();
+                if (currentTheme === "easter") {
+                  ctx.save();
+                  ctx.translate(swing.x - camX, swing.y);
+                  ctx.fillStyle = "#fff2cf";
+                  ctx.strokeStyle = "#d59dbf";
+                  ctx.lineWidth = 3;
+                  ctx.beginPath();
+                  ctx.ellipse(0, 0, p.swingSize * 0.88, p.swingSize, 0, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.fillStyle = "#ffc2de";
+                  ctx.fillRect(-p.swingSize * 0.35, -2, 5, 5);
+                  ctx.fillStyle = "#9de4c9";
+                  ctx.fillRect(1, -p.swingSize * 0.25, 5, 5);
+                  ctx.fillStyle = "#ffd27f";
+                  ctx.fillRect(-1, p.swingSize * 0.2, 5, 5);
+                  ctx.restore();
+                } else {
+                  ctx.fillStyle = "#888";
+                  ctx.beginPath();
+                  ctx.arc(swing.x - camX, swing.y, p.swingSize, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.strokeStyle = "#333";
+                  ctx.lineWidth = 3;
+                  ctx.stroke();
+                }
               } else if (p.isSwingPlatform) {
                 ctx.fillStyle = "#d5d5d5";
                 ctx.beginPath();
