@@ -3992,6 +3992,7 @@
           speedRunGameOverMode = false;
           document.getElementById("speedRunGameOver").style.display = "none";
           document.getElementById("speedRunTimer").classList.remove("active");
+          setTheme("classic");
           returnToStartMenu();
         };
         document.getElementById("exitTutorialBtn").onclick = () => {
