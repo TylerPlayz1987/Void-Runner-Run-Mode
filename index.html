@@ -4326,6 +4326,7 @@
           platforms.forEach((p) => {
             let cy = frameCount % 300,
               sol = !p.isPhase || cy < 240;
+            const isEasterTheme = currentTheme === "easter";
             ctx.globalAlpha = sol ? 1 : 0.1;
             if (p.isSinking) {
               if (currentTheme === "pirate") {
@@ -4338,9 +4339,17 @@
                 ctx.lineTo(p.x - camX + p.w - 5, p.y + p.h / 2);
                 ctx.stroke();
               } else {
-                ctx.fillStyle = p.isTouched ? "#444" : "#888";
+                ctx.fillStyle = isEasterTheme
+                  ? p.isTouched
+                    ? "#f6bcd9"
+                    : "#ffd7eb"
+                  : p.isTouched
+                    ? "#444"
+                    : "#888";
                 ctx.fillRect(p.x - camX, p.y, p.w, p.h);
-                ctx.strokeStyle = "rgba(255,255,255,0.3)";
+                ctx.strokeStyle = isEasterTheme
+                  ? "rgba(255,255,255,0.55)"
+                  : "rgba(255,255,255,0.3)";
                 ctx.beginPath();
                 ctx.moveTo(p.x - camX + 10, p.y);
                 ctx.lineTo(p.x - camX + 20, p.y + 8);
@@ -4393,16 +4402,23 @@
                 }
               } else {
                 ctx.fillStyle =
-                  p.isPhase &&
-                  cy >= 120 &&
-                  cy < 240 &&
-                  Math.floor(frameCount / 10) % 2
-                    ? "#fff"
-                    : p.isPhase
-                      ? "#08f"
-                      : p.moveRange > 0
-                        ? "#555"
-                        : t.plat;
+                  isEasterTheme
+                    ? p.isPhase &&
+                      cy >= 120 &&
+                      cy < 240 &&
+                      Math.floor(frameCount / 10) % 2
+                      ? "#ffeaf4"
+                      : "#ffd7eb"
+                    : p.isPhase &&
+                        cy >= 120 &&
+                        cy < 240 &&
+                        Math.floor(frameCount / 10) % 2
+                      ? "#fff"
+                      : p.isPhase
+                        ? "#08f"
+                        : p.moveRange > 0
+                          ? "#555"
+                          : t.plat;
                 ctx.fillRect(p.x - camX, p.y, p.w, p.h);
               }
             }
