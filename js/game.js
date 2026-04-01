@@ -3979,6 +3979,15 @@
         };
 
         document.getElementById("speedRunMenuBtn").onclick = () => {
+          // Return to the Speed Run submenu from game over
+          speedRunMode = false;
+          speedRunGameOverMode = false;
+          document.getElementById("speedRunGameOver").style.display = "none";
+          document.getElementById("speedRunTimer").classList.remove("active");
+          showSpeedRunMenu();
+        };
+
+        document.getElementById("speedRunMainMenuBtn").onclick = () => {
           // Exit speed run flow and return to main menu
           speedRunMode = false;
           speedRunGameOverMode = false;

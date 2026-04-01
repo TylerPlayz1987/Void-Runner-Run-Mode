@@ -622,6 +622,45 @@
         color: #000;
       }
 
+      #speedRunMenu .menu-page {
+        width: min(760px, 92vw);
+      }
+
+      .speed-run-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 14px;
+        width: 100%;
+        align-items: start;
+      }
+
+      .speed-run-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .speed-run-achievements {
+        min-height: 230px;
+      }
+
+      .speed-run-action-row {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .speed-run-action-row button {
+        flex: 1;
+      }
+
+      @media (max-width: 760px) {
+        .speed-run-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
       .notes-grid {
         width: 100%;
         display: grid;
