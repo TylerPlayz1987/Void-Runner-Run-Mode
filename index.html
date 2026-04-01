@@ -3478,28 +3478,57 @@
               }
             }
 
-            // Far trees, more abundant in jungle mode
-            for (let i = 0; i < 10; i++) {
-              const tx = (i * 95 - camX * 0.1 + frameCount * 0.08) % 900 - 50;
-              const treeHeight = 140 + (i % 3) * 30;
-              ctx.fillStyle = "rgba(18,40,20,0.85)";
-              ctx.fillRect(tx, 220, 10, treeHeight);
+            // Far trees, more abundant in jungle mode with variable trunk size and branches
+            for (let i = 0; i < 14; i++) {
+              const tx = (i * 70 - camX * 0.1 + frameCount * 0.06) % 900 - 60;
+              const treeHeight = 120 + ((i * 7) % 60) + Math.sin(frameCount * 0.013 + i) * 10;
+              const treeWidth = 8 + ((i % 4) * 3);
+              const trunkY = 220;
+              ctx.fillStyle = "rgba(18,40,20,0.86)";
+              ctx.fillRect(tx, trunkY, treeWidth, treeHeight);
+
+              // branches
+              const branchCount = 2 + (i % 3);
+              for (let b = 0; b < branchCount; b++) {
+                const by = trunkY + (treeHeight * (0.2 + 0.2 * b)) + Math.sin(frameCount * 0.02 + i * 0.7 + b) * 5;
+                const branchLength = 24 + (i % 3) * 6;
+                const dir = b % 2 === 0 ? -1 : 1;
+                ctx.strokeStyle = "rgba(20,45,22,0.94)";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(tx + treeWidth / 2, by);
+                ctx.quadraticCurveTo(tx + treeWidth / 2 + dir * (branchLength * 0.4), by - 8, tx + treeWidth / 2 + dir * branchLength, by - 12);
+                ctx.stroke();
+
+                // branch leaves
+                for (let leaf = 0; leaf < 3; leaf++) {
+                  const lX = tx + treeWidth / 2 + dir * (branchLength * 0.3 + leaf * 4);
+                  const lY = by - 12 - leaf * 4 + Math.sin(frameCount * 0.03 + i + leaf) * 3;
+                  ctx.fillStyle = "rgba(38,130,45,0.88)";
+                  ctx.beginPath();
+                  ctx.ellipse(lX, lY, 4.5, 7, leaf * 0.2, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              }
 
               // tree leaves clusters
-              const leafColors = ["rgba(28,85,30,0.94)", "rgba(45,110,40,0.87)"];
+              const leafColors = ["rgba(32,98,30,0.94)", "rgba(58,120,44,0.88)"];
               for (let j = 0; j < 3; j++) {
                 ctx.fillStyle = leafColors[j % leafColors.length];
+                const yBase = trunkY - j * 20 + 16;
+                const width = 34 + (j % 2) * 8;
+                const height = 16 + (j % 2) * 4;
                 ctx.beginPath();
-                const yBase = 220 - j * 18;
-                ctx.ellipse(tx + 5, yBase, 30 - j * 4, 14 - j * 2, Math.sin(frameCount * 0.01 + j) * 0.1, 0, Math.PI * 2);
+                ctx.ellipse(tx + treeWidth / 2, yBase, width, height, Math.sin(frameCount * 0.01 + j) * 0.1, 0, Math.PI * 2);
                 ctx.fill();
-                // extra leaf details
-                for (let k = 0; k < 4; k++) {
-                  const leafX = tx + (k * 8 - 10) + Math.sin(frameCount * 0.03 + i + k) * 1.5;
-                  const leafY = yBase - 4 + k * 2;
-                  ctx.fillStyle = "rgba(190,240,150,0.9)";
+
+                // extra leaf clusters
+                for (let k = 0; k < 3; k++) {
+                  const leafX = tx + treeWidth / 2 + (k * 10 - 10) + Math.sin(frameCount * 0.03 + i + k) * 1.5;
+                  const leafY = yBase - 4 + k * 5;
+                  ctx.fillStyle = "rgba(180,235,130,0.86)";
                   ctx.beginPath();
-                  ctx.ellipse(leafX, leafY, 2.6, 4.6, k * 0.2, 0, Math.PI * 2);
+                  ctx.ellipse(leafX, leafY, 3.2, 5.2, k * 0.2, 0, Math.PI * 2);
                   ctx.fill();
                 }
               }
