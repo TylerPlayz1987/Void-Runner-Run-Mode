@@ -3512,8 +3512,9 @@
               ctx.stroke();
             }
             
-            // Draw pirate ship in background with bobbing animation
-            let shipX = 300 - camX * 0.2; // Parallax effect
+            // Draw pirate ship in background with bobbing animation.
+            // Wrap horizontally so the pirate backdrop loops continuously.
+            let shipX = ((300 - camX * 0.2) % 800 + 800) % 800;
             let bobbing = Math.sin(frameCount / 25) * 12 + Math.sin(frameCount / 18) * 8; // More dramatic bobbing
             let shipY = 230 + bobbing; // Sits lower in the water
             
@@ -4256,7 +4257,7 @@
             ctx.fillStyle = "#ffec8a";
             for (let i = 0; i < 5; i++) {
               const cx = -gw * 0.25 + i * (gw * 0.13);
-              const cy = -gh * 0.08 + Math.sin(frameCount * 0.12 + i) * 1.5;
+              const cy = -gh * 0.08;
               ctx.beginPath();
               ctx.arc(cx, cy, 3, 0, Math.PI * 2);
               ctx.fill();
