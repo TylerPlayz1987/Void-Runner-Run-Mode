@@ -3513,11 +3513,13 @@
             }
             
             // Draw pirate ship in background with bobbing animation.
-            // Wrap horizontally so the pirate backdrop loops continuously.
-            let shipX = ((300 - camX * 0.2) % 800 + 800) % 800;
+            // Render two copies offset by 800px so the ship tiles seamlessly as the parallax scrolls.
+            let shipXBase = ((300 - camX * 0.2) % 800 + 800) % 800;
             let bobbing = Math.sin(frameCount / 25) * 12 + Math.sin(frameCount / 18) * 8; // More dramatic bobbing
             let shipY = 230 + bobbing; // Sits lower in the water
-            
+
+            for (const shipOffset of [0, -800]) {
+            let shipX = shipXBase + shipOffset;
             // Ship shadow underwater
             ctx.fillStyle = "rgba(0,0,0,0.1)";
             ctx.beginPath();
@@ -3710,6 +3712,7 @@
             ctx.moveTo(shipX - 15, shipY - 88);
             ctx.lineTo(shipX - 5, shipY - 88);
             ctx.stroke();
+            } // end ship offset loop
           } else {
             ctx.fillStyle = t.bg;
             ctx.fillRect(0, 0, 800, 400);
@@ -4373,10 +4376,10 @@
             }
           });
           ctx.shadowBlur = 0;
+          const isEasterTheme = currentTheme === "easter";
           platforms.forEach((p) => {
             let cy = frameCount % 300,
               sol = !p.isPhase || cy < 240;
-            const isEasterTheme = currentTheme === "easter";
             ctx.globalAlpha = sol ? 1 : 0.1;
             if (p.isSinking) {
               if (currentTheme === "pirate") {
