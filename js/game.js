@@ -53,6 +53,7 @@
           mobileBtnLeft = 14,
           screenScale = 100,
           buttonCustomizationActive = false,
+          showCustomizeGrid = false,
           touchStartDistance = 0,
           defaultButtonPositions = {
             "btn-left": { x: 14, y: 0 },
@@ -4014,6 +4015,13 @@
           document.getElementById("pauseMenu").style.display = "none";
           document.getElementById("mobileControls").classList.add("customizing");
           document.getElementById("customizeConfirmBar").classList.add("active");
+          showCustomizeGrid = false;
+          document.getElementById("mobileControls").classList.remove("show-grid");
+          const gridBtn = document.getElementById("customizeGridBtn");
+          if (gridBtn) {
+            gridBtn.classList.remove("active");
+            gridBtn.textContent = "Show Grid";
+          }
           
           // Position buttons absolutely based on saved positions
           updateButtonPositions();
@@ -4591,6 +4599,15 @@
           updateButtonPositions();
         };
 
+        document.getElementById("customizeGridBtn").onclick = () => {
+          showCustomizeGrid = !showCustomizeGrid;
+          const controls = document.getElementById("mobileControls");
+          const gridBtn = document.getElementById("customizeGridBtn");
+          controls.classList.toggle("show-grid", showCustomizeGrid);
+          gridBtn.classList.toggle("active", showCustomizeGrid);
+          gridBtn.textContent = showCustomizeGrid ? "Hide Grid" : "Show Grid";
+        };
+
         document.getElementById("resetControlLayoutBtn").onclick = () => {
           resetMobileButtonLayout();
           updateButtonPositions();
@@ -4603,7 +4620,14 @@
           buttonCustomizationActive = false;
           currentCustomizingButton = null;
           document.getElementById("mobileControls").classList.remove("customizing");
+          document.getElementById("mobileControls").classList.remove("show-grid");
           document.getElementById("customizeConfirmBar").classList.remove("active");
+          showCustomizeGrid = false;
+          const gridBtn = document.getElementById("customizeGridBtn");
+          if (gridBtn) {
+            gridBtn.classList.remove("active");
+            gridBtn.textContent = "Show Grid";
+          }
           
           // Remove customizing highlight from all buttons
           for (const btn of document.querySelectorAll(".mobile-btn.customizing")) {

@@ -186,7 +186,6 @@
               <button id="mobileSupportToggleBtn" class="small-btn">Mobile Support: OFF</button>
             </div>
             <button id="openControlLayoutBtn" style="width: 100%; margin-top: 8px; background: #0aa;">Customize Buttons</button>
-            <button id="resetControlLayoutBtn" style="width: 100%; margin-top: 8px; background: #f44; color: #fff;">Reset Layout</button>
             <button id="openScreenSizeBtn" style="width: 100%; margin-top: 8px;">Screen Size</button>
             <div class="setting-item" style="text-align: left; font-size: 12px; line-height: 1.4">
               <span>Shows left/right, jump, and run buttons on screen.</span>
@@ -273,12 +272,15 @@
           </div>
         </div>
         <div id="mobileControls">
+          <div id="customizeGridOverlay"></div>
           <button class="mobile-btn" id="btn-left" data-code="ArrowLeft" aria-label="Move left" title="Move left">◀</button>
           <button class="mobile-btn" id="btn-right" data-code="ArrowRight" aria-label="Move right" title="Move right">▶</button>
           <button class="mobile-btn wide" id="btn-run" data-code="ShiftLeft" aria-label="Run" title="Run">RUN</button>
           <button class="mobile-btn" id="btn-jump" data-code="Space" aria-label="Jump" title="Jump">JUMP</button>
           <button class="mobile-btn" id="btn-dash" data-code="KeyQ" aria-label="Dash" title="Dash">DASH</button>
           <div id="customizeConfirmBar">
+            <button id="customizeGridBtn" class="small-btn">Show Grid</button>
+            <button id="resetControlLayoutBtn" class="small-btn">Reset Layout</button>
             <button id="snapControlLayoutBtn" class="small-btn" style="background: #88f; color: #111;">Snap to Grid</button>
             <button id="confirmCustomizeBtn" class="small-btn" style="background: #0aa; color: #000;">Done</button>
           </div>

@@ -246,6 +246,31 @@
         background: rgba(0, 0, 0, 0.15);
       }
 
+      #mobileControls.customizing.show-grid {
+        background-color: rgba(0, 0, 0, 0.2);
+        background-image:
+          linear-gradient(rgba(0, 255, 255, 0.14) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 255, 255, 0.14) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
+
+      #customizeGridOverlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        display: none;
+        z-index: 1;
+        background-image:
+          linear-gradient(rgba(0, 255, 255, 0.16) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 255, 255, 0.16) 1px, transparent 1px);
+        background-size: 40px 40px;
+        opacity: 0.7;
+      }
+
+      #mobileControls.show-grid #customizeGridOverlay {
+        display: block;
+      }
+
       #customizeConfirmBar {
         position: absolute;
         bottom: 0;
@@ -265,9 +290,20 @@
       }
 
       #customizeConfirmBar button {
-        padding: 10px 30px;
+        padding: 10px 16px;
         font-size: 14px;
         width: auto;
+      }
+
+      #customizeGridBtn,
+      #resetControlLayoutBtn {
+        background: #444;
+        color: #fff;
+      }
+
+      #customizeGridBtn.active {
+        background: #0ff;
+        color: #000;
       }
 
       .mobile-btn {
