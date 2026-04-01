@@ -54,20 +54,22 @@
           screenScale = 100,
           buttonCustomizationActive = false,
           touchStartDistance = 0,
-          buttonPositions = {
+          defaultButtonPositions = {
             "btn-left": { x: 14, y: 0 },
             "btn-right": { x: 90, y: 0 },
             "btn-run": { x: 14, y: 80 },
             "btn-jump": { x: 108, y: 80 },
             "btn-dash": { x: 166, y: 80 }
           },
-          buttonSizes = {
+          defaultButtonSizes = {
             "btn-left": 64,
             "btn-right": 64,
             "btn-run": 64,
             "btn-jump": 64,
             "btn-dash": 64
           },
+          buttonPositions = JSON.parse(JSON.stringify(defaultButtonPositions)),
+          buttonSizes = JSON.parse(JSON.stringify(defaultButtonSizes)),
           currentCustomizingButton = null,
           customizeStartData = null;
         let postTutorialTourTimers = [];
@@ -4172,21 +4174,19 @@
           document.getElementById("masterValue").textContent = "50%";
           document.getElementById("musicValue").textContent = "50%";
           document.getElementById("sfxValue").textContent = "50%";
-          document.getElementById("musicMuteBtn").textContent = "Music: ON";
-          document.getElementById("sfxMuteBtn").textContent = "SFX: ON";
           setTheme("classic");
           document.getElementById("retroToggleBtn").textContent = "8-bit: OFF";
           document.getElementById("invincibleBtn").textContent = "Invincibility: OFF";
           mobileSupportEnabled = false;
-          mobileBtnSize = 64;
-          mobileBtnBottom = 10;
-          mobileBtnLeft = 14;
+          resetMobileButtonLayout();
           screenScale = 100;
           buttonCustomizationActive = false;
           document.getElementById("screenSizeSlider").value = screenScale;
           updateControlLayoutUi();
           updateScreenSizeUi();
           updateMobileSupportUi();
+          updateAudioButtonsUi();
+          updateThemeLabel();
           const m = document.getElementById("bgMusic");
           if (m) {
             if (themes[currentTheme].music) {
@@ -4351,6 +4351,7 @@
             // auto-unmute if user adjusts the music slider
             musicMuted = false;
             document.getElementById("musicMuteBtn").textContent = "Music: ON";
+            updateAudioButtonsUi();
           }
         };
         document.getElementById("sfxSlider").oninput = (e) => {
@@ -4360,21 +4361,30 @@
           if (sfxMuted && sfxVol > 0 && masterVol > 0) {
             sfxMuted = false;
             document.getElementById("sfxMuteBtn").textContent = "SFX: ON";
+            updateAudioButtonsUi();
           }
         };
         document.getElementById("musicMuteBtn").onclick = () => {
           musicMuted = !musicMuted;
-          document.getElementById("musicMuteBtn").textContent =
-            "Music: " + (musicMuted ? "OFF" : "ON");
           const m = document.getElementById("bgMusic");
           if (m) {
             m.volume = musicMuted ? 0 : musicVol * masterVol;
           }
+          updateAudioButtonsUi();
         };
         document.getElementById("sfxMuteBtn").onclick = () => {
           sfxMuted = !sfxMuted;
-          document.getElementById("sfxMuteBtn").textContent =
-            "SFX: " + (sfxMuted ? "OFF" : "ON");
+          updateAudioButtonsUi();
+        };
+        document.getElementById("muteAllBtn").onclick = () => {
+          const shouldMute = !(musicMuted && sfxMuted);
+          musicMuted = shouldMute;
+          sfxMuted = shouldMute;
+          const m = document.getElementById("bgMusic");
+          if (m) {
+            m.volume = musicMuted ? 0 : musicVol * masterVol;
+          }
+          updateAudioButtonsUi();
         };
         function updateThemeButtonsUi() {
           const themeButtons = document.querySelectorAll(".theme-btn");
@@ -4386,6 +4396,7 @@
         function setTheme(themeName) {
           currentTheme = themeName;
           updateThemeButtonsUi();
+          updateThemeLabel();
           const m = document.getElementById("bgMusic");
           if (m && themes[currentTheme] && themes[currentTheme].music) {
             m.src = themes[currentTheme].music;
@@ -4422,6 +4433,10 @@
           if (v > 0) {
             warpToLevel(v, true);
           }
+        };
+        document.getElementById("resetDefaultsBtn").onclick = () => {
+          if (!confirm("Reset all settings to defaults?")) return;
+          applyDefaults();
         };
         function submenuBack() {
           const settingsPage = document.getElementById("settingsPage");
@@ -4475,13 +4490,76 @@
           const toggleBtn = document.getElementById("mobileSupportToggleBtn");
           const controls = document.getElementById("mobileControls");
           const customizeBtn = document.getElementById("openControlLayoutBtn");
+          const snapBtn = document.getElementById("snapControlLayoutBtn");
+          const resetBtn = document.getElementById("resetControlLayoutBtn");
           const screenBtn = document.getElementById("openScreenSizeBtn");
           toggleBtn.textContent =
             "Mobile Support: " + (mobileSupportEnabled ? "ON" : "OFF");
           if (mobileSupportEnabled) controls.classList.add("active");
           else controls.classList.remove("active");
           customizeBtn.style.display = mobileSupportEnabled ? "block" : "none";
+          if (snapBtn) snapBtn.style.display = mobileSupportEnabled ? "block" : "none";
+          if (resetBtn) resetBtn.style.display = mobileSupportEnabled ? "block" : "none";
           screenBtn.style.display = mobileSupportEnabled ? "block" : "none";
+        }
+
+        function resetMobileButtonLayout() {
+          buttonPositions = JSON.parse(JSON.stringify(defaultButtonPositions));
+          buttonSizes = JSON.parse(JSON.stringify(defaultButtonSizes));
+          mobileBtnSize = 64;
+          mobileBtnBottom = 10;
+          mobileBtnLeft = 14;
+          for (const btn of document.querySelectorAll(".mobile-btn.customizing")) {
+            btn.classList.remove("customizing");
+          }
+          currentCustomizingButton = null;
+          customizeStartData = null;
+        }
+
+        function snapMobileButtonLayout(gridSize = 8) {
+          for (const btnId of Object.keys(buttonPositions)) {
+            buttonPositions[btnId].x = Math.round(buttonPositions[btnId].x / gridSize) * gridSize;
+            buttonPositions[btnId].y = Math.round(buttonPositions[btnId].y / gridSize) * gridSize;
+          }
+          for (const btnId of Object.keys(buttonSizes)) {
+            buttonSizes[btnId] = Math.max(40, Math.round(buttonSizes[btnId] / gridSize) * gridSize);
+          }
+        }
+
+        function getThemeDisplayName(themeName) {
+          const labels = {
+            classic: "Classic",
+            sunny: "Sunny",
+            moony: "Moony",
+            toybox: "Toybox",
+            deepsea: "Deep Sea",
+            cyber: "Cyber",
+            glitchworld: "Glitch World",
+            easter: "Easter",
+            magma: "Magma",
+            stardust: "Star-Dust",
+            pirate: "Pirate",
+            jungle: "Jungle",
+          };
+          return labels[themeName] || themeName;
+        }
+
+        function updateThemeLabel() {
+          const label = document.getElementById("activeThemeLabel");
+          if (label) {
+            label.textContent = `Active Theme: ${getThemeDisplayName(currentTheme)}`;
+          }
+        }
+
+        function updateAudioButtonsUi() {
+          document.getElementById("musicMuteBtn").textContent =
+            "Music: " + (musicMuted ? "OFF" : "ON");
+          document.getElementById("sfxMuteBtn").textContent =
+            "SFX: " + (sfxMuted ? "OFF" : "ON");
+          const muteAllBtn = document.getElementById("muteAllBtn");
+          if (muteAllBtn) {
+            muteAllBtn.textContent = musicMuted && sfxMuted ? "Unmute All" : "Mute All";
+          }
         }
 
         function updateControlLayoutUi() {
@@ -4514,7 +4592,18 @@
           updateMobileSupportUi();
         };
 
+        document.getElementById("snapControlLayoutBtn").onclick = () => {
+          snapMobileButtonLayout();
+          updateButtonPositions();
+        };
+
+        document.getElementById("resetControlLayoutBtn").onclick = () => {
+          resetMobileButtonLayout();
+          updateButtonPositions();
+        };
+
         document.getElementById("confirmCustomizeBtn").onclick = () => {
+          snapMobileButtonLayout();
           // Exit customization mode and return to mobile settings
           forceReleaseAllMobileInputs();
           buttonCustomizationActive = false;
@@ -4687,6 +4776,9 @@
         updateControlLayoutUi();
         updateScreenSizeUi();
         updateMobileSupportUi();
+        updateThemeButtonsUi();
+        updateThemeLabel();
+        updateAudioButtonsUi();
 
         const activePointerToCode = new Map();
         function forceReleaseAllMobileInputs() {

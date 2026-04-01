@@ -126,6 +126,7 @@
             <button id="openThemeBtn" style="width: 100%; margin-bottom: 8px;">Theme Settings</button>
             <button id="openMobileSupportBtn" style="width: 100%; margin-bottom: 8px;">Mobile Support</button>
             <button id="openTutorialNotesBtn" style="width: 100%; margin-bottom: 8px;">Tutorial Notes</button>
+            <button id="resetDefaultsBtn" style="width: 100%; margin-bottom: 8px; background: #f44; color: #fff;">Reset Defaults</button>
             <button id="settingsBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
           </div>
           <div id="audioPage" class="menu-page" style="display: none">
@@ -148,12 +149,14 @@
               <div class="audio-right">
                 <button id="musicMuteBtn" class="small-btn">Music: ON</button>
                 <button id="sfxMuteBtn" class="small-btn">SFX: ON</button>
+                <button id="muteAllBtn" class="small-btn" style="background: #f88; color: #111;">Mute All</button>
               </div>
             </div>
             <button id="audioBackBtn" class="small-btn" style="margin-top: 12px; width: 100%;">Back</button>
           </div>
           <div id="themePage" class="menu-page" style="display: none">
             <h1>Theme</h1>
+            <div id="activeThemeLabel" class="stat" style="width: 100%; text-align: center; margin-bottom: 2px;">Active Theme: Classic</div>
             <div class="setting-item">
               <span>THEME</span>
               <div class="theme-buttons" id="themeButtons">
@@ -184,6 +187,8 @@
               <button id="mobileSupportToggleBtn" class="small-btn">Mobile Support: OFF</button>
             </div>
             <button id="openControlLayoutBtn" style="width: 100%; margin-top: 8px; background: #0aa;">Customize Buttons</button>
+            <button id="snapControlLayoutBtn" style="width: 100%; margin-top: 8px; background: #88f; color: #111;">Snap to Grid</button>
+            <button id="resetControlLayoutBtn" style="width: 100%; margin-top: 8px; background: #f44; color: #fff;">Reset Layout</button>
             <button id="openScreenSizeBtn" style="width: 100%; margin-top: 8px;">Screen Size</button>
             <div class="setting-item" style="text-align: left; font-size: 12px; line-height: 1.4">
               <span>Shows left/right, jump, and run buttons on screen.</span>
