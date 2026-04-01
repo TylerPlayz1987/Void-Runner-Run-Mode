@@ -418,6 +418,212 @@
         z-index: 200;
       }
 
+      #startMenu,
+      #codesMenu {
+        overflow: hidden;
+        background:
+          radial-gradient(circle at 20% 15%, rgba(255,255,255,0.55) 0 10%, transparent 11%),
+          radial-gradient(circle at 78% 20%, rgba(255,255,255,0.35) 0 8%, transparent 9%),
+          radial-gradient(circle at 30% 82%, rgba(255,255,255,0.2) 0 9%, transparent 10%),
+          linear-gradient(180deg, #ffd6ea 0%, #d9f4ff 48%, #c8ecff 100%);
+      }
+
+      .menu-bubbles {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+      }
+
+      .menu-bubble {
+        position: absolute;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,0.45);
+        background: rgba(255,255,255,0.12);
+        box-shadow: inset 0 0 18px rgba(255,255,255,0.35);
+        animation: floatBubble linear infinite;
+      }
+
+      .menu-bubble::after {
+        content: "";
+        position: absolute;
+        left: 20%;
+        top: 18%;
+        width: 22%;
+        height: 16%;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.85);
+        filter: blur(1px);
+      }
+
+      .menu-bubble.b1 { width: 70px; height: 70px; left: 8%; bottom: 12%; animation-duration: 12s; }
+      .menu-bubble.b2 { width: 42px; height: 42px; left: 18%; top: 18%; animation-duration: 10s; animation-delay: -3s; }
+      .menu-bubble.b3 { width: 96px; height: 96px; right: 7%; top: 10%; animation-duration: 14s; animation-delay: -6s; }
+      .menu-bubble.b4 { width: 58px; height: 58px; right: 16%; bottom: 18%; animation-duration: 11s; animation-delay: -4s; }
+      .menu-bubble.b5 { width: 28px; height: 28px; left: 52%; top: 16%; animation-duration: 9s; animation-delay: -2s; }
+      .menu-bubble.b6 { width: 120px; height: 120px; left: 40%; bottom: -28px; animation-duration: 16s; animation-delay: -8s; }
+
+      @keyframes floatBubble {
+        0% { transform: translateY(18px) scale(0.96); opacity: 0.72; }
+        50% { transform: translateY(-18px) scale(1.04); opacity: 1; }
+        100% { transform: translateY(18px) scale(0.96); opacity: 0.72; }
+      }
+
+      .menu-card,
+      .codes-card {
+        position: relative;
+        width: min(92%, 390px);
+        padding: 26px 24px 20px;
+        border-radius: 32px;
+        background: linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.18));
+        border: 2px solid rgba(255,255,255,0.55);
+        box-shadow:
+          0 16px 40px rgba(105, 71, 129, 0.22),
+          inset 0 1px 0 rgba(255,255,255,0.7);
+        backdrop-filter: blur(8px);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 14px;
+        z-index: 1;
+      }
+
+      .menu-logo {
+        width: 100%;
+        max-width: 320px;
+        display: block;
+      }
+
+      .menu-logo svg {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+
+      .menu-tagline {
+        color: rgba(65, 28, 86, 0.9);
+        font-size: 13px;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-top: -4px;
+        font-weight: bold;
+      }
+
+      .menu-actions,
+      .codes-actions {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      #startMenu button,
+      #codesMenu button {
+        border-radius: 999px;
+      }
+
+      #startMenu #startBtn {
+        background: linear-gradient(180deg, #fff 0%, #ffd0eb 100%);
+        color: #7b1350;
+        border: 2px solid rgba(255,255,255,0.75);
+        box-shadow: 0 8px 18px rgba(255, 133, 184, 0.25);
+      }
+
+      #startMenu #openCodesBtn {
+        background: linear-gradient(180deg, #7adbf5 0%, #58b8d8 100%);
+        color: #04334a;
+        border: 2px solid rgba(255,255,255,0.55);
+      }
+
+      #startMenu #startBtn:hover,
+      #codesMenu #submitCodeBtn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.03);
+      }
+
+      #menuVersionTag,
+      #versionTag {
+        position: absolute;
+        right: 12px;
+        bottom: 10px;
+        z-index: 230;
+        font-size: 12px;
+        color: rgba(255,255,255,0.9);
+        background: rgba(0, 0, 0, 0.32);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 999px;
+        padding: 4px 10px;
+        letter-spacing: 0.8px;
+        pointer-events: none;
+      }
+
+      #codesMenu {
+        display: none;
+      }
+
+      .codes-panel {
+        width: min(92%, 360px);
+        padding: 24px;
+        border-radius: 28px;
+        background: rgba(255, 255, 255, 0.28);
+        border: 2px solid rgba(255,255,255,0.5);
+        box-shadow: 0 16px 40px rgba(101, 60, 120, 0.22);
+        backdrop-filter: blur(8px);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        color: #6b1d53;
+        text-align: center;
+      }
+
+      .codes-panel h1 {
+        margin-bottom: 4px;
+        color: #7b1350;
+      }
+
+      #codeInput {
+        width: 100%;
+        box-sizing: border-box;
+        border: 2px solid rgba(123, 19, 80, 0.35);
+        background: rgba(255,255,255,0.8);
+        color: #5d1845;
+        border-radius: 999px;
+        padding: 12px 16px;
+        font-family: inherit;
+        font-size: 15px;
+        text-align: center;
+      }
+
+      #codeFeedback {
+        min-height: 20px;
+        font-weight: bold;
+        color: #5d1845;
+      }
+
+      #submitCodeBtn {
+        background: linear-gradient(180deg, #ffec8e 0%, #ffc85b 100%);
+        color: #7a4700;
+        border: 2px solid rgba(255,255,255,0.7);
+      }
+
+      #codeToast {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 260;
+        display: none;
+        min-width: 180px;
+        padding: 14px 20px;
+        border-radius: 999px;
+        background: rgba(255,255,255,0.92);
+        border: 2px solid #ff79b0;
+        color: #b61c68;
+        font-size: 20px;
+        font-weight: bold;
+        text-align: center;
+        box-shadow: 0 10px 24px rgba(255, 121, 176, 0.3);
+      }
+
       #tourExplain {
         position: absolute;
         top: 14px;
@@ -591,8 +797,56 @@
         </div>
 
         <div id="startMenu" class="overlay">
-          <h1>Void Runner</h1>
-          <button id="startBtn" style="width: 200px">Start</button>
+          <div class="menu-bubbles" aria-hidden="true">
+            <span class="menu-bubble b1"></span>
+            <span class="menu-bubble b2"></span>
+            <span class="menu-bubble b3"></span>
+            <span class="menu-bubble b4"></span>
+            <span class="menu-bubble b5"></span>
+            <span class="menu-bubble b6"></span>
+          </div>
+          <div class="menu-card">
+            <div class="menu-logo" aria-label="Void Runner logo">
+              <svg viewBox="0 0 360 140" role="img" aria-hidden="true">
+                <defs>
+                  <linearGradient id="logoBgGrad" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#fffdfd" />
+                    <stop offset="100%" stop-color="#ffd0eb" />
+                  </linearGradient>
+                  <linearGradient id="logoAccentGrad" x1="0" x2="1" y1="0" y2="1">
+                    <stop offset="0%" stop-color="#7adbf5" />
+                    <stop offset="100%" stop-color="#5d6dff" />
+                  </linearGradient>
+                </defs>
+                <rect x="14" y="22" width="332" height="96" rx="48" fill="url(#logoBgGrad)" stroke="rgba(123,19,80,0.2)" stroke-width="3" />
+                <circle cx="78" cy="70" r="30" fill="url(#logoAccentGrad)" />
+                <circle cx="78" cy="70" r="14" fill="#fffdfd" opacity="0.95" />
+                <path d="M142 70 C160 47, 196 47, 214 70 C196 93, 160 93, 142 70 Z" fill="#ff9bc8" opacity="0.9" />
+                <path d="M156 70 L202 70" stroke="#fffdfd" stroke-width="10" stroke-linecap="round" />
+                <path d="M202 54 L228 70 L202 86" fill="none" stroke="#fffdfd" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
+                <text x="236" y="82" text-anchor="middle" font-size="30" font-weight="900" letter-spacing="3" fill="#7b1350" font-family="Courier New, monospace">VOID RUNNER</text>
+              </svg>
+            </div>
+            <div class="menu-tagline">Bubble-fueled void sprint</div>
+            <div class="menu-actions">
+              <button id="startBtn" style="width: 100%">Start</button>
+              <button id="openCodesBtn" style="width: 100%">Codes</button>
+            </div>
+          </div>
+        </div>
+        <div id="codesMenu" class="overlay" style="display: none">
+          <div class="codes-panel">
+            <h1>Codes</h1>
+            <div style="font-size: 13px; line-height: 1.4; margin-top: -2px;">
+              Enter codes here for unlocks. More will be added later.
+            </div>
+            <input id="codeInput" type="text" placeholder="Enter code" autocomplete="off" maxlength="32" />
+            <div id="codeFeedback"></div>
+            <div class="codes-actions">
+              <button id="submitCodeBtn">Submit</button>
+              <button id="closeCodesBtn" class="small-btn">Back</button>
+            </div>
+          </div>
         </div>
         <div id="modeMenu" class="overlay" style="display: none">
           <h1>Select Mode</h1>
@@ -798,6 +1052,8 @@
             <button id="confirmCustomizeBtn" class="small-btn" style="background: #0aa; color: #000;">Done</button>
           </div>
         </div>
+        <div id="codeToast">test done</div>
+        <div id="versionTag">v0.6.8</div>
         <canvas id="canvas"></canvas>
       </div>
     </div>
@@ -830,6 +1086,7 @@
         // winParticles: victory particle effect storage
         // flashAlpha: white flash overlay timer for checkpoints
         let audioCtx,
+          gameVersion = "v0.6.8",
           masterVol = 0.5,
           musicVol = 0.5,
           sfxVol = 0.5,
@@ -887,7 +1144,11 @@
           container = document.getElementById("container"),
           cpNotif = document.getElementById("cp-notif"),
           tutorialHintEl = document.getElementById("tutorialHint"),
-          tourExplainEl = document.getElementById("tourExplain");
+          tourExplainEl = document.getElementById("tourExplain"),
+          codesMenuEl = document.getElementById("codesMenu"),
+          codeInputEl = document.getElementById("codeInput"),
+          codeFeedbackEl = document.getElementById("codeFeedback"),
+          codeToastEl = document.getElementById("codeToast");
         let ctx = mainCtx;
         const retroCanvas = document.createElement("canvas");
         retroCanvas.width = 160;
@@ -897,6 +1158,51 @@
         canvas.height = 400;
         let bestLevel = localStorage.getItem("core_best_v20") || 1;
         document.getElementById("best").textContent = bestLevel;
+        document.getElementById("versionTag").textContent = gameVersion;
+
+        const codeRewards = {
+          test: {
+            message: "test done",
+          },
+        };
+        let codeToastTimer = null;
+
+        function showCodeToast(message) {
+          codeToastEl.textContent = message;
+          codeToastEl.style.display = "block";
+          if (codeToastTimer) clearTimeout(codeToastTimer);
+          codeToastTimer = setTimeout(() => {
+            codeToastEl.style.display = "none";
+          }, 1800);
+        }
+
+        function openCodesMenu() {
+          codesMenuEl.style.display = "flex";
+          codeFeedbackEl.textContent = "";
+          codeInputEl.value = "";
+          setTimeout(() => codeInputEl.focus(), 0);
+        }
+
+        function closeCodesMenu() {
+          codesMenuEl.style.display = "none";
+          codeFeedbackEl.textContent = "";
+        }
+
+        function submitCode() {
+          const code = codeInputEl.value.trim().toLowerCase();
+          if (!code) {
+            codeFeedbackEl.textContent = "Enter a code first.";
+            return;
+          }
+          const reward = codeRewards[code];
+          if (!reward) {
+            codeFeedbackEl.textContent = "Unknown code.";
+            return;
+          }
+          codeFeedbackEl.textContent = "Code accepted.";
+          showCodeToast(reward.message);
+          closeCodesMenu();
+        }
         
         // Achievements system
         const achievements = {
@@ -4588,7 +4894,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.6.8", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6.9", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
@@ -4743,6 +5049,7 @@
 
         function returnToStartMenu() {
           clearPostTutorialTour();
+          closeCodesMenu();
           tutorialMode = false;
           speedRunMode = false;
           speedRunGameOverMode = false;
@@ -4777,6 +5084,7 @@
         function startSelectedMode(isTutorial) {
           ensureAudioContext();
           clearPostTutorialTour();
+          closeCodesMenu();
           tutorialMode = isTutorial;
           speedRunMode = false;
           showingPostTutorialSettings = false;
@@ -4818,6 +5126,24 @@
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "flex";
         };
+        document.getElementById("openCodesBtn").onclick = () => {
+          ensureAudioContext();
+          openCodesMenu();
+        };
+        document.getElementById("closeCodesBtn").onclick = () => {
+          closeCodesMenu();
+        };
+        document.getElementById("submitCodeBtn").onclick = submitCode;
+        codeInputEl.addEventListener("keydown", (e) => {
+          if (e.code === "Enter") {
+            e.preventDefault();
+            submitCode();
+          }
+          if (e.code === "Escape") {
+            e.preventDefault();
+            closeCodesMenu();
+          }
+        });
         document.getElementById("modeBackBtn").onclick = () => {
           document.getElementById("modeMenu").style.display = "none";
           document.getElementById("startMenu").style.display = "flex";
@@ -5683,6 +6009,14 @@
         }
 
         window.onkeydown = (e) => {
+          const codesMenuOpen = codesMenuEl.style.display === "flex";
+          if (codesMenuOpen) {
+            if (e.code === "Escape") {
+              e.preventDefault();
+              closeCodesMenu();
+            }
+            return;
+          }
           keys[e.code] = 1;
           const activeTag = document.activeElement
             ? document.activeElement.tagName
