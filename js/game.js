@@ -2159,6 +2159,25 @@
             ctx.moveTo(x + 9, y - 4.5);
             ctx.lineTo(x + 11, y - 5.5);
             ctx.stroke();
+          } else if (currentTheme === "jungle") {
+            // Square monkey-style model that still matches the blocky player style.
+            const monkeyColor = "#7a452d";
+            const bellyColor = "#d7b58d";
+            ctx.fillStyle = monkeyColor;
+            ctx.fillRect(x + 2, y + 2, player.w - 4, player.h - 4);
+            ctx.fillStyle = bellyColor;
+            ctx.fillRect(x + 5, y + 6, player.w - 10, player.h - 10);
+            ctx.strokeStyle = monkeyColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x + player.w - 4, y + player.h - 6);
+            ctx.quadraticCurveTo(
+              x + player.w + 4,
+              y + player.h - 12,
+              x + player.w + 2,
+              y + player.h - 2,
+            );
+            ctx.stroke();
           } else {
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
@@ -2564,6 +2583,107 @@
             ctx.lineTo(shipX - 5, shipY - 88);
             ctx.stroke();
             } // end ship offset loop
+          } else if (currentTheme === "jungle") {
+            let g = ctx.createLinearGradient(0, 0, 0, 400);
+            g.addColorStop(0, "#0f3f20");
+            g.addColorStop(0.5, "#1f5e30");
+            g.addColorStop(1, "#163b1b");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 800, 400);
+
+            // Far canopy silhouettes.
+            for (let i = 0; i < 8; i++) {
+              const cx = ((i * 110 - camX * 0.08 + frameCount * 0.2) % 900) - 80;
+              const scale = 0.6 + (i % 3) * 0.13;
+              ctx.fillStyle = "rgba(20,55,25,0.7)";
+              ctx.beginPath();
+              ctx.moveTo(cx, 300);
+              ctx.bezierCurveTo(
+                cx + 50 * scale,
+                240 * scale,
+                cx + 90 * scale,
+                260 * scale,
+                cx + 130 * scale,
+                220 * scale,
+              );
+              ctx.bezierCurveTo(
+                cx + 180 * scale,
+                260 * scale,
+                cx + 220 * scale,
+                240 * scale,
+                cx + 270 * scale,
+                300,
+              );
+              ctx.closePath();
+              ctx.fill();
+            }
+
+            // Mid-layer vines.
+            ctx.strokeStyle = "rgba(98,160,80,0.64)";
+            ctx.lineWidth = 3;
+            for (let i = 0; i < 5; i++) {
+              const vx = (i * 150 + frameCount * 0.18) % 870;
+              ctx.beginPath();
+              ctx.moveTo(vx, 0);
+              ctx.quadraticCurveTo(
+                vx - 6,
+                150 + Math.sin(frameCount * 0.015 + i) * 12,
+                vx + 2,
+                340,
+              );
+              ctx.stroke();
+              for (let li = 0; li < 3; li++) {
+                const ly = 30 + li * 60 + Math.sin(frameCount * 0.02 + i + li) * 8;
+                const lx = vx + (li % 2 === 0 ? -8 : 8);
+                ctx.fillStyle = "rgba(160,220,130,0.82)";
+                ctx.beginPath();
+                ctx.ellipse(lx, ly, 3, 5, li * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            }
+
+            // Far tree trunks and crowns.
+            for (let i = 0; i < 14; i++) {
+              const tx = ((i * 70 - camX * 0.1 + frameCount * 0.06) % 900) - 60;
+              const verticalOffset = (i % 4) * 12;
+              const treeHeight =
+                120 + ((i * 7) % 60) + Math.sin(frameCount * 0.013 + i) * 10 + verticalOffset;
+              const treeWidth = 8 + (i % 4) * 3;
+              const trunkY = 220 - verticalOffset;
+              ctx.fillStyle = "rgba(18,40,20,0.86)";
+              ctx.fillRect(tx, trunkY, treeWidth, treeHeight);
+
+              const leafColors = ["rgba(32,98,30,0.94)", "rgba(58,120,44,0.88)"];
+              for (let j = 0; j < 3; j++) {
+                ctx.fillStyle = leafColors[j % leafColors.length];
+                const yBase = trunkY - j * 20 + 16;
+                const width = 34 + (j % 2) * 8;
+                const height = 16 + (j % 2) * 4;
+                ctx.beginPath();
+                ctx.ellipse(
+                  tx + treeWidth / 2,
+                  yBase,
+                  width,
+                  height,
+                  Math.sin(frameCount * 0.01 + j) * 0.1,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.fill();
+              }
+            }
+
+            // Fireflies.
+            for (let i = 0; i < 20; i++) {
+              const fx = ((i * 43 + frameCount * 1.2) % 860) - 30;
+              const fy = 80 + ((i * 37) % 220) + Math.sin(frameCount * 0.02 + i) * 12;
+              const glow = 0.35 + 0.25 * Math.sin(frameCount * 0.08 + i);
+              const r = 1 + 0.9 * (0.5 + Math.sin(frameCount * 0.03 + i) * 0.45);
+              ctx.fillStyle = `rgba(255,255,190,${glow})`;
+              ctx.beginPath();
+              ctx.arc(fx, fy, r, 0, Math.PI * 2);
+              ctx.fill();
+            }
           } else {
             ctx.fillStyle = t.bg;
             ctx.fillRect(0, 0, 800, 400);
@@ -3135,6 +3255,22 @@
             ctx.fillStyle = "#ffe17a";
             ctx.beginPath();
             ctx.ellipse(0, -gh * 0.1, gw * 0.45, gh * 0.2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          } else if (currentTheme === "jungle") {
+            // Leaf-trophy style goal block for jungle.
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            ctx.rotate(Math.sin(frameCount * 0.03) * 0.05);
+            ctx.fillStyle = "#8abe6c";
+            ctx.fillRect(-gw / 2, -gh / 2, gw, gh);
+            ctx.fillStyle = "#5d8c40";
+            ctx.beginPath();
+            ctx.moveTo(-gw / 2, 0);
+            ctx.lineTo(0, -gh / 2);
+            ctx.lineTo(gw / 2, 0);
+            ctx.lineTo(0, gh / 2);
+            ctx.closePath();
             ctx.fill();
             ctx.restore();
           } else {

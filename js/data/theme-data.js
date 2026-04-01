@@ -84,6 +84,14 @@ const themes = {
     hazards: "#cc0000",
     music: "theme_bg/Pirate.ogg",
   },
+  jungle: {
+    bg: "#0a2d10",
+    plat: "#3a712f",
+    player: "#d7f18b",
+    hazards: "#e0b464",
+    vines: true,
+    music: null,
+  },
 };
 const lavaThemeFx = {
   classic: {
@@ -196,6 +204,16 @@ const lavaThemeFx = {
     particleB: [255, 215, 0],
     particleStyle: "spark",
   },
+  jungle: {
+    glowInner: "rgba(170,255,170,0.7)",
+    glowMid: "rgba(70,200,90,0.4)",
+    glowOuter: "rgba(20,80,20,0)",
+    fill: "rgba(80,200,100,0.9)",
+    stroke: "rgba(150,255,135,0.8)",
+    particleA: [120, 230, 130],
+    particleB: [60, 180, 90],
+    particleStyle: "bubble",
+  },
 };
 function getLavaFx(themeName) {
   return lavaThemeFx[themeName] || lavaThemeFx.classic;
@@ -300,6 +318,15 @@ const wellThemeFx = {
     coreMid: "rgba(139,69,19,0.34)",
     coreRing: "rgba(255,165,0,0.24)",
     coreStroke: "#ffa500",
+  },
+  jungle: {
+    normalInner: "rgba(80,190,110,0.5)",
+    normalMid: "rgba(45,100,60,0.3)",
+    normalRing: "rgba(30,70,40,0.22)",
+    coreInner: "rgba(165,255,155,0.52)",
+    coreMid: "rgba(95,215,120,0.34)",
+    coreRing: "rgba(80,185,100,0.24)",
+    coreStroke: "#88dd8c",
   },
 };
 function getWellFx(themeName) {
