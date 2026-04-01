@@ -4434,10 +4434,6 @@
             warpToLevel(v, true);
           }
         };
-        document.getElementById("resetDefaultsBtn").onclick = () => {
-          if (!confirm("Reset all settings to defaults?")) return;
-          applyDefaults();
-        };
         function submenuBack() {
           const settingsPage = document.getElementById("settingsPage");
           const audioPage = document.getElementById("audioPage");
@@ -4490,7 +4486,6 @@
           const toggleBtn = document.getElementById("mobileSupportToggleBtn");
           const controls = document.getElementById("mobileControls");
           const customizeBtn = document.getElementById("openControlLayoutBtn");
-          const snapBtn = document.getElementById("snapControlLayoutBtn");
           const resetBtn = document.getElementById("resetControlLayoutBtn");
           const screenBtn = document.getElementById("openScreenSizeBtn");
           toggleBtn.textContent =
@@ -4498,7 +4493,6 @@
           if (mobileSupportEnabled) controls.classList.add("active");
           else controls.classList.remove("active");
           customizeBtn.style.display = mobileSupportEnabled ? "block" : "none";
-          if (snapBtn) snapBtn.style.display = mobileSupportEnabled ? "block" : "none";
           if (resetBtn) resetBtn.style.display = mobileSupportEnabled ? "block" : "none";
           screenBtn.style.display = mobileSupportEnabled ? "block" : "none";
         }
