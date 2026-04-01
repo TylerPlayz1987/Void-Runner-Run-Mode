@@ -684,6 +684,7 @@
                 <option value="deepsea">Deep Sea</option>
                 <option value="cyber">Cyber</option>
                 <option value="glitchworld">Glitch World</option>
+                <option value="easter">Easter</option>
                 <option value="magma">Magma</option>
                 <option value="stardust">Star-Dust</option>
                 <option value="pirate">Pirate</option>
@@ -1307,6 +1308,13 @@
             glitch: true,
             music: "theme_bg/Glitchy.ogg",
           },
+          easter: {
+            bg: "#f5f9ff",
+            plat: "#ffd7eb",
+            player: "#8a5cff",
+            hazards: "#ff6b81",
+            music: "theme_bg/Easter.ogg",
+          },
           magma: {
             bg: "#1a0505",
             plat: "#fa9b6b",
@@ -1400,6 +1408,16 @@
             stroke: "rgba(116,255,242,0.84)",
             particleA: [255, 46, 158],
             particleB: [106, 53, 255],
+            particleStyle: "spark",
+          },
+          easter: {
+            glowInner: "rgba(255,198,224,0.72)",
+            glowMid: "rgba(168,238,217,0.45)",
+            glowOuter: "rgba(255,226,170,0)",
+            fill: "rgba(255,210,229,0.92)",
+            stroke: "rgba(255,246,205,0.86)",
+            particleA: [255, 186, 219],
+            particleB: [156, 229, 205],
             particleStyle: "spark",
           },
           magma: {
@@ -1499,6 +1517,16 @@
             coreMid: "rgba(130,0,80,0.34)",
             coreRing: "rgba(255,80,200,0.24)",
             coreStroke: "#ff2e9e",
+          },
+          easter: {
+            normalInner: "rgba(255,195,226,0.52)",
+            normalMid: "rgba(171,233,214,0.34)",
+            normalRing: "rgba(255,228,170,0.24)",
+            coreInner: "rgba(255,215,167,0.56)",
+            coreMid: "rgba(247,175,210,0.36)",
+            coreRing: "rgba(197,236,218,0.28)",
+            coreStroke: "#f7a8cf",
+            coreFill: "#ffe9f5",
           },
           magma: {
             normalInner: "rgba(255,140,40,0.5)",
@@ -3189,6 +3217,31 @@
             ctx.restore();
             ctx.fillStyle = "#0a0a14";
             ctx.fillRect(x + 6 + jitterX, y + 6 + jitterY, 8, 8);
+          } else if (currentTheme === "easter") {
+            // Classic cube body with bunny ears and a small basket.
+            ctx.fillStyle = c;
+            ctx.fillRect(x, y, player.w, player.h);
+
+            // Bunny ears.
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(x + 4, y - 10, 4, 10);
+            ctx.fillRect(x + 12, y - 10, 4, 10);
+            ctx.fillStyle = "#ffb7d8";
+            ctx.fillRect(x + 5, y - 8, 2, 7);
+            ctx.fillRect(x + 13, y - 8, 2, 7);
+
+            // Basket held in front.
+            ctx.fillStyle = "#9c6a3a";
+            ctx.fillRect(x + 11, y + 9, 9, 7);
+            ctx.strokeStyle = "#74471f";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(x + 15.5, y + 9, 4, Math.PI, 0);
+            ctx.stroke();
+            ctx.fillStyle = "#ffd27f";
+            ctx.fillRect(x + 12, y + 11, 2, 2);
+            ctx.fillStyle = "#9de4c9";
+            ctx.fillRect(x + 15, y + 12, 2, 2);
           } else if (currentTheme === "pirate") {
             // Draw pirate body
             ctx.fillStyle = c;
@@ -3373,6 +3426,37 @@
               ctx.lineTo(shardX + len, shardY - len * 0.5);
               ctx.stroke();
             }
+          } else if (currentTheme === "easter") {
+            let g = ctx.createLinearGradient(0, 0, 0, 400);
+            g.addColorStop(0, "#f9f3ff");
+            g.addColorStop(0.55, "#e8f7ff");
+            g.addColorStop(1, "#fef1d7");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 800, 400);
+
+            // Soft horizontal color ribbons.
+            const bands = ["rgba(255,190,220,0.25)", "rgba(180,240,225,0.22)", "rgba(255,230,160,0.22)"];
+            for (let i = 0; i < 7; i++) {
+              const y = 28 + i * 50 + Math.sin(frameCount * 0.02 + i) * 8;
+              ctx.fillStyle = bands[i % bands.length];
+              ctx.fillRect(0, y, 800, 18);
+            }
+
+            // Floating egg confetti.
+            for (let i = 0; i < 18; i++) {
+              const px = ((i * 123 + frameCount * (0.35 + (i % 4) * 0.08)) % 940) - 70;
+              const py = 25 + ((i * 41 + Math.sin(frameCount * 0.015 + i) * 30) % 330);
+              const hue = i % 3;
+              ctx.fillStyle =
+                hue === 0
+                  ? "rgba(255,166,201,0.55)"
+                  : hue === 1
+                    ? "rgba(151,230,203,0.55)"
+                    : "rgba(255,218,138,0.55)";
+              ctx.beginPath();
+              ctx.ellipse(px, py, 4, 6, Math.sin(i + frameCount * 0.01) * 0.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
           } else if (currentTheme === "pirate") {
             // Sky gradient (day sky)
             let g = ctx.createLinearGradient(0, 0, 0, 250);
@@ -3428,11 +3512,14 @@
               ctx.stroke();
             }
             
-            // Draw pirate ship in background with bobbing animation
-            let shipX = 300 - camX * 0.2; // Parallax effect
+            // Draw pirate ship in background with bobbing animation.
+            // Render two copies offset by 800px so the ship tiles seamlessly as the parallax scrolls.
+            let shipXBase = ((300 - camX * 0.2) % 800 + 800) % 800;
             let bobbing = Math.sin(frameCount / 25) * 12 + Math.sin(frameCount / 18) * 8; // More dramatic bobbing
             let shipY = 230 + bobbing; // Sits lower in the water
-            
+
+            for (const shipOffset of [0, -800]) {
+            let shipX = shipXBase + shipOffset;
             // Ship shadow underwater
             ctx.fillStyle = "rgba(0,0,0,0.1)";
             ctx.beginPath();
@@ -3625,6 +3712,7 @@
             ctx.moveTo(shipX - 15, shipY - 88);
             ctx.lineTo(shipX - 5, shipY - 88);
             ctx.stroke();
+            } // end ship offset loop
           } else {
             ctx.fillStyle = t.bg;
             ctx.fillRect(0, 0, 800, 400);
@@ -3927,7 +4015,7 @@
                 0,
                 Math.PI * 2,
               );
-              ctx.fillStyle = "#000";
+              ctx.fillStyle = wellFx.coreFill || "#000";
               ctx.fill();
               ctx.strokeStyle = wellFx.coreStroke;
               ctx.lineWidth = 3;
@@ -4110,6 +4198,23 @@
             ctx.fill();
             ctx.stroke();
             ctx.restore();
+          } else if (currentTheme === "easter") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            const bob = Math.sin(frameCount * 0.08) * 2;
+            ctx.translate(0, bob);
+            ctx.fillStyle = "#fff6ce";
+            ctx.strokeStyle = "#f2b6d8";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, gw * 0.45, gh * 0.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#9de4c9";
+            ctx.fillRect(-6, -3, 4, 4);
+            ctx.fillStyle = "#ffd27f";
+            ctx.fillRect(2, 1, 4, 4);
+            ctx.restore();
           } else if (currentTheme === "stardust") {
             let pulse = 0.7 + 0.3 * Math.sin(frameCount / 15);
             let rad = (gw / 2) * (1 + pulse * 0.15);
@@ -4132,6 +4237,55 @@
             ctx.beginPath();
             ctx.arc(gx + gw / 2, gy + gh / 2, gw * 0.25, 0, Math.PI * 2);
             ctx.fill();
+          } else if (currentTheme === "pirate") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+
+            // Open chest lid.
+            ctx.fillStyle = "#7f4f24";
+            ctx.strokeStyle = "#3b230f";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(-gw * 0.42, -gh * 0.1);
+            ctx.lineTo(gw * 0.42, -gh * 0.1);
+            ctx.lineTo(gw * 0.32, -gh * 0.55);
+            ctx.lineTo(-gw * 0.32, -gh * 0.55);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Gold inside chest.
+            ctx.fillStyle = "#ffd24a";
+            ctx.fillRect(-gw * 0.32, -gh * 0.05, gw * 0.64, gh * 0.2);
+            ctx.fillStyle = "#ffec8a";
+            for (let i = 0; i < 5; i++) {
+              const cx = -gw * 0.25 + i * (gw * 0.13);
+              const cy = -gh * 0.08;
+              ctx.beginPath();
+              ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // Chest body.
+            ctx.fillStyle = "#9b6535";
+            ctx.fillRect(-gw * 0.45, -gh * 0.02, gw * 0.9, gh * 0.62);
+            ctx.strokeStyle = "#4a2d15";
+            ctx.strokeRect(-gw * 0.45, -gh * 0.02, gw * 0.9, gh * 0.62);
+
+            // Metal straps and lock.
+            ctx.fillStyle = "#d8a73b";
+            ctx.fillRect(-gw * 0.42, gh * 0.1, gw * 0.84, 3);
+            ctx.fillRect(-gw * 0.42, gh * 0.34, gw * 0.84, 3);
+            ctx.fillStyle = "#f2c14e";
+            ctx.fillRect(-3, gh * 0.18, 6, 8);
+
+            // Soft treasure glow.
+            ctx.globalAlpha = 0.35 + Math.sin(frameCount * 0.08) * 0.1;
+            ctx.fillStyle = "#ffe17a";
+            ctx.beginPath();
+            ctx.ellipse(0, -gh * 0.1, gw * 0.45, gh * 0.2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
           } else {
             ctx.fillStyle = "#0f0";
             ctx.shadowBlur = 15;
@@ -4222,6 +4376,7 @@
             }
           });
           ctx.shadowBlur = 0;
+          const isEasterTheme = currentTheme === "easter";
           platforms.forEach((p) => {
             let cy = frameCount % 300,
               sol = !p.isPhase || cy < 240;
@@ -4237,9 +4392,17 @@
                 ctx.lineTo(p.x - camX + p.w - 5, p.y + p.h / 2);
                 ctx.stroke();
               } else {
-                ctx.fillStyle = p.isTouched ? "#444" : "#888";
+                ctx.fillStyle = isEasterTheme
+                  ? p.isTouched
+                    ? "#f6bcd9"
+                    : "#ffd7eb"
+                  : p.isTouched
+                    ? "#444"
+                    : "#888";
                 ctx.fillRect(p.x - camX, p.y, p.w, p.h);
-                ctx.strokeStyle = "rgba(255,255,255,0.3)";
+                ctx.strokeStyle = isEasterTheme
+                  ? "rgba(255,255,255,0.55)"
+                  : "rgba(255,255,255,0.3)";
                 ctx.beginPath();
                 ctx.moveTo(p.x - camX + 10, p.y);
                 ctx.lineTo(p.x - camX + 20, p.y + 8);
@@ -4292,16 +4455,23 @@
                 }
               } else {
                 ctx.fillStyle =
-                  p.isPhase &&
-                  cy >= 120 &&
-                  cy < 240 &&
-                  Math.floor(frameCount / 10) % 2
-                    ? "#fff"
-                    : p.isPhase
-                      ? "#08f"
-                      : p.moveRange > 0
-                        ? "#555"
-                        : t.plat;
+                  isEasterTheme
+                    ? p.isPhase &&
+                      cy >= 120 &&
+                      cy < 240 &&
+                      Math.floor(frameCount / 10) % 2
+                      ? "#ffeaf4"
+                      : "#ffd7eb"
+                    : p.isPhase &&
+                        cy >= 120 &&
+                        cy < 240 &&
+                        Math.floor(frameCount / 10) % 2
+                      ? "#fff"
+                      : p.isPhase
+                        ? "#08f"
+                        : p.moveRange > 0
+                          ? "#555"
+                          : t.plat;
                 ctx.fillRect(p.x - camX, p.y, p.w, p.h);
               }
             }
@@ -4368,13 +4538,32 @@
               }
               ctx.stroke();
               if (p.isWreckingBall) {
-                ctx.fillStyle = "#888";
-                ctx.beginPath();
-                ctx.arc(swing.x - camX, swing.y, p.swingSize, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = "#333";
-                ctx.lineWidth = 3;
-                ctx.stroke();
+                if (currentTheme === "easter") {
+                  ctx.save();
+                  ctx.translate(swing.x - camX, swing.y);
+                  ctx.fillStyle = "#fff2cf";
+                  ctx.strokeStyle = "#d59dbf";
+                  ctx.lineWidth = 3;
+                  ctx.beginPath();
+                  ctx.ellipse(0, 0, p.swingSize * 0.88, p.swingSize, 0, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.stroke();
+                  ctx.fillStyle = "#ffc2de";
+                  ctx.fillRect(-p.swingSize * 0.35, -2, 5, 5);
+                  ctx.fillStyle = "#9de4c9";
+                  ctx.fillRect(1, -p.swingSize * 0.25, 5, 5);
+                  ctx.fillStyle = "#ffd27f";
+                  ctx.fillRect(-1, p.swingSize * 0.2, 5, 5);
+                  ctx.restore();
+                } else {
+                  ctx.fillStyle = "#888";
+                  ctx.beginPath();
+                  ctx.arc(swing.x - camX, swing.y, p.swingSize, 0, Math.PI * 2);
+                  ctx.fill();
+                  ctx.strokeStyle = "#333";
+                  ctx.lineWidth = 3;
+                  ctx.stroke();
+                }
               } else if (p.isSwingPlatform) {
                 ctx.fillStyle = "#d5d5d5";
                 ctx.beginPath();
@@ -4399,7 +4588,7 @@
           ctx.fillStyle = "#fff";
           ctx.font = "12px 'Courier New',monospace";
           ctx.textAlign = "right";
-          ctx.fillText("v0.6.7", canvas.width - 10, canvas.height - 10);
+          ctx.fillText("v0.6.8", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
