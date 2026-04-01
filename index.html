@@ -684,6 +684,7 @@
                 <option value="deepsea">Deep Sea</option>
                 <option value="cyber">Cyber</option>
                 <option value="glitchworld">Glitch World</option>
+                <option value="easter">Easter</option>
                 <option value="magma">Magma</option>
                 <option value="stardust">Star-Dust</option>
                 <option value="pirate">Pirate</option>
@@ -1306,6 +1307,13 @@
             stars: true,
             glitch: true,
             music: "theme_bg/Glitchy.ogg",
+          },
+          easter: {
+            bg: "#f5f9ff",
+            plat: "#ffd7eb",
+            player: "#8a5cff",
+            hazards: "#ff6b81",
+            music: "theme_bg/Smile.ogg",
           },
           magma: {
             bg: "#1a0505",
@@ -3189,6 +3197,19 @@
             ctx.restore();
             ctx.fillStyle = "#0a0a14";
             ctx.fillRect(x + 6 + jitterX, y + 6 + jitterY, 8, 8);
+          } else if (currentTheme === "easter") {
+            // Egg-like body with pastel spots.
+            ctx.fillStyle = c;
+            ctx.beginPath();
+            ctx.ellipse(x + 10, y + 10, 8, 10, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#fff";
+            ctx.fillRect(x + 6, y + 6, 2, 2);
+            ctx.fillRect(x + 12, y + 8, 2, 2);
+            ctx.fillStyle = "#ffd56a";
+            ctx.fillRect(x + 9, y + 12, 2, 2);
+            ctx.fillStyle = "#7ddfc7";
+            ctx.fillRect(x + 7, y + 15, 2, 2);
           } else if (currentTheme === "pirate") {
             // Draw pirate body
             ctx.fillStyle = c;
@@ -3372,6 +3393,37 @@
               ctx.moveTo(shardX, shardY);
               ctx.lineTo(shardX + len, shardY - len * 0.5);
               ctx.stroke();
+            }
+          } else if (currentTheme === "easter") {
+            let g = ctx.createLinearGradient(0, 0, 0, 400);
+            g.addColorStop(0, "#f9f3ff");
+            g.addColorStop(0.55, "#e8f7ff");
+            g.addColorStop(1, "#fef1d7");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 800, 400);
+
+            // Soft horizontal color ribbons.
+            const bands = ["rgba(255,190,220,0.25)", "rgba(180,240,225,0.22)", "rgba(255,230,160,0.22)"];
+            for (let i = 0; i < 7; i++) {
+              const y = 28 + i * 50 + Math.sin(frameCount * 0.02 + i) * 8;
+              ctx.fillStyle = bands[i % bands.length];
+              ctx.fillRect(0, y, 800, 18);
+            }
+
+            // Floating egg confetti.
+            for (let i = 0; i < 18; i++) {
+              const px = ((i * 123 + frameCount * (0.35 + (i % 4) * 0.08)) % 940) - 70;
+              const py = 25 + ((i * 41 + Math.sin(frameCount * 0.015 + i) * 30) % 330);
+              const hue = i % 3;
+              ctx.fillStyle =
+                hue === 0
+                  ? "rgba(255,166,201,0.55)"
+                  : hue === 1
+                    ? "rgba(151,230,203,0.55)"
+                    : "rgba(255,218,138,0.55)";
+              ctx.beginPath();
+              ctx.ellipse(px, py, 4, 6, Math.sin(i + frameCount * 0.01) * 0.5, 0, Math.PI * 2);
+              ctx.fill();
             }
           } else if (currentTheme === "pirate") {
             // Sky gradient (day sky)
@@ -4109,6 +4161,23 @@
             ctx.closePath();
             ctx.fill();
             ctx.stroke();
+            ctx.restore();
+          } else if (currentTheme === "easter") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            const bob = Math.sin(frameCount * 0.08) * 2;
+            ctx.translate(0, bob);
+            ctx.fillStyle = "#fff6ce";
+            ctx.strokeStyle = "#f2b6d8";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.ellipse(0, 0, gw * 0.45, gh * 0.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = "#9de4c9";
+            ctx.fillRect(-6, -3, 4, 4);
+            ctx.fillStyle = "#ffd27f";
+            ctx.fillRect(2, 1, 4, 4);
             ctx.restore();
           } else if (currentTheme === "stardust") {
             let pulse = 0.7 + 0.3 * Math.sin(frameCount / 15);
