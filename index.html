@@ -3481,9 +3481,10 @@
             // Far trees, more abundant in jungle mode with variable trunk size and branches
             for (let i = 0; i < 14; i++) {
               const tx = (i * 70 - camX * 0.1 + frameCount * 0.06) % 900 - 60;
-              const treeHeight = 120 + ((i * 7) % 60) + Math.sin(frameCount * 0.013 + i) * 10;
+              const verticalOffset = (i % 4) * 12; // height stacking for depth layering
+              const treeHeight = 120 + ((i * 7) % 60) + Math.sin(frameCount * 0.013 + i) * 10 + verticalOffset;
               const treeWidth = 8 + ((i % 4) * 3);
-              const trunkY = 220;
+              const trunkY = 220 - verticalOffset; // raise some trees to appear taller/farther back
               ctx.fillStyle = "rgba(18,40,20,0.86)";
               ctx.fillRect(tx, trunkY, treeWidth, treeHeight);
 
