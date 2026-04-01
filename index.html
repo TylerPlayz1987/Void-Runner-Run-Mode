@@ -3232,68 +3232,24 @@
             ctx.arc(x + 8, y + 11, 3, 0, Math.PI * 2);
             ctx.fill();
           } else if (currentTheme === "jungle") {
-            // Monkey player style (head, ears, body, tail)
-            const bodyColor = "#7a452d";
+            // Square monkey player model without face features, consistent with blocky style
+            const monkeyColor = "#7a452d";
             const bellyColor = "#d7b58d";
-            const eyeColor = "#000";
 
-            // Body
-            ctx.fillStyle = bodyColor;
-            ctx.fillRect(x + 4, y + 4, 12, 15);
+            // square head/body combined
+            ctx.fillStyle = monkeyColor;
+            ctx.fillRect(x + 2, y + 2, player.w - 4, player.h - 4);
 
-            // Belly patch
+            // belly patch
             ctx.fillStyle = bellyColor;
-            ctx.fillRect(x + 7, y + 8, 8, 10);
+            ctx.fillRect(x + 5, y + 6, player.w - 10, player.h - 10);
 
-            // Head
-            ctx.beginPath();
-            ctx.arc(x + 10, y + 0, 8, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Face
-            ctx.fillStyle = bellyColor;
-            ctx.beginPath();
-            ctx.arc(x + 10, y + 1, 5, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Eyes
-            ctx.fillStyle = eyeColor;
-            ctx.beginPath();
-            ctx.arc(x + 8, y - 1, 1.3, 0, Math.PI * 2);
-            ctx.arc(x + 12, y - 1, 1.3, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Mouth
-            ctx.strokeStyle = "#3f2a1e";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.arc(x + 10, y + 2, 2.3, 0, Math.PI);
-            ctx.stroke();
-
-            // Ears
-            ctx.fillStyle = bodyColor;
-            ctx.beginPath();
-            ctx.arc(x + 2, y + 1, 3, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + 18, y + 1, 3, 0, Math.PI * 2);
-            ctx.fill();
-
-            // Tail
-            ctx.strokeStyle = bodyColor;
+            // tail
+            ctx.strokeStyle = monkeyColor;
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(x + 16, y + 16);
-            ctx.quadraticCurveTo(x + 22, y + 18, x + 22, y + 26);
-            ctx.quadraticCurveTo(x + 22, y + 31, x + 18, y + 33);
-            ctx.stroke();
-
-            // Optional vine at shoulder to reinforce jungle style
-            ctx.strokeStyle = "rgba(93,135,62,0.9)";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(x + 8, y + 9);
-            ctx.quadraticCurveTo(x + 10, y + 12, x + 13, y + 10);
+            ctx.moveTo(x + player.w - 4, y + player.h - 6);
+            ctx.quadraticCurveTo(x + player.w + 4, y + player.h - 12, x + player.w + 2, y + player.h - 2);
             ctx.stroke();
           } else if (currentTheme === "glitchworld") {
             const jitterX = Math.sin(frameCount * 0.25 + y) * 1.3;
@@ -3497,25 +3453,7 @@
               ctx.fill();
             }
 
-            // Far trees, more abundant in jungle mode
-            for (let i = 0; i < 10; i++) {
-              const tx = (i * 95 - camX * 0.1 + frameCount * 0.08) % 900 - 50;
-              const treeHeight = 140 + (i % 3) * 30;
-              ctx.fillStyle = "rgba(18,40,20,0.85)";
-              ctx.fillRect(tx, 220, 10, treeHeight);
-
-              ctx.beginPath();
-              ctx.fillStyle = "rgba(28,80,26,0.9)";
-              ctx.moveTo(tx - 20, 220);
-              ctx.quadraticCurveTo(tx + 5, 180, tx + 30, 220);
-              ctx.fill();
-              ctx.beginPath();
-              ctx.moveTo(tx - 22, 200);
-              ctx.quadraticCurveTo(tx + 5, 170, tx + 32, 200);
-              ctx.fill();
-            }
-
-            // Mid-layer vines, reduced density
+            // Mid-layer vines, reduced density (behind trees)
             ctx.strokeStyle = "rgba(98,160,80,0.64)";
             ctx.lineWidth = 3;
             for (let i = 0; i < 5; i++) {
@@ -3529,6 +3467,42 @@
                 340,
               );
               ctx.stroke();
+              // Add small leaves on vines
+              for (let li = 0; li < 3; li++) {
+                const ly = 30 + li * 60 + Math.sin(frameCount * 0.02 + i + li) * 8;
+                const lx = vx + (li % 2 === 0 ? -8 : 8);
+                ctx.fillStyle = "rgba(160,220,130,0.82)";
+                ctx.beginPath();
+                ctx.ellipse(lx, ly, 3, 5, li * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+              }
+            }
+
+            // Far trees, more abundant in jungle mode
+            for (let i = 0; i < 10; i++) {
+              const tx = (i * 95 - camX * 0.1 + frameCount * 0.08) % 900 - 50;
+              const treeHeight = 140 + (i % 3) * 30;
+              ctx.fillStyle = "rgba(18,40,20,0.85)";
+              ctx.fillRect(tx, 220, 10, treeHeight);
+
+              // tree leaves clusters
+              const leafColors = ["rgba(28,85,30,0.94)", "rgba(45,110,40,0.87)"];
+              for (let j = 0; j < 3; j++) {
+                ctx.fillStyle = leafColors[j % leafColors.length];
+                ctx.beginPath();
+                const yBase = 220 - j * 18;
+                ctx.ellipse(tx + 5, yBase, 30 - j * 4, 14 - j * 2, Math.sin(frameCount * 0.01 + j) * 0.1, 0, Math.PI * 2);
+                ctx.fill();
+                // extra leaf details
+                for (let k = 0; k < 4; k++) {
+                  const leafX = tx + (k * 8 - 10) + Math.sin(frameCount * 0.03 + i + k) * 1.5;
+                  const leafY = yBase - 4 + k * 2;
+                  ctx.fillStyle = "rgba(190,240,150,0.9)";
+                  ctx.beginPath();
+                  ctx.ellipse(leafX, leafY, 2.6, 4.6, k * 0.2, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              }
             }
 
             // Fireflies (glowing particles)
