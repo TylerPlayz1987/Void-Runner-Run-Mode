@@ -422,10 +422,10 @@
       #codesMenu {
         overflow: hidden;
         background:
-          radial-gradient(circle at 20% 15%, rgba(255,255,255,0.55) 0 10%, transparent 11%),
-          radial-gradient(circle at 78% 20%, rgba(255,255,255,0.35) 0 8%, transparent 9%),
-          radial-gradient(circle at 30% 82%, rgba(255,255,255,0.2) 0 9%, transparent 10%),
-          linear-gradient(180deg, #ffd6ea 0%, #d9f4ff 48%, #c8ecff 100%);
+          radial-gradient(circle at 20% 18%, rgba(0,255,0,0.14) 0 10%, transparent 11%),
+          radial-gradient(circle at 82% 18%, rgba(0,255,0,0.1) 0 8%, transparent 9%),
+          radial-gradient(circle at 30% 80%, rgba(0,255,0,0.08) 0 9%, transparent 10%),
+          linear-gradient(180deg, #040604 0%, #071107 52%, #020202 100%);
       }
 
       .menu-bubbles {
@@ -474,12 +474,13 @@
         width: min(92%, 390px);
         padding: 26px 24px 20px;
         border-radius: 32px;
-        background: linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.18));
-        border: 2px solid rgba(255,255,255,0.55);
+        background: linear-gradient(180deg, rgba(0, 25, 0, 0.94), rgba(0, 12, 0, 0.92));
+        border: 2px solid rgba(0,255,0,0.45);
         box-shadow:
-          0 16px 40px rgba(105, 71, 129, 0.22),
-          inset 0 1px 0 rgba(255,255,255,0.7);
-        backdrop-filter: blur(8px);
+          0 16px 40px rgba(0, 0, 0, 0.4),
+          inset 0 1px 0 rgba(0,255,0,0.12),
+          0 0 18px rgba(0,255,0,0.12);
+        backdrop-filter: blur(5px);
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -500,7 +501,7 @@
       }
 
       .menu-tagline {
-        color: rgba(65, 28, 86, 0.9);
+        color: rgba(0,255,0,0.9);
         font-size: 13px;
         letter-spacing: 2px;
         text-transform: uppercase;
@@ -522,16 +523,16 @@
       }
 
       #startMenu #startBtn {
-        background: linear-gradient(180deg, #fff 0%, #ffd0eb 100%);
-        color: #7b1350;
-        border: 2px solid rgba(255,255,255,0.75);
-        box-shadow: 0 8px 18px rgba(255, 133, 184, 0.25);
+        background: linear-gradient(180deg, #0f0 0%, #0a8f0a 100%);
+        color: #000;
+        border: 2px solid rgba(0,255,0,0.7);
+        box-shadow: 0 8px 18px rgba(0, 255, 0, 0.18);
       }
 
       #startMenu #openCodesBtn {
-        background: linear-gradient(180deg, #7adbf5 0%, #58b8d8 100%);
-        color: #04334a;
-        border: 2px solid rgba(255,255,255,0.55);
+        background: linear-gradient(180deg, #111 0%, #1f1f1f 100%);
+        color: #0f0;
+        border: 2px solid rgba(0,255,0,0.35);
       }
 
       #startMenu #startBtn:hover,
@@ -547,9 +548,9 @@
         bottom: 10px;
         z-index: 230;
         font-size: 12px;
-        color: rgba(255,255,255,0.9);
-        background: rgba(0, 0, 0, 0.32);
-        border: 1px solid rgba(255,255,255,0.2);
+        color: rgba(0,255,0,0.9);
+        background: rgba(0, 0, 0, 0.7);
+        border: 1px solid rgba(0,255,0,0.25);
         border-radius: 999px;
         padding: 4px 10px;
         letter-spacing: 0.8px;
@@ -577,7 +578,7 @@
 
       .codes-panel h1 {
         margin-bottom: 4px;
-        color: #7b1350;
+        color: #0f0;
       }
 
       #codeInput {
@@ -596,7 +597,7 @@
       #codeFeedback {
         min-height: 20px;
         font-weight: bold;
-        color: #5d1845;
+        color: #0f0;
       }
 
       #submitCodeBtn {
@@ -810,24 +811,27 @@
               <svg viewBox="0 0 360 140" role="img" aria-hidden="true">
                 <defs>
                   <linearGradient id="logoBgGrad" x1="0" x2="1" y1="0" y2="1">
-                    <stop offset="0%" stop-color="#fffdfd" />
-                    <stop offset="100%" stop-color="#ffd0eb" />
+                    <stop offset="0%" stop-color="#0a0a0a" />
+                    <stop offset="100%" stop-color="#081808" />
                   </linearGradient>
                   <linearGradient id="logoAccentGrad" x1="0" x2="1" y1="0" y2="1">
-                    <stop offset="0%" stop-color="#7adbf5" />
-                    <stop offset="100%" stop-color="#5d6dff" />
+                    <stop offset="0%" stop-color="#0f0" />
+                    <stop offset="100%" stop-color="#8aff8a" />
                   </linearGradient>
                 </defs>
-                <rect x="14" y="22" width="332" height="96" rx="48" fill="url(#logoBgGrad)" stroke="rgba(123,19,80,0.2)" stroke-width="3" />
-                <circle cx="78" cy="70" r="30" fill="url(#logoAccentGrad)" />
-                <circle cx="78" cy="70" r="14" fill="#fffdfd" opacity="0.95" />
-                <path d="M142 70 C160 47, 196 47, 214 70 C196 93, 160 93, 142 70 Z" fill="#ff9bc8" opacity="0.9" />
-                <path d="M156 70 L202 70" stroke="#fffdfd" stroke-width="10" stroke-linecap="round" />
-                <path d="M202 54 L228 70 L202 86" fill="none" stroke="#fffdfd" stroke-width="8" stroke-linecap="round" stroke-linejoin="round" />
-                <text x="236" y="82" text-anchor="middle" font-size="30" font-weight="900" letter-spacing="3" fill="#7b1350" font-family="Courier New, monospace">VOID RUNNER</text>
+                <rect x="14" y="22" width="332" height="96" rx="18" fill="url(#logoBgGrad)" stroke="#0f0" stroke-width="3" />
+                <rect x="34" y="42" width="42" height="56" rx="4" fill="none" stroke="url(#logoAccentGrad)" stroke-width="5" />
+                <path d="M56 42 L56 26" stroke="#0f0" stroke-width="5" stroke-linecap="round" />
+                <path d="M46 62 L66 62" stroke="#0f0" stroke-width="5" stroke-linecap="round" />
+                <path d="M56 98 L56 112" stroke="#0f0" stroke-width="5" stroke-linecap="round" />
+                <path d="M112 98 L132 42 L152 98" fill="none" stroke="url(#logoAccentGrad)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M120 78 L144 78" stroke="#0f0" stroke-width="5" stroke-linecap="round" />
+                <path d="M172 42 L172 98 M172 42 L214 42 M172 70 L206 70 M172 98 L214 98" fill="none" stroke="#0f0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M232 42 L232 98 M232 42 L272 42 M232 70 L264 70" fill="none" stroke="#0f0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M286 42 L286 98 M286 42 L326 42 M286 70 L316 70 M286 98 L326 98" fill="none" stroke="#0f0" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            <div class="menu-tagline">Bubble-fueled void sprint</div>
+            <div class="menu-tagline">Classic void sprint</div>
             <div class="menu-actions">
               <button id="startBtn" style="width: 100%">Start</button>
               <button id="openCodesBtn" style="width: 100%">Codes</button>
