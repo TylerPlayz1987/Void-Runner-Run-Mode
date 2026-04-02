@@ -2,19 +2,25 @@
 Infinite Platform Game
 
 ## Overview
-Void Runner is a browser-based 2D endless platformer in a single-page `index.html` file. It features:
-- procedural level generation
-- multiple themes and audio tracks
-- player controls with momentum and coyote-time jump buffering
-- hazards, checkpoints, and high-score tracking
-- pause/menu/settings with audio and theme controls
-- cheat controls (invincibility + level warp)
-- 8-bit filter mode on classic theme
-- **Speed Running Mode**: competitive time-attack mode to reach level 100 as fast as possible with millisecond precision timer (v0.6+)
+Void Runner is a browser-based 2D platformer built around a single-page `index.html` game shell. The current v0.7 branch adds a broader menu system, more themes, mobile support, interchangeable legacy builds, and quality-of-life polish on top of the core endless-runner loop.
 
-## Project files
-- `index.html`: full game implementation (canvas, styles, gameplay logic).
-- `README.md`: this documentation.
+Highlights:
+- procedural level generation
+- multiple themes and theme-specific music
+- player momentum, coyote time, jump buffering, and quick restart
+- hazards, checkpoints, achievements, and high-score tracking
+- pause/menu/settings flow with audio, theme, and mobile options
+- changelog panel, main-menu subtitle, and pause-menu main menu navigation
+- speedrun mode updates with improved flow and UI
+- clickable version selector for legacy builds
+- 8-bit filter mode on the classic theme
+
+## Project Files
+- [index.html](index.html): full game implementation, menus, gameplay logic, and UI.
+- [legacy_versions/](legacy_versions): older playable builds linked from the version selector.
+- [js/data/version-data.js](js/data/version-data.js): version registry used by the selector.
+- [js/version-picker-legacy.js](js/version-picker-legacy.js): shared legacy version picker behavior.
+- [CHECKLIST.md](CHECKLIST.md): post-change test checklist.
 
 ## Controls
 - Movement: `A/Left`, `D/Right`
@@ -23,7 +29,8 @@ Void Runner is a browser-based 2D endless platformer in a single-page `index.htm
 - Pause/Menu: `P/Escape` (disabled in Speed Running Mode)
 - Quick Restart from checkpoint: `R`
 - Full Restart to level 1: `Shift+R` (opens confirmation popup)
-- Pause overlay buttons for resume/settings/restart/cheats
+- Version selector: click the version number in supported builds
+- Pause overlay buttons for resume/settings/restart/cheats/main menu
 
 ## Game Modes
 
@@ -31,46 +38,51 @@ Void Runner features three distinct game modes accessible from the mode selectio
 
 ### Run Mode
 Standard infinite platformer progression:
-- **Infinite levels**: levels increase indefinitely with increasing procedural difficulty
-- **Checkpoints every 5 levels**: save progress at levels 5, 10, 15, 20, etc.
-- **Death recovery**: dying respawns player at the last checkpoint reached
-- **High score tracking**: best level reached is automatically saved to localStorage as `core_best_v20`
-- **Pause enabled**: press `P` or `Escape` to access the pause menu and adjust settings
+- Infinite levels with increasing procedural difficulty
+- Checkpoints every 5 levels
+- Death recovery at the last checkpoint reached
+- High score tracking saved to localStorage as `core_best_v20`
+- Pause enabled with full settings access
 
 ### Tutorial Level
 Guided introduction to game mechanics:
-- **Extended single level**: teaches all game mechanics through progressive difficulty
-- **Hint system**: contextual text hints appear as player progresses (movement → running → jumping → moving platforms → hazards → advanced features)
-- **Post-completion tour**: after reaching the goal, an automated sequence shows audio and theme customization options
-- **Linear progression**: single path from start to goal; no checkpoints
-- **Replayable**: select "Tutorial Level" from mode menu to play again anytime
+- Extended single level that teaches mechanics progressively
+- Hint system that walks through movement, jumping, platforms, hazards, and advanced features
+- Post-completion tour that shows settings and customization pages
+- Linear progression with no checkpoints
+- Replayable any time from the mode menu
 
-### Speed Running Mode (v0.6+)
-Competitive speedrunning challenge introduced in version 0.6:
-- **Time attack objective**: race from level 1 to level 100 as fast as possible
-- **Millisecond precision timer**: on-screen stopwatch in top-right displays `MM:SS.mmm` format (e.g., `01:23.456`)
-- **Ironman ruleset**: any death instantly ends the run (no respawn, no checkpoints, no recovery)
-- **Game over screen**: when dying, shows final level reached and total elapsed time with restart and menu buttons
-- **No pause functionality**: pause menu is disabled; cannot pause the timer
-- **Goal**: reach level 100 in shortest time for personal bests and competitive rankings
+### Speed Running Mode
+Competitive time-attack mode to reach level 100 as fast as possible:
+- Millisecond precision timer in `MM:SS.mmm` format
+- Any death ends the run immediately
+- Game over screen shows final level and elapsed time
+- Pause is disabled during the run
+- Best time tracking uses `core_speedrun_best_time_v1`
 
-## Code structure
+## UI and Menus
+- Main menu includes the version subtitle, changelog button, and version picker entry point.
+- Pause menu includes a direct main menu button, achievements, cheats, settings, audio, theme, and mobile support pages.
+- Theme and audio menus are shared across the main build and the legacy builds.
+- The changelog panel lives in the main menu and lists the current release notes.
+
+## Code Structure
 ### Initialization and globals
-- `window.onload`: wraps all setup; reads localStorage best score; sets up canvas and theme presets.
+- `window.onload`: wraps all setup; reads localStorage best score; sets up canvas, themes, and menus.
 - Audio state: `audioCtx`, `masterVol`, `musicVol`, `sfxVol`, `musicMuted`, `sfxMuted`.
 - Game state: `running`, `isPaused`, `currentLevel`, `lastCheckpoint`, `deathCount`, `shake`, `flashAlpha`, `winParticles`.
-- Speed Running mode state: `speedRunMode` (flag), `speedRunStartTime` (timestamp in ms), `speedRunGameOverMode` (flag for game over screen).
+- Speed Running mode state: `speedRunMode`, `speedRunStartTime`, `speedRunGameOverMode`.
 
 ### Visual themes
-- `themes` object with color palettes and optional features (`stars`, `glitch`, `glow`, `aurora`, `music` file names).
-- Theme-specific background decor in `drawScene()` (stars, cyber buildings, magma volcanoes, etc.).
+- `themes` object with color palettes and optional features such as `stars`, `glitch`, `glow`, `aurora`, and `music`.
+- Theme-specific background decor in `drawScene()` for stars, cyber city details, magma effects, and more.
 
 ### Level generation
 - `generateLevel()`: creates base ground, platforms, hazards, seekers, wells, shield item, and goal position.
 
 ### Player physics
-- `player` object: position, velocity, momentum, ground state, jump buffer, coyote time, special effect state.
-- `update()`: core frame logic includes input, momentum, gravity, wells, collisions, crash/death logic, goal detection.
+- `player` object: position, velocity, momentum, ground state, jump buffer, coyote time, and special effect state.
+- `update()`: core frame logic including input, momentum, gravity, collisions, hazards, and goal detection.
 
 ### Audio and SFX
 - `sfx(f, type, duration, volume, slide)`: Web Audio oscillator-based sound effects.
@@ -78,163 +90,34 @@ Competitive speedrunning challenge introduced in version 0.6:
 - `bgMusic` `<audio>` element controlled by settings and theme selection.
 
 ### Rendering
-- `drawScene()`: draws environment, hazards, platforms, player, effects, and goal.
-- `drawPlayer()`: renders player shape depending on theme and effect state.
-- `draw()`: top-level render wrapper; when `isRetro8bit` is true on classic theme, draws to low-res offscreen canvas.
-
-### Menus and UI
-- Multiple overlay submenu pages: `startMenu`, `pauseMenu`, `modeMenu`, `settingsPage`, `audioPage`, `themePage`, `cheatsPage`.
-- Speed Running overlay: `speedRunGameOver` (game over screen for speed run mode).
-- Audio sliders and mute toggles update `masterVol`, `musicVol`, `sfxVol`, with live volume adjustment.
-- Theme select updates background and audio track.
-- `submenuBack()` for `Esc/P` behavior.
-- Speed running timer: `speedRunTimer` (MM:SS.mmm display in top-right).
-
-### Speed Running Mode Functions (v0.6+)
-- `startSpeedRunMode()`: initializes a new speed run attempt; records start time, resets all state, hides pause button.
-- `formatSpeedRunTime(ms)`: converts milliseconds to `MM:SS.mmm` format for timer display and game over screen.
-- `showSpeedRunGameOver()`: displays game over overlay with final level and elapsed time; disables further input.
-- Speed run integration: `die()` calls `showSpeedRunGameOver()` instead of respawning; `win()` checks for level 100 completion; `toggle()` prevents pause during speed run.
-
-## Added doc mode
-- This README is the separate detailed doc for code structure and behavior.
-- Inline comments in `index.html` are concise and oriented to support reading, while this README provides high-level narrative.
-
-## Build / Run
-Open `index.html` in any modern desktop browser (Chrome/Firefox/Edge). Local server recommended if audio files are served from relative paths.
-
-## Post-Change Test Checklist
-Use this checklist after any code change before merging.
-
-### 1) Boot and Main Menus
-- [ ] Game loads with no console errors.
-- [ ] Start screen appears and responds to input.
-- [ ] Codes button on start screen opens prompt.
-- [ ] Entering code `test` flashes message `test done`.
-- [ ] Start button opens mode selection.
-- [ ] Mode Back returns to start screen.
-
-### 2) Run Mode Core Gameplay
-- [ ] Run Mode starts and player spawns correctly.
-- [ ] Left/right movement works (`A/D` and arrows).
-- [ ] Jump works (`W/Up/Space`) including coyote/buffer behavior.
-- [ ] Shift run increases movement speed.
-- [ ] Hazards kill player and increment death counter.
-- [ ] Respawn returns to last checkpoint in Run Mode.
-- [ ] Level completion increments level and updates UI.
-
-### 3) Pause and Top Shortcut Buttons
-- [ ] Top controls are visible in normal gameplay.
-- [ ] Pause button pauses/resumes (`P` and `Esc` also work).
-- [ ] Achievements shortcut opens achievements page.
-- [ ] Mobile shortcut opens mobile support page.
-- [ ] Theme shortcut opens theme page.
-- [ ] Cheats shortcut opens cheats page.
-- [ ] Resume returns to gameplay cleanly.
-
-### 4) Settings Pages
-- [ ] Settings page opens from pause menu.
-- [ ] Audio Settings page opens and back navigation works.
-- [ ] Theme Settings page opens and back button is fully visible (no clipping).
-- [ ] Mobile Support page opens and back navigation works.
-- [ ] Tutorial Notes page opens and back navigation works.
-
-### 5) Theme System
-- [ ] Theme buttons switch visual theme immediately.
-- [ ] Active theme button highlight updates correctly.
-- [ ] Theme list can scroll when needed without clipping other controls.
-- [ ] Theme music changes (if audio file exists for that theme).
-- [ ] 8-bit toggle updates label and visual behavior as expected.
-
-### 6) Audio Controls
-- [ ] Master slider updates displayed value and effective volume.
-- [ ] Music slider updates displayed value and music volume.
-- [ ] SFX slider updates displayed value and SFX volume.
-- [ ] Music mute toggles ON/OFF and updates button text.
-- [ ] SFX mute toggles ON/OFF and updates button text.
-
-### 7) Cheats and Reset Flows
-- [ ] Invincibility toggle works and updates label.
-- [ ] Warp to valid level works.
-- [ ] Reset button opens reset confirmation.
-- [ ] Checkpoint restart works and closes prompts.
-- [ ] Full restart confirmation flow works (Yes/No paths).
-- [ ] Shift+R opens full restart confirmation while playing.
-- [ ] R performs quick checkpoint restart while playing.
-
-### 8) Achievements and Save Data
-- [ ] Achievements page renders without errors.
-- [ ] Unlock conditions still trigger (spot-check at least one achievement).
-- [ ] High score updates when cheats are not used.
-- [ ] Cheat usage behavior for score state is still correct.
-- [ ] Reloading page preserves expected localStorage values.
-
-### 9) Mobile Support
-- [ ] Mobile Support toggle shows/hides on-screen controls.
-- [ ] On-screen controls move player/jump/run/dash correctly.
-- [ ] Customize Buttons flow opens, allows repositioning, and saves.
-- [ ] Screen Size slider changes scale and updates value text.
-
-### 10) Tutorial Mode
-- [ ] Tutorial mode starts from mode menu.
-- [ ] Tutorial hints appear in expected progression.
-- [ ] End-of-tutorial flow completes and returns correctly.
-- [ ] Post-tutorial settings tour does not soft-lock navigation.
-
-### 11) Speed Running Mode
-- [ ] Speed Running mode starts with timer at `00:00.000`.
-- [ ] Pause is disabled in Speed Running mode.
-- [ ] Dying shows speed run game over overlay.
-- [ ] Restart from speed run game over starts fresh run.
-- [ ] Back to menu from speed run game over works.
-- [ ] Timer formatting remains `MM:SS.mmm`.
-
-### 12) Regression Smoke on Refactor
-- [ ] Asset paths resolve after file moves (CSS/JS/theme/audio/icons).
-- [ ] No 404s for `css/styles.css`, `js/game.js`, `js/data/theme-data.js`, `js/data/achievements-data.js`.
-- [ ] No initialization race issues (data files load before game logic).
-
-### 13) Final Browser Pass
-- [ ] Chrome/Edge quick pass.
-- [ ] Firefox quick pass.
-- [ ] Window resize / small-height layout pass (menus remain usable).
+- `drawScene()`: draws the environment, hazards, platforms, player, effects, and goal.
+- `drawPlayer()`: renders the player shape depending on theme and effect state.
+- `draw()`: top-level render wrapper; when `isRetro8bit` is true on the classic theme, draws to a low-res offscreen canvas.
 
 ## Notes
-- Current version is 0.6 with Speed Running Mode feature added.
+- Current version is 0.7.
+- Legacy builds are interchangeable through the version picker.
 - High score is saved as `core_best_v20` in localStorage.
-- Add your own audio files in the expected names (`Smile.ogg`, `Dark.ogg`, `Funny.ogg`, `Neon.ogg`, `Boom.ogg`, `Starry.ogg`) to enable theme music.
+- Speed run best time uses `core_speedrun_best_time_v1`.
+- Add your own audio files in the expected names under `theme_bg/` to enable theme music.
 
 ## Developer Quick Start
 ### Adjust level difficulty
-- In `index.html`, modify `generateLevel()` settings:
-  - lower/raise hazard chance by updating condition `Math.random() < ...`.
-  - adjust `platform` gap and `w` for easier/harder traversal.
-  - modify `currentLevel` scaling (like `4 + currentLevel`) to change progression.
+- In `index.html`, modify `generateLevel()` settings.
+- Lower or raise hazard chance by updating conditions such as `Math.random() < ...`.
+- Adjust platform gap and width for easier or harder traversal.
 
 ### Add a new theme
-- In `index.html` `themes` object, add entry e.g. `newtheme: { bg: "#112", plat: "#88f", player: "#fff", hazards: "#f00", music: "New.ogg" }`.
-- Add `<option value="newtheme">New Theme</option>` in theme select.
+- In the `themes` object, add an entry such as `newtheme: { bg: "#112", plat: "#88f", player: "#fff", hazards: "#f00", music: "../theme_bg/New.ogg" }`.
+- Add the matching theme option in the theme selector.
 - Add render cases in `drawScene()` and `drawPlayer()` for visuals.
 
-### Customize 8-bit filter target theme
-- 8-bit mode currently activates when `isRetro8bit` is true and `currentTheme === "classic"`.
-- In `index.html`, search for:
-
-```js
-const isRetro = isRetro8bit && currentTheme === "classic";
-```
-
-- Replace with, for example, to allow all themes:
-
-```js
-const isRetro = isRetro8bit;
-```
-
-- Adjust `retroCanvas.width` / `retroCanvas.height` values (160x80) for different pixelation levels.
-
 ### Testing Speed Running Mode
-- Click "Start" on title screen
-- Select "Speed Running" mode from mode menu
-- Timer starts automatically (MM:SS.mmm format)
-- Reach level 100 to win, or die for Game Over
-- Click "Restart" to try again or "Back to Menu" to return to mode selection
+- Click Start on the title screen.
+- Select Speed Running mode from the mode menu.
+- Timer starts automatically in `MM:SS.mmm` format.
+- Reach level 100 to win, or die for game over.
+- Use Restart or Back to Menu from the speedrun game over screen.
+
+## Checklist
+The post-change test checklist has been moved to [CHECKLIST.md](CHECKLIST.md).
