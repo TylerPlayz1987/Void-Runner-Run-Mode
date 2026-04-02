@@ -88,7 +88,9 @@
         canvas.width = 800;
         canvas.height = 400;
         let bestLevel = localStorage.getItem("core_best_v20") || 1;
+        let speedRunBestTime = parseFloat(localStorage.getItem("core_speedrun_best_time_v1") || "0");
         document.getElementById("best").textContent = bestLevel;
+        updateSpeedRunBestTimeUi();
         
         // Achievements are defined in js/data/achievements-data.js.
         const achievements = JSON.parse(
@@ -3762,6 +3764,7 @@
           document.getElementById("modeMenu").style.display = "none";
           document.getElementById("speedRunMenu").style.display = "flex";
           updateSpeedRunThemeUi();
+          updateSpeedRunBestTimeUi();
         }
 
         function hideSpeedRunMenu() {
@@ -3954,6 +3957,14 @@
           return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.${String(milliseconds).padStart(3, "0")}`;
         }
 
+        function updateSpeedRunBestTimeUi() {
+          const display = speedRunBestTime > 0 ? formatSpeedRunTime(speedRunBestTime) : "--:--.---";
+          const menuLabel = document.getElementById("speedRunBestTimeLabel");
+          const gameOverLabel = document.getElementById("speedRunGameOverBestTime");
+          if (menuLabel) menuLabel.textContent = display;
+          if (gameOverLabel) gameOverLabel.textContent = display;
+        }
+
         // Speed Running Mode: Display game over screen showing level reached and elapsed time
         // Called when player dies (any death = instant game over, no respawn or checkpoint)
         // Shows final level and formatted time, offers restart or return to menu
@@ -3965,8 +3976,13 @@
           isPaused = true;
           // Calculate final time for display
           const elapsedTime = Date.now() - speedRunStartTime;
+          if (elapsedTime > 0 && (speedRunBestTime === 0 || elapsedTime < speedRunBestTime)) {
+            speedRunBestTime = elapsedTime;
+            localStorage.setItem("core_speedrun_best_time_v1", String(speedRunBestTime));
+          }
           document.getElementById("speedRunGameOverLevel").textContent = currentLevel;
           document.getElementById("speedRunGameOverTime").textContent = formatSpeedRunTime(elapsedTime);
+          updateSpeedRunBestTimeUi();
           // Show game over overlay and hide pause button  
           document.getElementById("speedRunGameOver").style.display = "flex";
           setTopControlsVisible(false);
