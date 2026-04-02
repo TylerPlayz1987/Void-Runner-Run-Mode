@@ -3495,10 +3495,27 @@
             goalGlitch,
             (goal.x + goal.y + goal.w) * 0.01,
           );
+          const goalTheme =
+            currentTheme === "aprilfools"
+              ? [
+                  "classic",
+                  "sunny",
+                  "moony",
+                  "toybox",
+                  "deepsea",
+                  "magma",
+                  "cyber",
+                  "glitchworld",
+                  "easter",
+                  "stardust",
+                  "pirate",
+                  "jungle",
+                ][Math.floor(frameCount / 8) % 12]
+              : currentTheme;
           ctx.save();
           ctx.translate(goalOffset.x, goalOffset.y);
           ctx.save();
-          if (currentTheme === "sunny") {
+          if (goalTheme === "sunny") {
             ctx.fillStyle = "#ffeb3b";
             ctx.shadowBlur = 12;
             ctx.shadowColor = "#fff05a";
@@ -3506,7 +3523,7 @@
             ctx.strokeStyle = "#f2c200";
             ctx.lineWidth = 3;
             ctx.strokeRect(gx, gy, gw, gh);
-          } else if (currentTheme === "moony") {
+          } else if (goalTheme === "moony") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
             ctx.shadowBlur = 15;
@@ -3517,14 +3534,14 @@
             ctx.lineWidth = 3;
             ctx.strokeRect(-gw / 2, -gh / 2, gw, gh);
             ctx.restore();
-          } else if (currentTheme === "toybox") {
+          } else if (goalTheme === "toybox") {
             ctx.fillStyle = "#f44336";
             ctx.fillRect(gx, gy, gw, gh);
             ctx.fillStyle = "#fff";
             ctx.fillRect(gx + 4, gy + 4, gw - 8, gh - 8);
             ctx.fillStyle = "#2196f3";
             ctx.fillRect(gx + 8, gy + 8, gw - 16, gh - 16);
-          } else if (currentTheme === "deepsea") {
+          } else if (goalTheme === "deepsea") {
             ctx.fillStyle = "#6b4c2d";
             ctx.fillRect(gx, gy + gh * 0.6, gw, gh * 0.4);
             ctx.fillStyle = "#a77b5f";
@@ -3535,7 +3552,7 @@
             ctx.globalAlpha = 0.6;
             ctx.fillRect(gx, gy, gw, gh);
             ctx.globalAlpha = 1;
-          } else if (currentTheme === "magma") {
+          } else if (goalTheme === "magma") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
             const flame = 0.8 + Math.sin(frameCount / 10) * 0.2;
@@ -3547,7 +3564,7 @@
             ctx.closePath();
             ctx.fill();
             ctx.restore();
-          } else if (currentTheme === "cyber") {
+          } else if (goalTheme === "cyber") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
             ctx.rotate(frameCount * 0.07);
@@ -3563,7 +3580,7 @@
             ctx.fill();
             ctx.stroke();
             ctx.restore();
-          } else if (currentTheme === "glitchworld") {
+          } else if (goalTheme === "glitchworld") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
             const pulse = 0.7 + Math.sin(frameCount * 0.18) * 0.2;
@@ -3582,7 +3599,7 @@
             ctx.fill();
             ctx.stroke();
             ctx.restore();
-          } else if (currentTheme === "easter") {
+          } else if (goalTheme === "easter") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
             const bob = Math.sin(frameCount * 0.08) * 2;
@@ -3599,7 +3616,7 @@
             ctx.fillStyle = "#ffd27f";
             ctx.fillRect(2, 1, 4, 4);
             ctx.restore();
-          } else if (currentTheme === "stardust") {
+          } else if (goalTheme === "stardust") {
             let pulse = 0.7 + 0.3 * Math.sin(frameCount / 15);
             let rad = (gw / 2) * (1 + pulse * 0.15);
             let g = ctx.createRadialGradient(
@@ -3621,7 +3638,7 @@
             ctx.beginPath();
             ctx.arc(gx + gw / 2, gy + gh / 2, gw * 0.25, 0, Math.PI * 2);
             ctx.fill();
-          } else if (currentTheme === "pirate") {
+          } else if (goalTheme === "pirate") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
 
@@ -3670,7 +3687,7 @@
             ctx.ellipse(0, -gh * 0.1, gw * 0.45, gh * 0.2, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
-          } else if (currentTheme === "jungle") {
+          } else if (goalTheme === "jungle") {
             // Leaf-trophy style goal block for jungle.
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
@@ -3686,7 +3703,7 @@
             ctx.closePath();
             ctx.fill();
             ctx.restore();
-          } else if (currentTheme === "zelda") {
+          } else if (goalTheme === "zelda") {
             // Triforce objective marker.
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
@@ -4318,6 +4335,9 @@
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
         const codeEntryCancelBtn = document.getElementById("codeEntryCancelBtn");
+        const aprilFoolsWarningModal = document.getElementById("aprilFoolsWarningModal");
+        const aprilFoolsConfirmBtn = document.getElementById("aprilFoolsConfirmBtn");
+        const aprilFoolsBackBtn = document.getElementById("aprilFoolsBackBtn");
 
         function updateSecretThemeButtonUi() {
           const themeButtonsContainer = document.getElementById("themeButtons");
@@ -4340,6 +4360,14 @@
         function closeCodeEntryModal() {
           codeEntryModal.style.display = "none";
           codeEntryInput.value = "";
+        }
+
+        function openAprilFoolsWarningModal() {
+          aprilFoolsWarningModal.style.display = "flex";
+        }
+
+        function closeAprilFoolsWarningModal() {
+          aprilFoolsWarningModal.style.display = "none";
         }
 
         function submitCodeEntry() {
@@ -5044,11 +5072,27 @@
           }
         }
 
+        function trySetTheme(themeName) {
+          if (themeName === "aprilfools") {
+            openAprilFoolsWarningModal();
+            return;
+          }
+          setTheme(themeName);
+        }
+
         document.querySelectorAll(".theme-btn").forEach((btn) => {
           btn.onclick = () => {
-            setTheme(btn.dataset.theme);
+            trySetTheme(btn.dataset.theme);
           };
         });
+        aprilFoolsConfirmBtn.onclick = () => {
+          closeAprilFoolsWarningModal();
+          setTheme("aprilfools");
+        };
+        aprilFoolsBackBtn.onclick = () => {
+          closeAprilFoolsWarningModal();
+          setTheme("classic");
+        };
         updateSecretThemeButtonUi();
         document.getElementById("retroToggleBtn").onclick = () => {
           isRetro8bit = !isRetro8bit;
@@ -5466,6 +5510,13 @@
             if (codeEntryModal.style.display === "flex") {
               e.preventDefault();
               closeCodeEntryModal();
+              return;
+            }
+
+            if (aprilFoolsWarningModal.style.display === "flex") {
+              e.preventDefault();
+              closeAprilFoolsWarningModal();
+              setTheme("classic");
               return;
             }
 

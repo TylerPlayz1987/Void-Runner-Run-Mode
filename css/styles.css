@@ -643,6 +643,41 @@
         width: 100%;
       }
 
+      .warning-box {
+        width: 360px;
+        max-width: 92%;
+        background: #111;
+        border: 2px solid #ff86c5;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+        color: #ffd4ee;
+        box-shadow: 0 0 20px rgba(255, 134, 197, 0.35);
+      }
+
+      #aprilFoolsWarningTitle {
+        color: #ff9fd0;
+        margin-bottom: 6px;
+      }
+
+      .warning-box p {
+        margin: 0;
+        line-height: 1.45;
+        color: #ffe9f6;
+      }
+
+      .warning-actions {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .warning-actions button {
+        flex: 1;
+      }
+
       @keyframes codeFlashPulse {
         0%,
         100% {
