@@ -653,6 +653,10 @@
             text: "Double jump: you get one extra jump in the air, then it resets on landing.",
           },
           {
+            minX: 700,
+            text: "Press Q to dash: a quick burst of speed with cooldown.",
+          },
+          {
             minX: 860,
             text: "Moving platform ahead: keep your jump timing and ride it safely.",
           },
@@ -2322,6 +2326,75 @@
               y + player.h - 12,
               x + player.w + 2,
               y + player.h - 2,
+            );
+            ctx.stroke();
+          } else if (currentTheme === "catmodel") {
+            // Cat-style model based on the provided reference (purple vent cat).
+            const body = "#d8b8f3";
+            const earFill = "#f4d9ff";
+            const eyeColor = "#ffd24f";
+            const pupilColor = "#222";
+            const noseColor = "#ec99c1";
+            const stripeColor = "#a873b5";
+
+            // Main body
+            ctx.fillStyle = body;
+            ctx.fillRect(x, y, player.w, player.h);
+
+            // Ears
+            ctx.fillStyle = earFill;
+            ctx.beginPath();
+            ctx.moveTo(x + 3, y);
+            ctx.lineTo(x + 8, y - 12);
+            ctx.lineTo(x + 13, y);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(x + 11, y);
+            ctx.lineTo(x + 16, y - 12);
+            ctx.lineTo(x + 21, y);
+            ctx.fill();
+
+            ctx.fillStyle = stripeColor;
+            ctx.fillRect(x + 5, y + 4, 2, 5);
+            ctx.fillRect(x + 13, y + 4, 2, 5);
+            ctx.fillRect(x + 9, y + 2, 2, 4);
+
+            // Eyes
+            ctx.fillStyle = "#ffffff";
+            ctx.fillRect(x + 6, y + 7, 4, 6);
+            ctx.fillRect(x + 12, y + 7, 4, 6);
+
+            ctx.fillStyle = eyeColor;
+            ctx.fillRect(x + 7, y + 9, 2, 3);
+            ctx.fillRect(x + 13, y + 9, 2, 3);
+
+            ctx.fillStyle = pupilColor;
+            ctx.fillRect(x + 7, y + 10, 2, 1);
+            ctx.fillRect(x + 13, y + 10, 2, 1);
+
+            // Nose + mouth
+            ctx.fillStyle = noseColor;
+            ctx.fillRect(x + 10, y + 13, 4, 2);
+            ctx.strokeStyle = "#aa4592";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x + 11, y + 15);
+            ctx.lineTo(x + 9, y + 17);
+            ctx.moveTo(x + 13, y + 15);
+            ctx.lineTo(x + 15, y + 17);
+            ctx.stroke();
+
+            // Tail
+            ctx.strokeStyle = stripeColor;
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(x + player.w, y + player.h - 6);
+            ctx.quadraticCurveTo(
+              x + player.w + 10,
+              y + player.h - 10,
+              x + player.w + 6,
+              y + player.h - 16,
             );
             ctx.stroke();
           } else if (currentTheme === "zelda") {
