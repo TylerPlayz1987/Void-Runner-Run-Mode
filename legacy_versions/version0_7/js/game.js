@@ -1,3 +1,4 @@
+/* LEGACY VERSION NOTICE: Archived build for compatibility/version switching. Known bugs may exist; do not modify gameplay behavior unless required for loading or version navigation. */
       // Entry point: run once DOM is ready
       window.onload = function () {
         // ---------------------------------------------------------------------

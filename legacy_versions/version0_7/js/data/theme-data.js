@@ -1,3 +1,4 @@
+/* LEGACY VERSION NOTICE: Archived build for compatibility/version switching. Known bugs may exist; do not modify gameplay behavior unless required for loading or version navigation. */
 // Shared theme configuration and FX tables extracted from game.js
 window.VR_THEME_DATA = (() => {
 const themes = {

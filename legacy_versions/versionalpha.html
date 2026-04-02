@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- LEGACY VERSION NOTICE: Archived build for compatibility/version switching. Known bugs may exist; do not modify gameplay behavior unless required for loading or version navigation. -->
 <html>
 <head>
     <title>Golden Bear: Bottomless Quest</title>
@@ -48,6 +49,24 @@ function resetPlayer() {
     player.jumpsUsed = 0;
 }
 
+function restartFromBeginning() {
+    isGameOver = false;
+    currentLevel = 1;
+    document.getElementById('level-display').innerText = 'Level 1';
+    msgOverlay.style.display = 'none';
+    msgOverlay.innerHTML = '';
+    resetPlayer();
+    draw();
+}
+
+function showCompletedScreen() {
+    isGameOver = true;
+    msgOverlay.style.display = 'block';
+    msgOverlay.style.borderColor = '#00ff88';
+    msgOverlay.innerHTML = `<h1>Quest Complete!</h1><p>You cleared all 8 levels.</p>
+        <button onclick="restartFromBeginning()">RESTART FROM BEGINNING</button>`;
+}
+
 window.addEventListener('keydown', e => { if (!isGameOver) keys[e.code] = true; if (e.code === 'Space' && player.jumpsUsed < player.maxJumps) { player.vy = player.jump; player.jumpsUsed++; } });
 window.addEventListener('keyup', e => keys[e.code] = false);
 
@@ -71,13 +90,14 @@ function update() {
 
     if (player.x > canvas.width) {
         if (currentLevel < 8) { currentLevel++; document.getElementById('level-display').innerText = `Level ${currentLevel}`; resetPlayer(); }
-        else { alert("THE BEAR HAS CONQUERED!"); location.reload(); }
+        else { showCompletedScreen(); }
     }
 
     if (player.y > canvas.height) {
         if (currentLevel === 8) {
             isGameOver = true;
             msgOverlay.style.display = "block";
+            msgOverlay.style.borderColor = '#ff4444';
             msgOverlay.innerHTML = `<h1>Died at the peak 8</h1><p>The code is the friends we made along the way</p>
                 <a href="https://sites.google.com">GO TO HOME SITE</a>
                 <button onclick="location.reload()">TRY AGAIN</button>`;

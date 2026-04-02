@@ -1,3 +1,4 @@
+/* LEGACY VERSION NOTICE: Archived build for compatibility/version switching. Known bugs may exist; do not modify gameplay behavior unless required for loading or version navigation. */
 // Configure this list to add older playable versions.
 // Example old build path: "legacy_versions/version0_1.html"
 window.VR_VERSION_DATA = {
