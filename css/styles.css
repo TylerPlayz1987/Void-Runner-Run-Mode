@@ -678,6 +678,10 @@
         flex: 1;
       }
 
+      #aprilFoolsWarningModal {
+        z-index: 320;
+      }
+
       @keyframes codeFlashPulse {
         0%,
         100% {
