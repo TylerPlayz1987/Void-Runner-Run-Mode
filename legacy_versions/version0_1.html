@@ -247,5 +247,7 @@ document.getElementById('resumeBtn').addEventListener('click', togglePause);
 document.getElementById('restartBtn').addEventListener('click', () => { handleDeath(); togglePause(); });
 document.getElementById('warpBtn').addEventListener('click', () => { let target = parseInt(document.getElementById('warpInput').value); if (!isNaN(target) && target > 0) { currentLevel = target; lastCheckpoint = target; lvlTag.textContent = currentLevel; player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; player.trail = []; generateLevel(); togglePause(); } });
 </script>
+<script src="../js/data/version-data.js"></script>
+<script src="../js/version-picker-legacy.js"></script>
 </body>
 </html>

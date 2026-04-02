@@ -218,7 +218,7 @@
         border: 1px solid #777;
         background: rgba(0, 0, 0, 0.75);
         color: #fff;
-        z-index: 160;
+        z-index: 320;
         cursor: pointer;
       }
 
@@ -238,7 +238,7 @@
         box-shadow: 0 0 14px rgba(0, 170, 170, 0.35);
         color: #0f0;
         padding: 8px;
-        z-index: 165;
+        z-index: 325;
         display: none;
         flex-direction: column;
         gap: 8px;
