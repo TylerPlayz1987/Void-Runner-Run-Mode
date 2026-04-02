@@ -3683,31 +3683,6 @@
             ctx.shadowColor = t.hazards;
           }
           const lavaFx = getLavaFx(currentTheme);
-          function drawCottonCandyHazard(x, y, w, h) {
-            const grad = ctx.createLinearGradient(x, y, x + w, y + h);
-            grad.addColorStop(0, "#ffb6fc");
-            grad.addColorStop(0.4, "#ff69b4");
-            grad.addColorStop(0.6, "#ffd9ff");
-            grad.addColorStop(1, "#b2e9ff");
-            ctx.fillStyle = grad;
-            ctx.fillRect(x, y, w, h);
-            ctx.strokeStyle = "rgba(255,255,255,0.9)";
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x, y, w, h);
-            for (let i = 0; i < 3; i++) {
-              const cx = x + (i * 0.25 + 0.1) * w;
-              const cy = y + 0.3 * h + Math.sin(frameCount * 0.03 + i) * 4;
-              const r = Math.min(w, h) * (0.18 + i * 0.03);
-              ctx.fillStyle = "rgba(255,255,255,0.6)";
-              ctx.beginPath();
-              ctx.arc(cx, cy, r, 0, Math.PI * 2);
-              ctx.fill();
-              ctx.fillStyle = "rgba(255,255,255,0.4)";
-              ctx.beginPath();
-              ctx.arc(cx + r * 0.2, cy - r * 0.15, r * 0.5, 0, Math.PI * 2);
-              ctx.fill();
-            }
-          }
           hazards.forEach((h) => {
             const hazardGlitch = getWallGlitchAmount(h.x, h.w);
             const hazardOffset = getObjectGlitchOffset(
@@ -3727,9 +3702,6 @@
                   h.y + h.h / 2,
                   Math.max(20, h.h),
                 );
-              } else if (currentTheme === "aprilfools") {
-                drawCottonCandyHazard(h.x - camX, h.y, h.w, h.h);
-              } else {
                 waterGlow.addColorStop(0, "rgba(100, 200, 255, 0.8)");
                 waterGlow.addColorStop(0.45, "rgba(150, 220, 255, 0.6)");
                 waterGlow.addColorStop(1, "rgba(200, 240, 255, 0.3)");
@@ -3786,13 +3758,64 @@
                 ctx.lineWidth = 2;
                 ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
               }
-            } else {
-              if (currentTheme === "aprilfools") {
-                drawCottonCandyHazard(h.x - camX, h.y, h.w, h.h);
-              } else {
-                ctx.fillStyle = t.hazards;
+                waterGlow.addColorStop(0.45, "rgba(150, 220, 255, 0.6)");
+                waterGlow.addColorStop(1, "rgba(200, 240, 255, 0.3)");
+                ctx.fillStyle = waterGlow;
+                ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
+                
+                // Water base
+                ctx.fillStyle = "rgba(50, 150, 255, 0.8)";
                 ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+                
+                // Water surface waves
+                ctx.strokeStyle = "rgba(100, 200, 255, 0.9)";
+                ctx.lineWidth = 2;
+                const waveOffset = frameCount * 0.05;
+                for (let i = 0; i < 3; i++) {
+                  const y = h.y + i * 4 + Math.sin((h.x - camX) * 0.1 + waveOffset + i) * 2;
+                  ctx.beginPath();
+                  ctx.moveTo(h.x - camX, y);
+                  ctx.lineTo(h.x - camX + h.w, y);
+                  ctx.stroke();
+                }
+                
+                // Water droplets/reflection effect - use deterministic positions to avoid frame flicker
+                ctx.fillStyle = "rgba(150, 220, 255, 0.4)";
+                const dropBaseSeed = h.x * 374761 + h.y * 668265263;
+                for (let i = 0; i < 5; i++) {
+                  const rx = Math.abs(Math.sin(dropBaseSeed + i * 12.9898)) % 1;
+                  const ry = Math.abs(Math.sin(dropBaseSeed + i * 78.233)) % 1;
+                  const rr = Math.abs(Math.sin(dropBaseSeed + i * 37.719)) % 1;
+                  const dropletX = h.x - camX + rx * h.w;
+                  const dropletY = h.y + ry * h.h;
+                  const radius = 1 + rr * 2;
+                  ctx.beginPath();
+                  ctx.arc(dropletX, dropletY, radius, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              } else {
+                let glow = ctx.createRadialGradient(
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  0,
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  Math.max(20, h.h),
+                );
+                glow.addColorStop(0, lavaFx.glowInner);
+                glow.addColorStop(0.45, lavaFx.glowMid);
+                glow.addColorStop(1, lavaFx.glowOuter);
+                ctx.fillStyle = glow;
+                ctx.fillRect(h.x - camX - 16, h.y - 16, h.w + 32, h.h + 32);
+                ctx.fillStyle = lavaFx.fill;
+                ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+                ctx.strokeStyle = lavaFx.stroke;
+                ctx.lineWidth = 2;
+                ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
               }
+            } else {
+              ctx.fillStyle = t.hazards;
+              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
             }
             drawWallGlitchOverlay(h.x - camX, h.y, h.w, h.h, hazardGlitch);
             ctx.restore();
