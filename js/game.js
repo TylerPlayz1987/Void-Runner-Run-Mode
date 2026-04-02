@@ -2545,53 +2545,88 @@
               ctx.fill();
             }
           } else if (currentTheme === "aprilfools") {
+            const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.055);
             let g = ctx.createLinearGradient(0, 0, 800, 400);
             g.addColorStop(0, "#fff1f8");
-            g.addColorStop(0.34, "#e6fbff");
-            g.addColorStop(0.68, "#f9ecff");
+            g.addColorStop(0.3, "#e6fbff");
+            g.addColorStop(0.6, "#f9ecff");
             g.addColorStop(1, "#fff6d8");
             ctx.fillStyle = g;
             ctx.fillRect(0, 0, 800, 400);
 
-            const ribbonColors = [
-              "rgba(255,165,220,0.2)",
-              "rgba(173,240,255,0.2)",
-              "rgba(255,243,164,0.2)",
-            ];
-            for (let i = 0; i < 10; i++) {
-              const y = 18 + i * 38 + Math.sin(frameCount * 0.03 + i * 0.8) * 12;
-              const h = 13 + (i % 3) * 4;
-              ctx.fillStyle = ribbonColors[i % ribbonColors.length];
+            // Fast moving pastel stripes with phase offsets for chaotic motion.
+            for (let i = 0; i < 17; i++) {
+              const y =
+                ((i * 31 + frameCount * (1.8 + (i % 4) * 0.4)) % 470) - 35 +
+                Math.sin(frameCount * 0.09 + i * 1.9) * 12;
+              const h = 10 + (i % 3) * 6;
+              ctx.fillStyle =
+                i % 3 === 0
+                  ? `rgba(255,167,226,${0.15 + pulse * 0.2})`
+                  : i % 3 === 1
+                    ? `rgba(174,241,255,${0.15 + (1 - pulse) * 0.2})`
+                    : `rgba(255,237,156,${0.16 + pulse * 0.17})`;
               ctx.fillRect(0, y, 800, h);
             }
 
-            for (let i = 0; i < 30; i++) {
-              const x = ((i * 109 + frameCount * (0.85 + (i % 5) * 0.16)) % 980) - 90;
-              const y = 20 + ((i * 47 + Math.sin(frameCount * 0.021 + i) * 35) % 340);
-              const size = 5 + (i % 4) * 3;
-              const rot = frameCount * (0.02 + (i % 3) * 0.009) + i;
+            // Rotating checker confetti chunks.
+            for (let i = 0; i < 46; i++) {
+              const speed = 0.9 + (i % 6) * 0.17;
+              const x = ((i * 83 + frameCount * speed) % 1000) - 100;
+              const y =
+                12 + ((i * 41 + frameCount * (0.38 + (i % 5) * 0.11)) % 368);
+              const size = 4 + (i % 5) * 3;
+              const rot = frameCount * (0.04 + (i % 4) * 0.015) + i * 0.7;
               ctx.save();
               ctx.translate(x, y);
               ctx.rotate(rot);
               ctx.fillStyle =
-                i % 3 === 0
-                  ? "rgba(255,150,210,0.55)"
-                  : i % 3 === 1
-                    ? "rgba(155,233,255,0.55)"
-                    : "rgba(255,236,140,0.55)";
+                i % 4 === 0
+                  ? "rgba(255,147,213,0.62)"
+                  : i % 4 === 1
+                    ? "rgba(149,233,255,0.62)"
+                    : i % 4 === 2
+                      ? "rgba(255,228,129,0.62)"
+                      : "rgba(207,184,255,0.62)";
               ctx.fillRect(-size * 0.5, -size * 0.5, size, size);
+              ctx.fillStyle = "rgba(255,255,255,0.35)";
+              ctx.fillRect(-size * 0.2, -size * 0.2, size * 0.4, size * 0.4);
               ctx.restore();
             }
 
-            for (let i = 0; i < 14; i++) {
-              const bx = ((i * 181 - camX * 0.17 + frameCount * (0.35 + (i % 2) * 0.1)) % 980) - 110;
-              const by = 46 + i * 22 + Math.sin(frameCount * 0.035 + i) * 10;
-              const r = 14 + (i % 4) * 7;
-              const tone = i % 2 === 0 ? "rgba(255,199,235,0.25)" : "rgba(190,241,255,0.25)";
-              ctx.fillStyle = tone;
+            // Sine-wave scanlines with horizontal drift.
+            for (let y = 0; y < 400; y += 6) {
+              const drift = Math.sin(frameCount * 0.12 + y * 0.08) * 18;
+              const alpha = 0.03 + (Math.sin(frameCount * 0.2 + y * 0.11) + 1) * 0.03;
+              ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+              ctx.fillRect(drift, y, 820, 2);
+            }
+
+            // Big drifting pastel blobs for extra visual chaos depth.
+            for (let i = 0; i < 20; i++) {
+              const bx = ((i * 157 - camX * 0.22 + frameCount * (0.7 + (i % 3) * 0.24)) % 1080) - 140;
+              const by =
+                24 + i * 17 + Math.sin(frameCount * (0.04 + (i % 4) * 0.008) + i) * 22;
+              const r = 12 + (i % 5) * 8;
+              ctx.fillStyle =
+                i % 2 === 0
+                  ? `rgba(255,196,232,${0.16 + pulse * 0.12})`
+                  : `rgba(188,242,255,${0.16 + (1 - pulse) * 0.12})`;
               ctx.beginPath();
               ctx.arc(bx, by, r, 0, Math.PI * 2);
               ctx.fill();
+            }
+
+            // Brief flicker bars to make the scene feel intentionally unstable.
+            for (let i = 0; i < 8; i++) {
+              const jitterY = (i * 53 + frameCount * 4.2) % 420;
+              const jitterW = 180 + (i % 3) * 120;
+              const jitterX = ((i * 149 + frameCount * (2.4 + i * 0.08)) % 980) - 120;
+              ctx.fillStyle =
+                i % 2 === 0
+                  ? "rgba(255,150,220,0.13)"
+                  : "rgba(150,240,255,0.13)";
+              ctx.fillRect(jitterX, jitterY, jitterW, 3);
             }
           } else if (currentTheme === "pirate") {
             // Sky gradient (day sky)
