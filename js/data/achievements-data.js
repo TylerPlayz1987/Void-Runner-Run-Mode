@@ -15,6 +15,13 @@ window.VR_ACHIEVEMENT_DATA = {
       unlocked: false,
       mode: "run",
     },
+    speedDemon: {
+      id: "speedDemon",
+      name: "Speed Demon",
+      description: "Finish 10 levels while holding run the entire time",
+      unlocked: false,
+      mode: "run",
+    },
     isThisThingOn: {
       id: "isThisThingOn",
       name: "Is This Thing On?",
@@ -33,6 +40,7 @@ window.VR_ACHIEVEMENT_DATA = {
   iconSources: {
     floorIsLava: "achievement_icons/1.png",
     spacebarCrusher: "achievement_icons/2.png",
+    speedDemon: "achievement_icons/6.png",
     isThisThingOn: "achievement_icons/3.png",
     staringIntoTheVoid: "achievement_icons/5.png",
   },
