@@ -2224,6 +2224,36 @@
             ctx.fillRect(x + 12, y + 11, 2, 2);
             ctx.fillStyle = "#9de4c9";
             ctx.fillRect(x + 15, y + 12, 2, 2);
+          } else if (currentTheme === "aprilfools") {
+            // Draw a smiley face player for April Fools theme
+            const centerX = x + player.w / 2;
+            const centerY = y + player.h / 2;
+            const radius = Math.min(player.w, player.h) * 0.45;
+
+            // Face background
+            ctx.fillStyle = "#ffff00";
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Eyes
+            const eyeRadius = radius * 0.15;
+            const eyeOffsetX = radius * 0.35;
+            const eyeOffsetY = radius * 0.25;
+            ctx.fillStyle = "#000000";
+            ctx.beginPath();
+            ctx.arc(centerX - eyeOffsetX, centerY - eyeOffsetY, eyeRadius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(centerX + eyeOffsetX, centerY - eyeOffsetY, eyeRadius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Smile mouth
+            ctx.strokeStyle = "#000000";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(centerX, centerY + radius * 0.15, radius * 0.45, 0, Math.PI);
+            ctx.stroke();
           } else if (currentTheme === "pirate") {
             // Draw pirate body
             ctx.fillStyle = c;
@@ -3578,35 +3608,6 @@
             ctx.shadowColor = t.hazards;
           }
           const lavaFx = getLavaFx(currentTheme);
-          function drawSmileyFace(x, y, w, h) {
-            const centerX = x + w / 2;
-            const centerY = y + h / 2;
-            const radius = Math.min(w, h) / 2 - 2;
-            
-            // Face circle
-            ctx.fillStyle = "#ffff00";
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Eyes
-            ctx.fillStyle = "#000000";
-            const eyeRadius = radius * 0.1;
-            const eyeOffset = radius * 0.3;
-            ctx.beginPath();
-            ctx.arc(centerX - eyeOffset, centerY - eyeOffset, eyeRadius, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(centerX + eyeOffset, centerY - eyeOffset, eyeRadius, 0, Math.PI * 2);
-            ctx.fill();
-            
-            // Mouth
-            ctx.strokeStyle = "#000000";
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(centerX, centerY + eyeOffset * 0.5, radius * 0.4, 0, Math.PI);
-            ctx.stroke();
-          }
           hazards.forEach((h) => {
             const hazardGlitch = getWallGlitchAmount(h.x, h.w);
             const hazardOffset = getObjectGlitchOffset(
@@ -3662,9 +3663,6 @@
                   ctx.arc(dropletX, dropletY, radius, 0, Math.PI * 2);
                   ctx.fill();
                 }
-              } else if (currentTheme === "aprilfools") {
-                // Draw smiley face for lava walls in april fools theme
-                drawSmileyFace(h.x - camX, h.y, h.w, h.h);
               } else {
                 let glow = ctx.createRadialGradient(
                   h.x - camX + h.w / 2,
@@ -3686,13 +3684,8 @@
                 ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
               }
             } else {
-              if (currentTheme === "aprilfools") {
-                // Draw smiley face for spikes in april fools theme
-                drawSmileyFace(h.x - camX, h.y, h.w, h.h);
-              } else {
-                ctx.fillStyle = t.hazards;
-                ctx.fillRect(h.x - camX, h.y, h.w, h.h);
-              }
+              ctx.fillStyle = t.hazards;
+              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
             }
             drawWallGlitchOverlay(h.x - camX, h.y, h.w, h.h, hazardGlitch);
             ctx.restore();
