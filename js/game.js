@@ -694,35 +694,10 @@
           for (let i = 0; i < tutorialGuide.length; i++) {
             if (player.x >= tutorialGuide[i].minX) {
               nextText = tutorialGuide[i].text;
-
-        const secretThemeUnlockKey = "void_secret_theme_zelda_unlocked";
-        const secretThemeCode = "zelda";
-        let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
-        let secretThemeButton = null;
-
-        function updateSecretThemeButtonUi() {
-          const themeButtonsContainer = document.getElementById("themeButtons");
-          if (!themeButtonsContainer) return;
-
-          if (!secretThemeButton) {
-            secretThemeButton = document.createElement("button");
-            secretThemeButton.type = "button";
-            secretThemeButton.className = "theme-btn";
-            secretThemeButton.dataset.theme = "zelda";
-            secretThemeButton.textContent = "Zelda";
-            secretThemeButton.onclick = () => {
-              setTheme("zelda");
-            };
-            themeButtonsContainer.appendChild(secretThemeButton);
-          }
-
-          secretThemeButton.style.display = secretThemeUnlocked ? "" : "none";
-        }
             } else {
               break;
             }
           }
-          updateSecretThemeButtonUi();
           if (nextText !== tutorialHintText) {
             tutorialHintText = nextText;
             tutorialHintEl.textContent = nextText;
@@ -4134,10 +4109,30 @@
         };
         const code1 = "test";
         const secretThemeCode = "zelda";
+        const secretThemeUnlockKey = "void_secret_theme_zelda_unlocked";
+        let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
         const codeEntryCancelBtn = document.getElementById("codeEntryCancelBtn");
+
+        function updateSecretThemeButtonUi() {
+          const themeButtonsContainer = document.getElementById("themeButtons");
+          if (!themeButtonsContainer) return;
+
+          let secretThemeBtn = themeButtonsContainer.querySelector('[data-theme="zelda"]');
+          if (!secretThemeBtn) {
+            secretThemeBtn = document.createElement("button");
+            secretThemeBtn.type = "button";
+            secretThemeBtn.className = "theme-btn";
+            secretThemeBtn.dataset.theme = "zelda";
+            secretThemeBtn.textContent = "Zelda";
+            secretThemeBtn.onclick = () => setTheme("zelda");
+            themeButtonsContainer.appendChild(secretThemeBtn);
+          }
+
+          secretThemeBtn.style.display = secretThemeUnlocked ? "" : "none";
+        }
 
         function closeCodeEntryModal() {
           codeEntryModal.style.display = "none";
@@ -4183,6 +4178,13 @@
         codeEntrySubmitBtn.onclick = submitCodeEntry;
         codeEntryCancelBtn.onclick = closeCodeEntryModal;
         codeEntryInput.addEventListener("keydown", (e) => {
+          if (e.code === "Enter") {
+            e.preventDefault();
+            submitCodeEntry();
+          } else if (e.code === "Escape") {
+            e.preventDefault();
+            closeCodeEntryModal();
+          }
         });
         document.getElementById("openChangelogBtn").onclick = () => {
           document.getElementById("startMenu").style.display = "none";
@@ -4826,6 +4828,7 @@
             setTheme(btn.dataset.theme);
           };
         });
+        updateSecretThemeButtonUi();
         document.getElementById("retroToggleBtn").onclick = () => {
           isRetro8bit = !isRetro8bit;
           document.getElementById("retroToggleBtn").textContent =
