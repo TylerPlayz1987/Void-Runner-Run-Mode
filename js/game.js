@@ -5202,7 +5202,6 @@
         }
 
         window.onkeydown = (e) => {
-          keys[e.code] = 1;
           const activeTag = document.activeElement
             ? document.activeElement.tagName
             : "";
@@ -5211,6 +5210,16 @@
             activeTag === "TEXTAREA" ||
             activeTag === "SELECT" ||
             (document.activeElement && document.activeElement.isContentEditable);
+
+          if (typingInField) {
+            if (e.code === "Escape" && codeEntryModal.style.display === "flex") {
+              e.preventDefault();
+              closeCodeEntryModal();
+            }
+            return;
+          }
+
+          keys[e.code] = 1;
 
           if (e.code === "KeyR" && !typingInField) {
             if (
