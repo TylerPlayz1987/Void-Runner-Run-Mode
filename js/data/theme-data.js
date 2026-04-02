@@ -117,6 +117,7 @@ const themes = {
     player: "#ffd54a",
     hazards: "#c94f3d",
     glow: true,
+    playerImage: "theme_bg/zelda_theme_player.png",
     bgImage: "theme_bg/zelda-background.png",
     music: "theme_bg/Zelda.ogg",
   },
