@@ -207,6 +207,91 @@
         z-index: 150;
       }
 
+      #versionPickerBtn {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        width: auto;
+        padding: 3px 7px;
+        font-size: 12px;
+        border-radius: 3px;
+        border: 1px solid #777;
+        background: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        z-index: 160;
+        cursor: pointer;
+      }
+
+      #versionPickerBtn:hover {
+        border-color: #0ff;
+        color: #0ff;
+      }
+
+      #versionPickerMenu {
+        position: absolute;
+        right: 8px;
+        bottom: 34px;
+        width: 240px;
+        max-width: calc(100% - 16px);
+        background: rgba(0, 0, 0, 0.95);
+        border: 1px solid #0aa;
+        box-shadow: 0 0 14px rgba(0, 170, 170, 0.35);
+        color: #0f0;
+        padding: 8px;
+        z-index: 165;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      #versionPickerHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      #versionPickerTitle {
+        font-size: 12px;
+        letter-spacing: 1px;
+      }
+
+      #versionPickerClose {
+        width: auto;
+        padding: 2px 8px;
+        min-width: 0;
+      }
+
+      #versionPickerList {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 170px;
+        overflow-y: auto;
+      }
+
+      .version-option-btn {
+        width: 100%;
+        text-align: left;
+        padding: 7px 8px;
+        font-size: 12px;
+        border-radius: 3px;
+        border: 1px solid #0f0;
+        color: #0f0;
+        background: #111;
+      }
+
+      .version-option-btn:hover {
+        background: #0f0;
+        color: #000;
+      }
+
+      .version-option-btn.current {
+        border-color: #777;
+        color: #aaa;
+        background: #191919;
+      }
+
       #tutorialHint {
         position: absolute;
         left: 50%;
@@ -679,6 +764,10 @@
         .notes-grid {
           grid-template-columns: 1fr;
           max-height: 270px;
+        }
+
+        #versionPickerMenu {
+          width: 215px;
         }
       }
 

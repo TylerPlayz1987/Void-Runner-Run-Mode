@@ -328,6 +328,14 @@
           </div>
         </div>
         <canvas id="canvas"></canvas>
+        <button id="versionPickerBtn" aria-haspopup="dialog" aria-expanded="false" title="Choose game version">v0.6.8</button>
+        <div id="versionPickerMenu" aria-label="Game versions" role="dialog">
+          <div id="versionPickerHeader">
+            <span id="versionPickerTitle">Choose Version</span>
+            <button id="versionPickerClose" class="small-btn" type="button">X</button>
+          </div>
+          <div id="versionPickerList"></div>
+        </div>
       </div>
     </div>
     <audio id="bgSunnyMusic" loop crossorigin="anonymous" preload="none"></audio>
@@ -339,6 +347,7 @@
     <audio id="bgMusic" loop crossorigin="anonymous"></audio>
     <script src="js/data/achievements-data.js"></script>
     <script src="js/data/theme-data.js"></script>
+    <script src="js/data/version-data.js"></script>
     <script src="js/game.js"></script>
   </body>
 </html>

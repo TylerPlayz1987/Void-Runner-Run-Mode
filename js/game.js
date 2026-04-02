@@ -80,6 +80,11 @@
           cpNotif = document.getElementById("cp-notif"),
           tutorialHintEl = document.getElementById("tutorialHint"),
           tourExplainEl = document.getElementById("tourExplain");
+        const versionPickerBtn = document.getElementById("versionPickerBtn");
+        const versionPickerMenu = document.getElementById("versionPickerMenu");
+        const versionPickerTitle = document.getElementById("versionPickerTitle");
+        const versionPickerCloseBtn = document.getElementById("versionPickerClose");
+        const versionPickerList = document.getElementById("versionPickerList");
         let ctx = mainCtx;
         const retroCanvas = document.createElement("canvas");
         retroCanvas.width = 160;
@@ -91,6 +96,83 @@
         let speedRunBestLevel = localStorage.getItem("core_speedrun_best_level_v1") || 1;
         let speedRunBestTime = parseFloat(localStorage.getItem("core_speedrun_best_time_v1") || "0");
         document.getElementById("best").textContent = bestLevel;
+
+        const fallbackVersionData = {
+          currentVersion: "v0.6.8",
+          versions: [{ label: "v0.6.8 (Current)", path: "./", current: true }],
+        };
+        const versionData = window.VR_VERSION_DATA || fallbackVersionData;
+        const currentGameVersion =
+          typeof versionData.currentVersion === "string" && versionData.currentVersion.trim()
+            ? versionData.currentVersion.trim()
+            : fallbackVersionData.currentVersion;
+        const versionOptions = Array.isArray(versionData.versions) && versionData.versions.length
+          ? versionData.versions
+          : fallbackVersionData.versions;
+
+        function closeVersionPicker() {
+          versionPickerMenu.style.display = "none";
+          versionPickerBtn.setAttribute("aria-expanded", "false");
+        }
+
+        function openVersionPicker() {
+          versionPickerMenu.style.display = "flex";
+          versionPickerBtn.setAttribute("aria-expanded", "true");
+        }
+
+        function buildVersionPicker() {
+          versionPickerBtn.textContent = currentGameVersion;
+          versionPickerTitle.textContent = `Choose Version (${currentGameVersion})`;
+          versionPickerList.innerHTML = "";
+
+          for (const option of versionOptions) {
+            if (!option || typeof option !== "object") continue;
+            const label = typeof option.label === "string" ? option.label.trim() : "";
+            const path = typeof option.path === "string" ? option.path.trim() : "";
+            if (!label || !path) continue;
+
+            const isCurrent = Boolean(option.current);
+            const optionBtn = document.createElement("button");
+            optionBtn.type = "button";
+            optionBtn.className = "version-option-btn";
+            if (isCurrent) optionBtn.classList.add("current");
+            optionBtn.textContent = isCurrent ? `${label} - Playing` : label;
+            optionBtn.onclick = () => {
+              if (isCurrent) {
+                closeVersionPicker();
+                return;
+              }
+              window.location.href = path;
+            };
+            versionPickerList.appendChild(optionBtn);
+          }
+
+          if (!versionPickerList.children.length) {
+            const fallbackBtn = document.createElement("button");
+            fallbackBtn.type = "button";
+            fallbackBtn.className = "version-option-btn current";
+            fallbackBtn.textContent = `${currentGameVersion} - Playing`;
+            fallbackBtn.onclick = () => closeVersionPicker();
+            versionPickerList.appendChild(fallbackBtn);
+          }
+        }
+
+        buildVersionPicker();
+        closeVersionPicker();
+
+        versionPickerBtn.onclick = (e) => {
+          e.stopPropagation();
+          if (versionPickerMenu.style.display === "flex") {
+            closeVersionPicker();
+          } else {
+            openVersionPicker();
+          }
+        };
+
+        versionPickerCloseBtn.onclick = () => closeVersionPicker();
+        versionPickerMenu.onclick = (e) => e.stopPropagation();
+        document.addEventListener("click", () => closeVersionPicker());
+
         updateHudModeUi();
         updateSpeedRunBestTimeUi();
 
@@ -3595,10 +3677,6 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
           }
           ctx.restore();
-          ctx.fillStyle = "#fff";
-          ctx.font = "12px 'Courier New',monospace";
-          ctx.textAlign = "right";
-          ctx.fillText("v0.6.8", canvas.width - 10, canvas.height - 10);
         }
 
         // Top-level draw entry - handles retro scaling wrapper
@@ -4936,6 +5014,11 @@
           }
 
           if (e.code === "KeyP" || e.code === "Escape") {
+            if (versionPickerMenu.style.display === "flex") {
+              closeVersionPicker();
+              return;
+            }
+
             if (document.getElementById("fullRestartConfirm").style.display === "flex") {
               hideFullRestartPrompt();
               return;
