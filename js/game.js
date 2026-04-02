@@ -627,8 +627,6 @@
           SPIKE_H = 12,
           SPEED_ZONE_START_LEVEL = 40,
           SPEED_ZONE_CHANCE = 0.33,
-          SWING_START_LEVEL = 60,
-          SWING_CHANCE = 0.55,
           FAKE_HAZARD_START_LEVEL = 70,
           FAKE_HAZARD_CHANCE = 0.12;
         const tutorialGuide = [
@@ -685,10 +683,6 @@
             text: "Lava walls rise and fall in cycles. Time your crossing.",
           },
           {
-            minX: 3600,
-            text: "Swing hazards are advanced: watch their arc, then move when the lane opens.",
-          },
-          {
             minX: 3920,
             text: "Run Mode checkpoints save every 5 levels. Reach one to set your restart point.",
           },
@@ -698,7 +692,7 @@
           },
           {
             minX: 4320,
-            text: "Obstacle unlocks: L10 spikes+wells, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L60 swing, L70 fake hazards.",
+            text: "Obstacle unlocks: L10 spikes, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L55 wells, L70 fake hazards.",
           },
           {
             minX: 4760,
@@ -768,19 +762,6 @@
               speedZoneW: 0,
               speedZoneDuration: 0,
               speedZoneMul: 1,
-              hasSwingObstacle: false,
-              isSwingPlatform: false,
-              isWreckingBall: false,
-              swingType: null,
-              swingAnchorX: 0,
-              swingAnchorAbsX: x + w / 2,
-              swingAnchorY: 0,
-              swingLen: 0,
-              swingAmp: 0,
-              swingSpeed: 0,
-              swingPhase: 0,
-              swingSize: 0,
-              swingThickness: 0,
               hasFakeHazard: false,
               fakeType: null,
               fakeX: 0,
@@ -864,22 +845,6 @@
           ctx.lineTo(drawX + w / 2, sy - h);
           ctx.lineTo(drawX + w, sy);
           ctx.fill();
-        }
-        function getSwingBob(p) {
-          const angle =
-            Math.sin(frameCount * p.swingSpeed + p.swingPhase) * p.swingAmp;
-          const anchorX =
-            typeof p.swingAnchorAbsX === "number"
-              ? p.swingAnchorAbsX
-              : p.x + p.swingAnchorX;
-          const anchorY = p.swingAnchorY;
-          return {
-            angle,
-            anchorX,
-            anchorY,
-            x: anchorX + Math.sin(angle) * p.swingLen,
-            y: anchorY + Math.cos(angle) * p.swingLen,
-          };
         }
         // Player state and physics
         const player = {
@@ -1006,13 +971,7 @@
             const canPlaceOnPlatform = !isG && !ph && !isSink;
             const allowObstacleStacking = currentLevel >= 50;
             let platformHasObstacle = false;
-            let hasSwingObstacle =
-              currentLevel >= SWING_START_LEVEL &&
-              canPlaceOnPlatform &&
-              Math.random() < SWING_CHANCE;
-            if (hasSwingObstacle) platformHasObstacle = true;
             let hasFakeHazard =
-              !hasSwingObstacle &&
               currentLevel >= FAKE_HAZARD_START_LEVEL &&
               canPlaceOnPlatform &&
               Math.random() < FAKE_HAZARD_CHANCE;
@@ -1020,7 +979,6 @@
             let hasSpike =
                 currentLevel >= 10 &&
                 canPlaceOnPlatform &&
-                !hasSwingObstacle &&
                 !hasFakeHazard &&
                 (allowObstacleStacking || !platformHasObstacle) &&
                 Math.random() < 0.3;
@@ -1028,7 +986,6 @@
             let hasSeeker =
                 currentLevel >= 40 &&
                 canPlaceOnPlatform &&
-                !hasSwingObstacle &&
                 !hasFakeHazard &&
                 !hasSpike &&
                 (allowObstacleStacking || !platformHasObstacle) &&
@@ -1038,19 +995,9 @@
               currentLevel >= SPEED_ZONE_START_LEVEL &&
               !isG &&
               !ph &&
-              !hasSwingObstacle &&
               !hasFakeHazard &&
               Math.random() < SPEED_ZONE_CHANCE;
-            const swingType = hasSwingObstacle
-              ? Math.random() < 0.65
-                ? "wreckingBall"
-                : "platform"
-              : null;
-            const isSwingPlatform = hasSwingObstacle && swingType === "platform";
-            const isWreckingBall = hasSwingObstacle && swingType === "wreckingBall";
-            const platformWidth = isSwingPlatform
-              ? 68 + Math.random() * 36
-              : PLATFORM_W;
+            const platformWidth = PLATFORM_W;
             const speedZoneW = hasSpeedZone ? 34 + Math.random() * 36 : 0;
             const speedZoneX = hasSpeedZone
               ? Math.random() * (platformWidth - speedZoneW)
@@ -1060,16 +1007,6 @@
                 ? "boost"
                 : "slow"
               : null;
-            const swingAnchorY = hasSwingObstacle ? 18 + Math.random() * 70 : 0;
-            const swingLen = hasSwingObstacle
-              ? Math.max(
-                  45,
-                  Math.min(
-                    isSwingPlatform ? 140 : 220,
-                    ly - swingAnchorY - 18,
-                  ),
-                )
-              : 0;
             const fakeType = hasFakeHazard
               ? Math.random() < 0.7
                 ? "ghostSpike"
@@ -1125,36 +1062,6 @@
                   : speedZoneType === "slow"
                     ? 0.5 + Math.random() * 0.15
                     : 1,
-              hasSwingObstacle,
-              isSwingPlatform,
-              isWreckingBall,
-              swingType,
-              swingAnchorX: hasSwingObstacle ? 20 + Math.random() * 80 : 0,
-              swingAnchorAbsX: hasSwingObstacle
-                ? lx + 20 + Math.random() * (platformWidth - 40)
-                : 0,
-              swingAnchorY,
-              swingLen,
-              swingAmp: hasSwingObstacle
-                ? isSwingPlatform
-                  ? 0.35 + Math.random() * 0.25
-                  : 0.65 + Math.random() * 0.55
-                : 0,
-              swingSpeed: hasSwingObstacle
-                ? isSwingPlatform
-                  ? 0.014 + Math.random() * 0.01
-                  : 0.025 + Math.random() * 0.018
-                : 0,
-              swingPhase: hasSwingObstacle ? Math.random() * Math.PI * 2 : 0,
-              swingSize: hasSwingObstacle
-                ? swingType === "wreckingBall"
-                  ? 9 + Math.random() * 6
-                  : 34 + Math.random() * 20
-                : 0,
-              swingThickness:
-                hasSwingObstacle && swingType === "platform"
-                  ? 9 + Math.random() * 5
-                  : 0,
               hasFakeHazard,
               fakeType,
               fakeX: hasFakeHazard ? Math.random() * (PLATFORM_W - fakeW) : 0,
@@ -1165,7 +1072,6 @@
             if (
               currentLevel >= 55 &&
               canPlaceOnPlatform &&
-              !hasSwingObstacle &&
               !hasFakeHazard &&
               (allowObstacleStacking || !platformHasObstacle) &&
               Math.random() < 0.25
@@ -1183,7 +1089,6 @@
             if (
               currentLevel >= 15 &&
               canPlaceOnPlatform &&
-              !hasSwingObstacle &&
               !hasFakeHazard &&
               (allowObstacleStacking || !platformHasObstacle) &&
               Math.random() < 0.22 &&
@@ -1329,31 +1234,8 @@
               spikeH: 15,
               spikeShape: "split",
             }),
-            makeTutorialPlatform(3620, 245, 170, {
-              hasSwingObstacle: true,
-              isSwingPlatform: true,
-              swingType: "platform",
-              swingAnchorAbsX: 3705,
-              swingAnchorY: 86,
-              swingLen: 92,
-              swingAmp: 0.36,
-              swingSpeed: 0.018,
-              swingPhase: 0.2,
-              swingSize: 54,
-              swingThickness: 11,
-            }),
-            makeTutorialPlatform(3860, 230, 180, {
-              hasSwingObstacle: true,
-              isWreckingBall: true,
-              swingType: "wreckingBall",
-              swingAnchorAbsX: 3950,
-              swingAnchorY: 90,
-              swingLen: 120,
-              swingAmp: 0.75,
-              swingSpeed: 0.03,
-              swingPhase: 1.2,
-              swingSize: 13,
-            }),
+            makeTutorialPlatform(3620, 245, 170),
+            makeTutorialPlatform(3860, 230, 180),
             makeTutorialPlatform(4120, 220, 155, {
               isPhase: true,
               hasSpeedZone: true,
@@ -1470,7 +1352,7 @@
           let s = platforms;
           let minD = Infinity;
           platforms.forEach((p) => {
-            if (!p.isPhase && !p.hasSpike && !p.hasSeeker && !p.isWreckingBall && !p.isSinking) {
+            if (!p.isPhase && !p.hasSpike && !p.hasSeeker && !p.isSinking) {
               let d = Math.abs(p.x - player.x);
               if (d < minD) {
                 minD = d;
@@ -1895,14 +1777,7 @@
             let dX = 0;
             let dY = 0;
             const oY = p.y;
-            if (p.isSwingPlatform) {
-              const oX = p.x;
-              const swing = getSwingBob(p);
-              p.x = swing.x - p.w / 2;
-              p.y = swing.y - p.h / 2;
-              dX = p.x - oX;
-              dY = p.y - oY;
-            } else if (p.moveRange > 0) {
+            if (p.moveRange > 0) {
               let oX = p.x;
               p.x += p.moveSpeed * p.moveDir;
               if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange)
@@ -2069,26 +1944,6 @@
                 ) {
                   dead = true;
                   break;
-                }
-              }
-              if (p.isWreckingBall) {
-                const swing = getSwingBob(p);
-                const closestX = Math.max(
-                  nX,
-                  Math.min(swing.x, nX + player.w),
-                );
-                const closestY = Math.max(
-                  nY,
-                  Math.min(swing.y, nY + player.h),
-                );
-                const dx = swing.x - closestX;
-                const dy = swing.y - closestY;
-                if (dx * dx + dy * dy < p.swingSize * p.swingSize) {
-                  const dist = Math.sqrt(dx * dx + dy * dy) || 0.1;
-                  const pushX = (dx / dist) * 8;
-                  const pushY = (dy / dist) * 8;
-                  player.vx = pushX;
-                  player.vy = pushY - 5;
                 }
               }
             }
@@ -2445,32 +2300,51 @@
             );
             ctx.stroke();
           } else if (currentTheme === "zelda") {
-            // Keep the core block body but add Link-inspired hat details.
-            ctx.fillStyle = c;
-            ctx.fillRect(x, y, player.w, player.h);
+            const zeldaPlayerImage = getThemePlayerImage("zelda");
+            if (
+              zeldaPlayerImage &&
+              zeldaPlayerImage.complete &&
+              zeldaPlayerImage.naturalWidth > 0
+            ) {
+              const maxW = player.w + 8;
+              const maxH = player.h + 10;
+              const scale = Math.min(
+                maxW / zeldaPlayerImage.naturalWidth,
+                maxH / zeldaPlayerImage.naturalHeight,
+              );
+              const drawW = zeldaPlayerImage.naturalWidth * scale;
+              const drawH = zeldaPlayerImage.naturalHeight * scale;
+              const drawX = x + (player.w - drawW) / 2;
+              const drawY = y + (player.h - drawH) / 2;
+              ctx.drawImage(zeldaPlayerImage, drawX, drawY, drawW, drawH);
+            } else {
+              // Keep the core block body but add Link-inspired hat details.
+              ctx.fillStyle = c;
+              ctx.fillRect(x, y, player.w, player.h);
 
-            // Hat brim.
-            ctx.fillStyle = "#1f8b3f";
-            ctx.fillRect(x + 2, y + 1, 16, 4);
+              // Hat brim.
+              ctx.fillStyle = "#1f8b3f";
+              ctx.fillRect(x + 2, y + 1, 16, 4);
 
-            // Hat crown and trailing tail.
-            ctx.beginPath();
-            ctx.moveTo(x + 3, y + 2);
-            ctx.lineTo(x + 13, y - 8);
-            ctx.lineTo(x + 19, y + 2);
-            ctx.closePath();
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(x + 15, y + 2);
-            ctx.lineTo(x + 22, y + 6);
-            ctx.lineTo(x + 14, y + 7);
-            ctx.closePath();
-            ctx.fill();
+              // Hat crown and trailing tail.
+              ctx.beginPath();
+              ctx.moveTo(x + 3, y + 2);
+              ctx.lineTo(x + 13, y - 8);
+              ctx.lineTo(x + 19, y + 2);
+              ctx.closePath();
+              ctx.fill();
+              ctx.beginPath();
+              ctx.moveTo(x + 15, y + 2);
+              ctx.lineTo(x + 22, y + 6);
+              ctx.lineTo(x + 14, y + 7);
+              ctx.closePath();
+              ctx.fill();
 
-            // Hair under the cap.
-            ctx.fillStyle = "#b67d2e";
-            ctx.fillRect(x + 3, y + 9, 2, 5);
-            ctx.fillRect(x + 15, y + 9, 2, 5);
+              // Hair under the cap.
+              ctx.fillStyle = "#b67d2e";
+              ctx.fillRect(x + 3, y + 9, 2, 5);
+              ctx.fillRect(x + 15, y + 9, 2, 5);
+            }
           } else {
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
@@ -4159,52 +4033,6 @@
                 ctx.strokeRect(bx, by, p.fakeW, p.fakeH);
               }
               ctx.restore();
-            }
-            if (p.hasSwingObstacle) {
-              const swing = getSwingBob(p);
-              ctx.strokeStyle = "rgba(210,210,210,0.85)";
-              ctx.lineWidth = 2;
-              ctx.beginPath();
-              ctx.moveTo(swing.anchorX - camX, swing.anchorY);
-              if (p.isSwingPlatform) {
-                ctx.lineTo(swing.x - camX, swing.y - p.h / 2);
-              } else {
-                ctx.lineTo(swing.x - camX, swing.y);
-              }
-              ctx.stroke();
-              if (p.isWreckingBall) {
-                if (currentTheme === "easter") {
-                  ctx.save();
-                  ctx.translate(swing.x - camX, swing.y);
-                  ctx.fillStyle = "#fff2cf";
-                  ctx.strokeStyle = "#d59dbf";
-                  ctx.lineWidth = 3;
-                  ctx.beginPath();
-                  ctx.ellipse(0, 0, p.swingSize * 0.88, p.swingSize, 0, 0, Math.PI * 2);
-                  ctx.fill();
-                  ctx.stroke();
-                  ctx.fillStyle = "#ffc2de";
-                  ctx.fillRect(-p.swingSize * 0.35, -2, 5, 5);
-                  ctx.fillStyle = "#9de4c9";
-                  ctx.fillRect(1, -p.swingSize * 0.25, 5, 5);
-                  ctx.fillStyle = "#ffd27f";
-                  ctx.fillRect(-1, p.swingSize * 0.2, 5, 5);
-                  ctx.restore();
-                } else {
-                  ctx.fillStyle = "#888";
-                  ctx.beginPath();
-                  ctx.arc(swing.x - camX, swing.y, p.swingSize, 0, Math.PI * 2);
-                  ctx.fill();
-                  ctx.strokeStyle = "#333";
-                  ctx.lineWidth = 3;
-                  ctx.stroke();
-                }
-              } else if (p.isSwingPlatform) {
-                ctx.fillStyle = "#d5d5d5";
-                ctx.beginPath();
-                ctx.arc(swing.anchorX - camX, swing.anchorY, 3, 0, Math.PI * 2);
-                ctx.fill();
-              }
             }
             drawWallGlitchOverlay(p.x - camX, p.y - 2, p.w, p.h + 4, platformGlitch);
             ctx.restore();
