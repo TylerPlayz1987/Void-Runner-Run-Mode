@@ -3683,6 +3683,31 @@
             ctx.shadowColor = t.hazards;
           }
           const lavaFx = getLavaFx(currentTheme);
+          function drawCottonCandyHazard(x, y, w, h) {
+            const grad = ctx.createLinearGradient(x, y, x + w, y + h);
+            grad.addColorStop(0, "#ffb6fc");
+            grad.addColorStop(0.4, "#ff69b4");
+            grad.addColorStop(0.6, "#ffd9ff");
+            grad.addColorStop(1, "#b2e9ff");
+            ctx.fillStyle = grad;
+            ctx.fillRect(x, y, w, h);
+            ctx.strokeStyle = "rgba(255,255,255,0.9)";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x, y, w, h);
+            for (let i = 0; i < 3; i++) {
+              const cx = x + (i * 0.25 + 0.1) * w;
+              const cy = y + 0.3 * h + Math.sin(frameCount * 0.03 + i) * 4;
+              const r = Math.min(w, h) * (0.18 + i * 0.03);
+              ctx.fillStyle = "rgba(255,255,255,0.6)";
+              ctx.beginPath();
+              ctx.arc(cx, cy, r, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = "rgba(255,255,255,0.4)";
+              ctx.beginPath();
+              ctx.arc(cx + r * 0.2, cy - r * 0.15, r * 0.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
           hazards.forEach((h) => {
             const hazardGlitch = getWallGlitchAmount(h.x, h.w);
             const hazardOffset = getObjectGlitchOffset(
@@ -3702,6 +3727,9 @@
                   h.y + h.h / 2,
                   Math.max(20, h.h),
                 );
+              } else if (currentTheme === "aprilfools") {
+                drawCottonCandyHazard(h.x - camX, h.y, h.w, h.h);
+              } else {
                 waterGlow.addColorStop(0, "rgba(100, 200, 255, 0.8)");
                 waterGlow.addColorStop(0.45, "rgba(150, 220, 255, 0.6)");
                 waterGlow.addColorStop(1, "rgba(200, 240, 255, 0.3)");
@@ -3759,8 +3787,12 @@
                 ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
               }
             } else {
-              ctx.fillStyle = t.hazards;
-              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+              if (currentTheme === "aprilfools") {
+                drawCottonCandyHazard(h.x - camX, h.y, h.w, h.h);
+              } else {
+                ctx.fillStyle = t.hazards;
+                ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+              }
             }
             drawWallGlitchOverlay(h.x - camX, h.y, h.w, h.h, hazardGlitch);
             ctx.restore();
