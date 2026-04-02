@@ -936,6 +936,11 @@
             sfx(300, "sine", 1.2, 0.2, 1400);
             sfx(450, "sine", 1.2, 0.1, 1600);
           },
+          dash: () => {
+            // Short layered whoosh for dash start.
+            sfx(240, "sawtooth", 0.08, 0.07, 110);
+            setTimeout(() => sfx(160, "triangle", 0.06, 0.045, 80), 12);
+          },
           well: () => sfx(60, "sine", 0.8, 0.15, 10),
           grab: () => sfx(400, "sawtooth", 0.2, 0.1, 100),
         };
@@ -1717,6 +1722,7 @@
             
             player.vx = dashDir * currentDashSpeed;
             player.vy = 0; // Reset vertical velocity for cleaner dash
+            play.dash();
             // Add dash trail effect
             player.trail.push({ x: player.x, y: player.y });
             if (player.trail.length > 12) player.trail.shift();
