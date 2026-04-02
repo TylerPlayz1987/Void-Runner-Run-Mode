@@ -76,6 +76,7 @@ const themes = {
     plat: "#2b1a3d",
     player: "#f5d9ff",
     hazards: "#ff8cb0",
+    playerImage: "theme_bg/sol_theme_player.png",
     stars: false,
     glow: false,
     music: null,
