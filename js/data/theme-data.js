@@ -61,6 +61,14 @@ const themes = {
     hazards: "#ff6b81",
     music: "theme_bg/Easter.ogg",
   },
+  tjtheme: {
+    bg: "#bf94e4",
+    plat: "#ffe0a6",
+    player: "#ffd94d",
+    hazards: "#ff7d7d",
+    stars: true,
+    music: "theme_bg/Funny.ogg",
+  },
   aprilfools: {
     bg: "#fff4fb",
     plat: "#bff4ff",
@@ -190,6 +198,16 @@ const lavaThemeFx = {
     stroke: "rgba(255,246,205,0.86)",
     particleA: [255, 186, 219],
     particleB: [156, 229, 205],
+    particleStyle: "spark",
+  },
+  tjtheme: {
+    glowInner: "rgba(255,220,120,0.78)",
+    glowMid: "rgba(255,170,80,0.48)",
+    glowOuter: "rgba(140,60,180,0)",
+    fill: "rgba(255,205,90,0.95)",
+    stroke: "rgba(255,245,180,0.9)",
+    particleA: [255, 218, 87],
+    particleB: [255, 143, 74],
     particleStyle: "spark",
   },
   aprilfools: {
@@ -329,6 +347,16 @@ const wellThemeFx = {
     coreRing: "rgba(197,236,218,0.28)",
     coreStroke: "#f7a8cf",
     coreFill: "#ffe9f5",
+  },
+  tjtheme: {
+    normalInner: "rgba(255,233,168,0.54)",
+    normalMid: "rgba(255,180,90,0.34)",
+    normalRing: "rgba(255,205,120,0.24)",
+    coreInner: "rgba(255,199,80,0.58)",
+    coreMid: "rgba(255,130,70,0.38)",
+    coreRing: "rgba(255,240,170,0.28)",
+    coreStroke: "#ffd54d",
+    coreFill: "#fff0a8",
   },
   aprilfools: {
     normalInner: "rgba(184,246,255,0.52)",

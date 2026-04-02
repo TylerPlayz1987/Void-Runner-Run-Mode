@@ -2261,6 +2261,29 @@
             ctx.fill();
             ctx.fillStyle = "#fff7b8";
             ctx.fillRect(x + 9, y - 12 + wobble, 2, 2);
+          } else if (currentTheme === "tjtheme") {
+            ctx.fillStyle = "#ffd94d";
+            ctx.beginPath();
+            ctx.ellipse(x + 10, y + 11, 9, 7, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#fff8bf";
+            ctx.beginPath();
+            ctx.ellipse(x + 9, y + 10, 6, 4.5, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#ffd94d";
+            ctx.fillRect(x + 6, y + 12, 3, 6);
+            ctx.fillRect(x + 12, y + 12, 3, 6);
+            ctx.fillRect(x + 3, y + 16, 3, 4);
+            ctx.fillRect(x + 15, y + 16, 3, 4);
+
+            ctx.fillStyle = "#fff8bf";
+            ctx.fillRect(x + 15, y + 7, 5, 2);
+            ctx.fillRect(x + 16, y + 9, 2, 2);
+            ctx.fillStyle = "#111";
+            ctx.fillRect(x + 8, y + 9, 2, 2);
+            ctx.fillRect(x + 12, y + 9, 2, 2);
           } else if (currentTheme === "pirate") {
             // Draw pirate body
             ctx.fillStyle = c;
@@ -2543,6 +2566,85 @@
               ctx.beginPath();
               ctx.ellipse(px, py, 4, 6, Math.sin(i + frameCount * 0.01) * 0.5, 0, Math.PI * 2);
               ctx.fill();
+            }
+          } else if (currentTheme === "tjtheme") {
+            const sky = ctx.createLinearGradient(0, 0, 0, 400);
+            sky.addColorStop(0, "#d9c1ef");
+            sky.addColorStop(0.55, "#bf94e4");
+            sky.addColorStop(1, "#8f5ab9");
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, 800, 400);
+
+            for (let i = 0; i < 14; i++) {
+              const sx = ((i * 147 + frameCount * (0.35 + (i % 4) * 0.12)) % 980) - 110;
+              const sy = 30 + i * 18 + Math.sin(frameCount * 0.03 + i) * 16;
+              ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,0.08)" : "rgba(255,220,140,0.09)";
+              ctx.beginPath();
+              ctx.arc(sx, sy, 16 + (i % 4) * 7, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            const cityScroll = (camX * 0.12) % 220;
+            for (let i = 0; i < 12; i++) {
+              const bx = i * 78 - cityScroll - 40;
+              const bh = 70 + (i % 5) * 28 + (i % 3) * 12;
+              const by = 400 - bh;
+              ctx.fillStyle = i % 2 === 0 ? "#34254f" : "#493062";
+              ctx.fillRect(bx, by, 56, bh);
+              ctx.fillStyle = "rgba(255,255,255,0.18)";
+              for (let w = 0; w < 4; w++) {
+                for (let h = 0; h < 6; h++) {
+                  if ((w + h + i + frameCount) % 3 === 0) {
+                    ctx.fillRect(bx + 8 + w * 10, by + 8 + h * 14, 4, 6);
+                  }
+                }
+              }
+            }
+
+            const dinoX = 260 + Math.sin(frameCount * 0.02) * 18 - camX * 0.05;
+            const dinoY = 128 + Math.sin(frameCount * 0.06) * 5;
+            ctx.save();
+            ctx.translate(dinoX, dinoY);
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = "rgba(255, 225, 140, 0.35)";
+            ctx.fillStyle = "#4a7a39";
+            ctx.beginPath();
+            ctx.ellipse(88, 72, 92, 56, -0.08, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(170, 48, 38, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillRect(82, 96, 28, 78);
+            ctx.fillRect(124, 98, 26, 74);
+            ctx.fillRect(56, 92, 22, 62);
+            ctx.fillRect(148, 91, 20, 62);
+            ctx.fillRect(176, 68, 20, 20);
+            ctx.fillStyle = "#315925";
+            ctx.fillRect(196, 46, 116, 20);
+            ctx.fillRect(286, 32, 28, 42);
+            ctx.fillRect(308, 28, 18, 48);
+            ctx.fillRect(324, 24, 16, 54);
+            ctx.fillStyle = "#7bc46d";
+            ctx.beginPath();
+            ctx.arc(182, 42, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#111";
+            ctx.beginPath();
+            ctx.arc(178, 44, 2.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = "#2c4a20";
+            ctx.lineWidth = 5;
+            ctx.beginPath();
+            ctx.moveTo(292, 33);
+            ctx.lineTo(340, 8);
+            ctx.stroke();
+            ctx.restore();
+
+            for (let i = 0; i < 16; i++) {
+              const dx = ((i * 97 + frameCount * 1.6) % 920) - 60;
+              const dy = 180 + Math.sin(frameCount * 0.05 + i) * 16 + (i % 4) * 6;
+              ctx.fillStyle = i % 2 === 0 ? "rgba(255,220,120,0.28)" : "rgba(255,140,140,0.28)";
+              ctx.fillRect(dx, dy, 14 + (i % 3) * 5, 6 + (i % 2) * 3);
             }
           } else if (currentTheme === "aprilfools") {
             const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.055);
@@ -3616,6 +3718,31 @@
             ctx.fillStyle = "#ffd27f";
             ctx.fillRect(2, 1, 4, 4);
             ctx.restore();
+          } else if (goalTheme === "tjtheme") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            const wobble = Math.sin(frameCount * 0.09) * 0.06;
+            ctx.rotate(wobble);
+            ctx.fillStyle = "#4b2a1a";
+            ctx.fillRect(-gw * 0.35, -gh * 0.18, gw * 0.7, gh * 0.36);
+            ctx.fillRect(-gw * 0.12, -gh * 0.55, gw * 0.24, gh * 0.42);
+            ctx.fillRect(-gw * 0.55, -gh * 0.02, gw * 0.22, gh * 0.2);
+            ctx.fillRect(gw * 0.33, -gh * 0.04, gw * 0.22, gh * 0.2);
+            ctx.fillStyle = "#6f4629";
+            ctx.fillRect(-gw * 0.15, -gh * 0.08, gw * 0.3, gh * 0.16);
+            ctx.fillStyle = "#8fd16a";
+            ctx.beginPath();
+            ctx.moveTo(-gw * 0.16, -gh * 0.34);
+            ctx.lineTo(gw * 0.05, -gh * 0.48);
+            ctx.lineTo(gw * 0.18, -gh * 0.24);
+            ctx.lineTo(gw * 0.02, -gh * 0.12);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = "#ffe089";
+            ctx.beginPath();
+            ctx.arc(gw * 0.42, -gh * 0.28, 5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
           } else if (goalTheme === "stardust") {
             let pulse = 0.7 + 0.3 * Math.sin(frameCount / 15);
             let rad = (gw / 2) * (1 + pulse * 0.15);
@@ -4330,7 +4457,10 @@
         const code1 = "test";
         const secretThemeCode = "zelda";
         const secretThemeUnlockKey = "void_secret_theme_zelda_unlocked";
+        const tjThemeCode = "tj_theme";
+        const tjThemeUnlockKey = "void_secret_theme_tjtheme_unlocked";
         let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
+        let tjThemeUnlocked = localStorage.getItem(tjThemeUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
@@ -4340,21 +4470,41 @@
         const aprilFoolsBackBtn = document.getElementById("aprilFoolsBackBtn");
 
         function updateSecretThemeButtonUi() {
-          const themeButtonsContainer = document.getElementById("themeButtons");
-          if (!themeButtonsContainer) return;
+          const buttonSpecs = [
+            {
+              container: document.getElementById("themeButtons"),
+              theme: "zelda",
+              label: "Zelda",
+              unlocked: secretThemeUnlocked,
+            },
+            {
+              container: document.getElementById("themeButtons"),
+              theme: "tjtheme",
+              label: "TJ's Theme",
+              unlocked: tjThemeUnlocked,
+            },
+            {
+              container: document.getElementById("speedRunThemeButtons"),
+              theme: "tjtheme",
+              label: "TJ's Theme",
+              unlocked: tjThemeUnlocked,
+            },
+          ];
 
-          let secretThemeBtn = themeButtonsContainer.querySelector('[data-theme="zelda"]');
-          if (!secretThemeBtn) {
-            secretThemeBtn = document.createElement("button");
-            secretThemeBtn.type = "button";
-            secretThemeBtn.className = "theme-btn";
-            secretThemeBtn.dataset.theme = "zelda";
-            secretThemeBtn.textContent = "Zelda";
-            secretThemeBtn.onclick = () => setTheme("zelda");
-            themeButtonsContainer.appendChild(secretThemeBtn);
+          for (const spec of buttonSpecs) {
+            if (!spec.container) continue;
+            let themeBtn = spec.container.querySelector(`[data-theme="${spec.theme}"]`);
+            if (!themeBtn) {
+              themeBtn = document.createElement("button");
+              themeBtn.type = "button";
+              themeBtn.className = "theme-btn";
+              themeBtn.dataset.theme = spec.theme;
+              themeBtn.textContent = spec.label;
+              themeBtn.onclick = () => setTheme(spec.theme);
+              spec.container.appendChild(themeBtn);
+            }
+            themeBtn.style.display = spec.unlocked ? "" : "none";
           }
-
-          secretThemeBtn.style.display = secretThemeUnlocked ? "" : "none";
         }
 
         function closeCodeEntryModal() {
@@ -4386,6 +4536,13 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("zelda theme unlocked");
+          } else if (normalized === tjThemeCode) {
+            if (!tjThemeUnlocked) {
+              tjThemeUnlocked = true;
+              localStorage.setItem(tjThemeUnlockKey, "1");
+              updateSecretThemeButtonUi();
+            }
+            flashCodeMessage("tj's theme unlocked");
           }
           closeCodeEntryModal();
         }
@@ -4916,7 +5073,9 @@
           localStorage.setItem("core_best_v20", 1);
           localStorage.setItem("core_speedrun_best_level_v1", 1);
           localStorage.removeItem("void_secret_theme_zelda_unlocked");
+          localStorage.removeItem("void_secret_theme_tjtheme_unlocked");
           secretThemeUnlocked = false;
+          tjThemeUnlocked = false;
           updateSecretThemeButtonUi();
           setLevelDisplay();
           updateBestLevelUi();
