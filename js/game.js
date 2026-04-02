@@ -4745,6 +4745,9 @@
           speedRunBestLevel = 1;
           localStorage.setItem("core_best_v20", 1);
           localStorage.setItem("core_speedrun_best_level_v1", 1);
+          localStorage.removeItem("void_secret_theme_zelda_unlocked");
+          secretThemeUnlocked = false;
+          updateSecretThemeButtonUi();
           setLevelDisplay();
           updateBestLevelUi();
           applyDefaults();
