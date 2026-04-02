@@ -92,6 +92,14 @@ const themes = {
     vines: true,
     music: "theme_bg/Jungle.ogg",
   },
+  zelda: {
+    bg: "#0b3d2e",
+    plat: "#7a5c2d",
+    player: "#ffd54a",
+    hazards: "#c94f3d",
+    glow: true,
+    music: null,
+  },
 };
 const lavaThemeFx = {
   classic: {

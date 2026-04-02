@@ -694,10 +694,32 @@
           for (let i = 0; i < tutorialGuide.length; i++) {
             if (player.x >= tutorialGuide[i].minX) {
               nextText = tutorialGuide[i].text;
+
+        const secretThemeUnlockKey = "void_secret_theme_zelda_unlocked";
+        const secretThemeCode = "zelda";
+        let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
+        let secretThemeButton = null;
+
+        function updateSecretThemeButtonUi() {
+          const themeButtonsContainer = document.getElementById("themeButtons");
+          if (!themeButtonsContainer) return;
+
+          if (!secretThemeButton) {
+            secretThemeButton = document.createElement("button");
+            secretThemeButton.type = "button";
+            secretThemeButton.className = "theme-btn";
+            secretThemeButton.dataset.theme = "zelda";
+            secretThemeButton.textContent = "Zelda";
+            themeButtonsContainer.appendChild(secretThemeButton);
+          }
+
+          secretThemeButton.style.display = secretThemeUnlocked ? "" : "none";
+        }
             } else {
               break;
             }
           }
+          updateSecretThemeButtonUi();
           if (nextText !== tutorialHintText) {
             tutorialHintText = nextText;
             tutorialHintEl.textContent = nextText;
@@ -4127,6 +4149,13 @@
           const normalized = entered.trim().toLowerCase();
           if (normalized === code1) {
             flashCodeMessage("test done");
+          } else if (normalized === secretThemeCode) {
+            if (!secretThemeUnlocked) {
+              secretThemeUnlocked = true;
+              localStorage.setItem(secretThemeUnlockKey, "1");
+              updateSecretThemeButtonUi();
+            }
+            flashCodeMessage("zelda theme unlocked");
           }
           closeCodeEntryModal();
         }
@@ -4150,13 +4179,6 @@
         codeEntrySubmitBtn.onclick = submitCodeEntry;
         codeEntryCancelBtn.onclick = closeCodeEntryModal;
         codeEntryInput.addEventListener("keydown", (e) => {
-          if (e.code === "Enter") {
-            e.preventDefault();
-            submitCodeEntry();
-          } else if (e.code === "Escape") {
-            e.preventDefault();
-            closeCodeEntryModal();
-          }
         });
         document.getElementById("openChangelogBtn").onclick = () => {
           document.getElementById("startMenu").style.display = "none";
