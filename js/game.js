@@ -513,6 +513,7 @@
           infiniteInvincibility = false;
         const { themes, getLavaFx, getWellFx } = window.VR_THEME_DATA;
         const themeBackgroundImages = {};
+        const themeGoalImages = {};
         function getThemeBackgroundImage(themeName) {
           const theme = themes[themeName];
           if (!theme || !theme.bgImage) return null;
@@ -522,6 +523,16 @@
             themeBackgroundImages[themeName] = image;
           }
           return themeBackgroundImages[themeName];
+        }
+        function getThemeGoalImage(themeName) {
+          const theme = themes[themeName];
+          if (!theme || !theme.goalImage) return null;
+          if (!themeGoalImages[themeName]) {
+            const image = new Image();
+            image.src = theme.goalImage;
+            themeGoalImages[themeName] = image;
+          }
+          return themeGoalImages[themeName];
         }
         // Theme particles/background add-ons (cosmetic)
         const cyberBldgs = Array.from({ length: 12 }, () => ({
@@ -2262,28 +2273,76 @@
             ctx.fillStyle = "#fff7b8";
             ctx.fillRect(x + 9, y - 12 + wobble, 2, 2);
           } else if (currentTheme === "tjtheme") {
+            const bob = Math.sin(frameCount * 0.08 + x * 0.05) * 0.7;
+            ctx.save();
+            ctx.translate(0, bob);
+
+            // Round yellow rubber duck body.
             ctx.fillStyle = "#ffd94d";
             ctx.beginPath();
-            ctx.ellipse(x + 10, y + 11, 9, 7, 0, 0, Math.PI * 2);
+            ctx.ellipse(x + 10, y + 12, 11, 9, 0, 0, Math.PI * 2);
             ctx.fill();
 
-            ctx.fillStyle = "#fff8bf";
+            ctx.fillStyle = "#f8cb2d";
             ctx.beginPath();
-            ctx.ellipse(x + 9, y + 10, 6, 4.5, 0, 0, Math.PI * 2);
+            ctx.ellipse(x + 10, y + 12, 8.5, 6.8, 0, 0, Math.PI * 2);
             ctx.fill();
 
+            // Head and cheek highlight.
             ctx.fillStyle = "#ffd94d";
-            ctx.fillRect(x + 6, y + 12, 3, 6);
-            ctx.fillRect(x + 12, y + 12, 3, 6);
-            ctx.fillRect(x + 3, y + 16, 3, 4);
-            ctx.fillRect(x + 15, y + 16, 3, 4);
+            ctx.beginPath();
+            ctx.ellipse(x + 10, y + 9, 8.5, 7, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "rgba(255,255,255,0.16)";
+            ctx.beginPath();
+            ctx.ellipse(x + 6.5, y + 11.5, 3.2, 2.1, -0.25, 0, Math.PI * 2);
+            ctx.fill();
 
-            ctx.fillStyle = "#fff8bf";
-            ctx.fillRect(x + 15, y + 7, 5, 2);
-            ctx.fillRect(x + 16, y + 9, 2, 2);
+            // Orange beak.
+            ctx.fillStyle = "#ff7a1a";
+            ctx.beginPath();
+            ctx.ellipse(x + 10, y + 12, 6.8, 4.2, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#ff9b3b";
+            ctx.beginPath();
+            ctx.ellipse(x + 10, y + 11.5, 5.4, 2.4, 0, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Beak lip and nostril line.
+            ctx.strokeStyle = "rgba(220,90,20,0.8)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(x + 5.6, y + 12);
+            ctx.lineTo(x + 14.6, y + 12);
+            ctx.stroke();
+
+            // Eyes.
             ctx.fillStyle = "#111";
-            ctx.fillRect(x + 8, y + 9, 2, 2);
-            ctx.fillRect(x + 12, y + 9, 2, 2);
+            ctx.beginPath();
+            ctx.arc(x + 7.5, y + 7.5, 1.7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 13, y + 7.5, 1.7, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = "#fff8d8";
+            ctx.beginPath();
+            ctx.arc(x + 8.1, y + 6.8, 0.45, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 13.6, y + 6.8, 0.45, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Tiny wing bumps.
+            ctx.fillStyle = "#f0c71a";
+            ctx.beginPath();
+            ctx.ellipse(x + 3, y + 13.5, 2.5, 3.5, -0.55, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.ellipse(x + 17, y + 13.5, 2.5, 3.5, 0.55, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.restore();
           } else if (currentTheme === "pirate") {
             // Draw pirate body
             ctx.fillStyle = c;
@@ -2601,50 +2660,20 @@
               }
             }
 
-            const dinoX = 260 + Math.sin(frameCount * 0.02) * 18 - camX * 0.05;
-            const dinoY = 128 + Math.sin(frameCount * 0.06) * 5;
-            ctx.save();
-            ctx.translate(dinoX, dinoY);
-            ctx.shadowBlur = 20;
-            ctx.shadowColor = "rgba(255, 225, 140, 0.35)";
-            ctx.fillStyle = "#4a7a39";
-            ctx.beginPath();
-            ctx.ellipse(88, 72, 92, 56, -0.08, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(170, 48, 38, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillRect(82, 96, 28, 78);
-            ctx.fillRect(124, 98, 26, 74);
-            ctx.fillRect(56, 92, 22, 62);
-            ctx.fillRect(148, 91, 20, 62);
-            ctx.fillRect(176, 68, 20, 20);
-            ctx.fillStyle = "#315925";
-            ctx.fillRect(196, 46, 116, 20);
-            ctx.fillRect(286, 32, 28, 42);
-            ctx.fillRect(308, 28, 18, 48);
-            ctx.fillRect(324, 24, 16, 54);
-            ctx.fillStyle = "#7bc46d";
-            ctx.beginPath();
-            ctx.arc(182, 42, 8, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#111";
-            ctx.beginPath();
-            ctx.arc(178, 44, 2.5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.strokeStyle = "#2c4a20";
-            ctx.lineWidth = 5;
-            ctx.beginPath();
-            ctx.moveTo(292, 33);
-            ctx.lineTo(340, 8);
-            ctx.stroke();
-            ctx.restore();
-
             for (let i = 0; i < 16; i++) {
               const dx = ((i * 97 + frameCount * 1.6) % 920) - 60;
               const dy = 180 + Math.sin(frameCount * 0.05 + i) * 16 + (i % 4) * 6;
               ctx.fillStyle = i % 2 === 0 ? "rgba(255,220,120,0.28)" : "rgba(255,140,140,0.28)";
               ctx.fillRect(dx, dy, 14 + (i % 3) * 5, 6 + (i % 2) * 3);
+            }
+
+            for (let i = 0; i < 6; i++) {
+              const puffX = ((i * 185 + frameCount * (0.28 + i * 0.03)) % 950) - 70;
+              const puffY = 64 + Math.sin(frameCount * 0.025 + i) * 22 + i * 4;
+              ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,0.08)" : "rgba(255,230,170,0.07)";
+              ctx.beginPath();
+              ctx.arc(puffX, puffY, 24 + i * 3, 0, Math.PI * 2);
+              ctx.fill();
             }
           } else if (currentTheme === "aprilfools") {
             const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.055);
@@ -3719,30 +3748,35 @@
             ctx.fillRect(2, 1, 4, 4);
             ctx.restore();
           } else if (goalTheme === "tjtheme") {
-            ctx.save();
-            ctx.translate(gx + gw / 2, gy + gh / 2);
-            const wobble = Math.sin(frameCount * 0.09) * 0.06;
-            ctx.rotate(wobble);
-            ctx.fillStyle = "#4b2a1a";
-            ctx.fillRect(-gw * 0.35, -gh * 0.18, gw * 0.7, gh * 0.36);
-            ctx.fillRect(-gw * 0.12, -gh * 0.55, gw * 0.24, gh * 0.42);
-            ctx.fillRect(-gw * 0.55, -gh * 0.02, gw * 0.22, gh * 0.2);
-            ctx.fillRect(gw * 0.33, -gh * 0.04, gw * 0.22, gh * 0.2);
-            ctx.fillStyle = "#6f4629";
-            ctx.fillRect(-gw * 0.15, -gh * 0.08, gw * 0.3, gh * 0.16);
-            ctx.fillStyle = "#8fd16a";
-            ctx.beginPath();
-            ctx.moveTo(-gw * 0.16, -gh * 0.34);
-            ctx.lineTo(gw * 0.05, -gh * 0.48);
-            ctx.lineTo(gw * 0.18, -gh * 0.24);
-            ctx.lineTo(gw * 0.02, -gh * 0.12);
-            ctx.closePath();
-            ctx.fill();
-            ctx.fillStyle = "#ffe089";
-            ctx.beginPath();
-            ctx.arc(gw * 0.42, -gh * 0.28, 5, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+            const tjGoalImage = getThemeGoalImage("tjtheme");
+            if (tjGoalImage && tjGoalImage.complete && tjGoalImage.naturalWidth > 0) {
+              ctx.drawImage(tjGoalImage, gx, gy, gw, gh);
+            } else {
+              ctx.save();
+              ctx.translate(gx + gw / 2, gy + gh / 2);
+              const wobble = Math.sin(frameCount * 0.09) * 0.06;
+              ctx.rotate(wobble);
+              ctx.fillStyle = "#4b2a1a";
+              ctx.fillRect(-gw * 0.35, -gh * 0.18, gw * 0.7, gh * 0.36);
+              ctx.fillRect(-gw * 0.12, -gh * 0.55, gw * 0.24, gh * 0.42);
+              ctx.fillRect(-gw * 0.55, -gh * 0.02, gw * 0.22, gh * 0.2);
+              ctx.fillRect(gw * 0.33, -gh * 0.04, gw * 0.22, gh * 0.2);
+              ctx.fillStyle = "#6f4629";
+              ctx.fillRect(-gw * 0.15, -gh * 0.08, gw * 0.3, gh * 0.16);
+              ctx.fillStyle = "#8fd16a";
+              ctx.beginPath();
+              ctx.moveTo(-gw * 0.16, -gh * 0.34);
+              ctx.lineTo(gw * 0.05, -gh * 0.48);
+              ctx.lineTo(gw * 0.18, -gh * 0.24);
+              ctx.lineTo(gw * 0.02, -gh * 0.12);
+              ctx.closePath();
+              ctx.fill();
+              ctx.fillStyle = "#ffe089";
+              ctx.beginPath();
+              ctx.arc(gw * 0.42, -gh * 0.28, 5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            }
           } else if (goalTheme === "stardust") {
             let pulse = 0.7 + 0.3 * Math.sin(frameCount / 15);
             let rad = (gw / 2) * (1 + pulse * 0.15);
