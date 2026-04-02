@@ -88,9 +88,21 @@
         canvas.width = 800;
         canvas.height = 400;
         let bestLevel = localStorage.getItem("core_best_v20") || 1;
+        let speedRunBestLevel = localStorage.getItem("core_speedrun_best_level_v1") || 1;
         let speedRunBestTime = parseFloat(localStorage.getItem("core_speedrun_best_time_v1") || "0");
         document.getElementById("best").textContent = bestLevel;
+        updateHudModeUi();
         updateSpeedRunBestTimeUi();
+
+        function updateBestLevelUi() {
+          const highScore = speedRunMode ? speedRunBestLevel : bestLevel;
+          document.getElementById("best").textContent = highScore;
+        }
+
+        function updateHudModeUi() {
+          document.getElementById("death-stat").style.display = speedRunMode ? "none" : "block";
+          updateBestLevelUi();
+        }
         
         // Achievements are defined in js/data/achievements-data.js.
         const achievements = JSON.parse(
@@ -1465,10 +1477,16 @@
               cpNotif.style.opacity = "0";
             }, 1500);
           } else play.wn();
-          if (!cheatsUsed && currentLevel > bestLevel) {
-            bestLevel = currentLevel;
-            document.getElementById("best").textContent = bestLevel;
-            localStorage.setItem("core_best_v20", bestLevel);
+          if (!cheatsUsed) {
+            if (speedRunMode && currentLevel > speedRunBestLevel) {
+              speedRunBestLevel = currentLevel;
+              localStorage.setItem("core_speedrun_best_level_v1", speedRunBestLevel);
+              updateBestLevelUi();
+            } else if (!speedRunMode && currentLevel > bestLevel) {
+              bestLevel = currentLevel;
+              localStorage.setItem("core_best_v20", bestLevel);
+              updateBestLevelUi();
+            }
           }
           resetPlayerForRun(200);
           player.x = 50;
@@ -3738,6 +3756,7 @@
           tutorialMode = false;
           speedRunMode = false;
           speedRunGameOverMode = false;
+          updateHudModeUi();
           showingPostTutorialSettings = false;
           setTutorialUiVisible(false);
           running = false;
@@ -3821,6 +3840,7 @@
           clearPostTutorialTour();
           tutorialMode = isTutorial;
           speedRunMode = false;
+          updateHudModeUi();
           showingPostTutorialSettings = false;
           setTutorialUiVisible(tutorialMode);
           currentLevel = 1;
@@ -3894,6 +3914,7 @@
           ensureAudioContext();
           clearPostTutorialTour();
           speedRunMode = true;
+          updateHudModeUi();
           tutorialMode = false;
           speedRunGameOverMode = false;
           // Record exact start time (milliseconds) for accurate timer
@@ -4361,9 +4382,11 @@
           lastCheckpoint = 1;
           currentLevel = 1;
           bestLevel = 1;
+          speedRunBestLevel = 1;
           localStorage.setItem("core_best_v20", 1);
+          localStorage.setItem("core_speedrun_best_level_v1", 1);
           setLevelDisplay();
-          document.getElementById("best").textContent = bestLevel;
+          updateBestLevelUi();
           applyDefaults();
           generateLevel();
           respawnPlayer();
