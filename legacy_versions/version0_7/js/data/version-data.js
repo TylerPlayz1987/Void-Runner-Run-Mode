@@ -5,13 +5,13 @@ window.VR_VERSION_DATA = {
   currentVersion: "v0.7.0",
   versions: [
     {
-      label: "v0.7.0 Snapshot (Current)",
-      path: "./version0_7.html",
-      current: true,
-    },
-    {
       label: "v0.8.0",
       path: "../../index.html",
+    },
+    {
+      label: "v0.7.0 (Current)",
+      path: "./version0_7.html",
+      current: true,
     },
     {
       label: "v0.6.0",

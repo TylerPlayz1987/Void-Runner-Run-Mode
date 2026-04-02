@@ -1,254 +1,435 @@
 <!DOCTYPE html>
 <!-- LEGACY VERSION NOTICE: Archived build for compatibility/version switching. Known bugs may exist; do not modify gameplay behavior unless required for loading or version navigation. -->
 <html>
+
 <head>
     <style>
-        body { margin: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; font-family: 'Courier New', monospace; overflow: hidden; }
-        #pauseBtn { background: #0f0; border: none; color: #000; padding: 8px 20px; cursor: pointer; font-family: inherit; font-weight: bold; margin-bottom: 10px; border-radius: 5px; }
-        #pauseBtn:hover { background: #fff; }
-        #container { position: relative; border: 4px solid #333; width: 800px; height: 400px; background: #050505; transition: border-color 0.2s, box-shadow 0.2s; }
-        canvas { display: block; }
-        #ui-left { position: absolute; top: 15px; left: 15px; display: flex; gap: 10px; pointer-events: none; z-index: 100; }
-        #ui-right { position: absolute; top: 15px; right: 15px; pointer-events: none; z-index: 100; }
-        .stat { background: rgba(0, 0, 0, 0.9); padding: 6px 15px; border: 1px solid #0f0; color: #0f0; font-weight: bold; font-size: 14px; border-radius: 2px; }
-        #best-stat { color: #ff0; border-color: #ff0; }
-        #death-stat { color: #f44; border-color: #f44; }
-        #cp-notif { position: absolute; width: 100%; top: 40%; text-align: center; color: #0f0; font-size: 32px; font-weight: bold; opacity: 0; pointer-events: none; z-index: 150; transition: opacity 0.4s; text-shadow: 0 0 20px #0f0; }
-        .overlay { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; }
-        #pauseMenu { display: none; background: rgba(0,0,0,0.85); }
-        h1 { color: #0f0; margin-bottom: 20px; letter-spacing: 5px; }
-        h3 { color: #ffae00; margin: 10px 0; font-size: 14px; border-bottom: 1px solid #ffae00; width: 100%; text-align: center; }
-        .btn-group { display: flex; flex-direction: column; gap: 10px; pointer-events: all; width: 250px; }
-        button { background: #0f0; border: none; padding: 12px; font-size: 18px; font-family: inherit; font-weight: bold; cursor: pointer; border-radius: 5px; transition: transform 0.1s; }
-        button:hover { background: #fff; transform: scale(1.03); }
-        .debug-row { display: flex; gap: 5px; width: 100%; }
-        #warpInput { flex: 1; background: #222; border: 1px solid #ffae00; color: #ffae00; padding: 5px; font-family: inherit; font-weight: bold; text-align: center; border-radius: 5px; }
-        #warpBtn { background: #ffae00; color: #000; flex: 1; font-size: 14px; }
-        .small-btn { padding: 8px; font-size: 14px; background: #444; color: #fff; }
+        body {
+            margin: 0;
+            background: #000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+
+        #pauseBtn {
+            background: #0f0;
+            border: none;
+            color: #000;
+            padding: 8px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            margin-bottom: 10px;
+            border-radius: 5px;
+        }
+
+        #pauseBtn:hover {
+            background: #fff;
+        }
+
+        #container {
+            position: relative;
+            border: 4px solid #333;
+            width: 800px;
+            height: 400px;
+            background: #050505;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #ui-left {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            display: flex;
+            gap: 10px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        #ui-right {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .stat {
+            background: rgba(0, 0, 0, 0.9);
+            padding: 6px 15px;
+            border: 1px solid #0f0;
+            color: #0f0;
+            font-weight: bold;
+            font-size: 14px;
+            border-radius: 2px;
+        }
+
+        #best-stat {
+            color: #ff0;
+            border-color: #ff0;
+        }
+
+        #death-stat {
+            color: #f44;
+            border-color: #f44;
+        }
+
+        #cp-notif {
+            position: absolute;
+            width: 100%;
+            top: 40%;
+            text-align: center;
+            color: #0f0;
+            font-size: 32px;
+            font-weight: bold;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 150;
+            transition: opacity 0.4s;
+            text-shadow: 0 0 20px #0f0;
+        }
+
+        .overlay {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+
+        #pauseMenu {
+            display: none;
+            background: rgba(0, 0, 0, 0.85);
+        }
+
+        h1 {
+            color: #0f0;
+            margin-bottom: 20px;
+            letter-spacing: 5px;
+        }
+
+        h3 {
+            color: #ffae00;
+            margin: 10px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #ffae00;
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: all;
+            width: 250px;
+        }
+
+        button {
+            background: #0f0;
+            border: none;
+            padding: 12px;
+            font-size: 18px;
+            font-family: inherit;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: transform 0.1s;
+        }
+
+        button:hover {
+            background: #fff;
+            transform: scale(1.03);
+        }
+
+        .debug-row {
+            display: flex;
+            gap: 5px;
+            width: 100%;
+        }
+
+        #warpInput {
+            flex: 1;
+            background: #222;
+            border: 1px solid #ffae00;
+            color: #ffae00;
+            padding: 5px;
+            font-family: inherit;
+            font-weight: bold;
+            text-align: center;
+            border-radius: 5px;
+        }
+
+        #warpBtn {
+            background: #ffae00;
+            color: #000;
+            flex: 1;
+            font-size: 14px;
+        }
+
+        .small-btn {
+            padding: 8px;
+            font-size: 14px;
+            background: #444;
+            color: #fff;
+        }
     </style>
 </head>
+
 <body>
 
-<button id="pauseBtn">Pause [P]</button>
+    <button id="pauseBtn">Pause [P]</button>
 
-<div id="container">
-    <div id="ui-left"><div class="stat">Level: <span id="lvl">1</span></div><div class="stat" id="death-stat">Deaths: <span id="deaths">0</span></div></div>
-    <div id="ui-right"><div class="stat" id="best-stat">High Score: <span id="best">1</span></div></div>
-    <div id="cp-notif">CHECKPOINT REACHED</div>
+    <div id="container">
+        <div id="ui-left">
+            <div class="stat">Level: <span id="lvl">1</span></div>
+            <div class="stat" id="death-stat">Deaths: <span id="deaths">0</span></div>
+        </div>
+        <div id="ui-right">
+            <div class="stat" id="best-stat">High Score: <span id="best">1</span></div>
+        </div>
+        <div id="cp-notif">CHECKPOINT REACHED</div>
 
-    <div id="startMenu" class="overlay"><h1>Void Runner</h1><div class="btn-group"><button id="startBtn">Start Run Mode</button></div></div>
-    <div id="pauseMenu" class="overlay"><h1>PAUSED</h1><div class="btn-group"><button id="resumeBtn">Resume</button><button id="restartBtn" class="small-btn">Restart At Checkpoint</button><h3>Debug/Cheats</h3><div class="debug-row"><input type="number" id="warpInput" placeholder="Level" min="1"><button id="warpBtn">Warp</button></div></div></div>
+        <div id="startMenu" class="overlay">
+            <h1>Void Runner</h1>
+            <div class="btn-group"><button id="startBtn">Start Run Mode</button></div>
+        </div>
+        <div id="pauseMenu" class="overlay">
+            <h1>PAUSED</h1>
+            <div class="btn-group"><button id="resumeBtn">Resume</button><button id="restartBtn"
+                    class="small-btn">Restart At Checkpoint</button>
+                <h3>Debug/Cheats</h3>
+                <div class="debug-row"><input type="number" id="warpInput" placeholder="Level" min="1"><button
+                        id="warpBtn">Warp</button></div>
+            </div>
+        </div>
 
-    <canvas id="canvas"></canvas>
-</div>
+        <canvas id="canvas"></canvas>
+    </div>
 
-<script>
-let audioCtx;
-function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
-function playSfx(f, t, d, v, slide = 0) {
-    if (!audioCtx || audioCtx.state !== 'running') return;
-    try {
-        const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
-        o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
-        if (slide) o.frequency.exponentialRampToValueAtTime(slide, audioCtx.currentTime + d);
-        g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
-        o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + d);
-    } catch(e) {}
-}
-
-const sfx = {
-    jump: () => playSfx(180, 'square', 0.1, 0.08, 450),
-    win: () => { playSfx(523, 'triangle', 0.1, 0.1); setTimeout(() => playSfx(659, 'triangle', 0.1, 0.1), 80); },
-    checkpoint: () => { playSfx(300, 'sine', 1.2, 0.2, 1400); playSfx(450, 'sine', 1.2, 0.1, 1600); },
-    death: () => playSfx(150, 'sawtooth', 0.4, 0.1, 40)
-};
-
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const container = document.getElementById('container');
-const lvlTag = document.getElementById('lvl');
-const bestTag = document.getElementById('best');
-const deathTag = document.getElementById('deaths');
-canvas.width = 800; canvas.height = 400;
-
-let running = false, isPaused = false, currentLevel = 1, lastCheckpoint = 1, deathCount = 0;
-let bestLevel = localStorage.getItem('core_best_v11') || 1;
-bestTag.textContent = bestLevel;
-
-let platforms = [], hazards = [], frameCount = 0;
-const keys = {};
-const player = { x: 50, y: 200, w: 20, h: 20, vx: 0, vy: 0, speed: 5, runSpeed: 8, jump: -12, grounded: false, trail: [] };
-const goal = { x: 0, y: 0, w: 40, h: 40 };
-
-function generateLevel() {
-    platforms = [{ x: 0, y: 350, w: 150, h: 50, hasSpike: false, moveRange: 0, isPhase: false, seekerX: 0 }]; 
-    hazards = [];
-    let lastX = 150, lastY = 350;
-    const numPlatforms = 4 + currentLevel; 
-    
-    for (let i = 0; i < numPlatforms; i++) {
-        let gap = 110 + Math.random() * 80;
-        let vDiff = (Math.random() - 0.5) * 140;
-        if (currentLevel >= 15 && Math.random() < 0.3) {
-            hazards.push({ x: lastX + (gap / 2) - 10, y: 100, w: 15, h: 80, speed: 1.5 + (Math.random() * 2), dir: 1, range: 150 + (Math.random() * 100), startY: 50 + (Math.random() * 50) });
-        }
-        lastX += gap; lastY = Math.max(120, Math.min(340, lastY + vDiff));
-        let isGoalPlatform = (i === numPlatforms - 1);
-        
-        let spawnSpike = (currentLevel >= 10) && !isGoalPlatform && (Math.random() < 0.3);
-        let moveR = (currentLevel >= 20 && !isGoalPlatform && Math.random() < 0.4) ? 50 + Math.random() * 50 : 0;
-        
-        let prevWasPhase = platforms[platforms.length - 1].isPhase;
-        let phase = (currentLevel >= 30 && !isGoalPlatform && !prevWasPhase && Math.random() < 0.35);
-        let seeker = (currentLevel >= 40 && !isGoalPlatform && !spawnSpike && !phase && Math.random() < 0.3);
-
-        platforms.push({ x: lastX, y: lastY, w: 120, h: 15, hasSpike: spawnSpike, moveRange: moveR, startX: lastX, moveDir: 1, moveSpeed: 1 + Math.random() * 1.5, isPhase: phase, hasSeeker: seeker, seekerX: 0, seekerDir: 1 });
-        if (isGoalPlatform) { goal.x = lastX + 40; goal.y = lastY - 45; }
-    }
-}
-
-function handleDeath() {
-    deathCount++; deathTag.textContent = deathCount;
-    currentLevel = lastCheckpoint; lvlTag.textContent = currentLevel;
-    sfx.death();
-    container.style.borderColor = '#f44';
-    setTimeout(() => container.style.borderColor = '#333', 200);
-    player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; player.trail = [];
-    generateLevel();
-}
-
-function update() {
-    if (!running || isPaused) return;
-    frameCount++;
-
-    if (keys['ShiftLeft'] || keys['ShiftRight']) {
-        player.trail.push({x: player.x, y: player.y});
-    }
-    if (player.trail.length > 5) player.trail.shift();
-
-    let curSpeed = (keys['ShiftLeft'] || keys['ShiftRight']) ? player.runSpeed : player.speed;
-    if (keys['ArrowLeft']) player.vx = -curSpeed;
-    else if (keys['ArrowRight']) player.vx = curSpeed;
-    else player.vx *= 0.85;
-
-    player.vy += 0.6; 
-    if (keys['ArrowUp'] && player.grounded) { player.vy = player.jump; player.grounded = false; sfx.jump(); }
-
-    let nextY = player.y + player.vy, nextX = player.x + player.vx;
-    player.grounded = false;
-
-    hazards.forEach(h => {
-        h.y += h.speed * h.dir;
-        if (h.y > h.startY + h.range || h.y < h.startY) h.dir *= -1;
-        if (nextX + player.w > h.x && nextX < h.x + h.w && nextY + player.h > h.y && nextY < h.y + h.h) handleDeath();
-    });
-
-    platforms.forEach(p => {
-        if (p.hasSeeker) {
-            p.seekerX += 2.5 * p.seekerDir;
-            if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1;
-            let sx = p.x + p.seekerX;
-            if (nextX + player.w > sx && nextX < sx + 15 && nextY + player.h > p.y - 12 && nextY < p.y) handleDeath();
+    <script>
+        let audioCtx;
+        function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); }
+        function playSfx(f, t, d, v, slide = 0) {
+            if (!audioCtx || audioCtx.state !== 'running') return;
+            try {
+                const o = audioCtx.createOscillator(); const g = audioCtx.createGain();
+                o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime);
+                if (slide) o.frequency.exponentialRampToValueAtTime(slide, audioCtx.currentTime + d);
+                g.gain.setValueAtTime(v, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+                o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + d);
+            } catch (e) { }
         }
 
-        // Phase Timing: 240 frames (4s) solid, 60 frames (1s) vanished
-        let cycle = frameCount % 300;
-        let isSolid = !p.isPhase || (cycle < 240);
+        const sfx = {
+            jump: () => playSfx(180, 'square', 0.1, 0.08, 450),
+            win: () => { playSfx(523, 'triangle', 0.1, 0.1); setTimeout(() => playSfx(659, 'triangle', 0.1, 0.1), 80); },
+            checkpoint: () => { playSfx(300, 'sine', 1.2, 0.2, 1400); playSfx(450, 'sine', 1.2, 0.1, 1600); },
+            death: () => playSfx(150, 'sawtooth', 0.4, 0.1, 40)
+        };
 
-        if (p.moveRange > 0) {
-            let oldX = p.x; p.x += p.moveSpeed * p.moveDir;
-            if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange) p.moveDir *= -1;
-            if (isSolid && player.grounded && player.y + player.h === p.y && player.x + player.w > oldX && player.x < oldX + p.w) nextX += (p.x - oldX);
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const container = document.getElementById('container');
+        const lvlTag = document.getElementById('lvl');
+        const bestTag = document.getElementById('best');
+        const deathTag = document.getElementById('deaths');
+        canvas.width = 800; canvas.height = 400;
+
+        let running = false, isPaused = false, currentLevel = 1, lastCheckpoint = 1, deathCount = 0;
+        let bestLevel = localStorage.getItem('core_best_v11') || 1;
+        bestTag.textContent = bestLevel;
+
+        let platforms = [], hazards = [], frameCount = 0;
+        const keys = {};
+        const player = { x: 50, y: 200, w: 20, h: 20, vx: 0, vy: 0, speed: 5, runSpeed: 8, jump: -12, grounded: false, trail: [] };
+        const goal = { x: 0, y: 0, w: 40, h: 40 };
+
+        function generateLevel() {
+            platforms = [{ x: 0, y: 350, w: 150, h: 50, hasSpike: false, moveRange: 0, isPhase: false, seekerX: 0 }];
+            hazards = [];
+            let lastX = 150, lastY = 350;
+            const numPlatforms = 4 + currentLevel;
+
+            for (let i = 0; i < numPlatforms; i++) {
+                let gap = 110 + Math.random() * 80;
+                let vDiff = (Math.random() - 0.5) * 140;
+                if (currentLevel >= 15 && Math.random() < 0.3) {
+                    hazards.push({ x: lastX + (gap / 2) - 10, y: 100, w: 15, h: 80, speed: 1.5 + (Math.random() * 2), dir: 1, range: 150 + (Math.random() * 100), startY: 50 + (Math.random() * 50) });
+                }
+                lastX += gap; lastY = Math.max(120, Math.min(340, lastY + vDiff));
+                let isGoalPlatform = (i === numPlatforms - 1);
+
+                let spawnSpike = (currentLevel >= 10) && !isGoalPlatform && (Math.random() < 0.3);
+                let moveR = (currentLevel >= 20 && !isGoalPlatform && Math.random() < 0.4) ? 50 + Math.random() * 50 : 0;
+
+                let prevWasPhase = platforms[platforms.length - 1].isPhase;
+                let phase = (currentLevel >= 30 && !isGoalPlatform && !prevWasPhase && Math.random() < 0.35);
+                let seeker = (currentLevel >= 40 && !isGoalPlatform && !spawnSpike && !phase && Math.random() < 0.3);
+
+                platforms.push({ x: lastX, y: lastY, w: 120, h: 15, hasSpike: spawnSpike, moveRange: moveR, startX: lastX, moveDir: 1, moveSpeed: 1 + Math.random() * 1.5, isPhase: phase, hasSeeker: seeker, seekerX: 0, seekerDir: 1 });
+                if (isGoalPlatform) { goal.x = lastX + 40; goal.y = lastY - 45; }
+            }
         }
 
-        if (isSolid && nextX + player.w > p.x && nextX < p.x + p.w) {
-            if (player.y + player.h <= p.y && nextY + player.h >= p.y) { player.vy = 0; nextY = p.y - player.h; player.grounded = true; }
-        }
-        if (p.hasSpike) {
-            let sX = p.x + (p.w / 2) - 7.5;
-            if (nextX + player.w > sX && nextX < sX + 15 && nextY + player.h > p.y - 12 && nextY < p.y) handleDeath();
-        }
-    });
-    
-    if (player.y > canvas.height) handleDeath();
-    else {
-        player.x = nextX; player.y = nextY;
-        if (player.x + player.w > goal.x && player.x < goal.x + goal.w && player.y + player.h > goal.y && player.y < goal.y + goal.h) {
-            currentLevel++;
-            if (currentLevel % 10 === 0) {
-                lastCheckpoint = currentLevel; sfx.checkpoint();
-                const cp = document.getElementById('cp-notif'); cp.style.opacity = "1";
-                container.style.borderColor = '#0f0'; container.style.boxShadow = '0 0 30px #0f0';
-                setTimeout(() => { container.style.borderColor = '#333'; container.style.boxShadow = 'none'; cp.style.opacity = "0"; }, 1500);
-            } else sfx.win();
-            lvlTag.textContent = currentLevel;
-            if (currentLevel > bestLevel) { bestLevel = currentLevel; bestTag.textContent = bestLevel; localStorage.setItem('core_best_v11', bestLevel); }
-            player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; player.trail = []; generateLevel();
-        }
-    }
-}
-
-function draw() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    const camX = player.x - 150; 
-    ctx.fillStyle = "#0f0"; ctx.shadowBlur = 15; ctx.shadowColor = "#0f0";
-    ctx.fillRect(goal.x - camX, goal.y, goal.w, goal.h);
-    ctx.shadowBlur = 0;
-    
-    ctx.fillStyle = "#f33";
-    hazards.forEach(h => { ctx.shadowBlur = 10; ctx.shadowColor = "#f33"; ctx.fillRect(h.x - camX, h.y, h.w, h.h); ctx.shadowBlur = 0; });
-
-    platforms.forEach(p => {
-        let cycle = frameCount % 300;
-        let isSolid = !p.isPhase || (cycle < 240);
-        
-        ctx.globalAlpha = isSolid ? 1 : 0.1;
-        
-        // Blink logic: Start blinking 2 seconds (120 frames) before vanishing
-        let isBlinking = p.isPhase && cycle >= 120 && cycle < 240;
-        let blinkOn = Math.floor(frameCount / 10) % 2 === 0;
-
-        if (isBlinking && !blinkOn) {
-            ctx.fillStyle = "#fff"; // Blink color
-        } else {
-            ctx.fillStyle = p.isPhase ? "#08f" : (p.moveRange > 0 ? "#555" : "#333");
+        function handleDeath() {
+            deathCount++; deathTag.textContent = deathCount;
+            currentLevel = lastCheckpoint; lvlTag.textContent = currentLevel;
+            sfx.death();
+            container.style.borderColor = '#f44';
+            setTimeout(() => container.style.borderColor = '#333', 200);
+            player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; player.trail = [];
+            generateLevel();
         }
 
-        ctx.fillRect(p.x - camX, p.y, p.w, p.h);
-        
-        if (p.isPhase) { 
-            ctx.strokeStyle = "#08f"; 
-            ctx.lineWidth = 2;
-            ctx.strokeRect(p.x - camX, p.y, p.w, p.h); 
+        function update() {
+            if (!running || isPaused) return;
+            frameCount++;
+
+            if (keys['ShiftLeft'] || keys['ShiftRight']) {
+                player.trail.push({ x: player.x, y: player.y });
+            }
+            if (player.trail.length > 5) player.trail.shift();
+
+            let curSpeed = (keys['ShiftLeft'] || keys['ShiftRight']) ? player.runSpeed : player.speed;
+            if (keys['ArrowLeft']) player.vx = -curSpeed;
+            else if (keys['ArrowRight']) player.vx = curSpeed;
+            else player.vx *= 0.85;
+
+            player.vy += 0.6;
+            if (keys['ArrowUp'] && player.grounded) { player.vy = player.jump; player.grounded = false; sfx.jump(); }
+
+            let nextY = player.y + player.vy, nextX = player.x + player.vx;
+            player.grounded = false;
+
+            hazards.forEach(h => {
+                h.y += h.speed * h.dir;
+                if (h.y > h.startY + h.range || h.y < h.startY) h.dir *= -1;
+                if (nextX + player.w > h.x && nextX < h.x + h.w && nextY + player.h > h.y && nextY < h.y + h.h) handleDeath();
+            });
+
+            platforms.forEach(p => {
+                if (p.hasSeeker) {
+                    p.seekerX += 2.5 * p.seekerDir;
+                    if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1;
+                    let sx = p.x + p.seekerX;
+                    if (nextX + player.w > sx && nextX < sx + 15 && nextY + player.h > p.y - 12 && nextY < p.y) handleDeath();
+                }
+
+                // Phase Timing: 240 frames (4s) solid, 60 frames (1s) vanished
+                let cycle = frameCount % 300;
+                let isSolid = !p.isPhase || (cycle < 240);
+
+                if (p.moveRange > 0) {
+                    let oldX = p.x; p.x += p.moveSpeed * p.moveDir;
+                    if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange) p.moveDir *= -1;
+                    if (isSolid && player.grounded && player.y + player.h === p.y && player.x + player.w > oldX && player.x < oldX + p.w) nextX += (p.x - oldX);
+                }
+
+                if (isSolid && nextX + player.w > p.x && nextX < p.x + p.w) {
+                    if (player.y + player.h <= p.y && nextY + player.h >= p.y) { player.vy = 0; nextY = p.y - player.h; player.grounded = true; }
+                }
+                if (p.hasSpike) {
+                    let sX = p.x + (p.w / 2) - 7.5;
+                    if (nextX + player.w > sX && nextX < sX + 15 && nextY + player.h > p.y - 12 && nextY < p.y) handleDeath();
+                }
+            });
+
+            if (player.y > canvas.height) handleDeath();
+            else {
+                player.x = nextX; player.y = nextY;
+                if (player.x + player.w > goal.x && player.x < goal.x + goal.w && player.y + player.h > goal.y && player.y < goal.y + goal.h) {
+                    currentLevel++;
+                    if (currentLevel % 10 === 0) {
+                        lastCheckpoint = currentLevel; sfx.checkpoint();
+                        const cp = document.getElementById('cp-notif'); cp.style.opacity = "1";
+                        container.style.borderColor = '#0f0'; container.style.boxShadow = '0 0 30px #0f0';
+                        setTimeout(() => { container.style.borderColor = '#333'; container.style.boxShadow = 'none'; cp.style.opacity = "0"; }, 1500);
+                    } else sfx.win();
+                    lvlTag.textContent = currentLevel;
+                    if (currentLevel > bestLevel) { bestLevel = currentLevel; bestTag.textContent = bestLevel; localStorage.setItem('core_best_v11', bestLevel); }
+                    player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; player.trail = []; generateLevel();
+                }
+            }
         }
 
-        if (p.hasSpike || p.hasSeeker) {
-            ctx.fillStyle = "#f44"; ctx.beginPath();
-            let sx = p.hasSpike ? (p.x + p.w/2 - 7.5) : (p.x + p.seekerX);
-            ctx.moveTo(sx - camX, p.y); ctx.lineTo(sx + 7.5 - camX, p.y - 12); ctx.lineTo(sx + 15 - camX, p.y); ctx.fill();
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const camX = player.x - 150;
+            ctx.fillStyle = "#0f0"; ctx.shadowBlur = 15; ctx.shadowColor = "#0f0";
+            ctx.fillRect(goal.x - camX, goal.y, goal.w, goal.h);
+            ctx.shadowBlur = 0;
+
+            ctx.fillStyle = "#f33";
+            hazards.forEach(h => { ctx.shadowBlur = 10; ctx.shadowColor = "#f33"; ctx.fillRect(h.x - camX, h.y, h.w, h.h); ctx.shadowBlur = 0; });
+
+            platforms.forEach(p => {
+                let cycle = frameCount % 300;
+                let isSolid = !p.isPhase || (cycle < 240);
+
+                ctx.globalAlpha = isSolid ? 1 : 0.1;
+
+                // Blink logic: Start blinking 2 seconds (120 frames) before vanishing
+                let isBlinking = p.isPhase && cycle >= 120 && cycle < 240;
+                let blinkOn = Math.floor(frameCount / 10) % 2 === 0;
+
+                if (isBlinking && !blinkOn) {
+                    ctx.fillStyle = "#fff"; // Blink color
+                } else {
+                    ctx.fillStyle = p.isPhase ? "#08f" : (p.moveRange > 0 ? "#555" : "#333");
+                }
+
+                ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+
+                if (p.isPhase) {
+                    ctx.strokeStyle = "#08f";
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect(p.x - camX, p.y, p.w, p.h);
+                }
+
+                if (p.hasSpike || p.hasSeeker) {
+                    ctx.fillStyle = "#f44"; ctx.beginPath();
+                    let sx = p.hasSpike ? (p.x + p.w / 2 - 7.5) : (p.x + p.seekerX);
+                    ctx.moveTo(sx - camX, p.y); ctx.lineTo(sx + 7.5 - camX, p.y - 12); ctx.lineTo(sx + 15 - camX, p.y); ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            });
+
+            player.trail.forEach((t, i) => {
+                ctx.fillStyle = `rgba(255, 255, 255, ${i / 10})`;
+                ctx.fillRect(150 - (player.x - t.x), t.y, player.w, player.h);
+            });
+
+            ctx.fillStyle = "#fff"; ctx.fillRect(150, player.y, player.w, player.h);
+            if (isPaused) { ctx.fillStyle = "rgba(0,255,0,0.1)"; ctx.fillRect(0, 0, canvas.width, canvas.height); }
         }
-        ctx.globalAlpha = 1;
-    });
 
-    player.trail.forEach((t, i) => {
-        ctx.fillStyle = `rgba(255, 255, 255, ${i / 10})`;
-        ctx.fillRect(150 - (player.x - t.x), t.y, player.w, player.h);
-    });
-
-    ctx.fillStyle = "#fff"; ctx.fillRect(150, player.y, player.w, player.h);
-    if (isPaused) { ctx.fillStyle = "rgba(0,255,0,0.1)"; ctx.fillRect(0,0,canvas.width,canvas.height); }
-}
-
-function togglePause() { if (!running) return; isPaused = !isPaused; document.getElementById('pauseMenu').style.display = isPaused ? 'flex' : 'none'; }
-window.addEventListener('keydown', e => { keys[e.code] = true; if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space", "ShiftLeft", "ShiftRight"].includes(e.code)) e.preventDefault(); if (e.code === 'KeyP' || e.code === 'Escape') togglePause(); });
-window.addEventListener('keyup', e => keys[e.code] = false);
-document.getElementById('startBtn').addEventListener('click', () => { initAudio(); document.getElementById('startMenu').style.display = 'none'; running = true; generateLevel(); (function loop(){ update(); draw(); requestAnimationFrame(loop); })(); });
-document.getElementById('pauseBtn').addEventListener('click', togglePause);
-document.getElementById('resumeBtn').addEventListener('click', togglePause);
-document.getElementById('restartBtn').addEventListener('click', () => { handleDeath(); togglePause(); });
-document.getElementById('warpBtn').addEventListener('click', () => { let target = parseInt(document.getElementById('warpInput').value); if (!isNaN(target) && target > 0) { currentLevel = target; lastCheckpoint = target; lvlTag.textContent = currentLevel; player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; player.trail = []; generateLevel(); togglePause(); } });
-</script>
-<script src="../js/data/version-data.js"></script>
-<script src="../js/version-picker-legacy.js"></script>
+        function togglePause() { if (!running) return; isPaused = !isPaused; document.getElementById('pauseMenu').style.display = isPaused ? 'flex' : 'none'; }
+        window.addEventListener('keydown', e => { keys[e.code] = true; if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "Space", "ShiftLeft", "ShiftRight"].includes(e.code)) e.preventDefault(); if (e.code === 'KeyP' || e.code === 'Escape') togglePause(); });
+        window.addEventListener('keyup', e => keys[e.code] = false);
+        document.getElementById('startBtn').addEventListener('click', () => { initAudio(); document.getElementById('startMenu').style.display = 'none'; running = true; generateLevel(); (function loop() { update(); draw(); requestAnimationFrame(loop); })(); });
+        document.getElementById('pauseBtn').addEventListener('click', togglePause);
+        document.getElementById('resumeBtn').addEventListener('click', togglePause);
+        document.getElementById('restartBtn').addEventListener('click', () => { handleDeath(); togglePause(); });
+        document.getElementById('warpBtn').addEventListener('click', () => { let target = parseInt(document.getElementById('warpInput').value); if (!isNaN(target) && target > 0) { currentLevel = target; lastCheckpoint = target; lvlTag.textContent = currentLevel; player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; player.trail = []; generateLevel(); togglePause(); } });
+    </script>
+    <script src="../js/data/version-data.js"></script>
+    <script src="../js/version-picker-legacy.js"></script>
 </body>
+
 </html>

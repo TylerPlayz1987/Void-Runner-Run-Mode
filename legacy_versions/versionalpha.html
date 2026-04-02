@@ -1,17 +1,68 @@
 <!DOCTYPE html>
 <!-- LEGACY VERSION NOTICE: Archived build for compatibility/version switching. Known bugs may exist; do not modify gameplay behavior unless required for loading or version navigation. -->
 <html>
+
 <head>
     <title>Golden Bear: Bottomless Quest</title>
     <style>
-        body { background: #1a1a1a; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: 'Courier New', monospace; color: gold; overflow: hidden; }
-        canvas { border: 4px solid #fff; background: #000; image-rendering: pixelated; }
-        #ui { position: absolute; top: 20px; text-align: center; width: 100%; pointer-events: none; }
-        #msg-overlay { position: absolute; display: none; background: rgba(0,0,0,0.95); padding: 30px; border: 3px solid #ff4444; text-align: center; z-index: 20; color: white; }
-        button { background: gold; color: black; border: none; padding: 10px 20px; cursor: pointer; font-family: inherit; font-weight: bold; margin-top: 15px; }
-        a { color: #00eaff; text-decoration: none; font-weight: bold; display: block; margin-top: 10px; }
+        body {
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            color: gold;
+            overflow: hidden;
+        }
+
+        canvas {
+            border: 4px solid #fff;
+            background: #000;
+            image-rendering: pixelated;
+        }
+
+        #ui {
+            position: absolute;
+            top: 20px;
+            text-align: center;
+            width: 100%;
+            pointer-events: none;
+        }
+
+        #msg-overlay {
+            position: absolute;
+            display: none;
+            background: rgba(0, 0, 0, 0.95);
+            padding: 30px;
+            border: 3px solid #ff4444;
+            text-align: center;
+            z-index: 20;
+            color: white;
+        }
+
+        button {
+            background: gold;
+            color: black;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+            margin-top: 15px;
+        }
+
+        a {
+            color: #00eaff;
+            text-decoration: none;
+            font-weight: bold;
+            display: block;
+            margin-top: 10px;
+        }
     </style>
 </head>
+
 <body>
     <div id="ui">
         <h1 id="level-display">Level 1</h1>
@@ -20,120 +71,121 @@
     <div id="msg-overlay"></div>
     <canvas id="gameCanvas" width="800" height="400"></canvas>
 
-<script>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
-const msgOverlay = document.getElementById('msg-overlay');
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const msgOverlay = document.getElementById('msg-overlay');
 
-let currentLevel = 1;
-let isGameOver = false;
+        let currentLevel = 1;
+        let isGameOver = false;
 
-const player = { x: 50, y: 150, w: 20, h: 18, vx: 0, vy: 0, speed: 4.5, jump: -10, jumpsUsed: 0, maxJumps: 2 };
-const gravity = 0.5;
-const keys = {};
+        const player = { x: 50, y: 150, w: 20, h: 18, vx: 0, vy: 0, speed: 4.5, jump: -10, jumpsUsed: 0, maxJumps: 2 };
+        const gravity = 0.5;
+        const keys = {};
 
-const levels = {
-    1: [[0, 350, 200, 20], [250, 300, 150, 20], [450, 250, 150, 20], [650, 200, 150, 20]],
-    2: [[0, 350, 100, 20], [200, 300, 100, 20], [400, 250, 100, 20], [600, 200, 100, 20]],
-    3: [[0, 350, 80, 20], [150, 300, 80, 20], [300, 250, 80, 20], [500, 200, 80, 20], [700, 150, 80, 20]],
-    4: [[0, 350, 60, 20], [200, 300, 60, 20], [400, 300, 60, 20], [600, 250, 60, 20]],
-    5: [[0, 350, 50, 20], [150, 320, 50, 20], [300, 280, 50, 20], [450, 240, 50, 20], [600, 200, 50, 20]],
-    6: [[0, 350, 40, 20], [120, 300, 40, 20], [240, 350, 40, 20], [360, 300, 40, 20], [480, 250, 40, 20], [600, 200, 40, 20]],
-    7: [[0, 350, 30, 20], [150, 280, 30, 20], [300, 350, 30, 20], [450, 220, 30, 20], [600, 300, 30, 20], [750, 180, 30, 20]],
-    8: [[0, 350, 25, 20], [180, 300, 25, 20], [360, 250, 25, 20], [540, 200, 25, 20], [720, 150, 25, 20]]
-};
+        const levels = {
+            1: [[0, 350, 200, 20], [250, 300, 150, 20], [450, 250, 150, 20], [650, 200, 150, 20]],
+            2: [[0, 350, 100, 20], [200, 300, 100, 20], [400, 250, 100, 20], [600, 200, 100, 20]],
+            3: [[0, 350, 80, 20], [150, 300, 80, 20], [300, 250, 80, 20], [500, 200, 80, 20], [700, 150, 80, 20]],
+            4: [[0, 350, 60, 20], [200, 300, 60, 20], [400, 300, 60, 20], [600, 250, 60, 20]],
+            5: [[0, 350, 50, 20], [150, 320, 50, 20], [300, 280, 50, 20], [450, 240, 50, 20], [600, 200, 50, 20]],
+            6: [[0, 350, 40, 20], [120, 300, 40, 20], [240, 350, 40, 20], [360, 300, 40, 20], [480, 250, 40, 20], [600, 200, 40, 20]],
+            7: [[0, 350, 30, 20], [150, 280, 30, 20], [300, 350, 30, 20], [450, 220, 30, 20], [600, 300, 30, 20], [750, 180, 30, 20]],
+            8: [[0, 350, 25, 20], [180, 300, 25, 20], [360, 250, 25, 20], [540, 200, 25, 20], [720, 150, 25, 20]]
+        };
 
-function resetPlayer() {
-    player.x = 20; player.y = 100;
-    player.vx = 0; player.vy = 0;
-    player.jumpsUsed = 0;
-}
-
-function restartFromBeginning() {
-    isGameOver = false;
-    currentLevel = 1;
-    document.getElementById('level-display').innerText = 'Level 1';
-    msgOverlay.style.display = 'none';
-    msgOverlay.innerHTML = '';
-    resetPlayer();
-    draw();
-}
-
-function showCompletedScreen() {
-    isGameOver = true;
-    msgOverlay.style.display = 'block';
-    msgOverlay.style.borderColor = '#00ff88';
-    msgOverlay.innerHTML = `<h1>Quest Complete!</h1><p>You cleared all 8 levels.</p>
-        <button onclick="restartFromBeginning()">RESTART FROM BEGINNING</button>`;
-}
-
-window.addEventListener('keydown', e => { if (!isGameOver) keys[e.code] = true; if (e.code === 'Space' && player.jumpsUsed < player.maxJumps) { player.vy = player.jump; player.jumpsUsed++; } });
-window.addEventListener('keyup', e => keys[e.code] = false);
-
-function update() {
-    if (isGameOver) return;
-    if (keys['ArrowRight']) player.vx = player.speed;
-    else if (keys['ArrowLeft']) player.vx = -player.speed;
-    else player.vx *= 0.8;
-
-    player.vy += gravity;
-    player.x += player.vx;
-    player.y += player.vy;
-
-    levels[currentLevel].forEach(p => {
-        if (player.x < p[0] + p[2] && player.x + player.w > p[0] && player.y < p[1] + p[3] && player.y + player.h > p[1]) {
-            if (player.vy > 0 && player.y + player.h - player.vy <= p[1] + 5) {
-                player.y = p[1] - player.h; player.vy = 0; player.jumpsUsed = 0;
-            }
+        function resetPlayer() {
+            player.x = 20; player.y = 100;
+            player.vx = 0; player.vy = 0;
+            player.jumpsUsed = 0;
         }
-    });
 
-    if (player.x > canvas.width) {
-        if (currentLevel < 8) { currentLevel++; document.getElementById('level-display').innerText = `Level ${currentLevel}`; resetPlayer(); }
-        else { showCompletedScreen(); }
-    }
+        function restartFromBeginning() {
+            isGameOver = false;
+            currentLevel = 1;
+            document.getElementById('level-display').innerText = 'Level 1';
+            msgOverlay.style.display = 'none';
+            msgOverlay.innerHTML = '';
+            resetPlayer();
+            draw();
+        }
 
-    if (player.y > canvas.height) {
-        if (currentLevel === 8) {
+        function showCompletedScreen() {
             isGameOver = true;
-            msgOverlay.style.display = "block";
-            msgOverlay.style.borderColor = '#ff4444';
-            msgOverlay.innerHTML = `<h1>Died at the peak 8</h1><p>The code is the friends we made along the way</p>
+            msgOverlay.style.display = 'block';
+            msgOverlay.style.borderColor = '#00ff88';
+            msgOverlay.innerHTML = `<h1>Quest Complete!</h1><p>You cleared all 8 levels.</p>
+        <button onclick="restartFromBeginning()">RESTART FROM BEGINNING</button>`;
+        }
+
+        window.addEventListener('keydown', e => { if (!isGameOver) keys[e.code] = true; if (e.code === 'Space' && player.jumpsUsed < player.maxJumps) { player.vy = player.jump; player.jumpsUsed++; } });
+        window.addEventListener('keyup', e => keys[e.code] = false);
+
+        function update() {
+            if (isGameOver) return;
+            if (keys['ArrowRight']) player.vx = player.speed;
+            else if (keys['ArrowLeft']) player.vx = -player.speed;
+            else player.vx *= 0.8;
+
+            player.vy += gravity;
+            player.x += player.vx;
+            player.y += player.vy;
+
+            levels[currentLevel].forEach(p => {
+                if (player.x < p[0] + p[2] && player.x + player.w > p[0] && player.y < p[1] + p[3] && player.y + player.h > p[1]) {
+                    if (player.vy > 0 && player.y + player.h - player.vy <= p[1] + 5) {
+                        player.y = p[1] - player.h; player.vy = 0; player.jumpsUsed = 0;
+                    }
+                }
+            });
+
+            if (player.x > canvas.width) {
+                if (currentLevel < 8) { currentLevel++; document.getElementById('level-display').innerText = `Level ${currentLevel}`; resetPlayer(); }
+                else { showCompletedScreen(); }
+            }
+
+            if (player.y > canvas.height) {
+                if (currentLevel === 8) {
+                    isGameOver = true;
+                    msgOverlay.style.display = "block";
+                    msgOverlay.style.borderColor = '#ff4444';
+                    msgOverlay.innerHTML = `<h1>Died at the peak 8</h1><p>The code is the friends we made along the way</p>
                 <a href="https://sites.google.com">GO TO HOME SITE</a>
                 <button onclick="location.reload()">TRY AGAIN</button>`;
-        } else { resetPlayer(); }
-    }
-}
+                } else { resetPlayer(); }
+            }
+        }
 
-function draw() {
-    if (isGameOver) return;
-    ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#555"; levels[currentLevel].forEach(p => ctx.fillRect(p[0], p[1], p[2], p[3]));
-    
-    ctx.fillStyle = "#888"; ctx.fillRect(780, levels[currentLevel][levels[currentLevel].length-1][1]-40, 4, 40);
-    ctx.fillStyle = "red"; ctx.fillRect(784, levels[currentLevel][levels[currentLevel].length-1][1]-40, 15, 10);
+        function draw() {
+            if (isGameOver) return;
+            ctx.fillStyle = "#000"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#555"; levels[currentLevel].forEach(p => ctx.fillRect(p[0], p[1], p[2], p[3]));
 
-    // DRAW BEAR (8-bit style)
-    ctx.fillStyle = "gold";
-    // Ears
-    ctx.fillRect(player.x, player.y, 6, 6);
-    ctx.fillRect(player.x + player.w - 6, player.y, 6, 6);
-    // Head
-    ctx.fillRect(player.x + 2, player.y + 4, player.w - 4, player.h - 4);
-    // Eyes
-    ctx.fillStyle = "black";
-    ctx.fillRect(player.x + 5, player.y + 8, 2, 2);
-    ctx.fillRect(player.x + player.w - 7, player.y + 8, 2, 2);
-    // Nose
-    ctx.fillRect(player.x + (player.w/2) - 1, player.y + 12, 2, 1);
+            ctx.fillStyle = "#888"; ctx.fillRect(780, levels[currentLevel][levels[currentLevel].length - 1][1] - 40, 4, 40);
+            ctx.fillStyle = "red"; ctx.fillRect(784, levels[currentLevel][levels[currentLevel].length - 1][1] - 40, 15, 10);
 
-    requestAnimationFrame(draw);
-}
+            // DRAW BEAR (8-bit style)
+            ctx.fillStyle = "gold";
+            // Ears
+            ctx.fillRect(player.x, player.y, 6, 6);
+            ctx.fillRect(player.x + player.w - 6, player.y, 6, 6);
+            // Head
+            ctx.fillRect(player.x + 2, player.y + 4, player.w - 4, player.h - 4);
+            // Eyes
+            ctx.fillStyle = "black";
+            ctx.fillRect(player.x + 5, player.y + 8, 2, 2);
+            ctx.fillRect(player.x + player.w - 7, player.y + 8, 2, 2);
+            // Nose
+            ctx.fillRect(player.x + (player.w / 2) - 1, player.y + 12, 2, 1);
 
-setInterval(update, 1000 / 60);
-draw();
-</script>
+            requestAnimationFrame(draw);
+        }
+
+        setInterval(update, 1000 / 60);
+        draw();
+    </script>
 </body>
 <script src="../js/data/version-data.js"></script>
 <script src="../js/version-picker-legacy.js"></script>
+
 </html>
