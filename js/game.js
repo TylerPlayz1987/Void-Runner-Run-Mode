@@ -2309,6 +2309,37 @@
               y + player.h - 2,
             );
             ctx.stroke();
+          } else if (currentTheme === "zelda") {
+            // Keep the core block body but add Link-inspired hat details.
+            ctx.fillStyle = c;
+            ctx.fillRect(x, y, player.w, player.h);
+
+            // Face panel.
+            ctx.fillStyle = "#f4d0a0";
+            ctx.fillRect(x + 4, y + 4, 12, 10);
+
+            // Hat brim.
+            ctx.fillStyle = "#1f8b3f";
+            ctx.fillRect(x + 2, y + 1, 16, 4);
+
+            // Hat crown and trailing tail.
+            ctx.beginPath();
+            ctx.moveTo(x + 3, y + 2);
+            ctx.lineTo(x + 13, y - 8);
+            ctx.lineTo(x + 19, y + 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x + 15, y + 2);
+            ctx.lineTo(x + 22, y + 6);
+            ctx.lineTo(x + 14, y + 7);
+            ctx.closePath();
+            ctx.fill();
+
+            // Hair under the cap.
+            ctx.fillStyle = "#b67d2e";
+            ctx.fillRect(x + 3, y + 9, 2, 5);
+            ctx.fillRect(x + 15, y + 9, 2, 5);
           } else {
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
@@ -3504,6 +3535,40 @@
             ctx.lineTo(gw / 2, 0);
             ctx.lineTo(0, gh / 2);
             ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          } else if (currentTheme === "zelda") {
+            // Triforce objective marker.
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            const pulse = 0.85 + Math.sin(frameCount * 0.09) * 0.15;
+            const triSize = gw * 0.28;
+
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = "rgba(255, 214, 64, 0.95)";
+            ctx.fillStyle = "rgba(255, 206, 61, 0.95)";
+            ctx.strokeStyle = "#9b6e14";
+            ctx.lineWidth = 2;
+
+            function drawTri(cx, cy, size) {
+              const h = size * 1.15;
+              ctx.beginPath();
+              ctx.moveTo(cx, cy - h / 2);
+              ctx.lineTo(cx - size, cy + h / 2);
+              ctx.lineTo(cx + size, cy + h / 2);
+              ctx.closePath();
+              ctx.fill();
+              ctx.stroke();
+            }
+
+            drawTri(0, -gh * 0.12, triSize * pulse);
+            drawTri(-triSize, gh * 0.26, triSize * pulse);
+            drawTri(triSize, gh * 0.26, triSize * pulse);
+
+            // Small center glint.
+            ctx.fillStyle = "rgba(255, 248, 180, 0.85)";
+            ctx.beginPath();
+            ctx.arc(0, gh * 0.02, 2.2, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
           } else {
