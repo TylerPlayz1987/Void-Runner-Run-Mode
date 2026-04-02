@@ -601,6 +601,13 @@
         text-shadow: 0 0 10px rgba(255, 204, 51, 0.8);
       }
 
+      #changelogContent {
+        width: 100%;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
       #codeFlashMessage.active {
         animation: codeFlashPulse 1s ease-in-out 3;
       }

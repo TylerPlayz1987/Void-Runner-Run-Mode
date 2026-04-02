@@ -45,6 +45,9 @@
           speedRunMode = false,
           speedRunStartTime = 0,
           speedRunGameOverMode = false,
+          speedRunGlitchWallX = -260,
+          speedRunGlitchWallW = 34,
+          speedRunGlitchWallSpeed = 0.9,
           fullRestartResumeOnCancel = false,
           fullRestartOpenedFromResetPrompt = false,
           mobileSupportEnabled = false,
@@ -1582,7 +1585,16 @@
           player.speedZoneMul = 1;
           player.standPlatform = null;
           generateLevel();
+          if (speedRunMode) {
+            resetSpeedRunGlitchWall();
+          }
         }
+
+        function resetSpeedRunGlitchWall() {
+          speedRunGlitchWallX = -260;
+          speedRunGlitchWallSpeed = 0.78 + Math.min(1.05, currentLevel * 0.02);
+        }
+
         // Main game simulation, runs every frame before draw()
         function update() {
           if (!running || isPaused) return;
@@ -1595,6 +1607,14 @@
           if (speedRunMode && !speedRunGameOverMode) {
             const elapsedTime = Date.now() - speedRunStartTime;
             document.getElementById("speedRunTimer").textContent = formatSpeedRunTime(elapsedTime);
+            speedRunGlitchWallX += speedRunGlitchWallSpeed;
+            if (
+              player.x + player.w > speedRunGlitchWallX &&
+              player.x < speedRunGlitchWallX + speedRunGlitchWallW
+            ) {
+              showSpeedRunGameOver();
+              return;
+            }
           }
           for (let i = winParticles.length - 1; i >= 0; i--) {
             let p = winParticles[i];
@@ -2317,6 +2337,26 @@
               (Math.random() - 0.5) * shake,
             );
           const camX = player.x - 150;
+          if (speedRunMode && !speedRunGameOverMode) {
+            const wallScreenX = speedRunGlitchWallX - camX;
+            if (wallScreenX < canvas.width + 24 && wallScreenX + speedRunGlitchWallW > -24) {
+              const band = ctx.createLinearGradient(
+                wallScreenX,
+                0,
+                wallScreenX + speedRunGlitchWallW,
+                0,
+              );
+              band.addColorStop(0, "rgba(255, 0, 200, 0.65)");
+              band.addColorStop(0.5, "rgba(80, 255, 245, 0.7)");
+              band.addColorStop(1, "rgba(255, 0, 140, 0.6)");
+              ctx.fillStyle = band;
+              ctx.fillRect(wallScreenX, 0, speedRunGlitchWallW, canvas.height);
+              for (let y = 0; y < canvas.height; y += 12) {
+                ctx.fillStyle = y % 24 === 0 ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.15)";
+                ctx.fillRect(wallScreenX - 2, y + ((frameCount + y) % 5), speedRunGlitchWallW + 4, 2);
+              }
+            }
+          }
           if (t.aurora) {
             let s = Math.sin(frameCount / 100) * 20;
             let g = ctx.createLinearGradient(0, 0, 0, 400);
@@ -3851,6 +3891,7 @@
           document.getElementById("topControls").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("changelogMenu").style.display = "none";
           document.getElementById("speedRunMenu").style.display = "none";
           document.getElementById("speedRunTimer").classList.remove("active");
           document.getElementById("startMenu").style.display = "flex";
@@ -3974,6 +4015,14 @@
             flashCodeMessage("test done");
           }
         };
+        document.getElementById("openChangelogBtn").onclick = () => {
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("changelogMenu").style.display = "flex";
+        };
+        document.getElementById("changelogBackBtn").onclick = () => {
+          document.getElementById("changelogMenu").style.display = "none";
+          document.getElementById("startMenu").style.display = "flex";
+        };
         document.getElementById("modeBackBtn").onclick = () => {
           document.getElementById("modeMenu").style.display = "none";
           document.getElementById("startMenu").style.display = "flex";
@@ -3997,6 +4046,7 @@
           speedRunGameOverMode = false;
           // Record exact start time (milliseconds) for accurate timer
           speedRunStartTime = Date.now();
+          resetSpeedRunGlitchWall();
           showingPostTutorialSettings = false;
           setTutorialUiVisible(false);
           currentLevel = 1;
