@@ -512,6 +512,17 @@
           currentTheme = "classic",
           infiniteInvincibility = false;
         const { themes, getLavaFx, getWellFx } = window.VR_THEME_DATA;
+        const themeBackgroundImages = {};
+        function getThemeBackgroundImage(themeName) {
+          const theme = themes[themeName];
+          if (!theme || !theme.bgImage) return null;
+          if (!themeBackgroundImages[themeName]) {
+            const image = new Image();
+            image.src = theme.bgImage;
+            themeBackgroundImages[themeName] = image;
+          }
+          return themeBackgroundImages[themeName];
+        }
         // Theme particles/background add-ons (cosmetic)
         const cyberBldgs = Array.from({ length: 12 }, () => ({
           x: Math.random() * 1200,
@@ -2389,6 +2400,16 @@
             g.addColorStop(1, "#660099");
             ctx.fillStyle = g;
             ctx.fillRect(0, 0, 800, 400);
+          } else if (t.bgImage) {
+            const bgImage = getThemeBackgroundImage(currentTheme);
+            if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
+              ctx.drawImage(bgImage, 0, 0, 800, 400);
+              ctx.fillStyle = "rgba(11, 61, 46, 0.12)";
+              ctx.fillRect(0, 0, 800, 400);
+            } else {
+              ctx.fillStyle = t.bg;
+              ctx.fillRect(0, 0, 800, 400);
+            }
           } else if (currentTheme === "sunny") {
             let g = ctx.createLinearGradient(0, 0, 0, 400);
             g.addColorStop(0, "#87CEEB");
