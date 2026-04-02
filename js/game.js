@@ -2337,26 +2337,6 @@
               (Math.random() - 0.5) * shake,
             );
           const camX = player.x - 150;
-          if (speedRunMode && !speedRunGameOverMode) {
-            const wallScreenX = speedRunGlitchWallX - camX;
-            if (wallScreenX < canvas.width + 24 && wallScreenX + speedRunGlitchWallW > -24) {
-              const band = ctx.createLinearGradient(
-                wallScreenX,
-                0,
-                wallScreenX + speedRunGlitchWallW,
-                0,
-              );
-              band.addColorStop(0, "rgba(255, 0, 200, 0.65)");
-              band.addColorStop(0.5, "rgba(80, 255, 245, 0.7)");
-              band.addColorStop(1, "rgba(255, 0, 140, 0.6)");
-              ctx.fillStyle = band;
-              ctx.fillRect(wallScreenX, 0, speedRunGlitchWallW, canvas.height);
-              for (let y = 0; y < canvas.height; y += 12) {
-                ctx.fillStyle = y % 24 === 0 ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.15)";
-                ctx.fillRect(wallScreenX - 2, y + ((frameCount + y) % 5), speedRunGlitchWallW + 4, 2);
-              }
-            }
-          }
           if (t.aurora) {
             let s = Math.sin(frameCount / 100) * 20;
             let g = ctx.createLinearGradient(0, 0, 0, 400);
@@ -3098,6 +3078,26 @@
             ctx.globalAlpha = 0.6 + Math.sin(frameCount / 15) * 0.2;
             ctx.fillRect(0, 370, 800, 30);
             ctx.globalAlpha = 1;
+          }
+          if (speedRunMode && !speedRunGameOverMode) {
+            const wallScreenX = speedRunGlitchWallX - camX;
+            if (wallScreenX < canvas.width + 24 && wallScreenX + speedRunGlitchWallW > -24) {
+              const band = ctx.createLinearGradient(
+                wallScreenX,
+                0,
+                wallScreenX + speedRunGlitchWallW,
+                0,
+              );
+              band.addColorStop(0, "rgba(255, 0, 200, 0.65)");
+              band.addColorStop(0.5, "rgba(80, 255, 245, 0.7)");
+              band.addColorStop(1, "rgba(255, 0, 140, 0.6)");
+              ctx.fillStyle = band;
+              ctx.fillRect(wallScreenX, 0, speedRunGlitchWallW, canvas.height);
+              for (let y = 0; y < canvas.height; y += 12) {
+                ctx.fillStyle = y % 24 === 0 ? "rgba(0,0,0,0.3)" : "rgba(255,255,255,0.15)";
+                ctx.fillRect(wallScreenX - 2, y + ((frameCount + y) % 5), speedRunGlitchWallW + 4, 2);
+              }
+            }
           }
           if (t.glitch) ctx.globalAlpha = 0.8;
           const wellFx = getWellFx(currentTheme);
