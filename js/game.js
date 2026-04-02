@@ -514,6 +514,7 @@
         const { themes, getLavaFx, getWellFx } = window.VR_THEME_DATA;
         const themeBackgroundImages = {};
         const themeGoalImages = {};
+        const themePlayerImages = {};
         function getThemeBackgroundImage(themeName) {
           const theme = themes[themeName];
           if (!theme || !theme.bgImage) return null;
@@ -533,6 +534,16 @@
             themeGoalImages[themeName] = image;
           }
           return themeGoalImages[themeName];
+        }
+        function getThemePlayerImage(themeName) {
+          const theme = themes[themeName];
+          if (!theme || !theme.playerImage) return null;
+          if (!themePlayerImages[themeName]) {
+            const image = new Image();
+            image.src = theme.playerImage;
+            themePlayerImages[themeName] = image;
+          }
+          return themePlayerImages[themeName];
         }
         // Theme particles/background add-ons (cosmetic)
         const cyberBldgs = Array.from({ length: 12 }, () => ({
@@ -2273,76 +2284,81 @@
             ctx.fillStyle = "#fff7b8";
             ctx.fillRect(x + 9, y - 12 + wobble, 2, 2);
           } else if (currentTheme === "tjtheme") {
-            const bob = Math.sin(frameCount * 0.08 + x * 0.05) * 0.7;
-            ctx.save();
-            ctx.translate(0, bob);
+            const tjPlayerImage = getThemePlayerImage("tjtheme");
+            if (tjPlayerImage && tjPlayerImage.complete && tjPlayerImage.naturalWidth > 0) {
+              ctx.drawImage(tjPlayerImage, x - 3, y - 2, player.w + 6, player.h + 6);
+            } else {
+              const bob = Math.sin(frameCount * 0.08 + x * 0.05) * 0.7;
+              ctx.save();
+              ctx.translate(0, bob);
 
-            // Round yellow rubber duck body.
-            ctx.fillStyle = "#ffd94d";
-            ctx.beginPath();
-            ctx.ellipse(x + 10, y + 12, 11, 9, 0, 0, Math.PI * 2);
-            ctx.fill();
+              // Round yellow rubber duck body.
+              ctx.fillStyle = "#ffd94d";
+              ctx.beginPath();
+              ctx.ellipse(x + 10, y + 12, 11, 9, 0, 0, Math.PI * 2);
+              ctx.fill();
 
-            ctx.fillStyle = "#f8cb2d";
-            ctx.beginPath();
-            ctx.ellipse(x + 10, y + 12, 8.5, 6.8, 0, 0, Math.PI * 2);
-            ctx.fill();
+              ctx.fillStyle = "#f8cb2d";
+              ctx.beginPath();
+              ctx.ellipse(x + 10, y + 12, 8.5, 6.8, 0, 0, Math.PI * 2);
+              ctx.fill();
 
-            // Head and cheek highlight.
-            ctx.fillStyle = "#ffd94d";
-            ctx.beginPath();
-            ctx.ellipse(x + 10, y + 9, 8.5, 7, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "rgba(255,255,255,0.16)";
-            ctx.beginPath();
-            ctx.ellipse(x + 6.5, y + 11.5, 3.2, 2.1, -0.25, 0, Math.PI * 2);
-            ctx.fill();
+              // Head and cheek highlight.
+              ctx.fillStyle = "#ffd94d";
+              ctx.beginPath();
+              ctx.ellipse(x + 10, y + 9, 8.5, 7, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = "rgba(255,255,255,0.16)";
+              ctx.beginPath();
+              ctx.ellipse(x + 6.5, y + 11.5, 3.2, 2.1, -0.25, 0, Math.PI * 2);
+              ctx.fill();
 
-            // Orange beak.
-            ctx.fillStyle = "#ff7a1a";
-            ctx.beginPath();
-            ctx.ellipse(x + 10, y + 12, 6.8, 4.2, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = "#ff9b3b";
-            ctx.beginPath();
-            ctx.ellipse(x + 10, y + 11.5, 5.4, 2.4, 0, 0, Math.PI * 2);
-            ctx.fill();
+              // Orange beak.
+              ctx.fillStyle = "#ff7a1a";
+              ctx.beginPath();
+              ctx.ellipse(x + 10, y + 12, 6.8, 4.2, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = "#ff9b3b";
+              ctx.beginPath();
+              ctx.ellipse(x + 10, y + 11.5, 5.4, 2.4, 0, 0, Math.PI * 2);
+              ctx.fill();
 
-            // Beak lip and nostril line.
-            ctx.strokeStyle = "rgba(220,90,20,0.8)";
-            ctx.lineWidth = 1;
-            ctx.beginPath();
-            ctx.moveTo(x + 5.6, y + 12);
-            ctx.lineTo(x + 14.6, y + 12);
-            ctx.stroke();
+              // Beak lip and nostril line.
+              ctx.strokeStyle = "rgba(220,90,20,0.8)";
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(x + 5.6, y + 12);
+              ctx.lineTo(x + 14.6, y + 12);
+              ctx.stroke();
 
-            // Eyes.
-            ctx.fillStyle = "#111";
-            ctx.beginPath();
-            ctx.arc(x + 7.5, y + 7.5, 1.7, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + 13, y + 7.5, 1.7, 0, Math.PI * 2);
-            ctx.fill();
+              // Eyes.
+              ctx.fillStyle = "#111";
+              ctx.beginPath();
+              ctx.arc(x + 7.5, y + 7.5, 1.7, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.beginPath();
+              ctx.arc(x + 13, y + 7.5, 1.7, 0, Math.PI * 2);
+              ctx.fill();
 
-            ctx.fillStyle = "#fff8d8";
-            ctx.beginPath();
-            ctx.arc(x + 8.1, y + 6.8, 0.45, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.arc(x + 13.6, y + 6.8, 0.45, 0, Math.PI * 2);
-            ctx.fill();
+              ctx.fillStyle = "#fff8d8";
+              ctx.beginPath();
+              ctx.arc(x + 8.1, y + 6.8, 0.45, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.beginPath();
+              ctx.arc(x + 13.6, y + 6.8, 0.45, 0, Math.PI * 2);
+              ctx.fill();
 
-            // Tiny wing bumps.
-            ctx.fillStyle = "#f0c71a";
-            ctx.beginPath();
-            ctx.ellipse(x + 3, y + 13.5, 2.5, 3.5, -0.55, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.beginPath();
-            ctx.ellipse(x + 17, y + 13.5, 2.5, 3.5, 0.55, 0, Math.PI * 2);
-            ctx.fill();
+              // Tiny wing bumps.
+              ctx.fillStyle = "#f0c71a";
+              ctx.beginPath();
+              ctx.ellipse(x + 3, y + 13.5, 2.5, 3.5, -0.55, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.beginPath();
+              ctx.ellipse(x + 17, y + 13.5, 2.5, 3.5, 0.55, 0, Math.PI * 2);
+              ctx.fill();
 
-            ctx.restore();
+              ctx.restore();
+            }
           } else if (currentTheme === "pirate") {
             // Draw pirate body
             ctx.fillStyle = c;

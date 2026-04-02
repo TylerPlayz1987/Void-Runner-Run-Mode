@@ -67,6 +67,7 @@ const themes = {
     player: "#ffd94d",
     hazards: "#ff7d7d",
     stars: true,
+    playerImage: "theme_bg/tj_theme_player.png",
     goalImage: "theme_bg/tj_theme_goal.png",
     music: "theme_bg/Wacky.ogg",
   },
