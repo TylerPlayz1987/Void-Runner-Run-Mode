@@ -549,6 +549,15 @@
             Math.floor(Math.random() * 5)
           ],
         }));
+        const aprilFloaters = Array.from({ length: 12 }, () => ({
+          x: Math.random() * 900 - 70,
+          y: 30 + Math.random() * 260,
+          vx: 0.8 + Math.random() * 1.4,
+          size: 12 + Math.random() * 14,
+          type: ["balloon", "ufo", "duck", "twist"][Math.floor(Math.random() * 4)],
+          hue: Math.floor(Math.random() * 360),
+          offset: Math.random() * Math.PI * 2,
+        }));
         const moonTreeTops = Array.from({ length: 52 }, () => ({
           x: Math.random() * 2600,
           // Keep tree bases below the visible canvas so only the tops peek in.
@@ -2899,6 +2908,72 @@
                 ctx.fill();
               }
             }
+
+            // April Fools extra flying background objects
+            aprilFloaters.forEach((f, i) => {
+              f.x += f.vx;
+              f.y += Math.sin(frameCount * 0.02 + f.offset) * 0.6;
+              if (f.x > 850) f.x = -70;
+              if (f.x < -70) f.x = 850;
+
+              const c = `hsl(${(f.hue + frameCount * 0.5) % 360}, 90%, 60%)`;
+              ctx.fillStyle = c;
+              ctx.strokeStyle = "#000";
+              ctx.lineWidth = 1;
+              const cx = f.x;
+              const cy = f.y;
+              const s = f.size;
+
+              if (f.type === "balloon") {
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, s * 0.7, s, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.strokeStyle = "#444";
+                ctx.beginPath();
+                ctx.moveTo(cx, cy + s);
+                ctx.lineTo(cx, cy + s * 1.5);
+                ctx.stroke();
+              } else if (f.type === "ufo") {
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, s, s * 0.4, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.stroke();
+                ctx.fillStyle = "rgba(255,255,255,0.7)";
+                ctx.beginPath();
+                ctx.ellipse(cx, cy + 2, s * 0.5, s * 0.2, 0, 0, Math.PI * 2);
+                ctx.fill();
+              } else if (f.type === "duck") {
+                ctx.beginPath();
+                ctx.arc(cx, cy, s * 0.45, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#000";
+                ctx.beginPath();
+                ctx.arc(cx + s * 0.15, cy - s * 0.08, s * 0.08, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#ff9900";
+                ctx.beginPath();
+                ctx.moveTo(cx + s * 0.5, cy);
+                ctx.lineTo(cx + s * 0.7, cy + s * 0.05);
+                ctx.lineTo(cx + s * 0.5, cy + s * 0.1);
+                ctx.closePath();
+                ctx.fill();
+              } else {
+                // twisted ribbon
+                ctx.beginPath();
+                for (let k = 0; k < 8; k++) {
+                  const angle = (k / 8) * Math.PI * 2 + frameCount * 0.05;
+                  const r = s * (0.6 + 0.25 * Math.sin(frameCount * 0.07 + k));
+                  const px = cx + Math.cos(angle) * r;
+                  const py = cy + Math.sin(angle) * r;
+                  if (k === 0) ctx.moveTo(px, py);
+                  else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+              }
+            });
           } else {
             ctx.fillStyle = t.bg;
             ctx.fillRect(0, 0, 800, 400);
