@@ -68,7 +68,7 @@ const themes = {
     hazards: "#ff9f7a",
     stars: true,
     glitch: true,
-    music: "theme_bg/Funny.ogg",
+    music: "theme_bg/Wacky.ogg",
   },
   magma: {
     bg: "#1a0505",
