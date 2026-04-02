@@ -4130,6 +4130,7 @@
           document.getElementById("modeMenu").style.display = "flex";
         };
         const code1 = "test";
+        const secretThemeCode = "zelda";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
