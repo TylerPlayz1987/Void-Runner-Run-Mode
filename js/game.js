@@ -2314,10 +2314,6 @@
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
 
-            // Face panel.
-            ctx.fillStyle = "#f4d0a0";
-            ctx.fillRect(x + 4, y + 4, 12, 10);
-
             // Hat brim.
             ctx.fillStyle = "#1f8b3f";
             ctx.fillRect(x + 2, y + 1, 16, 4);
