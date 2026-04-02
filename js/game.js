@@ -2429,6 +2429,17 @@
 
             const drift = frameCount * 1.35;
             for (let i = 0; i < 16; i++) {
+
+        function drawGoalTriangle(ctx, cx, cy, size) {
+          const h = size * 1.15;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy - h / 2);
+          ctx.lineTo(cx - size, cy + h / 2);
+          ctx.lineTo(cx + size, cy + h / 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
               const bandY = (i * 29 + drift) % 420;
               const width = 260 + ((i % 4) * 70);
               const startX = ((i * 93 - camX * 0.2) % 1000) - 120;
@@ -3546,20 +3557,9 @@
             ctx.strokeStyle = "#9b6e14";
             ctx.lineWidth = 2;
 
-            function drawTri(cx, cy, size) {
-              const h = size * 1.15;
-              ctx.beginPath();
-              ctx.moveTo(cx, cy - h / 2);
-              ctx.lineTo(cx - size, cy + h / 2);
-              ctx.lineTo(cx + size, cy + h / 2);
-              ctx.closePath();
-              ctx.fill();
-              ctx.stroke();
-            }
-
-            drawTri(0, -gh * 0.12, triSize * pulse);
-            drawTri(-triSize, gh * 0.26, triSize * pulse);
-            drawTri(triSize, gh * 0.26, triSize * pulse);
+            drawGoalTriangle(ctx, 0, -gh * 0.12, triSize * pulse);
+            drawGoalTriangle(ctx, -triSize, gh * 0.26, triSize * pulse);
+            drawGoalTriangle(ctx, triSize, gh * 0.26, triSize * pulse);
 
             // Small center glint.
             ctx.fillStyle = "rgba(255, 248, 180, 0.85)";
@@ -5301,11 +5301,37 @@
             activeTag === "SELECT" ||
             (document.activeElement && document.activeElement.isContentEditable);
 
-          if (typingInField) {
-            if (e.code === "Escape" && codeEntryModal.style.display === "flex") {
+          const isPauseShortcut = e.code === "KeyP" || e.code === "Escape";
+          if (isPauseShortcut) {
+            if (codeEntryModal.style.display === "flex") {
               e.preventDefault();
               closeCodeEntryModal();
+              return;
             }
+
+            if (versionPickerMenu.style.display === "flex") {
+              e.preventDefault();
+              closeVersionPicker();
+              return;
+            }
+
+            if (document.getElementById("fullRestartConfirm").style.display === "flex") {
+              e.preventDefault();
+              hideFullRestartPrompt();
+              return;
+            }
+
+            if (document.getElementById("pauseMenu").style.display === "flex") {
+              e.preventDefault();
+              if (submenuBack()) return;
+            }
+
+            e.preventDefault();
+            toggle();
+            return;
+          }
+
+          if (typingInField) {
             return;
           }
 
@@ -5343,27 +5369,6 @@
             }
           }
 
-          if (e.code === "KeyP" || e.code === "Escape") {
-            if (codeEntryModal.style.display === "flex") {
-              closeCodeEntryModal();
-              return;
-            }
-
-            if (versionPickerMenu.style.display === "flex") {
-              closeVersionPicker();
-              return;
-            }
-
-            if (document.getElementById("fullRestartConfirm").style.display === "flex") {
-              hideFullRestartPrompt();
-              return;
-            }
-
-            if (document.getElementById("pauseMenu").style.display === "flex") {
-              if (submenuBack()) return;
-            }
-            toggle();
-          }
           if (
             [
               "ArrowUp",

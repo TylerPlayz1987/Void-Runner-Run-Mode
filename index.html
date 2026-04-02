@@ -76,10 +76,10 @@
           <button id="openChangelogBtn" class="small-btn" style="width: 200px; margin-top: 8px;">Changelog</button>
           <div id="codeFlashMessage">test done</div>
         </div>
-        <div id="codeEntryModal" class="overlay" style="display: none">
+        <div id="codeEntryModal" class="overlay" style="display: none" role="dialog" aria-modal="true" aria-labelledby="codeEntryTitle">
           <div class="code-entry-box">
-            <h1>ENTER CODE</h1>
-            <input id="codeEntryInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Type code" />
+            <h1 id="codeEntryTitle">ENTER CODE</h1>
+            <input id="codeEntryInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Type code" aria-label="Enter code" />
             <div class="code-entry-actions">
               <button id="codeEntrySubmitBtn" style="background: #fc3; color: #111">Submit</button>
               <button id="codeEntryCancelBtn" class="small-btn">Cancel</button>
