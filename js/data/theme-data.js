@@ -222,6 +222,16 @@ const lavaThemeFx = {
     particleB: [60, 180, 90],
     particleStyle: "bubble",
   },
+  zelda: {
+    glowInner: "rgba(201,79,61,0.7)",
+    glowMid: "rgba(150,60,45,0.4)",
+    glowOuter: "rgba(100,30,15,0)",
+    fill: "rgba(201,79,61,0.9)",
+    stroke: "rgba(230,120,100,0.8)",
+    particleA: [201, 79, 61],
+    particleB: [230, 120, 100],
+    particleStyle: "ember",
+  },
 };
 function getLavaFx(themeName) {
   return lavaThemeFx[themeName] || lavaThemeFx.classic;
@@ -326,6 +336,15 @@ const wellThemeFx = {
     coreMid: "rgba(139,69,19,0.34)",
     coreRing: "rgba(255,165,0,0.24)",
     coreStroke: "#ffa500",
+  zelda: {
+    normalInner: "rgba(122,92,45,0.5)",
+    normalMid: "rgba(80,60,30,0.3)",
+    normalRing: "rgba(100,75,40,0.22)",
+    coreInner: "rgba(201,79,61,0.52)",
+    coreMid: "rgba(140,50,35,0.34)",
+    coreRing: "rgba(180,100,80,0.24)",
+    coreStroke: "#c95f3d",
+  },
   },
   jungle: {
     normalInner: "rgba(80,190,110,0.5)",
