@@ -152,6 +152,7 @@
   const closeBtn = document.createElement("button");
   closeBtn.id = "versionPickerClose";
   closeBtn.type = "button";
+  closeBtn.setAttribute("aria-label", "Close version picker");
   closeBtn.textContent = "X";
 
   const list = document.createElement("div");

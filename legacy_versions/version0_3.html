@@ -82,7 +82,7 @@
          const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d'), container = document.getElementById('container'), cpNotif = document.getElementById('cp-notif');
          canvas.width = 800; canvas.height = 400;
          
-         let bestLevel = localStorage.getItem('core_best_v20') || 1;
+         let bestLevel = localStorage.getItem('core_best_v0_3') || 1;
          document.getElementById('best').textContent = bestLevel;
          
          let currentTheme = 'classic';
@@ -173,7 +173,7 @@
              if (currentLevel % 5 === 0) {
                  lastCheckpoint = currentLevel; play.cp(); cpNotif.style.opacity = "1"; container.style.borderColor = '#0f0'; container.style.boxShadow = '0 0 30px #0f0'; setTimeout(() => { container.style.borderColor = '#333'; container.style.boxShadow = 'none'; cpNotif.style.opacity = "0"; }, 1500);
              } else play.wn();
-             if (currentLevel > bestLevel) { bestLevel = currentLevel; document.getElementById('best').textContent = bestLevel; localStorage.setItem('core_best_v20', bestLevel); }
+             if (currentLevel > bestLevel) { bestLevel = currentLevel; document.getElementById('best').textContent = bestLevel; localStorage.setItem('core_best_v0_3', bestLevel); }
              player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; generateLevel();
          }
          
