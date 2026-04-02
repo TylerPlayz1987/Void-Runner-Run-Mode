@@ -2815,6 +2815,60 @@
               ctx.arc(fx, fy, r, 0, Math.PI * 2);
               ctx.fill();
             }
+          } else if (currentTheme === "aprilfools") {
+            // April Fools rainbow background
+            const rainbowColors = [
+              "#ff0000", "#ff8000", "#ffff00", "#80ff00", 
+              "#00ff00", "#00ff80", "#00ffff", "#0080ff", 
+              "#0000ff", "#8000ff", "#ff00ff", "#ff0080"
+            ];
+            
+            for (let i = 0; i < rainbowColors.length; i++) {
+              const y = (i * 400 / rainbowColors.length) + (frameCount * 0.5) % (400 / rainbowColors.length);
+              const height = 400 / rainbowColors.length + 10;
+              ctx.fillStyle = rainbowColors[i];
+              ctx.fillRect(0, y % 400, 800, height);
+            }
+            
+            // Add some silly floating shapes
+            for (let i = 0; i < 8; i++) {
+              const x = ((i * 113 + frameCount * 0.8) % 900) - 50;
+              const y = 50 + ((i * 47) % 300) + Math.sin(frameCount * 0.03 + i) * 20;
+              const size = 15 + Math.sin(frameCount * 0.05 + i) * 5;
+              
+              // Random silly shapes
+              ctx.fillStyle = rainbowColors[i % rainbowColors.length];
+              if (i % 4 === 0) {
+                // Circle
+                ctx.beginPath();
+                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.fill();
+              } else if (i % 4 === 1) {
+                // Square
+                ctx.fillRect(x - size/2, y - size/2, size, size);
+              } else if (i % 4 === 2) {
+                // Triangle
+                ctx.beginPath();
+                ctx.moveTo(x, y - size/2);
+                ctx.lineTo(x - size/2, y + size/2);
+                ctx.lineTo(x + size/2, y + size/2);
+                ctx.closePath();
+                ctx.fill();
+              } else {
+                // Star
+                ctx.beginPath();
+                for (let j = 0; j < 5; j++) {
+                  const angle = (j * 4 * Math.PI) / 5;
+                  const radius = j % 2 === 0 ? size : size/2;
+                  const px = x + Math.cos(angle) * radius;
+                  const py = y + Math.sin(angle) * radius;
+                  if (j === 0) ctx.moveTo(px, py);
+                  else ctx.lineTo(px, py);
+                }
+                ctx.closePath();
+                ctx.fill();
+              }
+            }
           } else {
             ctx.fillStyle = t.bg;
             ctx.fillRect(0, 0, 800, 400);
