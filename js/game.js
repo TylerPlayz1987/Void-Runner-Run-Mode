@@ -4873,6 +4873,21 @@
         function setTheme(themeName) {
           currentTheme = themeName;
           updateThemeButtonsUi();
+          
+          // Adjust stat colors for better visibility on dark theme backgrounds
+          const levelStat = document.querySelector('#ui-left > .stat:first-child');
+          if (themeName === "zelda") {
+            if (levelStat) {
+              levelStat.style.color = "#ffd54a";
+              levelStat.style.borderColor = "#ffd54a";
+            }
+          } else {
+            if (levelStat) {
+              levelStat.style.color = "";
+              levelStat.style.borderColor = "";
+            }
+          }
+          
           const m = document.getElementById("bgMusic");
           if (m && themes[currentTheme] && themes[currentTheme].music) {
             m.src = themes[currentTheme].music;
