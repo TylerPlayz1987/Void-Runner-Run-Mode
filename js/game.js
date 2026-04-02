@@ -2306,7 +2306,17 @@
               zeldaPlayerImage.complete &&
               zeldaPlayerImage.naturalWidth > 0
             ) {
-              ctx.drawImage(zeldaPlayerImage, x - 3, y - 3, player.w + 6, player.h + 6);
+              const maxW = player.w + 8;
+              const maxH = player.h + 10;
+              const scale = Math.min(
+                maxW / zeldaPlayerImage.naturalWidth,
+                maxH / zeldaPlayerImage.naturalHeight,
+              );
+              const drawW = zeldaPlayerImage.naturalWidth * scale;
+              const drawH = zeldaPlayerImage.naturalHeight * scale;
+              const drawX = x + (player.w - drawW) / 2;
+              const drawY = y + (player.h - drawH) / 2;
+              ctx.drawImage(zeldaPlayerImage, drawX, drawY, drawW, drawH);
             } else {
               // Keep the core block body but add Link-inspired hat details.
               ctx.fillStyle = c;
