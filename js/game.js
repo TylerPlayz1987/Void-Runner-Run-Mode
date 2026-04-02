@@ -4636,6 +4636,41 @@
         document.getElementById("cancelFullRestartBtn").onclick = () =>
           hideFullRestartPrompt(true);
 
+        let lastSliderPreviewAt = 0;
+        function playSliderPreview(kind, value) {
+          const now = performance.now();
+          if (now - lastSliderPreviewAt < 85) return;
+          lastSliderPreviewAt = now;
+          ensureAudioContext();
+          if (!audioCtx) return;
+          try {
+            const normalized = Math.max(0, Math.min(1, value / 100));
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type =
+              kind === "sfx"
+                ? "square"
+                : kind === "music"
+                  ? "sine"
+                  : "triangle";
+            const baseFreq = kind === "sfx" ? 320 : kind === "music" ? 220 : 270;
+            osc.frequency.setValueAtTime(
+              baseFreq + normalized * 420,
+              audioCtx.currentTime,
+            );
+            const previewVol = (0.012 + normalized * 0.045) * Math.max(0.2, masterVol);
+            gain.gain.setValueAtTime(previewVol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(
+              0.0001,
+              audioCtx.currentTime + 0.075,
+            );
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
+          } catch (_err) {}
+        }
+
         document.getElementById("masterSlider").oninput = (e) => {
           masterVol = e.target.value / 100;
           document.getElementById("masterValue").textContent =
@@ -4644,6 +4679,7 @@
           if (m) {
             m.volume = musicMuted ? 0 : musicVol * masterVol;
           }
+          playSliderPreview("master", Number(e.target.value));
         };
         document.getElementById("musicSlider").oninput = (e) => {
           musicVol = e.target.value / 100;
@@ -4659,6 +4695,7 @@
             document.getElementById("musicMuteBtn").textContent = "Music: ON";
             updateAudioButtonsUi();
           }
+          playSliderPreview("music", Number(e.target.value));
         };
         document.getElementById("sfxSlider").oninput = (e) => {
           sfxVol = e.target.value / 100;
@@ -4669,6 +4706,7 @@
             document.getElementById("sfxMuteBtn").textContent = "SFX: ON";
             updateAudioButtonsUi();
           }
+          playSliderPreview("sfx", Number(e.target.value));
         };
         document.getElementById("musicMuteBtn").onclick = () => {
           musicMuted = !musicMuted;
