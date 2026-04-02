@@ -2360,6 +2360,18 @@
           }
           ctx.restore();
         }
+
+        function drawGoalTriangle(ctx, cx, cy, size) {
+          const h = size * 1.15;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy - h / 2);
+          ctx.lineTo(cx - size, cy + h / 2);
+          ctx.lineTo(cx + size, cy + h / 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+
         // Core world rendering in current theme
         function drawScene() {
           const t = themes[currentTheme];
@@ -2429,17 +2441,6 @@
 
             const drift = frameCount * 1.35;
             for (let i = 0; i < 16; i++) {
-
-        function drawGoalTriangle(ctx, cx, cy, size) {
-          const h = size * 1.15;
-          ctx.beginPath();
-          ctx.moveTo(cx, cy - h / 2);
-          ctx.lineTo(cx - size, cy + h / 2);
-          ctx.lineTo(cx + size, cy + h / 2);
-          ctx.closePath();
-          ctx.fill();
-          ctx.stroke();
-        }
               const bandY = (i * 29 + drift) % 420;
               const width = 260 + ((i % 4) * 70);
               const startX = ((i * 93 - camX * 0.2) % 1000) - 120;
