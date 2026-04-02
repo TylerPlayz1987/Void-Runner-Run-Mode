@@ -692,7 +692,7 @@
           },
           {
             minX: 4320,
-            text: "Obstacle unlocks: L10 spikes+wells, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L70 fake hazards.",
+            text: "Obstacle unlocks: L10 spikes, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L55 wells, L70 fake hazards.",
           },
           {
             minX: 4760,
