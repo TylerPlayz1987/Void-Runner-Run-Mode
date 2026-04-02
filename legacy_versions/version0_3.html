@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <style>
+         body { margin: 0; background: #000; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; font-family: 'Courier New', monospace; overflow: hidden; }
+         #pauseBtn { 
+         display: none; 
+         background: #0f0; 
+         border: none; 
+         color: #000; 
+         padding: 5px 12px; 
+         cursor: pointer; 
+         font-weight: bold; 
+         margin-bottom: 5px; 
+         border-radius: 3px; 
+         z-index: 10; 
+         font-size: 12px;
+         align-self: flex-end; 
+         }
+         #pauseBtn:hover { background: #fff; }
+         #container { position: relative; border: 4px solid #333; width: 800px; height: 400px; background: #050505; transition: border-color 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; }
+         canvas { display: block; }
+         #ui-left, #ui-right { position: absolute; top: 15px; pointer-events: none; z-index: 100; }
+         #ui-left { left: 15px; display: flex; gap: 10px; } #ui-right { right: 15px; }
+         .stat { background: rgba(0, 0, 0, 0.9); padding: 6px 15px; border: 1px solid #0f0; color: #0f0; font-weight: bold; font-size: 14px; border-radius: 2px; }
+         #cp-notif { position: absolute; width: 100%; top: 40%; text-align: center; color: #0f0; font-size: 32px; font-weight: bold; opacity: 0; transition: opacity 0.4s; text-shadow: 0 0 20px #0f0; pointer-events: none; z-index: 150; }
+         .overlay { position: absolute; width: 100%; height: 100%; top: 0; left: 0; background: rgba(0,0,0,0.9); display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 200; }
+         .menu-page { display: flex; flex-direction: column; align-items: center; gap: 10px; width: 280px; }
+         h1 { color: #0f0; margin-bottom: 15px; letter-spacing: 5px; font-size: 24px; }
+         button { background: #0f0; border: none; padding: 12px; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 5px; width: 100%; }
+         .small-btn { padding: 8px; font-size: 14px; background: #444; color: #fff; }
+         .setting-item { width: 100%; color: #0f0; display: flex; flex-direction: column; gap: 8px; margin: 10px 0; }
+         input[type=range], select { width: 100%; background: #222; border: 1px solid #0f0; color: #0f0; padding: 5px; border-radius: 5px; font-family: inherit; }
+      </style>
+   </head>
+   <body>
+      <div style="width: 800px; display: flex; flex-direction: column;">
+         <button id="pauseBtn">Pause [P/Esc]</button>
+         <div id="container">
+            <div id="ui-left">
+               <div class="stat">Level: <span id="lvl">1</span></div>
+               <div class="stat" id="death-stat" style="color:#f44; border-color:#f44">Deaths: <span id="deaths">0</span></div>
+            </div>
+            <div id="ui-right">
+               <div class="stat" id="best-stat" style="color:#ff0; border-color:#ff0">High Score: <span id="best">1</span></div>
+            </div>
+            <div id="cp-notif">Checkpoint Reached</div>
+            <div id="startMenu" class="overlay">
+               <h1>Void Runner</h1>
+               <button id="startBtn" style="width: 200px;">Start(Run Mode)</button>
+            </div>
+            <div id="pauseMenu" class="overlay" style="display:none">
+               <div id="mainPausePage" class="menu-page">
+                  <h1>PAUSED</h1>
+                  <button id="resumeBtn">Resume</button><button id="settingsBtn">Settings</button><button id="restartBtn" class="small-btn">Reset</button>
+                  <div style="display:flex; gap:5px; width:100%; margin-top:10px">
+                     <input type="number" id="warpInput" placeholder="Level" style="flex:1; background:#222; border:1px solid #fa0; color:#fa0; text-align:center">
+                     <button id="warpBtn" style="background:#fa0; width:80px; font-size:12px">Warp</button>
+                  </div>
+               </div>
+               <div id="settingsPage" class="menu-page" style="display:none">
+                  <h1>SETTINGS</h1>
+                  <div class="setting-item"><span>Volume: <span id="volValue">50%</span></span><input type="range" id="volSlider" min="0" max="100" value="50"></div>
+                  <div class="setting-item">
+                     <span>THEME</span>
+                     <select id="themeSelect">
+                        <option value="classic">Classic</option>
+                        <option value="sunny">Sunny</option>
+                        <option value="moony">Moony</option>
+                        <option value="toybox">Toybox</option>
+                        <option value="deepsea">Deep Sea</option>
+                     </select>
+                  </div>
+                  <button id="backBtn" class="small-btn" style="margin-top:20px">Back</button>
+               </div>
+            </div>
+            <canvas id="canvas"></canvas>
+         </div>
+      </div>
+      <script>
+         let audioCtx, masterVol = 0.5, frameCount = 0, running = false, isPaused = false, currentLevel = 1, lastCheckpoint = 1, deathCount = 0;
+         const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d'), container = document.getElementById('container'), cpNotif = document.getElementById('cp-notif');
+         canvas.width = 800; canvas.height = 400;
+         
+         let bestLevel = localStorage.getItem('core_best_v0_3') || 1;
+         document.getElementById('best').textContent = bestLevel;
+         
+         let currentTheme = 'classic';
+         const themes = {
+             classic: { bg: '#050505', plat: '#333', player: '#fff', hazards: '#f33' },
+             sunny: { bg: '#87CEEB', plat: '#fff', player: '#FFFF00', hazards: '#f33' },
+             moony: { bg: '#000000', plat: '#D8BFD8', player: '#FFF', hazards: '#FFFF33', stars: true },
+             toybox: {  bg: 'linear-gradient(#ffeb3b, #fbc02d)', plat: '#f44336', player: '#2196f3', hazards: '#4caf50', stars: false },
+             deepsea: { bg: 'linear-gradient(#0077be, #001a33)', plat: '#2c3e50', player: '#f1c40f', hazards: '#e74c3c',  stars: false }
+         };
+         
+         const stars = Array.from({length: 50}, () => ({x: Math.random() * 800, y: Math.random() * 400, s: Math.random() * 2}));
+         
+         let platforms = [], hazards = [], keys = {};
+         const player = { x: 50, y: 200, w: 20, h: 20, vx: 0, vy: 0, speed: 5, runSpeed: 8, jump: -12, grounded: false, trail: [] }, goal = { x: 0, y: 0, w: 40, h: 40 };
+         
+         function sfx(f, t, d, v, slide = 0) {
+             if (!audioCtx) return; if (audioCtx.state === 'suspended') audioCtx.resume();
+             const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+             o.type = t; o.frequency.setValueAtTime(f, audioCtx.currentTime); if (slide) o.frequency.exponentialRampToValueAtTime(slide, audioCtx.currentTime + d);
+             g.gain.setValueAtTime(v * masterVol, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + d);
+             o.connect(g); g.connect(audioCtx.destination); o.start(); o.stop(audioCtx.currentTime + d);
+         }
+         
+         const play = {
+             jp: () => sfx(180, 'square', 0.1, 0.08, 450),
+             wn: () => { sfx(523, 'triangle', 0.1, 0.1); setTimeout(() => sfx(659, 'triangle', 0.1, 0.1), 80); },
+             di: () => sfx(150, 'sawtooth', 0.4, 0.1, 40),
+             cp: () => { sfx(300, 'sine', 1.2, 0.2, 1400); sfx(450, 'sine', 1.2, 0.1, 1600); }
+         };
+         
+         function generateLevel() {
+             platforms = [{ x: 0, y: 350, w: 300, h: 50, isPhase: false }]; 
+             hazards = [];
+             let lx = 300, ly = 350;
+         
+             for (let i = 0; i < 4 + currentLevel; i++) {
+                 let gp = 110 + Math.random() * 80, vd = (Math.random() - 0.5) * 140;
+                 if (currentLevel >= 15 && Math.random() < 0.3) {
+                     hazards.push({ x: lx + gp/2 - 10, y: 100, w: 15, h: 80, s: 2, dir: 1, r: 200, sy: 50 });
+                 }
+         
+                 lx += gp; 
+                 ly = Math.max(120, Math.min(340, ly + vd));
+         
+                 let isG = (i === 3 + currentLevel);                 
+                 let ph = (currentLevel >= 30 && !isG && !platforms[platforms.length-1].isPhase && Math.random() < 0.35);
+                 let isSink = (currentLevel >= 50 && !isG && !ph && Math.random() < 0.3);
+         
+                 platforms.push({ 
+                     x: lx, y: ly, w: 120, h: 15, 
+                     isPhase: ph, isSinking: isSink, isTouched: false,
+                     hasSpike: (currentLevel >= 10 && !isG && !ph && !isSink && Math.random() < 0.3), 
+                     moveRange: (currentLevel >= 20 && !isG && Math.random() < 0.4 ? 50 + Math.random() * 50 : 0), 
+                     startX: lx, 
+                     moveDir: 1, 
+                     moveSpeed: 1.5,
+                     hasSeeker: (currentLevel >= 40 && !isG && !ph && !isSink && Math.random() < 0.3), 
+                     seekerX: 0,
+                     seekerDir: 1 
+                 });
+                 
+                 if (isG) { goal.x = lx + 40; goal.y = ly - 45; }
+             }
+         }
+         
+         function die() {
+             deathCount++;
+             document.getElementById('deaths').textContent = deathCount;
+             currentLevel = lastCheckpoint;
+             document.getElementById('lvl').textContent = currentLevel;
+             
+             play.di();
+             container.style.borderColor = '#f44';
+             setTimeout(() => container.style.borderColor = '#333', 200);
+         
+             generateLevel();
+         
+             player.x = 50;
+             player.y = 330;
+             player.vx = 0;
+             player.vy = 0;
+             player.trail = [];
+         }
+         
+         function win() {
+             currentLevel++; document.getElementById('lvl').textContent = currentLevel;
+             if (currentLevel % 5 === 0) {
+                 lastCheckpoint = currentLevel; play.cp(); cpNotif.style.opacity = "1"; container.style.borderColor = '#0f0'; container.style.boxShadow = '0 0 30px #0f0'; setTimeout(() => { container.style.borderColor = '#333'; container.style.boxShadow = 'none'; cpNotif.style.opacity = "0"; }, 1500);
+             } else play.wn();
+             if (currentLevel > bestLevel) { bestLevel = currentLevel; document.getElementById('best').textContent = bestLevel; localStorage.setItem('core_best_v0_3', bestLevel); }
+             player.x = 50; player.y = 200; player.vx = 0; player.vy = 0; generateLevel();
+         }
+         
+         function update() {
+             if (!running || isPaused) return; 
+             frameCount++;
+         
+             if (keys['ShiftLeft'] || keys['ShiftRight']) {
+                 player.trail.push({x: player.x, y: player.y});
+                 if (player.trail.length > 8) player.trail.shift();
+             } else { 
+                 player.trail = []; 
+             }
+         
+             let s = (keys['ShiftLeft'] || keys['ShiftRight']) ? player.runSpeed : player.speed;
+             player.vx = (keys['ArrowLeft'] || keys['KeyA']) ? -s : (keys['ArrowRight'] || keys['KeyD']) ? s : player.vx * 0.85;
+             player.vy += 0.6;
+         
+             if ((keys['ArrowUp'] || keys['KeyW'] || keys['Space']) && player.grounded) {
+                 player.vy = player.jump;
+                 player.grounded = false;
+                 play.jp();
+             }
+         
+             let nX = player.x + player.vx, nY = player.y + player.vy; 
+             player.grounded = false;
+         
+               let dead = false;
+         
+             for (let h of hazards) {
+                 if (player.x < h.x + h.w && player.x + player.w > h.x && player.y < h.y + h.h && player.y + player.h > h.y) {
+                     dead = true; break;
+                 }
+             }
+         
+             if (!dead) {
+                 for (let p of platforms) {
+                     if (p.hasSpike) {
+                         let sx = p.x + 52.5;
+                         if (player.x < sx + 15 && player.x + player.w > sx && player.y + player.h > p.y - 12 && player.y < p.y) {
+                             dead = true; break;
+                         }
+                     }
+                 }
+             }
+         
+             if (player.y > 400) dead = true;
+         
+             if (dead) {
+                 die();
+                 return; 
+             }
+         
+             hazards.forEach(h => {
+                 if (h.r) { 
+                     h.sy += h.s * h.dir; 
+                     if (h.sy > h.r || h.sy < 50) h.dir *= -1; 
+                     h.y = h.sy; 
+                 }
+             });
+         
+         platforms.forEach(p => {
+             let cycle = frameCount % 300, solid = !p.isPhase || (cycle < 240);
+             
+             let deltaX = 0;
+             if (p.moveRange > 0) { 
+                 let oldX = p.x; 
+                 p.x += p.moveSpeed * p.moveDir; 
+                 if (p.x > p.startX + p.moveRange || p.x < p.startX - p.moveRange) p.moveDir *= -1; 
+                 deltaX = p.x - oldX; 
+             }
+         
+             if (p.isSinking && p.isTouched) {
+                 p.y += 2.5;
+             }
+         
+             if (p.hasSeeker) { 
+                 p.seekerX += 2.5 * p.seekerDir; 
+                 if (p.seekerX > p.w - 15 || p.seekerX < 0) p.seekerDir *= -1; 
+                 let sx = p.x + p.seekerX;
+                 if (nX + player.w > sx && nX < sx + 15 && nY + player.h > p.y - 12 && nY < p.y) {
+                     die(); return; 
+                 }
+             }
+         
+             if (solid && nX + player.w > p.x && nX < p.x + p.w && player.y + player.h <= p.y && nY + player.h >= p.y) { 
+                 player.vy = 0; 
+                 nY = p.y - player.h; 
+                 player.grounded = true; 
+                 
+                 if (p.isSinking) p.isTouched = true;
+         
+                 if (deltaX !== 0) nX += deltaX; 
+             }
+         });
+         
+             player.x = nX; 
+             player.y = nY; 
+         
+             if (player.x + player.w > goal.x && player.x < goal.x + goal.w && 
+                 player.y + player.h > goal.y && player.y < goal.y + goal.h) {
+                 win();
+                 return;
+             }
+         }
+         
+         function drawPlayer(xPos, yPos, color) {
+             if (currentTheme === 'moony') {
+                 ctx.fillStyle = color;
+                 ctx.beginPath(); ctx.arc(xPos + 10, yPos + 10, 10, 0, Math.PI * 2); ctx.fill();
+                 ctx.globalCompositeOperation = 'destination-out';
+                 ctx.beginPath(); ctx.arc(xPos + 16, yPos + 6, 10, 0, Math.PI * 2); ctx.fill();
+                 ctx.globalCompositeOperation = 'source-over';
+             } else if (currentTheme === 'sunny') {
+                 ctx.fillStyle = color;
+                 const centerX = xPos + 10, centerY = yPos + 10;
+                 ctx.beginPath(); ctx.arc(centerX, centerY, 7, 0, Math.PI * 2); ctx.fill();
+                 for (let i = 0; i < 8; i++) {
+                     ctx.beginPath();
+                     let angle = (i / 8) * (Math.PI * 2);
+                     ctx.moveTo(centerX + Math.cos(angle) * 7, centerY + Math.sin(angle) * 7);
+                     ctx.lineTo(centerX + Math.cos(angle) * 11, centerY + Math.sin(angle) * 11);
+                     ctx.lineWidth = 2; ctx.strokeStyle = color; ctx.stroke();
+                 }
+             } else if (currentTheme === 'toybox') {
+                 ctx.fillStyle = color;
+                 ctx.fillRect(xPos + 2, yPos + 6, 16, 14); 
+                 ctx.fillRect(xPos + 5, yPos + 1, 10, 5); 
+                 ctx.fillRect(xPos + 9, yPos, 2, 2); 
+                 ctx.fillStyle = "#fff";
+                 ctx.fillRect(xPos + 7, yPos + 2, 2, 2);
+                 ctx.fillRect(xPos + 11, yPos + 2, 2, 2);
+                 } else if (currentTheme === 'deepsea') {
+                 ctx.fillStyle = color;
+                 ctx.fillRect(xPos, yPos + 5, 20, 12); 
+                 ctx.fillRect(xPos + 12, yPos + 1, 2, 4);
+                 ctx.fillRect(xPos + 12, yPos + 1, 4, 2);
+                 ctx.fillStyle = "#fff";
+                 ctx.beginPath(); ctx.arc(xPos + 8, yPos + 11, 3, 0, Math.PI * 2); ctx.fill();
+             } else {
+                 ctx.fillStyle = color;
+                 ctx.fillRect(xPos, yPos, player.w, player.h);
+             }
+         }
+         
+         function draw() {
+             const t = themes[currentTheme];
+             container.style.background = t.bg;
+             ctx.clearRect(0, 0, canvas.width, canvas.height);
+             const camX = player.x - 150;
+         
+             if (t.stars) {
+                 ctx.fillStyle = "#FFF";
+                 stars.forEach(s => ctx.fillRect(s.x, s.y, s.s, s.s));
+             }
+         
+             if (currentTheme === 'deepsea') {
+                 ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+                 stars.forEach(s => {
+                     s.x -= 0.5;
+                     if (s.x < -10) s.x = canvas.width + 10;
+                     ctx.fillRect(s.x, s.y, 4, 2); 
+                     ctx.fillRect(s.x - 2, s.y - 1, 2, 4);
+                 });
+             }
+             
+             ctx.fillStyle = "#0f0"; ctx.shadowBlur = 15; ctx.shadowColor = "#0f0";
+             ctx.fillRect(goal.x - camX, goal.y, goal.w, goal.h);
+             ctx.shadowBlur = 0;
+         
+             hazards.forEach(h => { ctx.fillStyle = t.hazards; ctx.fillRect(h.x - camX, h.y, h.w, h.h); });
+             
+         platforms.forEach(p => {
+             let cy = frameCount % 300, sol = !p.isPhase || (cy < 240); 
+             ctx.globalAlpha = sol ? 1 : 0.1;
+         
+             if (p.isSinking) {
+                 ctx.fillStyle = p.isTouched ? "#444" : "#888";
+                 ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+                 
+                 ctx.strokeStyle = "rgba(255,255,255,0.3)";
+                 ctx.beginPath();
+                 ctx.moveTo(p.x - camX + 10, p.y); ctx.lineTo(p.x - camX + 20, p.y + 8);
+                 ctx.moveTo(p.x - camX + 80, p.y + 2); ctx.lineTo(p.x - camX + 70, p.y + 12);
+                 ctx.stroke();
+             } else {
+                 ctx.fillStyle = (p.isPhase && cy >= 120 && cy < 240 && Math.floor(frameCount/10)%2) ?
+                 "#fff" : (p.isPhase ? "#08f" : (p.moveRange > 0 ? "#555" : t.plat));
+                 ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+             }
+         
+             if (p.hasSpike || p.hasSeeker) { 
+                 ctx.fillStyle = t.hazards; ctx.beginPath(); 
+                 let sx = p.hasSpike ? p.x + 52.5 : p.x + p.seekerX; 
+                 ctx.moveTo(sx-camX, p.y); ctx.lineTo(sx+7.5-camX, p.y-12);
+                 ctx.lineTo(sx+15-camX, p.y); ctx.fill(); 
+             }
+         });
+             
+             ctx.globalAlpha = 1; 
+             player.trail.forEach((tr, i) => {
+                 ctx.globalAlpha = i / 15;
+                 drawPlayer(150 - (player.x - tr.x), tr.y, t.player);
+             });
+             ctx.globalAlpha = 1;
+             drawPlayer(150, player.y, t.player);
+         
+             ctx.fillStyle = "#fff";
+             ctx.font = "12px 'Courier New', monospace";
+             ctx.textAlign = "right";
+             ctx.fillText("v0.3", canvas.width - 10, canvas.height - 10);
+         }
+         
+         function toggle() { if (!running) return; isPaused = !isPaused; document.getElementById('pauseMenu').style.display = isPaused ? 'flex' : 'none'; document.getElementById('mainPausePage').style.display = 'flex'; document.getElementById('settingsPage').style.display = 'none'; }
+         document.getElementById('startBtn').onclick = () => { 
+             audioCtx = new AudioContext(); 
+             document.getElementById('startMenu').style.display = 'none'; 
+             document.getElementById('pauseBtn').style.display = 'block'; 
+             running = true; generateLevel(); (function loop(){ update(); draw(); requestAnimationFrame(loop); })(); 
+         };
+         document.getElementById('pauseBtn').onclick = toggle; document.getElementById('resumeBtn').onclick = toggle;
+         document.getElementById('settingsBtn').onclick = () => { document.getElementById('mainPausePage').style.display = 'none'; document.getElementById('settingsPage').style.display = 'flex'; };
+         document.getElementById('backBtn').onclick = () => { document.getElementById('settingsPage').style.display = 'none'; document.getElementById('mainPausePage').style.display = 'flex'; };
+         document.getElementById('volSlider').oninput = (e) => { masterVol = e.target.value / 100; document.getElementById('volValue').textContent = e.target.value + "%"; play.wn(); };
+         document.getElementById('themeSelect').onchange = (e) => { currentTheme = e.target.value; };
+         document.getElementById('warpBtn').onclick = () => { 
+             let v = parseInt(document.getElementById('warpInput').value); 
+             if (v > 0) { 
+                 currentLevel = v; 
+                 lastCheckpoint = v; 
+                 document.getElementById('lvl').textContent = v; 
+                 isPaused = false;
+                 die(); 
+                 document.getElementById('pauseMenu').style.display = 'none'; 
+             } 
+         };
+         
+         window.onkeydown = e => { 
+             keys[e.code] = 1; 
+             if (e.code === 'KeyP' || e.code === 'Escape') toggle(); 
+             if (["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "ShiftLeft", "ShiftRight", "KeyW", "KeyA", "KeyS", "KeyD", "Space"].includes(e.code)) e.preventDefault(); 
+         };
+         window.onkeyup = e => keys[e.code] = 0;
+      </script>
+        <script src="../js/data/version-data.js"></script>
+        <script src="../js/version-picker-legacy.js"></script>
+   </body>
+</html>
