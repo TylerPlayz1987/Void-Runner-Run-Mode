@@ -2309,6 +2309,33 @@
               y + player.h - 2,
             );
             ctx.stroke();
+          } else if (currentTheme === "zelda") {
+            // Keep the core block body but add Link-inspired hat details.
+            ctx.fillStyle = c;
+            ctx.fillRect(x, y, player.w, player.h);
+
+            // Hat brim.
+            ctx.fillStyle = "#1f8b3f";
+            ctx.fillRect(x + 2, y + 1, 16, 4);
+
+            // Hat crown and trailing tail.
+            ctx.beginPath();
+            ctx.moveTo(x + 3, y + 2);
+            ctx.lineTo(x + 13, y - 8);
+            ctx.lineTo(x + 19, y + 2);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x + 15, y + 2);
+            ctx.lineTo(x + 22, y + 6);
+            ctx.lineTo(x + 14, y + 7);
+            ctx.closePath();
+            ctx.fill();
+
+            // Hair under the cap.
+            ctx.fillStyle = "#b67d2e";
+            ctx.fillRect(x + 3, y + 9, 2, 5);
+            ctx.fillRect(x + 15, y + 9, 2, 5);
           } else {
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
@@ -2333,6 +2360,18 @@
           }
           ctx.restore();
         }
+
+        function drawGoalTriangle(ctx, cx, cy, size) {
+          const h = size * 1.15;
+          ctx.beginPath();
+          ctx.moveTo(cx, cy - h / 2);
+          ctx.lineTo(cx - size, cy + h / 2);
+          ctx.lineTo(cx + size, cy + h / 2);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        }
+
         // Core world rendering in current theme
         function drawScene() {
           const t = themes[currentTheme];
@@ -3506,6 +3545,29 @@
             ctx.closePath();
             ctx.fill();
             ctx.restore();
+          } else if (currentTheme === "zelda") {
+            // Triforce objective marker.
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            const pulse = 0.85 + Math.sin(frameCount * 0.09) * 0.15;
+            const triSize = gw * 0.28;
+
+            ctx.shadowBlur = 18;
+            ctx.shadowColor = "rgba(255, 214, 64, 0.95)";
+            ctx.fillStyle = "rgba(255, 206, 61, 0.95)";
+            ctx.strokeStyle = "#9b6e14";
+            ctx.lineWidth = 2;
+
+            drawGoalTriangle(ctx, 0, -gh * 0.12, triSize * pulse);
+            drawGoalTriangle(ctx, -triSize, gh * 0.26, triSize * pulse);
+            drawGoalTriangle(ctx, triSize, gh * 0.26, triSize * pulse);
+
+            // Small center glint.
+            ctx.fillStyle = "rgba(255, 248, 180, 0.85)";
+            ctx.beginPath();
+            ctx.arc(0, gh * 0.02, 2.2, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
           } else {
             ctx.fillStyle = "#0f0";
             ctx.shadowBlur = 15;
@@ -4108,6 +4170,63 @@
           document.getElementById("modeMenu").style.display = "flex";
         };
         const code1 = "test";
+        const secretThemeCode = "zelda";
+        const secretThemeUnlockKey = "void_secret_theme_zelda_unlocked";
+        let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
+        const codeEntryModal = document.getElementById("codeEntryModal");
+        const codeEntryInput = document.getElementById("codeEntryInput");
+        const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
+        const codeEntryCancelBtn = document.getElementById("codeEntryCancelBtn");
+
+        function updateSecretThemeButtonUi() {
+          const themeButtonsContainer = document.getElementById("themeButtons");
+          if (!themeButtonsContainer) return;
+
+          let secretThemeBtn = themeButtonsContainer.querySelector('[data-theme="zelda"]');
+          if (!secretThemeBtn) {
+            secretThemeBtn = document.createElement("button");
+            secretThemeBtn.type = "button";
+            secretThemeBtn.className = "theme-btn";
+            secretThemeBtn.dataset.theme = "zelda";
+            secretThemeBtn.textContent = "Zelda";
+            secretThemeBtn.onclick = () => setTheme("zelda");
+            themeButtonsContainer.appendChild(secretThemeBtn);
+          }
+
+          secretThemeBtn.style.display = secretThemeUnlocked ? "" : "none";
+        }
+
+        function closeCodeEntryModal() {
+          codeEntryModal.style.display = "none";
+          codeEntryInput.value = "";
+        }
+
+        function submitCodeEntry() {
+          const entered = codeEntryInput.value;
+          if (!entered) {
+            closeCodeEntryModal();
+            return;
+          }
+          const normalized = entered.trim().toLowerCase();
+          if (normalized === code1) {
+            flashCodeMessage("test done");
+          } else if (normalized === secretThemeCode) {
+            if (!secretThemeUnlocked) {
+              secretThemeUnlocked = true;
+              localStorage.setItem(secretThemeUnlockKey, "1");
+              updateSecretThemeButtonUi();
+            }
+            flashCodeMessage("zelda theme unlocked");
+          }
+          closeCodeEntryModal();
+        }
+
+        function openCodeEntryModal() {
+          codeEntryModal.style.display = "flex";
+          codeEntryInput.value = "";
+          codeEntryInput.focus();
+        }
+
         function flashCodeMessage(text) {
           const flashEl = document.getElementById("codeFlashMessage");
           flashEl.textContent = text;
@@ -4116,13 +4235,19 @@
           flashEl.classList.add("active");
         }
         document.getElementById("menuCodesBtn").onclick = () => {
-          const entered = prompt("Enter code:");
-          if (!entered) return;
-          const normalized = entered.trim().toLowerCase();
-          if (normalized === code1) {
-            flashCodeMessage("test done");
-          }
+          openCodeEntryModal();
         };
+        codeEntrySubmitBtn.onclick = submitCodeEntry;
+        codeEntryCancelBtn.onclick = closeCodeEntryModal;
+        codeEntryInput.addEventListener("keydown", (e) => {
+          if (e.code === "Enter") {
+            e.preventDefault();
+            submitCodeEntry();
+          } else if (e.code === "Escape") {
+            e.preventDefault();
+            closeCodeEntryModal();
+          }
+        });
         document.getElementById("openChangelogBtn").onclick = () => {
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("changelogMenu").style.display = "flex";
@@ -4621,6 +4746,9 @@
           speedRunBestLevel = 1;
           localStorage.setItem("core_best_v20", 1);
           localStorage.setItem("core_speedrun_best_level_v1", 1);
+          localStorage.removeItem("void_secret_theme_zelda_unlocked");
+          secretThemeUnlocked = false;
+          updateSecretThemeButtonUi();
           setLevelDisplay();
           updateBestLevelUi();
           applyDefaults();
@@ -4746,6 +4874,21 @@
         function setTheme(themeName) {
           currentTheme = themeName;
           updateThemeButtonsUi();
+          
+          // Adjust stat colors for better visibility on dark theme backgrounds
+          const levelStat = document.querySelector('#ui-left > .stat:first-child');
+          if (themeName === "zelda") {
+            if (levelStat) {
+              levelStat.style.color = "#ffd54a";
+              levelStat.style.borderColor = "#ffd54a";
+            }
+          } else {
+            if (levelStat) {
+              levelStat.style.color = "";
+              levelStat.style.borderColor = "";
+            }
+          }
+          
           const m = document.getElementById("bgMusic");
           if (m && themes[currentTheme] && themes[currentTheme].music) {
             m.src = themes[currentTheme].music;
@@ -4765,6 +4908,7 @@
             setTheme(btn.dataset.theme);
           };
         });
+        updateSecretThemeButtonUi();
         document.getElementById("retroToggleBtn").onclick = () => {
           isRetro8bit = !isRetro8bit;
           document.getElementById("retroToggleBtn").textContent =
@@ -5167,7 +5311,6 @@
         }
 
         window.onkeydown = (e) => {
-          keys[e.code] = 1;
           const activeTag = document.activeElement
             ? document.activeElement.tagName
             : "";
@@ -5176,6 +5319,42 @@
             activeTag === "TEXTAREA" ||
             activeTag === "SELECT" ||
             (document.activeElement && document.activeElement.isContentEditable);
+
+          const isPauseShortcut = e.code === "KeyP" || e.code === "Escape";
+          if (isPauseShortcut) {
+            if (codeEntryModal.style.display === "flex") {
+              e.preventDefault();
+              closeCodeEntryModal();
+              return;
+            }
+
+            if (versionPickerMenu.style.display === "flex") {
+              e.preventDefault();
+              closeVersionPicker();
+              return;
+            }
+
+            if (document.getElementById("fullRestartConfirm").style.display === "flex") {
+              e.preventDefault();
+              hideFullRestartPrompt();
+              return;
+            }
+
+            if (document.getElementById("pauseMenu").style.display === "flex") {
+              e.preventDefault();
+              if (submenuBack()) return;
+            }
+
+            e.preventDefault();
+            toggle();
+            return;
+          }
+
+          if (typingInField) {
+            return;
+          }
+
+          keys[e.code] = 1;
 
           if (e.code === "KeyR" && !typingInField) {
             if (
@@ -5209,22 +5388,6 @@
             }
           }
 
-          if (e.code === "KeyP" || e.code === "Escape") {
-            if (versionPickerMenu.style.display === "flex") {
-              closeVersionPicker();
-              return;
-            }
-
-            if (document.getElementById("fullRestartConfirm").style.display === "flex") {
-              hideFullRestartPrompt();
-              return;
-            }
-
-            if (document.getElementById("pauseMenu").style.display === "flex") {
-              if (submenuBack()) return;
-            }
-            toggle();
-          }
           if (
             [
               "ArrowUp",
