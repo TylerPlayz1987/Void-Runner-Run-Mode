@@ -77,9 +77,10 @@ const themes = {
     player: "#f5d9ff",
     hazards: "#ff8cb0",
     playerImage: "theme_bg/sol_theme_player.png",
+    goalImage: "theme_bg/sol_theme_goal.png",
     stars: false,
     glow: false,
-    music: null,
+    music: "theme_bg/Sol.ogg",
   },
   aprilfools: {
     bg: "#fff4fb",
