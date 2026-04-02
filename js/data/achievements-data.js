@@ -11,7 +11,14 @@ window.VR_ACHIEVEMENT_DATA = {
     spacebarCrusher: {
       id: "spacebarCrusher",
       name: "Spacebar Crusher",
-      description: "Jump a total of 250 times",
+      description: "Jump a total of 500 times",
+      unlocked: false,
+      mode: "run",
+    },
+    speedDemon: {
+      id: "speedDemon",
+      name: "Speed Demon",
+      description: "Finish 10 levels while holding run the entire time",
       unlocked: false,
       mode: "run",
     },
@@ -33,6 +40,7 @@ window.VR_ACHIEVEMENT_DATA = {
   iconSources: {
     floorIsLava: "achievement_icons/1.png",
     spacebarCrusher: "achievement_icons/2.png",
+    speedDemon: "achievement_icons/6.png",
     isThisThingOn: "achievement_icons/3.png",
     staringIntoTheVoid: "achievement_icons/5.png",
   },

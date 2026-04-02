@@ -236,6 +236,15 @@
           totalRunModeJumps = 0;
         }
 
+        // Persistent progress for Speed Demon.
+        let speedDemonLevelCount = parseInt(
+          localStorage.getItem("void_speed_demon_level_count") || "0",
+          10
+        );
+        if (!Number.isFinite(speedDemonLevelCount) || speedDemonLevelCount < 0) {
+          speedDemonLevelCount = 0;
+        }
+
         // Persistent cumulative main-menu idle progress for "Staring into the Void".
         let mainMenuIdleMs = parseInt(
           localStorage.getItem("void_main_menu_idle_ms") || "0",
@@ -299,6 +308,7 @@
         let noMoveStartJumpCount = 0;
         let noMoveStartMoved = false;
         let noMoveStartX = 50;
+        let speedDemonRunHeldThisLevel = false;
         
         // Render achievements on initialization
         renderAchievements();
@@ -1303,6 +1313,7 @@
           noMoveStartJumpCount = 0;
           noMoveStartMoved = false;
           noMoveStartX = player.x;
+          speedDemonRunHeldThisLevel = !!(keys["ShiftLeft"] || keys["ShiftRight"]);
         }
 
         function die() {
@@ -1400,7 +1411,7 @@
           if (!tutorialMode && !speedRunMode) {
             totalRunModeJumps++;
             localStorage.setItem("void_total_run_jumps", String(totalRunModeJumps));
-            if (totalRunModeJumps >= 250) {
+            if (totalRunModeJumps >= 500) {
               unlockAchievement("spacebarCrusher");
             }
 
@@ -1491,6 +1502,16 @@
               bestLevel = currentLevel;
               localStorage.setItem("core_best_v20", bestLevel);
               updateBestLevelUi();
+            }
+          }
+          if (!tutorialMode && !speedRunMode && speedDemonRunHeldThisLevel) {
+            speedDemonLevelCount++;
+            localStorage.setItem(
+              "void_speed_demon_level_count",
+              String(speedDemonLevelCount)
+            );
+            if (speedDemonLevelCount >= 10) {
+              unlockAchievement("speedDemon");
             }
           }
           resetPlayerForRun(200);
@@ -1606,6 +1627,10 @@
           } else {
             player.speedZoneType = null;
             player.speedZoneMul = 1;
+          }
+
+          if (!(keys["ShiftLeft"] || keys["ShiftRight"])) {
+            speedDemonRunHeldThisLevel = false;
           }
           
           // Handle dash cooldown and duration
