@@ -16,10 +16,12 @@ Highlights:
 - 8-bit filter mode on the classic theme
 
 ## Project Files
-- [index.html](index.html): full game implementation, menus, gameplay logic, and UI.
-- [legacy_versions/](legacy_versions): older playable builds linked from the version selector.
-- [js/data/version-data.js](js/data/version-data.js): version registry used by the selector.
+- [index.html](index.html): single-page game shell that hosts the canvas, DOM, and script loading.
+- [js/game.js](js/game.js): core gameplay loop, menus, state management, and input handling.
+- [js/data/theme-data.js](js/data/theme-data.js): theme registry and per-theme configuration.
+- [js/data/version-data.js](js/data/version-data.js): version registry for the selector and legacy builds.
 - [js/version-picker-legacy.js](js/version-picker-legacy.js): shared legacy version picker behavior.
+- [legacy_versions/](legacy_versions): older playable builds linked from the version selector.
 - [CHECKLIST.md](CHECKLIST.md): post-change test checklist.
 
 ## Controls
@@ -74,7 +76,7 @@ Competitive time-attack mode to reach level 100 as fast as possible:
 - Speed Running mode state: `speedRunMode`, `speedRunStartTime`, `speedRunGameOverMode`.
 
 ### Visual themes
-- `themes` object with color palettes and optional features such as `stars`, `glitch`, `glow`, `aurora`, and `music`.
+- `themes` object with color palettes and optional features such as `stars`, `glitch`, `glow`, `aurora`, and `music`, sourced from `window.VR_THEME_DATA` in [`js/data/theme-data.js`](js/data/theme-data.js) for the current build.
 - Theme-specific background decor in `drawScene()` for stars, cyber city details, magma effects, and more.
 
 ### Level generation
@@ -103,12 +105,12 @@ Competitive time-attack mode to reach level 100 as fast as possible:
 
 ## Developer Quick Start
 ### Adjust level difficulty
-- In `index.html`, modify `generateLevel()` settings.
+- In `js/game.js`, modify `generateLevel()` settings.
 - Lower or raise hazard chance by updating conditions such as `Math.random() < ...`.
 - Adjust platform gap and width for easier or harder traversal.
 
 ### Add a new theme
-- In the `themes` object, add an entry such as `newtheme: { bg: "#112", plat: "#88f", player: "#fff", hazards: "#f00", music: "../theme_bg/New.ogg" }`.
+- In `window.VR_THEME_DATA` in `js/data/theme-data.js`, add an entry such as `newtheme: { bg: "#112", plat: "#88f", player: "#fff", hazards: "#f00", music: "theme_bg/New.ogg" }`.
 - Add the matching theme option in the theme selector.
 - Add render cases in `drawScene()` and `drawPlayer()` for visuals.
 
