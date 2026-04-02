@@ -11,7 +11,7 @@ window.VR_ACHIEVEMENT_DATA = {
     spacebarCrusher: {
       id: "spacebarCrusher",
       name: "Spacebar Crusher",
-      description: "Jump a total of 250 times",
+      description: "Jump a total of 500 times",
       unlocked: false,
       mode: "run",
     },

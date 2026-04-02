@@ -1411,7 +1411,7 @@
           if (!tutorialMode && !speedRunMode) {
             totalRunModeJumps++;
             localStorage.setItem("void_total_run_jumps", String(totalRunModeJumps));
-            if (totalRunModeJumps >= 250) {
+            if (totalRunModeJumps >= 500) {
               unlockAchievement("spacebarCrusher");
             }
 
