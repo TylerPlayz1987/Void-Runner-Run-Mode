@@ -2235,6 +2235,32 @@
             ctx.fillRect(x + 12, y + 11, 2, 2);
             ctx.fillStyle = "#9de4c9";
             ctx.fillRect(x + 15, y + 12, 2, 2);
+          } else if (currentTheme === "aprilfools") {
+            const wobble = Math.sin(frameCount * 0.3 + y * 0.1) * 1.4;
+            ctx.fillStyle = c;
+            ctx.fillRect(x - 1, y + wobble, player.w + 2, player.h);
+
+            // Layered pastel offset blocks sell the intentionally chaotic look.
+            ctx.save();
+            ctx.globalAlpha = 0.55;
+            ctx.fillStyle = "#b5f1ff";
+            ctx.fillRect(x + 2, y - 2 + wobble, 15, 14);
+            ctx.fillStyle = "#ffe39a";
+            ctx.fillRect(x - 2, y + 4 + wobble, 14, 12);
+            ctx.fillStyle = "#ffc1e2";
+            ctx.fillRect(x + 6, y + 7 + wobble, 13, 11);
+            ctx.restore();
+
+            // Tiny party hat.
+            ctx.fillStyle = "#ff86c5";
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 11 + wobble);
+            ctx.lineTo(x + 4, y - 1 + wobble);
+            ctx.lineTo(x + 16, y - 1 + wobble);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = "#fff7b8";
+            ctx.fillRect(x + 9, y - 12 + wobble, 2, 2);
           } else if (currentTheme === "pirate") {
             // Draw pirate body
             ctx.fillStyle = c;
@@ -2516,6 +2542,55 @@
                     : "rgba(255,218,138,0.55)";
               ctx.beginPath();
               ctx.ellipse(px, py, 4, 6, Math.sin(i + frameCount * 0.01) * 0.5, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          } else if (currentTheme === "aprilfools") {
+            let g = ctx.createLinearGradient(0, 0, 800, 400);
+            g.addColorStop(0, "#fff1f8");
+            g.addColorStop(0.34, "#e6fbff");
+            g.addColorStop(0.68, "#f9ecff");
+            g.addColorStop(1, "#fff6d8");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 800, 400);
+
+            const ribbonColors = [
+              "rgba(255,165,220,0.2)",
+              "rgba(173,240,255,0.2)",
+              "rgba(255,243,164,0.2)",
+            ];
+            for (let i = 0; i < 10; i++) {
+              const y = 18 + i * 38 + Math.sin(frameCount * 0.03 + i * 0.8) * 12;
+              const h = 13 + (i % 3) * 4;
+              ctx.fillStyle = ribbonColors[i % ribbonColors.length];
+              ctx.fillRect(0, y, 800, h);
+            }
+
+            for (let i = 0; i < 30; i++) {
+              const x = ((i * 109 + frameCount * (0.85 + (i % 5) * 0.16)) % 980) - 90;
+              const y = 20 + ((i * 47 + Math.sin(frameCount * 0.021 + i) * 35) % 340);
+              const size = 5 + (i % 4) * 3;
+              const rot = frameCount * (0.02 + (i % 3) * 0.009) + i;
+              ctx.save();
+              ctx.translate(x, y);
+              ctx.rotate(rot);
+              ctx.fillStyle =
+                i % 3 === 0
+                  ? "rgba(255,150,210,0.55)"
+                  : i % 3 === 1
+                    ? "rgba(155,233,255,0.55)"
+                    : "rgba(255,236,140,0.55)";
+              ctx.fillRect(-size * 0.5, -size * 0.5, size, size);
+              ctx.restore();
+            }
+
+            for (let i = 0; i < 14; i++) {
+              const bx = ((i * 181 - camX * 0.17 + frameCount * (0.35 + (i % 2) * 0.1)) % 980) - 110;
+              const by = 46 + i * 22 + Math.sin(frameCount * 0.035 + i) * 10;
+              const r = 14 + (i % 4) * 7;
+              const tone = i % 2 === 0 ? "rgba(255,199,235,0.25)" : "rgba(190,241,255,0.25)";
+              ctx.fillStyle = tone;
+              ctx.beginPath();
+              ctx.arc(bx, by, r, 0, Math.PI * 2);
               ctx.fill();
             }
           } else if (currentTheme === "pirate") {
@@ -2885,7 +2960,8 @@
             currentTheme === "stardust" ||
             currentTheme === "deepsea" ||
             currentTheme === "cyber" ||
-            currentTheme === "glitchworld"
+            currentTheme === "glitchworld" ||
+            currentTheme === "aprilfools"
           ) {
             stars.forEach((s) => {
               if (currentTheme === "deepsea") {
@@ -2894,6 +2970,15 @@
                 ctx.fillStyle = "rgba(255,255,255,0.2)";
                 ctx.fillRect(s.x, s.y, 4, 2);
                 ctx.fillRect(s.x - 2, s.y - 1, 2, 4);
+              } else if (currentTheme === "aprilfools") {
+                const twinkle = 0.2 + (Math.sin(frameCount * 0.11 + s.x * 0.05 + s.y * 0.07) + 1) * 0.22;
+                ctx.fillStyle =
+                  s.s % 3 === 0
+                    ? `rgba(255,165,222,${twinkle})`
+                    : s.s % 3 === 1
+                      ? `rgba(172,243,255,${twinkle})`
+                      : `rgba(255,238,163,${twinkle})`;
+                ctx.fillRect(s.x, s.y, s.s + 1, s.s + 1);
               } else {
                 ctx.fillStyle =
                   currentTheme === "moony" ||
