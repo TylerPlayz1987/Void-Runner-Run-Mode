@@ -76,6 +76,16 @@
           <button id="openChangelogBtn" class="small-btn" style="width: 200px; margin-top: 8px;">Changelog</button>
           <div id="codeFlashMessage">test done</div>
         </div>
+        <div id="codeEntryModal" class="overlay" style="display: none">
+          <div class="code-entry-box">
+            <h1>ENTER CODE</h1>
+            <input id="codeEntryInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Type code" />
+            <div class="code-entry-actions">
+              <button id="codeEntrySubmitBtn" style="background: #fc3; color: #111">Submit</button>
+              <button id="codeEntryCancelBtn" class="small-btn">Cancel</button>
+            </div>
+          </div>
+        </div>
         <div id="changelogMenu" class="overlay" style="display: none">
           <div class="menu-page">
             <h1>CHANGELOG</h1>

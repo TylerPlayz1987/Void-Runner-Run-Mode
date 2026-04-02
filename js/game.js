@@ -4108,6 +4108,35 @@
           document.getElementById("modeMenu").style.display = "flex";
         };
         const code1 = "test";
+        const codeEntryModal = document.getElementById("codeEntryModal");
+        const codeEntryInput = document.getElementById("codeEntryInput");
+        const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
+        const codeEntryCancelBtn = document.getElementById("codeEntryCancelBtn");
+
+        function closeCodeEntryModal() {
+          codeEntryModal.style.display = "none";
+          codeEntryInput.value = "";
+        }
+
+        function submitCodeEntry() {
+          const entered = codeEntryInput.value;
+          if (!entered) {
+            closeCodeEntryModal();
+            return;
+          }
+          const normalized = entered.trim().toLowerCase();
+          if (normalized === code1) {
+            flashCodeMessage("test done");
+          }
+          closeCodeEntryModal();
+        }
+
+        function openCodeEntryModal() {
+          codeEntryModal.style.display = "flex";
+          codeEntryInput.value = "";
+          codeEntryInput.focus();
+        }
+
         function flashCodeMessage(text) {
           const flashEl = document.getElementById("codeFlashMessage");
           flashEl.textContent = text;
@@ -4116,13 +4145,19 @@
           flashEl.classList.add("active");
         }
         document.getElementById("menuCodesBtn").onclick = () => {
-          const entered = prompt("Enter code:");
-          if (!entered) return;
-          const normalized = entered.trim().toLowerCase();
-          if (normalized === code1) {
-            flashCodeMessage("test done");
-          }
+          openCodeEntryModal();
         };
+        codeEntrySubmitBtn.onclick = submitCodeEntry;
+        codeEntryCancelBtn.onclick = closeCodeEntryModal;
+        codeEntryInput.addEventListener("keydown", (e) => {
+          if (e.code === "Enter") {
+            e.preventDefault();
+            submitCodeEntry();
+          } else if (e.code === "Escape") {
+            e.preventDefault();
+            closeCodeEntryModal();
+          }
+        });
         document.getElementById("openChangelogBtn").onclick = () => {
           document.getElementById("startMenu").style.display = "none";
           document.getElementById("changelogMenu").style.display = "flex";
@@ -5210,6 +5245,11 @@
           }
 
           if (e.code === "KeyP" || e.code === "Escape") {
+            if (codeEntryModal.style.display === "flex") {
+              closeCodeEntryModal();
+              return;
+            }
+
             if (versionPickerMenu.style.display === "flex") {
               closeVersionPicker();
               return;
