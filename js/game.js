@@ -3940,6 +3940,26 @@
             ctx.arc(0, gh * 0.02, 2.2, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
+          } else if (goalTheme === "catmodel") {
+            const solGoalImage = getThemeGoalImage("catmodel");
+            if (solGoalImage && solGoalImage.complete && solGoalImage.naturalWidth > 0) {
+              ctx.drawImage(solGoalImage, gx, gy, gw, gh);
+            } else {
+              // Sol fallback: glowing ellipse with glow
+              ctx.save();
+              ctx.translate(gx + gw / 2, gy + gh / 2);
+              const pulse = 0.8 + 0.2 * Math.sin(frameCount * 0.08);
+              ctx.shadowBlur = 20;
+              ctx.shadowColor = "rgba(245, 217, 255, 0.8)";
+              ctx.fillStyle = "rgba(232, 171, 255, 0.9)";
+              ctx.beginPath();
+              ctx.ellipse(0, 0, gw * 0.45 * pulse, gh * 0.5 * pulse, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.strokeStyle = "#d9a8ff";
+              ctx.lineWidth = 2;
+              ctx.stroke();
+              ctx.restore();
+            }
           } else {
             ctx.fillStyle = "#0f0";
             ctx.shadowBlur = 15;
