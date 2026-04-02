@@ -512,6 +512,39 @@
           currentTheme = "classic",
           infiniteInvincibility = false;
         const { themes, getLavaFx, getWellFx } = window.VR_THEME_DATA;
+        const themeBackgroundImages = {};
+        const themeGoalImages = {};
+        const themePlayerImages = {};
+        function getThemeBackgroundImage(themeName) {
+          const theme = themes[themeName];
+          if (!theme || !theme.bgImage) return null;
+          if (!themeBackgroundImages[themeName]) {
+            const image = new Image();
+            image.src = theme.bgImage;
+            themeBackgroundImages[themeName] = image;
+          }
+          return themeBackgroundImages[themeName];
+        }
+        function getThemeGoalImage(themeName) {
+          const theme = themes[themeName];
+          if (!theme || !theme.goalImage) return null;
+          if (!themeGoalImages[themeName]) {
+            const image = new Image();
+            image.src = theme.goalImage;
+            themeGoalImages[themeName] = image;
+          }
+          return themeGoalImages[themeName];
+        }
+        function getThemePlayerImage(themeName) {
+          const theme = themes[themeName];
+          if (!theme || !theme.playerImage) return null;
+          if (!themePlayerImages[themeName]) {
+            const image = new Image();
+            image.src = theme.playerImage;
+            themePlayerImages[themeName] = image;
+          }
+          return themePlayerImages[themeName];
+        }
         // Theme particles/background add-ons (cosmetic)
         const cyberBldgs = Array.from({ length: 12 }, () => ({
           x: Math.random() * 1200,
@@ -2224,6 +2257,108 @@
             ctx.fillRect(x + 12, y + 11, 2, 2);
             ctx.fillStyle = "#9de4c9";
             ctx.fillRect(x + 15, y + 12, 2, 2);
+          } else if (currentTheme === "aprilfools") {
+            const wobble = Math.sin(frameCount * 0.3 + y * 0.1) * 1.4;
+            ctx.fillStyle = c;
+            ctx.fillRect(x - 1, y + wobble, player.w + 2, player.h);
+
+            // Layered pastel offset blocks sell the intentionally chaotic look.
+            ctx.save();
+            ctx.globalAlpha = 0.55;
+            ctx.fillStyle = "#b5f1ff";
+            ctx.fillRect(x + 2, y - 2 + wobble, 15, 14);
+            ctx.fillStyle = "#ffe39a";
+            ctx.fillRect(x - 2, y + 4 + wobble, 14, 12);
+            ctx.fillStyle = "#ffc1e2";
+            ctx.fillRect(x + 6, y + 7 + wobble, 13, 11);
+            ctx.restore();
+
+            // Tiny party hat.
+            ctx.fillStyle = "#ff86c5";
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 11 + wobble);
+            ctx.lineTo(x + 4, y - 1 + wobble);
+            ctx.lineTo(x + 16, y - 1 + wobble);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = "#fff7b8";
+            ctx.fillRect(x + 9, y - 12 + wobble, 2, 2);
+          } else if (currentTheme === "tjtheme") {
+            const tjPlayerImage = getThemePlayerImage("tjtheme");
+            if (tjPlayerImage && tjPlayerImage.complete && tjPlayerImage.naturalWidth > 0) {
+              ctx.drawImage(tjPlayerImage, x - 3, y - 2, player.w + 6, player.h + 6);
+            } else {
+              const bob = Math.sin(frameCount * 0.08 + x * 0.05) * 0.7;
+              ctx.save();
+              ctx.translate(0, bob);
+
+              // Round yellow rubber duck body.
+              ctx.fillStyle = "#ffd94d";
+              ctx.beginPath();
+              ctx.ellipse(x + 10, y + 12, 11, 9, 0, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.fillStyle = "#f8cb2d";
+              ctx.beginPath();
+              ctx.ellipse(x + 10, y + 12, 8.5, 6.8, 0, 0, Math.PI * 2);
+              ctx.fill();
+
+              // Head and cheek highlight.
+              ctx.fillStyle = "#ffd94d";
+              ctx.beginPath();
+              ctx.ellipse(x + 10, y + 9, 8.5, 7, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = "rgba(255,255,255,0.16)";
+              ctx.beginPath();
+              ctx.ellipse(x + 6.5, y + 11.5, 3.2, 2.1, -0.25, 0, Math.PI * 2);
+              ctx.fill();
+
+              // Orange beak.
+              ctx.fillStyle = "#ff7a1a";
+              ctx.beginPath();
+              ctx.ellipse(x + 10, y + 12, 6.8, 4.2, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = "#ff9b3b";
+              ctx.beginPath();
+              ctx.ellipse(x + 10, y + 11.5, 5.4, 2.4, 0, 0, Math.PI * 2);
+              ctx.fill();
+
+              // Beak lip and nostril line.
+              ctx.strokeStyle = "rgba(220,90,20,0.8)";
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(x + 5.6, y + 12);
+              ctx.lineTo(x + 14.6, y + 12);
+              ctx.stroke();
+
+              // Eyes.
+              ctx.fillStyle = "#111";
+              ctx.beginPath();
+              ctx.arc(x + 7.5, y + 7.5, 1.7, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.beginPath();
+              ctx.arc(x + 13, y + 7.5, 1.7, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.fillStyle = "#fff8d8";
+              ctx.beginPath();
+              ctx.arc(x + 8.1, y + 6.8, 0.45, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.beginPath();
+              ctx.arc(x + 13.6, y + 6.8, 0.45, 0, Math.PI * 2);
+              ctx.fill();
+
+              // Tiny wing bumps.
+              ctx.fillStyle = "#f0c71a";
+              ctx.beginPath();
+              ctx.ellipse(x + 3, y + 13.5, 2.5, 3.5, -0.55, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.beginPath();
+              ctx.ellipse(x + 17, y + 13.5, 2.5, 3.5, 0.55, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.restore();
+            }
           } else if (currentTheme === "pirate") {
             // Draw pirate body
             ctx.fillStyle = c;
@@ -2389,6 +2524,16 @@
             g.addColorStop(1, "#660099");
             ctx.fillStyle = g;
             ctx.fillRect(0, 0, 800, 400);
+          } else if (t.bgImage) {
+            const bgImage = getThemeBackgroundImage(currentTheme);
+            if (bgImage && bgImage.complete && bgImage.naturalWidth > 0) {
+              ctx.drawImage(bgImage, 0, 0, 800, 400);
+              ctx.fillStyle = "rgba(11, 61, 46, 0.12)";
+              ctx.fillRect(0, 0, 800, 400);
+            } else {
+              ctx.fillStyle = t.bg;
+              ctx.fillRect(0, 0, 800, 400);
+            }
           } else if (currentTheme === "sunny") {
             let g = ctx.createLinearGradient(0, 0, 0, 400);
             g.addColorStop(0, "#87CEEB");
@@ -2496,6 +2641,139 @@
               ctx.beginPath();
               ctx.ellipse(px, py, 4, 6, Math.sin(i + frameCount * 0.01) * 0.5, 0, Math.PI * 2);
               ctx.fill();
+            }
+          } else if (currentTheme === "tjtheme") {
+            const sky = ctx.createLinearGradient(0, 0, 0, 400);
+            sky.addColorStop(0, "#d9c1ef");
+            sky.addColorStop(0.55, "#bf94e4");
+            sky.addColorStop(1, "#8f5ab9");
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, 800, 400);
+
+            for (let i = 0; i < 14; i++) {
+              const sx = ((i * 147 + frameCount * (0.35 + (i % 4) * 0.12)) % 980) - 110;
+              const sy = 30 + i * 18 + Math.sin(frameCount * 0.03 + i) * 16;
+              ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,0.08)" : "rgba(255,220,140,0.09)";
+              ctx.beginPath();
+              ctx.arc(sx, sy, 16 + (i % 4) * 7, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            const cityScroll = (camX * 0.12) % 220;
+            for (let i = 0; i < 12; i++) {
+              const bx = i * 78 - cityScroll - 40;
+              const bh = 70 + (i % 5) * 28 + (i % 3) * 12;
+              const by = 400 - bh;
+              ctx.fillStyle = i % 2 === 0 ? "#34254f" : "#493062";
+              ctx.fillRect(bx, by, 56, bh);
+              ctx.fillStyle = "rgba(255,255,255,0.18)";
+              for (let w = 0; w < 4; w++) {
+                for (let h = 0; h < 6; h++) {
+                  if ((w + h + i + frameCount) % 3 === 0) {
+                    ctx.fillRect(bx + 8 + w * 10, by + 8 + h * 14, 4, 6);
+                  }
+                }
+              }
+            }
+
+            for (let i = 0; i < 16; i++) {
+              const dx = ((i * 97 + frameCount * 1.6) % 920) - 60;
+              const dy = 180 + Math.sin(frameCount * 0.05 + i) * 16 + (i % 4) * 6;
+              ctx.fillStyle = i % 2 === 0 ? "rgba(255,220,120,0.28)" : "rgba(255,140,140,0.28)";
+              ctx.fillRect(dx, dy, 14 + (i % 3) * 5, 6 + (i % 2) * 3);
+            }
+
+            for (let i = 0; i < 6; i++) {
+              const puffX = ((i * 185 + frameCount * (0.28 + i * 0.03)) % 950) - 70;
+              const puffY = 64 + Math.sin(frameCount * 0.025 + i) * 22 + i * 4;
+              ctx.fillStyle = i % 2 === 0 ? "rgba(255,255,255,0.08)" : "rgba(255,230,170,0.07)";
+              ctx.beginPath();
+              ctx.arc(puffX, puffY, 24 + i * 3, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          } else if (currentTheme === "aprilfools") {
+            const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.055);
+            let g = ctx.createLinearGradient(0, 0, 800, 400);
+            g.addColorStop(0, "#fff1f8");
+            g.addColorStop(0.3, "#e6fbff");
+            g.addColorStop(0.6, "#f9ecff");
+            g.addColorStop(1, "#fff6d8");
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, 800, 400);
+
+            // Fast moving pastel stripes with phase offsets for chaotic motion.
+            for (let i = 0; i < 17; i++) {
+              const y =
+                ((i * 31 + frameCount * (1.8 + (i % 4) * 0.4)) % 470) - 35 +
+                Math.sin(frameCount * 0.09 + i * 1.9) * 12;
+              const h = 10 + (i % 3) * 6;
+              ctx.fillStyle =
+                i % 3 === 0
+                  ? `rgba(255,167,226,${0.15 + pulse * 0.2})`
+                  : i % 3 === 1
+                    ? `rgba(174,241,255,${0.15 + (1 - pulse) * 0.2})`
+                    : `rgba(255,237,156,${0.16 + pulse * 0.17})`;
+              ctx.fillRect(0, y, 800, h);
+            }
+
+            // Rotating checker confetti chunks.
+            for (let i = 0; i < 46; i++) {
+              const speed = 0.9 + (i % 6) * 0.17;
+              const x = ((i * 83 + frameCount * speed) % 1000) - 100;
+              const y =
+                12 + ((i * 41 + frameCount * (0.38 + (i % 5) * 0.11)) % 368);
+              const size = 4 + (i % 5) * 3;
+              const rot = frameCount * (0.04 + (i % 4) * 0.015) + i * 0.7;
+              ctx.save();
+              ctx.translate(x, y);
+              ctx.rotate(rot);
+              ctx.fillStyle =
+                i % 4 === 0
+                  ? "rgba(255,147,213,0.62)"
+                  : i % 4 === 1
+                    ? "rgba(149,233,255,0.62)"
+                    : i % 4 === 2
+                      ? "rgba(255,228,129,0.62)"
+                      : "rgba(207,184,255,0.62)";
+              ctx.fillRect(-size * 0.5, -size * 0.5, size, size);
+              ctx.fillStyle = "rgba(255,255,255,0.35)";
+              ctx.fillRect(-size * 0.2, -size * 0.2, size * 0.4, size * 0.4);
+              ctx.restore();
+            }
+
+            // Sine-wave scanlines with horizontal drift.
+            for (let y = 0; y < 400; y += 6) {
+              const drift = Math.sin(frameCount * 0.12 + y * 0.08) * 18;
+              const alpha = 0.03 + (Math.sin(frameCount * 0.2 + y * 0.11) + 1) * 0.03;
+              ctx.fillStyle = `rgba(255,255,255,${alpha})`;
+              ctx.fillRect(drift, y, 820, 2);
+            }
+
+            // Big drifting pastel blobs for extra visual chaos depth.
+            for (let i = 0; i < 20; i++) {
+              const bx = ((i * 157 - camX * 0.22 + frameCount * (0.7 + (i % 3) * 0.24)) % 1080) - 140;
+              const by =
+                24 + i * 17 + Math.sin(frameCount * (0.04 + (i % 4) * 0.008) + i) * 22;
+              const r = 12 + (i % 5) * 8;
+              ctx.fillStyle =
+                i % 2 === 0
+                  ? `rgba(255,196,232,${0.16 + pulse * 0.12})`
+                  : `rgba(188,242,255,${0.16 + (1 - pulse) * 0.12})`;
+              ctx.beginPath();
+              ctx.arc(bx, by, r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            // Brief flicker bars to make the scene feel intentionally unstable.
+            for (let i = 0; i < 8; i++) {
+              const jitterY = (i * 53 + frameCount * 4.2) % 420;
+              const jitterW = 180 + (i % 3) * 120;
+              const jitterX = ((i * 149 + frameCount * (2.4 + i * 0.08)) % 980) - 120;
+              ctx.fillStyle =
+                i % 2 === 0
+                  ? "rgba(255,150,220,0.13)"
+                  : "rgba(150,240,255,0.13)";
+              ctx.fillRect(jitterX, jitterY, jitterW, 3);
             }
           } else if (currentTheme === "pirate") {
             // Sky gradient (day sky)
@@ -2864,7 +3142,8 @@
             currentTheme === "stardust" ||
             currentTheme === "deepsea" ||
             currentTheme === "cyber" ||
-            currentTheme === "glitchworld"
+            currentTheme === "glitchworld" ||
+            currentTheme === "aprilfools"
           ) {
             stars.forEach((s) => {
               if (currentTheme === "deepsea") {
@@ -2873,6 +3152,15 @@
                 ctx.fillStyle = "rgba(255,255,255,0.2)";
                 ctx.fillRect(s.x, s.y, 4, 2);
                 ctx.fillRect(s.x - 2, s.y - 1, 2, 4);
+              } else if (currentTheme === "aprilfools") {
+                const twinkle = 0.2 + (Math.sin(frameCount * 0.11 + s.x * 0.05 + s.y * 0.07) + 1) * 0.22;
+                ctx.fillStyle =
+                  s.s % 3 === 0
+                    ? `rgba(255,165,222,${twinkle})`
+                    : s.s % 3 === 1
+                      ? `rgba(172,243,255,${twinkle})`
+                      : `rgba(255,238,163,${twinkle})`;
+                ctx.fillRect(s.x, s.y, s.s + 1, s.s + 1);
               } else {
                 ctx.fillStyle =
                   currentTheme === "moony" ||
@@ -3354,10 +3642,27 @@
             goalGlitch,
             (goal.x + goal.y + goal.w) * 0.01,
           );
+          const goalTheme =
+            currentTheme === "aprilfools"
+              ? [
+                  "classic",
+                  "sunny",
+                  "moony",
+                  "toybox",
+                  "deepsea",
+                  "magma",
+                  "cyber",
+                  "glitchworld",
+                  "easter",
+                  "stardust",
+                  "pirate",
+                  "jungle",
+                ][Math.floor(frameCount / 8) % 12]
+              : currentTheme;
           ctx.save();
           ctx.translate(goalOffset.x, goalOffset.y);
           ctx.save();
-          if (currentTheme === "sunny") {
+          if (goalTheme === "sunny") {
             ctx.fillStyle = "#ffeb3b";
             ctx.shadowBlur = 12;
             ctx.shadowColor = "#fff05a";
@@ -3365,7 +3670,7 @@
             ctx.strokeStyle = "#f2c200";
             ctx.lineWidth = 3;
             ctx.strokeRect(gx, gy, gw, gh);
-          } else if (currentTheme === "moony") {
+          } else if (goalTheme === "moony") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
             ctx.shadowBlur = 15;
@@ -3376,14 +3681,14 @@
             ctx.lineWidth = 3;
             ctx.strokeRect(-gw / 2, -gh / 2, gw, gh);
             ctx.restore();
-          } else if (currentTheme === "toybox") {
+          } else if (goalTheme === "toybox") {
             ctx.fillStyle = "#f44336";
             ctx.fillRect(gx, gy, gw, gh);
             ctx.fillStyle = "#fff";
             ctx.fillRect(gx + 4, gy + 4, gw - 8, gh - 8);
             ctx.fillStyle = "#2196f3";
             ctx.fillRect(gx + 8, gy + 8, gw - 16, gh - 16);
-          } else if (currentTheme === "deepsea") {
+          } else if (goalTheme === "deepsea") {
             ctx.fillStyle = "#6b4c2d";
             ctx.fillRect(gx, gy + gh * 0.6, gw, gh * 0.4);
             ctx.fillStyle = "#a77b5f";
@@ -3394,7 +3699,7 @@
             ctx.globalAlpha = 0.6;
             ctx.fillRect(gx, gy, gw, gh);
             ctx.globalAlpha = 1;
-          } else if (currentTheme === "magma") {
+          } else if (goalTheme === "magma") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
             const flame = 0.8 + Math.sin(frameCount / 10) * 0.2;
@@ -3406,7 +3711,7 @@
             ctx.closePath();
             ctx.fill();
             ctx.restore();
-          } else if (currentTheme === "cyber") {
+          } else if (goalTheme === "cyber") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
             ctx.rotate(frameCount * 0.07);
@@ -3422,7 +3727,7 @@
             ctx.fill();
             ctx.stroke();
             ctx.restore();
-          } else if (currentTheme === "glitchworld") {
+          } else if (goalTheme === "glitchworld") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
             const pulse = 0.7 + Math.sin(frameCount * 0.18) * 0.2;
@@ -3441,7 +3746,7 @@
             ctx.fill();
             ctx.stroke();
             ctx.restore();
-          } else if (currentTheme === "easter") {
+          } else if (goalTheme === "easter") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
             const bob = Math.sin(frameCount * 0.08) * 2;
@@ -3458,7 +3763,37 @@
             ctx.fillStyle = "#ffd27f";
             ctx.fillRect(2, 1, 4, 4);
             ctx.restore();
-          } else if (currentTheme === "stardust") {
+          } else if (goalTheme === "tjtheme") {
+            const tjGoalImage = getThemeGoalImage("tjtheme");
+            if (tjGoalImage && tjGoalImage.complete && tjGoalImage.naturalWidth > 0) {
+              ctx.drawImage(tjGoalImage, gx, gy, gw, gh);
+            } else {
+              ctx.save();
+              ctx.translate(gx + gw / 2, gy + gh / 2);
+              const wobble = Math.sin(frameCount * 0.09) * 0.06;
+              ctx.rotate(wobble);
+              ctx.fillStyle = "#4b2a1a";
+              ctx.fillRect(-gw * 0.35, -gh * 0.18, gw * 0.7, gh * 0.36);
+              ctx.fillRect(-gw * 0.12, -gh * 0.55, gw * 0.24, gh * 0.42);
+              ctx.fillRect(-gw * 0.55, -gh * 0.02, gw * 0.22, gh * 0.2);
+              ctx.fillRect(gw * 0.33, -gh * 0.04, gw * 0.22, gh * 0.2);
+              ctx.fillStyle = "#6f4629";
+              ctx.fillRect(-gw * 0.15, -gh * 0.08, gw * 0.3, gh * 0.16);
+              ctx.fillStyle = "#8fd16a";
+              ctx.beginPath();
+              ctx.moveTo(-gw * 0.16, -gh * 0.34);
+              ctx.lineTo(gw * 0.05, -gh * 0.48);
+              ctx.lineTo(gw * 0.18, -gh * 0.24);
+              ctx.lineTo(gw * 0.02, -gh * 0.12);
+              ctx.closePath();
+              ctx.fill();
+              ctx.fillStyle = "#ffe089";
+              ctx.beginPath();
+              ctx.arc(gw * 0.42, -gh * 0.28, 5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.restore();
+            }
+          } else if (goalTheme === "stardust") {
             let pulse = 0.7 + 0.3 * Math.sin(frameCount / 15);
             let rad = (gw / 2) * (1 + pulse * 0.15);
             let g = ctx.createRadialGradient(
@@ -3480,7 +3815,7 @@
             ctx.beginPath();
             ctx.arc(gx + gw / 2, gy + gh / 2, gw * 0.25, 0, Math.PI * 2);
             ctx.fill();
-          } else if (currentTheme === "pirate") {
+          } else if (goalTheme === "pirate") {
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
 
@@ -3529,7 +3864,7 @@
             ctx.ellipse(0, -gh * 0.1, gw * 0.45, gh * 0.2, 0, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
-          } else if (currentTheme === "jungle") {
+          } else if (goalTheme === "jungle") {
             // Leaf-trophy style goal block for jungle.
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
@@ -3545,7 +3880,7 @@
             ctx.closePath();
             ctx.fill();
             ctx.restore();
-          } else if (currentTheme === "zelda") {
+          } else if (goalTheme === "zelda") {
             // Triforce objective marker.
             ctx.save();
             ctx.translate(gx + gw / 2, gy + gh / 2);
@@ -4172,33 +4507,67 @@
         const code1 = "test";
         const secretThemeCode = "zelda";
         const secretThemeUnlockKey = "void_secret_theme_zelda_unlocked";
+        const tjThemeCode = "tj_theme";
+        const tjThemeUnlockKey = "void_secret_theme_tjtheme_unlocked";
         let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
+        let tjThemeUnlocked = localStorage.getItem(tjThemeUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
         const codeEntryCancelBtn = document.getElementById("codeEntryCancelBtn");
+        const aprilFoolsWarningModal = document.getElementById("aprilFoolsWarningModal");
+        const aprilFoolsConfirmBtn = document.getElementById("aprilFoolsConfirmBtn");
+        const aprilFoolsBackBtn = document.getElementById("aprilFoolsBackBtn");
 
         function updateSecretThemeButtonUi() {
-          const themeButtonsContainer = document.getElementById("themeButtons");
-          if (!themeButtonsContainer) return;
+          const buttonSpecs = [
+            {
+              container: document.getElementById("themeButtons"),
+              theme: "zelda",
+              label: "Zelda",
+              unlocked: secretThemeUnlocked,
+            },
+            {
+              container: document.getElementById("themeButtons"),
+              theme: "tjtheme",
+              label: "TJ's Theme",
+              unlocked: tjThemeUnlocked,
+            },
+            {
+              container: document.getElementById("speedRunThemeButtons"),
+              theme: "tjtheme",
+              label: "TJ's Theme",
+              unlocked: tjThemeUnlocked,
+            },
+          ];
 
-          let secretThemeBtn = themeButtonsContainer.querySelector('[data-theme="zelda"]');
-          if (!secretThemeBtn) {
-            secretThemeBtn = document.createElement("button");
-            secretThemeBtn.type = "button";
-            secretThemeBtn.className = "theme-btn";
-            secretThemeBtn.dataset.theme = "zelda";
-            secretThemeBtn.textContent = "Zelda";
-            secretThemeBtn.onclick = () => setTheme("zelda");
-            themeButtonsContainer.appendChild(secretThemeBtn);
+          for (const spec of buttonSpecs) {
+            if (!spec.container) continue;
+            let themeBtn = spec.container.querySelector(`[data-theme="${spec.theme}"]`);
+            if (!themeBtn) {
+              themeBtn = document.createElement("button");
+              themeBtn.type = "button";
+              themeBtn.className = "theme-btn";
+              themeBtn.dataset.theme = spec.theme;
+              themeBtn.textContent = spec.label;
+              themeBtn.onclick = () => setTheme(spec.theme);
+              spec.container.appendChild(themeBtn);
+            }
+            themeBtn.style.display = spec.unlocked ? "" : "none";
           }
-
-          secretThemeBtn.style.display = secretThemeUnlocked ? "" : "none";
         }
 
         function closeCodeEntryModal() {
           codeEntryModal.style.display = "none";
           codeEntryInput.value = "";
+        }
+
+        function openAprilFoolsWarningModal() {
+          aprilFoolsWarningModal.style.display = "flex";
+        }
+
+        function closeAprilFoolsWarningModal() {
+          aprilFoolsWarningModal.style.display = "none";
         }
 
         function submitCodeEntry() {
@@ -4217,6 +4586,13 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("zelda theme unlocked");
+          } else if (normalized === tjThemeCode) {
+            if (!tjThemeUnlocked) {
+              tjThemeUnlocked = true;
+              localStorage.setItem(tjThemeUnlockKey, "1");
+              updateSecretThemeButtonUi();
+            }
+            flashCodeMessage("tj's theme unlocked");
           }
           closeCodeEntryModal();
         }
@@ -4747,7 +5123,9 @@
           localStorage.setItem("core_best_v20", 1);
           localStorage.setItem("core_speedrun_best_level_v1", 1);
           localStorage.removeItem("void_secret_theme_zelda_unlocked");
+          localStorage.removeItem("void_secret_theme_tjtheme_unlocked");
           secretThemeUnlocked = false;
+          tjThemeUnlocked = false;
           updateSecretThemeButtonUi();
           setLevelDisplay();
           updateBestLevelUi();
@@ -4903,11 +5281,27 @@
           }
         }
 
+        function trySetTheme(themeName) {
+          if (themeName === "aprilfools") {
+            openAprilFoolsWarningModal();
+            return;
+          }
+          setTheme(themeName);
+        }
+
         document.querySelectorAll(".theme-btn").forEach((btn) => {
           btn.onclick = () => {
-            setTheme(btn.dataset.theme);
+            trySetTheme(btn.dataset.theme);
           };
         });
+        aprilFoolsConfirmBtn.onclick = () => {
+          closeAprilFoolsWarningModal();
+          setTheme("aprilfools");
+        };
+        aprilFoolsBackBtn.onclick = () => {
+          closeAprilFoolsWarningModal();
+          setTheme("classic");
+        };
         updateSecretThemeButtonUi();
         document.getElementById("retroToggleBtn").onclick = () => {
           isRetro8bit = !isRetro8bit;
@@ -5325,6 +5719,13 @@
             if (codeEntryModal.style.display === "flex") {
               e.preventDefault();
               closeCodeEntryModal();
+              return;
+            }
+
+            if (aprilFoolsWarningModal.style.display === "flex") {
+              e.preventDefault();
+              closeAprilFoolsWarningModal();
+              setTheme("classic");
               return;
             }
 
