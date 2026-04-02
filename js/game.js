@@ -4500,8 +4500,11 @@
         const secretThemeUnlockKey = "void_secret_theme_zelda_unlocked";
         const tjThemeCode = "tj_theme";
         const tjThemeUnlockKey = "void_secret_theme_tjtheme_unlocked";
+        const solThemeCode = "sol";
+        const solThemeUnlockKey = "void_secret_theme_sol_unlocked";
         let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
         let tjThemeUnlocked = localStorage.getItem(tjThemeUnlockKey) === "1";
+        let solThemeUnlocked = localStorage.getItem(solThemeUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
@@ -4529,6 +4532,18 @@
               theme: "tjtheme",
               label: "TJ's Theme",
               unlocked: tjThemeUnlocked,
+            },
+            {
+              container: document.getElementById("themeButtons"),
+              theme: "catmodel",
+              label: "Sol",
+              unlocked: solThemeUnlocked,
+            },
+            {
+              container: document.getElementById("speedRunThemeButtons"),
+              theme: "catmodel",
+              label: "Sol",
+              unlocked: solThemeUnlocked,
             },
           ];
 
@@ -4584,6 +4599,13 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("tj's theme unlocked");
+          } else if (normalized === solThemeCode) {
+            if (!solThemeUnlocked) {
+              solThemeUnlocked = true;
+              localStorage.setItem(solThemeUnlockKey, "1");
+              updateSecretThemeButtonUi();
+            }
+            flashCodeMessage("sol theme unlocked");
           }
           closeCodeEntryModal();
         }
@@ -5115,8 +5137,10 @@
           localStorage.setItem("core_speedrun_best_level_v1", 1);
           localStorage.removeItem("void_secret_theme_zelda_unlocked");
           localStorage.removeItem("void_secret_theme_tjtheme_unlocked");
+          localStorage.removeItem("void_secret_theme_sol_unlocked");
           secretThemeUnlocked = false;
           tjThemeUnlocked = false;
+          solThemeUnlocked = false;
           updateSecretThemeButtonUi();
           setLevelDisplay();
           updateBestLevelUi();
