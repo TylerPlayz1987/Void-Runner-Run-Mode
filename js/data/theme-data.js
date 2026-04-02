@@ -98,7 +98,7 @@ const themes = {
     player: "#ffd54a",
     hazards: "#c94f3d",
     glow: true,
-    music: null,
+    music: "theme_bg/Zelda.ogg",
   },
 };
 const lavaThemeFx = {

@@ -710,6 +710,9 @@
             secretThemeButton.className = "theme-btn";
             secretThemeButton.dataset.theme = "zelda";
             secretThemeButton.textContent = "Zelda";
+            secretThemeButton.onclick = () => {
+              setTheme("zelda");
+            };
             themeButtonsContainer.appendChild(secretThemeButton);
           }
 
