@@ -1,12 +1,16 @@
 // Configure this list to add older playable versions.
 // Example old build path: "legacy_versions/version0_1.html"
 window.VR_VERSION_DATA = {
-  currentVersion: "v0.7.0",
+  currentVersion: "v0.8.0",
   versions: [
     {
-      label: "v0.7.0 (Current)",
+      label: "v0.8.0 (Current)",
       path: "./",
       current: true,
+    },
+    {
+      label: "v0.7.0",
+      path: "legacy_versions/version0_7/version0_7.html",
     },
     {
       label: "v0.1.0",
