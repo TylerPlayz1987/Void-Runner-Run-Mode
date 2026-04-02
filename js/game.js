@@ -3129,9 +3129,31 @@
             ctx.strokeRect(x, y, w, h);
           }
 
+          function getObjectGlitchOffset(amount, seed) {
+            if (amount <= 0) return { x: 0, y: 0 };
+            const baseShake = 1 + amount * 3.5;
+            const time = frameCount + seed * 11.37;
+            let x = Math.round(Math.sin(time * 0.67) * baseShake);
+            let y = Math.round(Math.cos(time * 0.53) * baseShake * 0.65);
+
+            // Occasional pop to sell a teleport-like glitch without displacing objects too far.
+            const popTick = Math.floor((frameCount + seed * 17) * 0.08);
+            if (popTick % 9 === 0) {
+              x += Math.round((Math.sin(seed * 29 + frameCount) * (5 + amount * 8)));
+              y += Math.round((Math.cos(seed * 41 + frameCount * 0.9) * (3 + amount * 6)));
+            }
+            return { x, y };
+          }
+
           const wellFx = getWellFx(currentTheme);
           wells.forEach((w) => {
             const wellGlitch = getWallGlitchAmount(w.x - w.r, w.r * 2);
+            const wellOffset = getObjectGlitchOffset(
+              wellGlitch,
+              (w.x + w.y + w.r) * 0.01,
+            );
+            ctx.save();
+            ctx.translate(wellOffset.x, wellOffset.y);
             ctx.beginPath();
             ctx.arc(w.x - camX, w.y, w.r, 0, Math.PI * 2);
             let g = ctx.createRadialGradient(
@@ -3187,9 +3209,16 @@
               w.r * 2,
               wellGlitch,
             );
+            ctx.restore();
           });
           if (shieldItem && !shieldItem.collected) {
             const shieldGlitch = getWallGlitchAmount(shieldItem.x, shieldItem.w);
+            const shieldOffset = getObjectGlitchOffset(
+              shieldGlitch,
+              (shieldItem.x + shieldItem.y) * 0.01,
+            );
+            ctx.save();
+            ctx.translate(shieldOffset.x, shieldOffset.y);
             ctx.strokeStyle = "#0cf";
             ctx.lineWidth = 3;
             ctx.strokeRect(shieldItem.x - camX, shieldItem.y, 20, 20);
@@ -3202,6 +3231,7 @@
               shieldItem.h,
               shieldGlitch,
             );
+            ctx.restore();
           }
           if (player.hasShield && !player.spaghettified) {
             ctx.beginPath();
@@ -3275,6 +3305,12 @@
           const gw = goal.w;
           const gh = goal.h;
           const goalGlitch = getWallGlitchAmount(goal.x, goal.w);
+          const goalOffset = getObjectGlitchOffset(
+            goalGlitch,
+            (goal.x + goal.y + goal.w) * 0.01,
+          );
+          ctx.save();
+          ctx.translate(goalOffset.x, goalOffset.y);
           ctx.save();
           if (currentTheme === "sunny") {
             ctx.fillStyle = "#ffeb3b";
@@ -3472,6 +3508,7 @@
           }
           ctx.restore();
           drawWallGlitchOverlay(gx, gy, gw, gh, goalGlitch);
+          ctx.restore();
           winParticles.forEach((p) => {
             ctx.fillStyle = `rgba(0,255,0,${p.l / 40})`;
             ctx.fillRect(p.x - camX, p.y, 5, 5);
@@ -3483,6 +3520,12 @@
           const lavaFx = getLavaFx(currentTheme);
           hazards.forEach((h) => {
             const hazardGlitch = getWallGlitchAmount(h.x, h.w);
+            const hazardOffset = getObjectGlitchOffset(
+              hazardGlitch,
+              (h.x + h.y + h.w) * 0.01,
+            );
+            ctx.save();
+            ctx.translate(hazardOffset.x, hazardOffset.y);
             if (h.type === "lava") {
               if (currentTheme === "pirate") {
                 // Water wall effect for pirate theme
@@ -3555,11 +3598,18 @@
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
             }
             drawWallGlitchOverlay(h.x - camX, h.y, h.w, h.h, hazardGlitch);
+            ctx.restore();
           });
           ctx.shadowBlur = 0;
           const isEasterTheme = currentTheme === "easter";
           platforms.forEach((p) => {
             const platformGlitch = getWallGlitchAmount(p.x, p.w);
+            const platformOffset = getObjectGlitchOffset(
+              platformGlitch,
+              (p.x + p.y + p.w) * 0.01,
+            );
+            ctx.save();
+            ctx.translate(platformOffset.x, platformOffset.y);
             let cy = frameCount % 300,
               sol = !p.isPhase || cy < 240;
             ctx.globalAlpha = sol ? 1 : 0.1;
@@ -3754,6 +3804,7 @@
               }
             }
             drawWallGlitchOverlay(p.x - camX, p.y - 2, p.w, p.h + 4, platformGlitch);
+            ctx.restore();
           });
           ctx.globalAlpha = 1;
           if (!player.spaghettified)
