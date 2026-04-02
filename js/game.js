@@ -2300,32 +2300,41 @@
             );
             ctx.stroke();
           } else if (currentTheme === "zelda") {
-            // Keep the core block body but add Link-inspired hat details.
-            ctx.fillStyle = c;
-            ctx.fillRect(x, y, player.w, player.h);
+            const zeldaPlayerImage = getThemePlayerImage("zelda");
+            if (
+              zeldaPlayerImage &&
+              zeldaPlayerImage.complete &&
+              zeldaPlayerImage.naturalWidth > 0
+            ) {
+              ctx.drawImage(zeldaPlayerImage, x - 3, y - 3, player.w + 6, player.h + 6);
+            } else {
+              // Keep the core block body but add Link-inspired hat details.
+              ctx.fillStyle = c;
+              ctx.fillRect(x, y, player.w, player.h);
 
-            // Hat brim.
-            ctx.fillStyle = "#1f8b3f";
-            ctx.fillRect(x + 2, y + 1, 16, 4);
+              // Hat brim.
+              ctx.fillStyle = "#1f8b3f";
+              ctx.fillRect(x + 2, y + 1, 16, 4);
 
-            // Hat crown and trailing tail.
-            ctx.beginPath();
-            ctx.moveTo(x + 3, y + 2);
-            ctx.lineTo(x + 13, y - 8);
-            ctx.lineTo(x + 19, y + 2);
-            ctx.closePath();
-            ctx.fill();
-            ctx.beginPath();
-            ctx.moveTo(x + 15, y + 2);
-            ctx.lineTo(x + 22, y + 6);
-            ctx.lineTo(x + 14, y + 7);
-            ctx.closePath();
-            ctx.fill();
+              // Hat crown and trailing tail.
+              ctx.beginPath();
+              ctx.moveTo(x + 3, y + 2);
+              ctx.lineTo(x + 13, y - 8);
+              ctx.lineTo(x + 19, y + 2);
+              ctx.closePath();
+              ctx.fill();
+              ctx.beginPath();
+              ctx.moveTo(x + 15, y + 2);
+              ctx.lineTo(x + 22, y + 6);
+              ctx.lineTo(x + 14, y + 7);
+              ctx.closePath();
+              ctx.fill();
 
-            // Hair under the cap.
-            ctx.fillStyle = "#b67d2e";
-            ctx.fillRect(x + 3, y + 9, 2, 5);
-            ctx.fillRect(x + 15, y + 9, 2, 5);
+              // Hair under the cap.
+              ctx.fillStyle = "#b67d2e";
+              ctx.fillRect(x + 3, y + 9, 2, 5);
+              ctx.fillRect(x + 15, y + 9, 2, 5);
+            }
           } else {
             ctx.fillStyle = c;
             ctx.fillRect(x, y, player.w, player.h);
