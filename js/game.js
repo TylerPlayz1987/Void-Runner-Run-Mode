@@ -658,7 +658,7 @@
           },
           {
             minX: 860,
-            text: "Moving platform ahead: keep your jump timing and ride it safely.",
+            text: "Moving platform: keep your jump timing and ride it safely.",
           },
           {
             minX: 1120,
@@ -2329,73 +2329,114 @@
             );
             ctx.stroke();
           } else if (currentTheme === "catmodel") {
-            // Cat-style model based on the provided reference (purple vent cat).
-            const body = "#d8b8f3";
-            const earFill = "#f4d9ff";
-            const eyeColor = "#ffd24f";
-            const pupilColor = "#222";
-            const noseColor = "#ec99c1";
-            const stripeColor = "#a873b5";
+            // Cat model inspired by uploaded image: purple tone, large eyes, gem, ears, simple tail.
+            const body = "#c393e8";
+            const face = "#e7cffc";
+            const earOuter = "#a860c7";
+            const earInner = "#f8d7ff";
+            const eyeWhite = "#ffffff";
+            const eyeIris = "#f5d44a";
+            const eyePupil = "#291e1a";
+            const nose = "#ff8fba";
+            const gem = "#ff61ab";
+            const whisker = "#814887";
 
-            // Main body
+            // Body base
             ctx.fillStyle = body;
             ctx.fillRect(x, y, player.w, player.h);
 
+            // Face piece
+            ctx.fillStyle = face;
+            ctx.fillRect(x + 2, y + 3, player.w - 4, player.h - 8);
+
             // Ears
-            ctx.fillStyle = earFill;
+            ctx.fillStyle = earOuter;
             ctx.beginPath();
-            ctx.moveTo(x + 3, y);
-            ctx.lineTo(x + 8, y - 12);
-            ctx.lineTo(x + 13, y);
+            ctx.moveTo(x + 2, y);
+            ctx.lineTo(x + 9, y - 12);
+            ctx.lineTo(x + 15, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y);
+            ctx.lineTo(x + 17, y - 12);
+            ctx.lineTo(x + 23, y);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = earInner;
+            ctx.beginPath();
+            ctx.moveTo(x + 4, y - 1);
+            ctx.lineTo(x + 9, y - 8);
+            ctx.lineTo(x + 13, y - 1);
+            ctx.closePath();
+            ctx.fill();
+            ctx.beginPath();
+            ctx.moveTo(x + 12, y - 1);
+            ctx.lineTo(x + 17, y - 8);
+            ctx.lineTo(x + 21, y - 1);
+            ctx.closePath();
             ctx.fill();
 
+            // Gem
+            ctx.fillStyle = gem;
             ctx.beginPath();
-            ctx.moveTo(x + 11, y);
-            ctx.lineTo(x + 16, y - 12);
-            ctx.lineTo(x + 21, y);
+            ctx.moveTo(x + 10, y + 2);
+            ctx.lineTo(x + 12, y - 1);
+            ctx.lineTo(x + 14, y + 2);
+            ctx.closePath();
             ctx.fill();
-
-            ctx.fillStyle = stripeColor;
-            ctx.fillRect(x + 5, y + 4, 2, 5);
-            ctx.fillRect(x + 13, y + 4, 2, 5);
-            ctx.fillRect(x + 9, y + 2, 2, 4);
 
             // Eyes
-            ctx.fillStyle = "#ffffff";
-            ctx.fillRect(x + 6, y + 7, 4, 6);
-            ctx.fillRect(x + 12, y + 7, 4, 6);
+            const leftEyeX = x + 5;
+            const rightEyeX = x + 12;
+            const eyeY = y + 8;
+            ctx.fillStyle = eyeWhite;
+            ctx.fillRect(leftEyeX, eyeY, 5, 6);
+            ctx.fillRect(rightEyeX, eyeY, 5, 6);
 
-            ctx.fillStyle = eyeColor;
-            ctx.fillRect(x + 7, y + 9, 2, 3);
-            ctx.fillRect(x + 13, y + 9, 2, 3);
+            ctx.fillStyle = eyeIris;
+            ctx.fillRect(leftEyeX + 1, eyeY + 1, 3, 5);
+            ctx.fillRect(rightEyeX + 1, eyeY + 1, 3, 5);
 
-            ctx.fillStyle = pupilColor;
-            ctx.fillRect(x + 7, y + 10, 2, 1);
-            ctx.fillRect(x + 13, y + 10, 2, 1);
+            ctx.fillStyle = eyePupil;
+            ctx.fillRect(leftEyeX + 2, eyeY + 2, 1, 3);
+            ctx.fillRect(rightEyeX + 2, eyeY + 2, 1, 3);
 
-            // Nose + mouth
-            ctx.fillStyle = noseColor;
-            ctx.fillRect(x + 10, y + 13, 4, 2);
-            ctx.strokeStyle = "#aa4592";
+            ctx.fillStyle = "rgba(255,255,255,0.85)";
+            ctx.fillRect(leftEyeX + 2, eyeY + 2, 1, 1);
+            ctx.fillRect(rightEyeX + 2, eyeY + 2, 1, 1);
+
+            // Nose and mouth
+            ctx.fillStyle = nose;
+            ctx.fillRect(x + 10, y + 12, 2, 2);
+            ctx.strokeStyle = whisker;
             ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.moveTo(x + 11, y + 15);
-            ctx.lineTo(x + 9, y + 17);
-            ctx.moveTo(x + 13, y + 15);
-            ctx.lineTo(x + 15, y + 17);
+            ctx.moveTo(x + 11, y + 14);
+            ctx.lineTo(x + 9, y + 16);
+            ctx.moveTo(x + 11, y + 14);
+            ctx.lineTo(x + 13, y + 16);
             ctx.stroke();
 
-            // Tail
-            ctx.strokeStyle = stripeColor;
-            ctx.lineWidth = 3;
+            // Whiskers
+            ctx.strokeStyle = whisker;
             ctx.beginPath();
-            ctx.moveTo(x + player.w, y + player.h - 6);
-            ctx.quadraticCurveTo(
-              x + player.w + 10,
-              y + player.h - 10,
-              x + player.w + 6,
-              y + player.h - 16,
-            );
+            ctx.moveTo(x + 5, y + 13);
+            ctx.lineTo(x + 2, y + 13);
+            ctx.moveTo(x + 5, y + 15);
+            ctx.lineTo(x + 2, y + 15);
+            ctx.moveTo(x + 15, y + 13);
+            ctx.lineTo(x + 18, y + 13);
+            ctx.moveTo(x + 15, y + 15);
+            ctx.lineTo(x + 18, y + 15);
+            ctx.stroke();
+
+            // Tail accent
+            ctx.strokeStyle = "#a373b8";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x + player.w, y + player.h - 4);
+            ctx.quadraticCurveTo(x + player.w + 7, y + player.h - 12, x + player.w + 4, y + player.h - 19);
             ctx.stroke();
           } else if (currentTheme === "zelda") {
             const zeldaPlayerImage = getThemePlayerImage("zelda");
