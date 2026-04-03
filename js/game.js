@@ -4630,6 +4630,9 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("sol theme unlocked");
+          } else {
+            flashCodeMessage("invalid code");
+            return;
           }
           closeCodeEntryModal();
         }
