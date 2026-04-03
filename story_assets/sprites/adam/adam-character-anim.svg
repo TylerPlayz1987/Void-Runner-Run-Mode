@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="768" height="96" viewBox="0 0 768 96" role="img" aria-label="White dot character sprite sheet with 8 animation frames">
+  <defs>
+    <g id="baseHead">
+      <circle cx="0" cy="0" r="14" fill="#ffffff" stroke="#d9d9d9" stroke-width="1.4"/>
+    </g>
+    <g id="baseBody">
+      <ellipse cx="0" cy="0" rx="11" ry="14" fill="#f6f6f6" stroke="#d6d6d6" stroke-width="1.2"/>
+    </g>
+    <g id="eyeOpen">
+      <circle cx="0" cy="0" r="1.8" fill="#0d0d0d"/>
+    </g>
+    <g id="eyeBlink">
+      <line x1="-1.8" y1="0" x2="1.8" y2="0" stroke="#0d0d0d" stroke-width="1.4" stroke-linecap="round"/>
+    </g>
+    <g id="armThin">
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#ededed" stroke-width="4" stroke-linecap="round"/>
+    </g>
+    <g id="legThin">
+      <line x1="0" y1="0" x2="0" y2="13" stroke="#ececec" stroke-width="4.4" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <!-- Frame 1: idle -->
+  <g transform="translate(48,48)">
+    <use href="#baseHead" transform="translate(0,-19)"/>
+    <use href="#baseBody" transform="translate(0,8)"/>
+    <use href="#eyeOpen" transform="translate(-5,-20)"/>
+    <use href="#eyeOpen" transform="translate(5,-20)"/>
+    <use href="#armThin" transform="translate(-12,2) rotate(24)"/>
+    <use href="#armThin" transform="translate(12,2) rotate(-24)"/>
+    <use href="#legThin" transform="translate(-5,20) rotate(8)"/>
+    <use href="#legThin" transform="translate(5,20) rotate(-8)"/>
+  </g>
+
+  <!-- Frame 2: walk left step -->
+  <g transform="translate(144,48)">
+    <use href="#baseHead" transform="translate(0,-19)"/>
+    <use href="#baseBody" transform="translate(0,8)"/>
+    <use href="#eyeOpen" transform="translate(-5,-20)"/>
+    <use href="#eyeOpen" transform="translate(5,-20)"/>
+    <use href="#armThin" transform="translate(-12,2) rotate(44)"/>
+    <use href="#armThin" transform="translate(12,2) rotate(-8)"/>
+    <use href="#legThin" transform="translate(-5,20) rotate(24)"/>
+    <use href="#legThin" transform="translate(5,20) rotate(-24)"/>
+  </g>
+
+  <!-- Frame 3: walk right step -->
+  <g transform="translate(240,48)">
+    <use href="#baseHead" transform="translate(0,-19)"/>
+    <use href="#baseBody" transform="translate(0,8)"/>
+    <use href="#eyeOpen" transform="translate(-5,-20)"/>
+    <use href="#eyeOpen" transform="translate(5,-20)"/>
+    <use href="#armThin" transform="translate(-12,2) rotate(8)"/>
+    <use href="#armThin" transform="translate(12,2) rotate(-44)"/>
+    <use href="#legThin" transform="translate(-5,20) rotate(-24)"/>
+    <use href="#legThin" transform="translate(5,20) rotate(24)"/>
+  </g>
+
+  <!-- Frame 4: blink -->
+  <g transform="translate(336,48)">
+    <use href="#baseHead" transform="translate(0,-19)"/>
+    <use href="#baseBody" transform="translate(0,8)"/>
+    <use href="#eyeBlink" transform="translate(-5,-20)"/>
+    <use href="#eyeBlink" transform="translate(5,-20)"/>
+    <use href="#armThin" transform="translate(-12,2) rotate(24)"/>
+    <use href="#armThin" transform="translate(12,2) rotate(-24)"/>
+    <use href="#legThin" transform="translate(-5,20) rotate(8)"/>
+    <use href="#legThin" transform="translate(5,20) rotate(-8)"/>
+  </g>
+
+  <!-- Frame 5: wave -->
+  <g transform="translate(432,48)">
+    <use href="#baseHead" transform="translate(0,-19)"/>
+    <use href="#baseBody" transform="translate(0,8)"/>
+    <use href="#eyeOpen" transform="translate(-5,-20)"/>
+    <use href="#eyeOpen" transform="translate(5,-20)"/>
+    <use href="#armThin" transform="translate(-12,2) rotate(72)"/>
+    <use href="#armThin" transform="translate(12,2) rotate(-10)"/>
+    <use href="#legThin" transform="translate(-5,20) rotate(10)"/>
+    <use href="#legThin" transform="translate(5,20) rotate(-10)"/>
+  </g>
+
+  <!-- Frame 6: jump prep -->
+  <g transform="translate(528,50)">
+    <use href="#baseHead" transform="translate(0,-17)"/>
+    <use href="#baseBody" transform="translate(0,9) scale(1,0.9)"/>
+    <use href="#eyeOpen" transform="translate(-5,-18)"/>
+    <use href="#eyeOpen" transform="translate(5,-18)"/>
+    <use href="#armThin" transform="translate(-12,4) rotate(18)"/>
+    <use href="#armThin" transform="translate(12,4) rotate(-18)"/>
+    <use href="#legThin" transform="translate(-5,20) rotate(24)"/>
+    <use href="#legThin" transform="translate(5,20) rotate(-24)"/>
+  </g>
+
+  <!-- Frame 7: jump up -->
+  <g transform="translate(624,42)">
+    <use href="#baseHead" transform="translate(0,-19)"/>
+    <use href="#baseBody" transform="translate(0,8)"/>
+    <use href="#eyeOpen" transform="translate(-5,-20)"/>
+    <use href="#eyeOpen" transform="translate(5,-20)"/>
+    <use href="#armThin" transform="translate(-12,0) rotate(55)"/>
+    <use href="#armThin" transform="translate(12,0) rotate(-55)"/>
+    <use href="#legThin" transform="translate(-5,19) rotate(42)"/>
+    <use href="#legThin" transform="translate(5,19) rotate(-42)"/>
+  </g>
+
+  <!-- Frame 8: land -->
+  <g transform="translate(720,52)">
+    <use href="#baseHead" transform="translate(0,-16)"/>
+    <use href="#baseBody" transform="translate(0,10) scale(1,0.86)"/>
+    <use href="#eyeOpen" transform="translate(-5,-17)"/>
+    <use href="#eyeOpen" transform="translate(5,-17)"/>
+    <use href="#armThin" transform="translate(-12,5) rotate(8)"/>
+    <use href="#armThin" transform="translate(12,5) rotate(-8)"/>
+    <use href="#legThin" transform="translate(-5,20) rotate(18)"/>
+    <use href="#legThin" transform="translate(5,20) rotate(-18)"/>
+  </g>
+</svg>

@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="96" viewBox="0 0 960 96" role="img" aria-label="Sunny character sprite sheet with 10 animation frames">
+  <defs>
+    <g id="sunHeadBase">
+      <circle cx="0" cy="0" r="13" fill="#FFFF00" stroke="#e6cc00" stroke-width="1.4"/>
+    </g>
+
+    <g id="sunRaysA" stroke="#FFFF00" stroke-width="2.2" stroke-linecap="round">
+      <line x1="0" y1="-19" x2="0" y2="-24"/>
+      <line x1="0" y1="19" x2="0" y2="24"/>
+      <line x1="-19" y1="0" x2="-24" y2="0"/>
+      <line x1="19" y1="0" x2="24" y2="0"/>
+      <line x1="-13.5" y1="-13.5" x2="-17.5" y2="-17.5"/>
+      <line x1="13.5" y1="13.5" x2="17.5" y2="17.5"/>
+      <line x1="13.5" y1="-13.5" x2="17.5" y2="-17.5"/>
+      <line x1="-13.5" y1="13.5" x2="-17.5" y2="17.5"/>
+    </g>
+
+    <g id="sunBody">
+      <ellipse cx="0" cy="0" rx="11" ry="14" fill="#FFFF00" stroke="#e2c800" stroke-width="1.2"/>
+    </g>
+
+    <g id="sunArm">
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#FFFF00" stroke-width="4" stroke-linecap="round"/>
+    </g>
+
+    <g id="sunLeg">
+      <line x1="0" y1="0" x2="0" y2="13" stroke="#FFFF00" stroke-width="4.4" stroke-linecap="round"/>
+    </g>
+
+    <g id="eyesOpen">
+      <circle cx="0" cy="0" r="1.7" fill="#1a1a1a"/>
+    </g>
+
+    <g id="eyesBlink">
+      <line x1="-1.8" y1="0" x2="1.8" y2="0" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
+    </g>
+  </defs>
+
+  <!-- 1 neutral -->
+  <g transform="translate(48,48)">
+    <use href="#sunRaysA" transform="translate(0,-19) rotate(0)"/>
+    <use href="#sunHeadBase" transform="translate(0,-19)"/>
+    <use href="#sunBody" transform="translate(0,8)"/>
+    <use href="#eyesOpen" transform="translate(-5,-20)"/>
+    <use href="#eyesOpen" transform="translate(5,-20)"/>
+    <line x1="-3" y1="-13" x2="3" y2="-13" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
+    <use href="#sunArm" transform="translate(-12,2) rotate(22)"/>
+    <use href="#sunArm" transform="translate(12,2) rotate(-22)"/>
+    <use href="#sunLeg" transform="translate(-5,20) rotate(8)"/>
+    <use href="#sunLeg" transform="translate(5,20) rotate(-8)"/>
+  </g>
+
+  <!-- 2 walk left -->
+  <g transform="translate(144,48)">
+    <use href="#sunRaysA" transform="translate(0,-19) rotate(0)"/>
+    <use href="#sunHeadBase" transform="translate(0,-19)"/>
+    <use href="#sunBody" transform="translate(0,8)"/>
+    <use href="#eyesOpen" transform="translate(-5,-20)"/>
+    <use href="#eyesOpen" transform="translate(5,-20)"/>
+    <line x1="-3" y1="-13" x2="3" y2="-13" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
+    <use href="#sunArm" transform="translate(-12,2) rotate(42)"/>
+    <use href="#sunArm" transform="translate(12,2) rotate(-8)"/>
+    <use href="#sunLeg" transform="translate(-5,20) rotate(24)"/>
+    <use href="#sunLeg" transform="translate(5,20) rotate(-24)"/>
+  </g>
+
+  <!-- 3 walk right -->
+  <g transform="translate(240,48)">
+    <use href="#sunRaysA" transform="translate(0,-19) rotate(0)"/>
+    <use href="#sunHeadBase" transform="translate(0,-19)"/>
+    <use href="#sunBody" transform="translate(0,8)"/>
+    <use href="#eyesOpen" transform="translate(-5,-20)"/>
+    <use href="#eyesOpen" transform="translate(5,-20)"/>
+    <line x1="-3" y1="-13" x2="3" y2="-13" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
+    <use href="#sunArm" transform="translate(-12,2) rotate(8)"/>
+    <use href="#sunArm" transform="translate(12,2) rotate(-42)"/>
+    <use href="#sunLeg" transform="translate(-5,20) rotate(-24)"/>
+    <use href="#sunLeg" transform="translate(5,20) rotate(24)"/>
+  </g>
+
+  <!-- 4 blink -->
+  <g transform="translate(336,48)">
+    <use href="#sunRaysA" transform="translate(0,-19) rotate(0)"/>
+    <use href="#sunHeadBase" transform="translate(0,-19)"/>
+    <use href="#sunBody" transform="translate(0,8)"/>
+    <use href="#eyesBlink" transform="translate(-5,-20)"/>
+    <use href="#eyesBlink" transform="translate(5,-20)"/>
+    <line x1="-3" y1="-13" x2="3" y2="-13" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
+    <use href="#sunArm" transform="translate(-12,2) rotate(22)"/>
+    <use href="#sunArm" transform="translate(12,2) rotate(-22)"/>
+    <use href="#sunLeg" transform="translate(-5,20) rotate(8)"/>
+    <use href="#sunLeg" transform="translate(5,20) rotate(-8)"/>
+  </g>
+
+  <!-- 5 happy spin slow (clockwise) -->
+  <g transform="translate(432,48)">
+    <use href="#sunRaysA" transform="translate(0,-19) rotate(18)"/>
+    <use href="#sunHeadBase" transform="translate(0,-19)"/>
+    <use href="#sunBody" transform="translate(0,8)"/>
+    <use href="#eyesOpen" transform="translate(-5,-20)"/>
+    <use href="#eyesOpen" transform="translate(5,-20)"/>
+    <path d="M -5 -13 Q 0 -9 5 -13" fill="none" stroke="#1a1a1a" stroke-width="1.4" stroke-linecap="round"/>
+    <use href="#sunArm" transform="translate(-12,1) rotate(34)"/>
+    <use href="#sunArm" transform="translate(12,1) rotate(-34)"/>
+    <use href="#sunLeg" transform="translate(-5,20) rotate(10)"/>
+    <use href="#sunLeg" transform="translate(5,20) rotate(-10)"/>
+  </g>
+
+  <!-- 6 happy spin medium (clockwise) -->
+  <g transform="translate(528,48)">
+    <use href="#sunRaysA" transform="translate(0,-19) rotate(48)"/>
+    <use href="#sunHeadBase" transform="translate(0,-19)"/>
+    <use href="#sunBody" transform="translate(0,8)"/>
+    <use href="#eyesOpen" transform="translate(-5,-20)"/>
+    <use href="#eyesOpen" transform="translate(5,-20)"/>
+    <path d="M -6 -13 Q 0 -7.8 6 -13" fill="none" stroke="#1a1a1a" stroke-width="1.5" stroke-linecap="round"/>
+    <use href="#sunArm" transform="translate(-12,0) rotate(50)"/>
+    <use href="#sunArm" transform="translate(12,0) rotate(-50)"/>
+    <use href="#sunLeg" transform="translate(-5,20) rotate(14)"/>
+    <use href="#sunLeg" transform="translate(5,20) rotate(-14)"/>
+  </g>
+
+  <!-- 7 happy spin fast (clockwise) -->
+  <g transform="translate(624,48)">
+    <use href="#sunRaysA" transform="translate(0,-19) rotate(84)"/>
+    <use href="#sunHeadBase" transform="translate(0,-19)"/>
+    <use href="#sunBody" transform="translate(0,8)"/>
+    <use href="#eyesOpen" transform="translate(-5,-20)"/>
+    <use href="#eyesOpen" transform="translate(5,-20)"/>
+    <path d="M -6.5 -13 Q 0 -7.2 6.5 -13" fill="none" stroke="#1a1a1a" stroke-width="1.6" stroke-linecap="round"/>
+    <use href="#sunArm" transform="translate(-12,-1) rotate(64)"/>
+    <use href="#sunArm" transform="translate(12,-1) rotate(-64)"/>
+    <use href="#sunLeg" transform="translate(-5,20) rotate(20)"/>
+    <use href="#sunLeg" transform="translate(5,20) rotate(-20)"/>
+  </g>
+
+  <!-- 8 jump prep -->
+  <g transform="translate(720,50)">
+    <use href="#sunRaysA" transform="translate(0,-17) rotate(24)"/>
+    <use href="#sunHeadBase" transform="translate(0,-17)"/>
+    <use href="#sunBody" transform="translate(0,9) scale(1,0.9)"/>
+    <use href="#eyesOpen" transform="translate(-5,-18)"/>
+    <use href="#eyesOpen" transform="translate(5,-18)"/>
+    <line x1="-4" y1="-12" x2="4" y2="-12" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
+    <use href="#sunArm" transform="translate(-12,4) rotate(18)"/>
+    <use href="#sunArm" transform="translate(12,4) rotate(-18)"/>
+    <use href="#sunLeg" transform="translate(-5,20) rotate(24)"/>
+    <use href="#sunLeg" transform="translate(5,20) rotate(-24)"/>
+  </g>
+
+  <!-- 9 jump -->
+  <g transform="translate(816,42)">
+    <use href="#sunRaysA" transform="translate(0,-19) rotate(42)"/>
+    <use href="#sunHeadBase" transform="translate(0,-19)"/>
+    <use href="#sunBody" transform="translate(0,8)"/>
+    <use href="#eyesOpen" transform="translate(-5,-20)"/>
+    <use href="#eyesOpen" transform="translate(5,-20)"/>
+    <path d="M -4 -12 Q 0 -9.8 4 -12" fill="none" stroke="#1a1a1a" stroke-width="1.3" stroke-linecap="round"/>
+    <use href="#sunArm" transform="translate(-12,0) rotate(55)"/>
+    <use href="#sunArm" transform="translate(12,0) rotate(-55)"/>
+    <use href="#sunLeg" transform="translate(-5,19) rotate(42)"/>
+    <use href="#sunLeg" transform="translate(5,19) rotate(-42)"/>
+  </g>
+
+  <!-- 10 land -->
+  <g transform="translate(912,52)">
+    <use href="#sunRaysA" transform="translate(0,-16) rotate(14)"/>
+    <use href="#sunHeadBase" transform="translate(0,-16)"/>
+    <use href="#sunBody" transform="translate(0,10) scale(1,0.86)"/>
+    <use href="#eyesOpen" transform="translate(-5,-17)"/>
+    <use href="#eyesOpen" transform="translate(5,-17)"/>
+    <line x1="-3" y1="-11" x2="3" y2="-11" stroke="#1a1a1a" stroke-width="1.2" stroke-linecap="round"/>
+    <use href="#sunArm" transform="translate(-12,5) rotate(8)"/>
+    <use href="#sunArm" transform="translate(12,5) rotate(-8)"/>
+    <use href="#sunLeg" transform="translate(-5,20) rotate(18)"/>
+    <use href="#sunLeg" transform="translate(5,20) rotate(-18)"/>
+  </g>
+</svg>

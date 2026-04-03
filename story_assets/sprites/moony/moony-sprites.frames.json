@@ -1,0 +1,82 @@
+{
+  "meta": {
+    "author": "copilot",
+    "version": 1,
+    "character": "Moony",
+    "coordinateSystem": "pixels",
+    "notes": "Moony is Adam-like but with a crescent moon head and cool moon palette."
+  },
+  "sheets": {
+    "moony-character-anim": {
+      "path": "story_assets/sprites/moony/moony-character-anim.svg",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "sheetWidth": 960,
+      "sheetHeight": 96,
+      "frames": {
+        "neutral": { "x": 0, "y": 0, "w": 96, "h": 96, "index": 0 },
+        "walk_left": { "x": 96, "y": 0, "w": 96, "h": 96, "index": 1 },
+        "walk_right": { "x": 192, "y": 0, "w": 96, "h": 96, "index": 2 },
+        "blink": { "x": 288, "y": 0, "w": 96, "h": 96, "index": 3 },
+        "wave": { "x": 384, "y": 0, "w": 96, "h": 96, "index": 4 },
+        "jump_prep": { "x": 480, "y": 0, "w": 96, "h": 96, "index": 5 },
+        "jump": { "x": 576, "y": 0, "w": 96, "h": 96, "index": 6 },
+        "land": { "x": 672, "y": 0, "w": 96, "h": 96, "index": 7 },
+        "determined": { "x": 768, "y": 0, "w": 96, "h": 96, "index": 8 },
+        "talking": { "x": 864, "y": 0, "w": 96, "h": 96, "index": 9 }
+      },
+      "defaults": {
+        "idle": "neutral",
+        "walkCycle": ["walk_left", "neutral", "walk_right", "neutral"],
+        "blinkFrame": "blink"
+      }
+    },
+    "moony-dialogue-expressions": {
+      "path": "story_assets/sprites/moony/moony-dialogue-expressions.svg",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "sheetWidth": 960,
+      "sheetHeight": 96,
+      "frames": {
+        "neutral": { "x": 0, "y": 0, "w": 96, "h": 96, "index": 0 },
+        "happy": { "x": 96, "y": 0, "w": 96, "h": 96, "index": 1 },
+        "excited": { "x": 192, "y": 0, "w": 96, "h": 96, "index": 2 },
+        "worried": { "x": 288, "y": 0, "w": 96, "h": 96, "index": 3 },
+        "angry": { "x": 384, "y": 0, "w": 96, "h": 96, "index": 4 },
+        "sad": { "x": 480, "y": 0, "w": 96, "h": 96, "index": 5 },
+        "blink": { "x": 576, "y": 0, "w": 96, "h": 96, "index": 6 },
+        "surprised": { "x": 672, "y": 0, "w": 96, "h": 96, "index": 7 },
+        "determined": { "x": 768, "y": 0, "w": 96, "h": 96, "index": 8 },
+        "talking": { "x": 864, "y": 0, "w": 96, "h": 96, "index": 9 }
+      },
+      "defaults": {
+        "idleExpression": "neutral",
+        "talkCycle": ["talking", "neutral", "talking", "happy"],
+        "blinkFrame": "blink"
+      }
+    },
+    "moony-dialogue-portraits": {
+      "path": "story_assets/sprites/moony/moony-dialogue-portraits.svg",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "sheetWidth": 1280,
+      "sheetHeight": 128,
+      "frames": {
+        "neutral": { "x": 0, "y": 0, "w": 128, "h": 128, "index": 0 },
+        "happy": { "x": 128, "y": 0, "w": 128, "h": 128, "index": 1 },
+        "excited": { "x": 256, "y": 0, "w": 128, "h": 128, "index": 2 },
+        "worried": { "x": 384, "y": 0, "w": 128, "h": 128, "index": 3 },
+        "angry": { "x": 512, "y": 0, "w": 128, "h": 128, "index": 4 },
+        "sad": { "x": 640, "y": 0, "w": 128, "h": 128, "index": 5 },
+        "blink": { "x": 768, "y": 0, "w": 128, "h": 128, "index": 6 },
+        "surprised": { "x": 896, "y": 0, "w": 128, "h": 128, "index": 7 },
+        "determined": { "x": 1024, "y": 0, "w": 128, "h": 128, "index": 8 },
+        "talking": { "x": 1152, "y": 0, "w": 128, "h": 128, "index": 9 }
+      },
+      "defaults": {
+        "idleExpression": "neutral",
+        "talkCycle": ["talking", "neutral", "talking", "happy"]
+      }
+    }
+  }
+}
