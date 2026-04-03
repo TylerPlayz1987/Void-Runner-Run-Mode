@@ -73,7 +73,7 @@ const themes = {
   },
   catmodel: {
     bg: "#1a1023",
-    plat: "#2b1a3d",
+    plat: "#483a57",
     player: "#f5d9ff",
     hazards: "#ff8cb0",
     bgImage: "theme_bg/sol_background.png",
