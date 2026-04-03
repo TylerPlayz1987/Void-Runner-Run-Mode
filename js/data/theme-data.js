@@ -76,6 +76,7 @@ const themes = {
     plat: "#2b1a3d",
     player: "#f5d9ff",
     hazards: "#ff8cb0",
+    bgImage: "theme_bg/sol_background.png",
     playerImage: "theme_bg/sol_theme_player.png",
     goalImage: "theme_bg/sol_theme_goal.png",
     stars: false,
