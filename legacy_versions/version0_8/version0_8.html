@@ -1,0 +1,402 @@
+<!doctype html>
+<html>
+  <head>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+
+  <body>
+    <div id="gameShell">
+      <div id="topControls">
+        <button id="pauseBtn">Pause</button>
+        <button id="topAchBtn" class="top-control-btn">Achievements</button>
+        <button id="topMobileBtn" class="top-control-btn">Mobile</button>
+        <button id="topThemeBtn" class="top-control-btn">Theme</button>
+        <button id="topCheatsBtn" class="top-control-btn">Cheats</button>
+      </div>
+      <div id="container">
+        <div id="ui-left">
+          <div class="stat">Level: <span id="lvl">1</span></div>
+          <div
+            class="stat"
+            id="death-stat"
+            style="color: #f44; border-color: #f44"
+          >
+            Deaths: <span id="deaths">0</span>
+          </div>
+        </div>
+        <div id="ui-right">
+          <div id="speedRunTimer">00:00</div>
+          <div
+            class="stat"
+            id="best-stat"
+            style="color: #ff0; border-color: #ff0"
+          >
+            High Score: <span id="best">1</span>
+          </div>
+        </div>
+        <div id="cp-notif">Checkpoint Reached</div>
+        <div id="tutorialHint" class="stat" style="display: none"></div>
+
+        <div id="resetConfirm">
+          <div class="confirm-box">
+            <h2>Reset Game</h2>
+            <p>Choose a reset option:</p>
+            <button id="checkpointRestartBtn" class="small-btn">Restart from Checkpoint</button>
+            <button id="fullRestartBtn" class="small-btn">Full Restart (Level 1)</button>
+            <button id="cancelResetBtn" class="small-btn">Cancel</button>
+          </div>
+        </div>
+
+        <div id="fullRestartConfirm">
+          <div class="confirm-box">
+            <h2>Confirm Full Restart</h2>
+            <p>This will reset to Level 1 and clear your best score.</p>
+            <p style="color: #f88; margin-top: 8px;">Warning: all your achievements will be gone.</p>
+            <button id="confirmFullRestartBtn" class="small-btn" style="background: #f44">Yes, Full Restart</button>
+            <button id="cancelFullRestartBtn" class="small-btn">No, Go Back</button>
+          </div>
+        </div>
+
+        <div id="timeTravelAnimation">
+          <div class="confirm-box">
+            <div class="clock">
+              <div class="hand" id="clockHand"></div>
+              <div class="clock-center"></div>
+            </div>
+            <p id="timeLevelLabel">Rewinding time...</p>
+            <div class="rewind-track"><span id="rewindProgress"></span></div>
+          </div>
+        </div>
+
+        <div id="startMenu" class="overlay">
+          <h1>Void Runner</h1>
+          <div id="startMenuVersionTag">v0.8 Easter Part 2!</div>
+          <button id="startBtn" style="width: 200px">Start</button>
+          <button id="menuCodesBtn" style="width: 200px; margin-top: 8px; background: #fc3; color: #111">Codes</button>
+          <button id="openChangelogBtn" class="small-btn" style="width: 200px; margin-top: 8px;">Changelog</button>
+          <div id="codeFlashMessage">test done</div>
+        </div>
+        <div id="codeEntryModal" class="overlay" style="display: none" role="dialog" aria-modal="true" aria-labelledby="codeEntryTitle">
+          <div class="code-entry-box">
+            <h1 id="codeEntryTitle">ENTER CODE</h1>
+            <input id="codeEntryInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Type code" aria-label="Enter code" />
+            <div class="code-entry-actions">
+              <button id="codeEntrySubmitBtn" style="background: #fc3; color: #111">Submit</button>
+              <button id="codeEntryCancelBtn" class="small-btn">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <div id="aprilFoolsWarningModal" class="overlay" style="display: none" role="dialog" aria-modal="true" aria-labelledby="aprilFoolsWarningTitle">
+          <div class="warning-box">
+            <h1 id="aprilFoolsWarningTitle">WARNING</h1>
+            <p>
+              This theme contains flashing lights which may not be suitable for
+              people with photosensitive epilepsy.
+            </p>
+            <div class="warning-actions">
+              <button id="aprilFoolsConfirmBtn" style="background: #ff86c5; color: #111">Confirm</button>
+              <button id="aprilFoolsBackBtn" class="small-btn">Back</button>
+            </div>
+          </div>
+        </div>
+        <div id="changelogMenu" class="overlay" style="display: none">
+          <div class="menu-page">
+            <h1>CHANGELOG</h1>
+            <div id="changelogContent" class="stat" style="text-align: left; line-height: 1.45; max-width: 320px; max-height: 240px; overflow-y: auto;">
+              <ul>
+                <li>Added Alpha and Beta to the interchangeable versions</li>
+                <li>Added a code entry menu for entering codes</li>
+                <li>Removed Swinging Obstacles</li>
+                <li>Added new achievements</li>
+                <li>Added a new theme: April Fools</li>
+                <li>Added a warning for the April Fools theme due to flashing lights</li>
+                <li>Bug fixes</li>
+              </ul>
+            </div>
+            <button id="changelogBackBtn" class="small-btn" style="width: 200px; margin-top: 12px;">Back</button>
+          </div>
+        </div>
+        <div id="modeMenu" class="overlay" style="display: none">
+          <h1>Select Mode</h1>
+          <button id="runModeBtn" style="width: 220px; margin-bottom: 8px">
+            Run Mode
+          </button>
+          <button id="tutorialBtn" style="width: 220px; margin-bottom: 8px">
+            Tutorial Level
+          </button>
+          <button id="speedRunModeBtn" style="width: 220px; margin-bottom: 8px">
+            Speed Running
+          </button>
+          <button id="modeBackBtn" class="small-btn" style="width: 220px">
+            Back
+          </button>
+        </div>
+        <div id="speedRunMenu" class="overlay" style="display: none">
+          <div class="menu-page">
+            <h1>SPEED RUN</h1>
+            <div class="speed-run-grid">
+              <div class="speed-run-panel">
+                <div class="setting-item">
+                  <span>THEME</span>
+                  <div class="theme-buttons" id="speedRunThemeButtons">
+                    <button class="theme-btn" data-theme="classic">Classic</button>
+                    <button class="theme-btn" data-theme="sunny">Sunny</button>
+                    <button class="theme-btn" data-theme="moony">Moony</button>
+                    <button class="theme-btn" data-theme="toybox">Toybox</button>
+                    <button class="theme-btn" data-theme="deepsea">Deep Sea</button>
+                    <button class="theme-btn" data-theme="cyber">Cyber</button>
+                    <button class="theme-btn" data-theme="glitchworld">Glitch World</button>
+                    <button class="theme-btn" data-theme="easter">Easter</button>
+                    <button class="theme-btn" data-theme="tjtheme" style="display: none">TJ's Theme</button>
+                    <button class="theme-btn" data-theme="catmodel" style="display: none">Sol</button>
+                    <button class="theme-btn" data-theme="aprilfools">April Fools</button>
+                    <button class="theme-btn" data-theme="magma">Magma</button>
+                    <button class="theme-btn" data-theme="stardust">Star-Dust</button>
+                    <button class="theme-btn" data-theme="pirate">Pirate</button>
+                    <button class="theme-btn" data-theme="jungle">Jungle</button>
+                  </div>
+                </div>
+              </div>
+              <div class="speed-run-panel speed-run-achievements">
+                  <div class="stat" style="width: 100%; text-align: center; margin-bottom: 2px; color: #0f0; border-color: #0f0;">Best Level: <span id="speedRunBestLevelLabel">1</span></div>
+                  <div class="stat" style="width: 100%; text-align: center; margin-bottom: 2px; color: #f44; border-color: #f44;">Best Time: <span id="speedRunBestTimeLabel">--:--.---</span></div>
+                <div class="setting-item" style="width: 100%; text-align: left; margin: 0;">
+                  <span>Speed Running Achievements</span>
+                  <div id="speedRunAchievementsPlaceholder" class="stat" style="width: 100%; margin-top: 4px; text-align: center; color: #aaa; border-color: #555;">
+                    Coming soon
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="speed-run-action-row" style="margin-top: 10px;">
+              <button id="speedRunStartBtn">Start Speed Running</button>
+              <button id="speedRunBackBtn" class="small-btn">Back</button>
+            </div>
+          </div>
+        </div>
+        <!-- Speed Running Mode: Game Over screen overlay (shown when player dies during speed run) -->
+        <div id="speedRunGameOver" class="overlay" style="display: none">
+          <div id="speedRunGameOverContent" style="text-align: center; color: #f44;">
+            <h1 style="font-size: 48px; margin: 20px 0; text-shadow: 0 0 20px #f44;">GAME OVER</h1>
+            <div style="background: rgba(0, 0, 0, 0.7); padding: 30px; border: 3px solid #f44; border-radius: 5px; margin: 20px auto; max-width: 400px;">
+              <div style="font-size: 24px; margin-bottom: 15px; color: #0f0;">Level: <span id="speedRunGameOverLevel">1</span></div>
+              <div style="font-size: 18px; margin-bottom: 12px; color: #0f0;">Best Level: <span id="speedRunGameOverBestLevel">1</span></div>
+              <div style="font-size: 24px; margin-bottom: 30px; color: #0f0;">Time: <span id="speedRunGameOverTime">0:00</span></div>
+              <div style="font-size: 18px; margin-bottom: 20px; color: #f44;">Best Time: <span id="speedRunGameOverBestTime">--:--.---</span></div>
+              <button id="speedRunRestartBtn" style="width: 200px; margin-bottom: 10px; background: #f44;">Restart</button>
+              <button id="speedRunMenuBtn" style="width: 200px; margin-bottom: 10px; background: #444;">Back to Menu</button>
+              <button id="speedRunMainMenuBtn" style="width: 200px; background: #666;">Back to Main Menu</button>
+            </div>
+          </div>
+        </div>
+        <div id="pauseMenu" class="overlay" style="display: none">
+          <div id="tourExplain" class="stat" style="display: none"></div>
+          <div id="mainPausePage" class="menu-page">
+            <h1>PAUSED</h1>
+            <button id="resumeBtn">Resume</button
+            ><button id="settingsBtn">Settings</button
+            ><button id="achievementsBtn">Achievements</button
+            ><button id="cheatsBtn" style="background: #fa0">
+              Cheats/Debug</button
+            ><button
+              id="exitTutorialBtn"
+              class="small-btn"
+              style="display: none; background: #0aa; color: #fff"
+            >
+              Exit Tutorial
+            </button
+            ><button id="pauseMainMenuBtn" class="small-btn" style="background: #666">Main Menu</button
+            ><button id="restartBtn" class="small-btn">Reset</button>
+          </div>
+          <div id="settingsPage" class="menu-page" style="display: none">
+            <h1>SETTINGS</h1>
+            <button id="openAudioBtn" style="width: 100%; margin-bottom: 8px;">Audio Settings</button>
+            <button id="openThemeBtn" style="width: 100%; margin-bottom: 8px;">Theme Settings</button>
+            <button id="openMobileSupportBtn" style="width: 100%; margin-bottom: 8px;">Mobile Support</button>
+            <button id="openTutorialNotesBtn" style="width: 100%; margin-bottom: 8px;">Tutorial Notes</button>
+            <button id="settingsBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="audioPage" class="menu-page" style="display: none">
+            <h1>Audio</h1>
+            <div class="audio-grid">
+              <div class="audio-left">
+                <div class="setting-item">
+                  <span>Master Volume: <span id="masterValue">50%</span></span>
+                  <input type="range" id="masterSlider" min="0" max="100" value="50" />
+                </div>
+                <div class="setting-item">
+                  <span>Music Volume: <span id="musicValue">50%</span></span>
+                  <input type="range" id="musicSlider" min="0" max="100" value="50" />
+                </div>
+                <div class="setting-item">
+                  <span>SFX Volume: <span id="sfxValue">50%</span></span>
+                  <input type="range" id="sfxSlider" min="0" max="100" value="50" />
+                </div>
+              </div>
+              <div class="audio-right">
+                <button id="musicMuteBtn" class="small-btn">Music: ON</button>
+                <button id="sfxMuteBtn" class="small-btn">SFX: ON</button>
+                <button id="muteAllBtn" class="small-btn" style="background: #f88; color: #111;">Mute All</button>
+              </div>
+            </div>
+            <button id="audioBackBtn" class="small-btn" style="margin-top: 12px; width: 100%;">Back</button>
+          </div>
+          <div id="themePage" class="menu-page" style="display: none">
+            <h1>Theme</h1>
+            <div class="setting-item">
+              <span>THEME</span>
+              <div class="theme-buttons" id="themeButtons">
+                <button class="theme-btn" data-theme="classic">Classic</button>
+                <button class="theme-btn" data-theme="sunny">Sunny</button>
+                <button class="theme-btn" data-theme="moony">Moony</button>
+                <button class="theme-btn" data-theme="toybox">Toybox</button>
+                <button class="theme-btn" data-theme="deepsea">Deep Sea</button>
+                <button class="theme-btn" data-theme="cyber">Cyber</button>
+                <button class="theme-btn" data-theme="glitchworld">Glitch World</button>
+                <button class="theme-btn" data-theme="easter">Easter</button>
+                <button class="theme-btn" data-theme="tjtheme" style="display: none">TJ's Theme</button>
+                <button class="theme-btn" data-theme="catmodel" style="display: none">Sol</button>
+                <button class="theme-btn" data-theme="aprilfools">April Fools</button>
+                <button class="theme-btn" data-theme="magma">Magma</button>
+                <button class="theme-btn" data-theme="stardust">Star-Dust</button>
+                <button class="theme-btn" data-theme="pirate">Pirate</button>
+                <button class="theme-btn" data-theme="jungle">Jungle</button>
+              </div>
+            </div>
+            <div class="setting-item">
+              <span>8-bit Filter</span>
+              <button id="retroToggleBtn" class="small-btn">8-bit: OFF</button>
+            </div>
+            <button id="themeBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="mobileSupportPage" class="menu-page" style="display: none">
+            <h1>Mobile Support</h1>
+            <div class="setting-item" style="width: 100%">
+              <span>On-screen Controls</span>
+              <button id="mobileSupportToggleBtn" class="small-btn">Mobile Support: OFF</button>
+            </div>
+            <button id="openControlLayoutBtn" style="width: 100%; margin-top: 8px; background: #0aa;">Customize Buttons</button>
+            <button id="openScreenSizeBtn" style="width: 100%; margin-top: 8px;">Screen Size</button>
+            <div class="setting-item" style="text-align: left; font-size: 12px; line-height: 1.4">
+              <span>Shows left/right, jump, and run buttons on screen.</span>
+            </div>
+            <button id="mobileSupportBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+        
+          <div id="screenSizePage" class="menu-page" style="display: none">
+            <h1>Screen Size</h1>
+            <div class="setting-item" style="width: 100%">
+              <span>Screen Scale: <span id="screenSizeValue">100%</span></span>
+              <input type="range" id="screenSizeSlider" min="70" max="130" value="100" />
+            </div>
+            <button id="screenSizeBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="tutorialNotesPage" class="menu-page" style="display: none">
+            <h1>Tutorial Notes</h1>
+            <div class="notes-grid">
+              <div class="setting-item" style="text-align: left; line-height: 1.4">
+                <span>Movement: A/D or Arrows</span>
+                <span>Jump: W/Up/Space</span>
+                <span>Run: Hold Shift</span>
+                <span>Double Jump: one extra jump in air; resets on landing</span>
+                <span>Quick Restart: press R to restart from your checkpoint</span>
+                <span>Full Restart: press Shift+R, then confirm to reset to Level 1</span>
+                <span>Shield: One safety hit</span>
+                <span>Gravity Wells: pull inward; fight pull with momentum and early jumps</span>
+                <span>Checkpoints: saved every 5 levels in Run Mode</span>
+                <span>Achievements: tracked in Run Mode from the pause menu</span>
+              </div>
+              <div class="setting-item" style="text-align: left; line-height: 1.4">
+                <span>Settings: adjust master/music/SFX and toggle mutes</span>
+                <span>Themes: swap visual style and theme music (when available)</span>
+                <span>Debug/Cheats: invincibility and level warp for testing</span>
+                <span>High Score: tracks best level only while cheats are not used</span>
+                <span>If cheats are used, high score text shows CHEATS USED</span>
+                <span>
+                  Unlocks: L10 spikes, L15 lava, L20 moving platforms, L30 phase platforms,
+                  L35 shield, L40 speed zones + seekers, L50 sinking platforms, L55 gravity wells, L70 fake hazards
+                </span>
+                <span>At the end of tutorial, reopen this page for a full recap any time</span>
+              </div>
+            </div>
+            <button id="tutorialNotesBackBtn" class="small-btn" style="margin-top: 12px;">Back</button>
+          </div>
+          <div id="achievementsPage" class="menu-page" style="display: none">
+            <h1>ACHIEVEMENTS</h1>
+            <div id="achievements-container"></div>
+            <button id="achievementsBackBtn" class="small-btn" style="margin-top: 15px;">Back</button>
+          </div>
+          <div id="cheatsPage" class="menu-page" style="display: none">
+            <h1 style="color: #fa0">CHEATS</h1>
+            <button
+              id="invincibleBtn"
+              style="background: #fa0; margin-bottom: 5px"
+            >
+              Invincibility: OFF
+            </button>
+            <div style="display: flex; gap: 5px; width: 100%; margin-top: 10px">
+              <input
+                type="number"
+                id="warpInput"
+                placeholder="Level"
+                style="
+                  flex: 1;
+                  background: #222;
+                  border: 1px solid #fa0;
+                  color: #fa0;
+                  text-align: center;
+                "
+              /><button
+                id="warpBtn"
+                style="background: #fa0; width: 80px; font-size: 12px"
+              >
+                Warp
+              </button>
+            </div>
+            <button
+              id="cheatBackBtn"
+              class="small-btn"
+              style="margin-top: 20px"
+            >
+              Back
+            </button>
+          </div>
+        </div>
+        <div id="mobileControls">
+          <div id="customizeGridOverlay"></div>
+          <button class="mobile-btn" id="btn-left" data-code="ArrowLeft" aria-label="Move left" title="Move left">◀</button>
+          <button class="mobile-btn" id="btn-right" data-code="ArrowRight" aria-label="Move right" title="Move right">▶</button>
+          <button class="mobile-btn wide" id="btn-run" data-code="ShiftLeft" aria-label="Run" title="Run">RUN</button>
+          <button class="mobile-btn" id="btn-jump" data-code="Space" aria-label="Jump" title="Jump">JUMP</button>
+          <button class="mobile-btn" id="btn-dash" data-code="KeyQ" aria-label="Dash" title="Dash">DASH</button>
+          <div id="customizeConfirmBar">
+            <button id="customizeGridBtn" class="small-btn">Show Grid</button>
+            <button id="resetControlLayoutBtn" class="small-btn">Reset Layout</button>
+            <button id="snapControlLayoutBtn" class="small-btn" style="background: #88f; color: #111;">Snap to Grid</button>
+            <button id="confirmCustomizeBtn" class="small-btn" style="background: #0aa; color: #000;">Done</button>
+          </div>
+        </div>
+        <canvas id="canvas"></canvas>
+        <button id="versionPickerBtn" aria-haspopup="dialog" aria-expanded="false" title="Choose game version">v0.7.0</button>
+        <div id="versionPickerMenu" aria-label="Game versions" role="dialog">
+          <div id="versionPickerHeader">
+            <span id="versionPickerTitle">Choose Version</span>
+            <button id="versionPickerClose" class="small-btn" type="button">X</button>
+          </div>
+          <div id="versionPickerList"></div>
+        </div>
+      </div>
+    </div>
+    <audio id="bgSunnyMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgMoonyMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgToyBoxMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgCyberMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgMagmaMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgStardustMusic" loop crossorigin="anonymous" preload="none"></audio>
+    <audio id="bgMusic" loop crossorigin="anonymous"></audio>
+    <script src="js/data/achievements-data.js"></script>
+    <script src="js/data/theme-data.js"></script>
+    <script src="js/data/version-data.js"></script>
+    <script src="js/game.js"></script>
+  </body>
+</html>
