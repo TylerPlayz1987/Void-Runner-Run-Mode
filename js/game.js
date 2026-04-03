@@ -709,6 +709,10 @@
             text: "Obstacle unlocks: L10 spikes, L15 lava, L20 moving, L30 phase, L35 shield, L40 speed+seekers, L50 sinking, L55 wells, L70 fake hazards.",
           },
           {
+            minX: 4540,
+            text: "Achievements are tracked in Run Mode; check them from the pause menu.",
+          },
+          {
             minX: 4760,
             text: "Final stretch. Reach the goal, then review settings and notes after completion.",
           },
