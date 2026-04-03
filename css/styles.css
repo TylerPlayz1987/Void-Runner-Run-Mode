@@ -567,9 +567,9 @@
       }
 
       #storyModeBtn {
-        background: linear-gradient(180deg, #4cf0ff 0%, #0fa7b8 100%);
-        color: #001419;
-        box-shadow: 0 0 14px rgba(76, 240, 255, 0.4);
+        background: linear-gradient(180deg, #59ff7a 0%, #11a835 100%);
+        color: #001206;
+        box-shadow: 0 0 14px rgba(89, 255, 122, 0.45);
       }
 
       #modeMenu.story-cutscene-hidden {
