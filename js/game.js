@@ -4684,7 +4684,16 @@
           const modeMenuEl = document.getElementById("modeMenu");
           const storyBtnEl = document.getElementById("storyModeBtn");
           const cutsceneApi = window.VRStoryModeCutscene;
+          const storyMenuApi = window.VRStoryModeMenu;
+          const openStoryMenu = () => {
+            if (storyMenuApi && typeof storyMenuApi.open === "function") {
+              storyMenuApi.open();
+            } else {
+              modeMenuEl.style.display = "flex";
+            }
+          };
           if (!cutsceneApi || typeof cutsceneApi.start !== "function") {
+            openStoryMenu();
             return;
           }
 
@@ -4692,8 +4701,7 @@
             modeMenuEl,
             storyBtnEl,
             onComplete: () => {
-              // Story start menu will be added later; return to mode menu after cutscene.
-              modeMenuEl.style.display = "flex";
+              openStoryMenu();
             },
           });
         };

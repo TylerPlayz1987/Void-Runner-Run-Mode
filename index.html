@@ -2,6 +2,7 @@
 <html>
   <head>
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/story_mode/story-mode-menu.css" />
   </head>
 
   <body>
@@ -131,6 +132,22 @@
         </div>
         <div id="storyCutsceneOverlay" style="display: none" aria-hidden="true">
           <div id="storyCutsceneBlackHole"></div>
+        </div>
+        <div id="storyModeMenu" class="overlay" style="display: none" aria-hidden="true">
+          <div class="story-menu-page">
+            <div class="story-kicker">Void Runner</div>
+            <h1>Story Mode</h1>
+            <div class="story-world-card">
+              <div class="story-world-label">World 1</div>
+              <div class="story-world-title">Into The Rift</div>
+              <div class="story-world-desc">
+                A strange pull is tearing the void apart. Enter the rift and follow
+                the signal.
+              </div>
+            </div>
+            <button id="storyStartBtn" class="story-primary-btn">Start World 1</button>
+            <button id="storyBackBtn" class="small-btn" style="width: 240px">Back</button>
+          </div>
         </div>
         <div id="speedRunMenu" class="overlay" style="display: none">
           <div class="menu-page">
@@ -399,6 +416,7 @@
     <script src="js/data/theme-data.js"></script>
     <script src="js/data/version-data.js"></script>
     <script src="js/story_mode/story-mode-cutscene.js"></script>
+    <script src="js/story_mode/story-mode-menu.js"></script>
     <script src="js/game.js"></script>
   </body>
 </html>
