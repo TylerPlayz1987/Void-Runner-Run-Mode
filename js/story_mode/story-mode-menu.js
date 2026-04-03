@@ -6,7 +6,7 @@
       label: "Chapter 1",
       title: "Into The Rift",
       description:
-        "A strange pull is tearing the void apart. Enter the rift and follow the signal.",
+        "A strange force is tearing the void apart. Enter the rift and find the source.",
       playable: true,
       buttonText: "Play Chapter 1",
       loadingText: "Chapter 1 loading soon",
