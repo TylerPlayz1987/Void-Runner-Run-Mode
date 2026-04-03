@@ -9,6 +9,10 @@ window.VR_VERSION_DATA = {
       path: "../../index.html",
     },
     {
+      label: "v0.8.0",
+      path: "../../legacy_versions/version0_8/version0_8.html",
+    },
+    {
       label: "v0.7.0 (Current)",
       path: "./version0_7.html",
       current: true,
