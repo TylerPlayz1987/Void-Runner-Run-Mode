@@ -16,6 +16,10 @@
     return t * t * t;
   }
 
+  function easeInQuart(t) {
+    return t * t * t * t;
+  }
+
   function easeOutCubic(t) {
     return 1 - Math.pow(1 - t, 3);
   }
@@ -101,10 +105,12 @@
       return Math.random() * Math.PI * 2;
     });
 
-    const staticDuration = 1600;
-    const focusDuration = 1250;
-    const totalDuration = 2400;
-    const focusHoldAt = 1100;
+    const suckDuration = 1900;
+    const centerDuration = 520;
+    const zoomDuration = 920;
+    const centerStartAt = suckDuration;
+    const zoomStartAt = centerStartAt + centerDuration;
+    const totalDuration = zoomStartAt + zoomDuration;
     const startTime = performance.now();
 
     function finishCutscene() {
@@ -134,13 +140,25 @@
       const elapsed = now - startTime;
       const p = clamp01(elapsed / totalDuration);
 
+      // Phase 1: all non-story menu elements are sucked in with accelerating speed.
+      const suckPhaseP = clamp01(elapsed / suckDuration);
+      const accelProgress = easeInQuart(suckPhaseP);
+
+      if (suckPhaseP < 0.45) {
+        blackHole.style.animationDuration = "0.95s";
+      } else if (suckPhaseP < 0.8) {
+        blackHole.style.animationDuration = "0.62s";
+      } else {
+        blackHole.style.animationDuration = "0.4s";
+      }
+
       for (let i = 0; i < staticClones.length; i += 1) {
         const data = staticClones[i];
         const delay = i * 65;
-        const localP = clamp01((elapsed - delay) / staticDuration);
-        const pull = easeInCubic(localP);
-        const swirl = (1 - localP) * 30;
-        const theta = localP * 18 + staticPhase[i];
+        const localP = clamp01((elapsed - delay) / suckDuration);
+        const pull = easeInQuart(localP);
+        const swirl = (1 - localP) * (36 - accelProgress * 18);
+        const theta = localP * (10 + accelProgress * 34) + staticPhase[i];
         const x = lerp(data.startX, holeX, pull) + Math.sin(theta) * swirl;
         const y = lerp(data.startY, holeY, pull) + Math.cos(theta * 0.85) * swirl * 0.7;
         const scale = Math.max(0.08, 1 - pull * 0.95);
@@ -153,16 +171,33 @@
           "translate(-50%, -50%) scale(" +
           scale.toFixed(3) +
           ") rotate(" +
-          (localP * 820).toFixed(1) +
+          (localP * (280 + accelProgress * 980)).toFixed(1) +
           "deg)";
       }
 
-      if (elapsed < focusHoldAt) {
-        const holdP = clamp01(elapsed / focusHoldAt);
-        const drift = 18 * Math.sin(holdP * 6.2);
-        const x = lerp(storyClone.startX, storyClone.startX + (holeX - storyClone.startX) * 0.1, holdP) + drift;
-        const y = lerp(storyClone.startY, storyClone.startY + (holeY - storyClone.startY) * 0.1, holdP * 0.8);
-        const scale = lerp(1, 1.08, easeOutCubic(holdP));
+      // Phase 2: once everything else is gone, center the Story Mode button.
+      if (elapsed < centerStartAt) {
+        const holdP = clamp01(elapsed / centerStartAt);
+        const drift = (1 - holdP) * 11 * Math.sin(holdP * 7.4);
+        const x = lerp(storyClone.startX, storyClone.startX + (holeX - storyClone.startX) * 0.08, holdP) + drift;
+        const y = lerp(storyClone.startY, storyClone.startY + (holeY - storyClone.startY) * 0.06, holdP * 0.85);
+        const scale = lerp(1, 1.04, easeOutCubic(holdP));
+
+        storyClone.el.style.left = x + "px";
+        storyClone.el.style.top = y + "px";
+        storyClone.el.style.opacity = "1";
+        storyClone.el.style.transform =
+          "translate(-50%, -50%) scale(" +
+          scale.toFixed(3) +
+          ")";
+      } else if (elapsed < zoomStartAt) {
+        const centerP = clamp01((elapsed - centerStartAt) / centerDuration);
+        const eased = easeInOutCubic(centerP);
+        const fromX = storyClone.startX + (holeX - storyClone.startX) * 0.08;
+        const fromY = storyClone.startY + (holeY - storyClone.startY) * 0.06;
+        const x = lerp(fromX, centerX, eased);
+        const y = lerp(fromY, centerY, eased);
+        const scale = lerp(1.04, 1.16, eased);
 
         storyClone.el.style.left = x + "px";
         storyClone.el.style.top = y + "px";
@@ -172,14 +207,13 @@
           scale.toFixed(3) +
           ")";
       } else {
-        const zoomP = clamp01((elapsed - focusHoldAt) / focusDuration);
-        const eased = easeInOutCubic(zoomP);
-        const x = lerp(storyClone.startX + (holeX - storyClone.startX) * 0.1, centerX, eased);
-        const y = lerp(storyClone.startY + (holeY - storyClone.startY) * 0.08, centerY, eased);
-        const scale = lerp(1.08, 10.5, easeInCubic(zoomP));
+        // Phase 3: zoom only after the story button is centered.
+        const zoomP = clamp01((elapsed - zoomStartAt) / zoomDuration);
+        const fromScale = 1.16;
+        const scale = lerp(fromScale, 10.5, easeInCubic(zoomP));
 
-        storyClone.el.style.left = x + "px";
-        storyClone.el.style.top = y + "px";
+        storyClone.el.style.left = centerX + "px";
+        storyClone.el.style.top = centerY + "px";
         storyClone.el.style.opacity = "1";
         storyClone.el.style.transform =
           "translate(-50%, -50%) scale(" +
