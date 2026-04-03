@@ -2,18 +2,27 @@
 Infinite Platform Game
 
 ## Overview
-Void Runner is a browser-based 2D platformer built around a single-page `index.html` game shell. The current v0.7 branch adds a broader menu system, more themes, mobile support, interchangeable legacy builds, and quality-of-life polish on top of the core endless-runner loop.
+Void Runner is a browser-based 2D platformer built around a single-page `index.html` game shell. Version 0.8 expands customization, secret unlocks, and progression polish on top of the core endless-runner loop.
 
 Highlights:
 - procedural level generation
 - multiple themes and theme-specific music
+- code-entry unlock system for secret themes and other things for the future
 - player momentum, coyote time, jump buffering, and quick restart
 - hazards, checkpoints, achievements, and high-score tracking
+- updated Run Mode achievements including Speed Demon and jump milestones
 - pause/menu/settings flow with audio, theme, and mobile options
 - changelog panel, main-menu subtitle, and pause-menu main menu navigation
 - speedrun mode updates with improved flow and UI
 - clickable version selector for legacy builds
 - 8-bit filter mode on the classic theme
+
+## What Changed In v0.8
+- Added code entry flow from the main menu for secret unlocks.
+- Updated run achievements:
+	- Added Speed Demon: finish 10 levels while holding run the entire time.
+	- Updated Spacebar Crusher target to 500 total jumps.
+- Updated tutorial messaging and notes so mechanics/unlocks match current gameplay.
 
 ## Project Files
 - [index.html](index.html): single-page game shell that hosts the canvas, DOM, and script loading.
@@ -49,7 +58,7 @@ Standard infinite platformer progression:
 ### Tutorial Level
 Guided introduction to game mechanics:
 - Extended single level that teaches mechanics progressively
-- Hint system that walks through movement, jumping, platforms, hazards, and advanced features
+- Hint system that walks through movement, jumping, platforms, hazards, restarts, and progression unlock timing
 - Post-completion tour that shows settings and customization pages
 - Linear progression with no checkpoints
 - Replayable any time from the mode menu
@@ -63,7 +72,7 @@ Competitive time-attack mode to reach level 100 as fast as possible:
 - Best time tracking uses `core_speedrun_best_time_v1`
 
 ## UI and Menus
-- Main menu includes the version subtitle, changelog button, and version picker entry point.
+- Main menu includes the version subtitle, changelog button, version picker entry point, and code entry button for unlocks.
 - Pause menu includes a direct main menu button, achievements, cheats, settings, audio, theme, and mobile support pages.
 - Theme and audio menus are shared across the main build and the legacy builds.
 - The changelog panel lives in the main menu and lists the current release notes.
@@ -97,7 +106,7 @@ Competitive time-attack mode to reach level 100 as fast as possible:
 - `draw()`: top-level render wrapper; when `isRetro8bit` is true on the classic theme, draws to a low-res offscreen canvas.
 
 ## Notes
-- Current version is 0.7.
+- Current version is 0.8.
 - Legacy builds are interchangeable through the version picker.
 - High score is saved as `core_best_v20` in localStorage.
 - Speed run best time uses `core_speedrun_best_time_v1`.
