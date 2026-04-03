@@ -71,6 +71,18 @@ const themes = {
     goalImage: "theme_bg/tj_theme_goal.png",
     music: "theme_bg/Wacky.ogg",
   },
+  catmodel: {
+    bg: "#1a1023",
+    plat: "#483a57",
+    player: "#f5d9ff",
+    hazards: "#ff8cb0",
+    bgImage: "theme_bg/sol_background.png",
+    playerImage: "theme_bg/sol_theme_player.png",
+    goalImage: "theme_bg/sol_theme_goal.png",
+    stars: false,
+    glow: false,
+    music: "theme_bg/Sol.ogg",
+  },
   aprilfools: {
     bg: "#fff4fb",
     plat: "#bff4ff",
@@ -118,7 +130,7 @@ const themes = {
     hazards: "#c94f3d",
     glow: true,
     playerImage: "theme_bg/zelda_theme_player.png",
-    bgImage: "theme_bg/zelda-background.png",
+    bgImage: "theme_bg/zelda_background.png",
     music: "theme_bg/Zelda.ogg",
   },
 };

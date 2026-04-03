@@ -653,8 +653,12 @@
             text: "Double jump: you get one extra jump in the air, then it resets on landing.",
           },
           {
+            minX: 700,
+            text: "Press Q to dash: a quick burst of speed with cooldown.",
+          },
+          {
             minX: 860,
-            text: "Moving platform ahead: keep your jump timing and ride it safely.",
+            text: "Moving platform: keep your jump timing and ride it safely.",
           },
           {
             minX: 1120,
@@ -2324,6 +2328,140 @@
               y + player.h - 2,
             );
             ctx.stroke();
+          } else if (currentTheme === "catmodel") {
+            const solPlayerImage = getThemePlayerImage("catmodel");
+            if (
+              solPlayerImage &&
+              solPlayerImage.complete &&
+              solPlayerImage.naturalWidth > 0
+            ) {
+              const maxW = player.w + 10;
+              const maxH = player.h + 12;
+              const scale = Math.min(
+                maxW / solPlayerImage.naturalWidth,
+                maxH / solPlayerImage.naturalHeight,
+              );
+              const drawW = solPlayerImage.naturalWidth * scale;
+              const drawH = solPlayerImage.naturalHeight * scale;
+              const drawX = x + (player.w - drawW) / 2;
+              const drawY = y + (player.h - drawH) / 2;
+              ctx.drawImage(solPlayerImage, drawX, drawY, drawW, drawH);
+            } else {
+              // Sol fallback if image is unavailable.
+              const body = "#c393e8";
+              const face = "#e7cffc";
+              const earOuter = "#a860c7";
+              const earInner = "#f8d7ff";
+              const eyeWhite = "#ffffff";
+              const eyeIris = "#f5d44a";
+              const eyePupil = "#291e1a";
+              const nose = "#ff8fba";
+              const gem = "#ff61ab";
+              const whisker = "#814887";
+
+              // Body base
+              ctx.fillStyle = body;
+              ctx.fillRect(x, y, player.w, player.h);
+
+              // Face piece
+              ctx.fillStyle = face;
+              ctx.fillRect(x + 2, y + 3, player.w - 4, player.h - 8);
+
+              // Ears
+              ctx.fillStyle = earOuter;
+              ctx.beginPath();
+              ctx.moveTo(x + 2, y);
+              ctx.lineTo(x + 9, y - 12);
+              ctx.lineTo(x + 15, y);
+              ctx.closePath();
+              ctx.fill();
+              ctx.beginPath();
+              ctx.moveTo(x + 10, y);
+              ctx.lineTo(x + 17, y - 12);
+              ctx.lineTo(x + 23, y);
+              ctx.closePath();
+              ctx.fill();
+              ctx.fillStyle = earInner;
+              ctx.beginPath();
+              ctx.moveTo(x + 4, y - 1);
+              ctx.lineTo(x + 9, y - 8);
+              ctx.lineTo(x + 13, y - 1);
+              ctx.closePath();
+              ctx.fill();
+              ctx.beginPath();
+              ctx.moveTo(x + 12, y - 1);
+              ctx.lineTo(x + 17, y - 8);
+              ctx.lineTo(x + 21, y - 1);
+              ctx.closePath();
+              ctx.fill();
+
+              // Gem
+              ctx.fillStyle = gem;
+              ctx.beginPath();
+              ctx.moveTo(x + 10, y + 2);
+              ctx.lineTo(x + 12, y - 1);
+              ctx.lineTo(x + 14, y + 2);
+              ctx.closePath();
+              ctx.fill();
+
+              // Eyes
+              const leftEyeX = x + 5;
+              const rightEyeX = x + 12;
+              const eyeY = y + 8;
+              ctx.fillStyle = eyeWhite;
+              ctx.fillRect(leftEyeX, eyeY, 5, 6);
+              ctx.fillRect(rightEyeX, eyeY, 5, 6);
+
+              ctx.fillStyle = eyeIris;
+              ctx.fillRect(leftEyeX + 1, eyeY + 1, 3, 5);
+              ctx.fillRect(rightEyeX + 1, eyeY + 1, 3, 5);
+
+              ctx.fillStyle = eyePupil;
+              ctx.fillRect(leftEyeX + 2, eyeY + 2, 1, 3);
+              ctx.fillRect(rightEyeX + 2, eyeY + 2, 1, 3);
+
+              ctx.fillStyle = "rgba(255,255,255,0.85)";
+              ctx.fillRect(leftEyeX + 2, eyeY + 2, 1, 1);
+              ctx.fillRect(rightEyeX + 2, eyeY + 2, 1, 1);
+
+              // Nose and mouth
+              ctx.fillStyle = nose;
+              ctx.fillRect(x + 10, y + 12, 2, 2);
+              ctx.strokeStyle = whisker;
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.moveTo(x + 11, y + 14);
+              ctx.lineTo(x + 9, y + 16);
+              ctx.moveTo(x + 11, y + 14);
+              ctx.lineTo(x + 13, y + 16);
+              ctx.stroke();
+
+              // Whiskers
+              ctx.strokeStyle = whisker;
+              ctx.beginPath();
+              ctx.moveTo(x + 5, y + 13);
+              ctx.lineTo(x + 2, y + 13);
+              ctx.moveTo(x + 5, y + 15);
+              ctx.lineTo(x + 2, y + 15);
+              ctx.moveTo(x + 15, y + 13);
+              ctx.lineTo(x + 18, y + 13);
+              ctx.moveTo(x + 15, y + 15);
+              ctx.lineTo(x + 18, y + 15);
+              ctx.stroke();
+
+              // Tail accent
+              ctx.strokeStyle = "#a373b8";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(x + player.w, y + player.h - 4);
+              ctx.quadraticCurveTo(
+                x + player.w + 7,
+                y + player.h - 12,
+                x + player.w + 4,
+                y + player.h - 19,
+              );
+              ctx.stroke();
+            }
           } else if (currentTheme === "zelda") {
             const zeldaPlayerImage = getThemePlayerImage("zelda");
             if (
@@ -3802,6 +3940,26 @@
             ctx.arc(0, gh * 0.02, 2.2, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
+          } else if (goalTheme === "catmodel") {
+            const solGoalImage = getThemeGoalImage("catmodel");
+            if (solGoalImage && solGoalImage.complete && solGoalImage.naturalWidth > 0) {
+              ctx.drawImage(solGoalImage, gx, gy, gw, gh);
+            } else {
+              // Sol fallback: glowing ellipse with glow
+              ctx.save();
+              ctx.translate(gx + gw / 2, gy + gh / 2);
+              const pulse = 0.8 + 0.2 * Math.sin(frameCount * 0.08);
+              ctx.shadowBlur = 20;
+              ctx.shadowColor = "rgba(245, 217, 255, 0.8)";
+              ctx.fillStyle = "rgba(232, 171, 255, 0.9)";
+              ctx.beginPath();
+              ctx.ellipse(0, 0, gw * 0.45 * pulse, gh * 0.5 * pulse, 0, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.strokeStyle = "#d9a8ff";
+              ctx.lineWidth = 2;
+              ctx.stroke();
+              ctx.restore();
+            }
           } else {
             ctx.fillStyle = "#0f0";
             ctx.shadowBlur = 15;
@@ -4362,8 +4520,11 @@
         const secretThemeUnlockKey = "void_secret_theme_zelda_unlocked";
         const tjThemeCode = "tj_theme";
         const tjThemeUnlockKey = "void_secret_theme_tjtheme_unlocked";
+        const solThemeCode = "sol";
+        const solThemeUnlockKey = "void_secret_theme_sol_unlocked";
         let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
         let tjThemeUnlocked = localStorage.getItem(tjThemeUnlockKey) === "1";
+        let solThemeUnlocked = localStorage.getItem(solThemeUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
@@ -4391,6 +4552,18 @@
               theme: "tjtheme",
               label: "TJ's Theme",
               unlocked: tjThemeUnlocked,
+            },
+            {
+              container: document.getElementById("themeButtons"),
+              theme: "catmodel",
+              label: "Sol",
+              unlocked: solThemeUnlocked,
+            },
+            {
+              container: document.getElementById("speedRunThemeButtons"),
+              theme: "catmodel",
+              label: "Sol",
+              unlocked: solThemeUnlocked,
             },
           ];
 
@@ -4446,6 +4619,13 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("tj's theme unlocked");
+          } else if (normalized === solThemeCode) {
+            if (!solThemeUnlocked) {
+              solThemeUnlocked = true;
+              localStorage.setItem(solThemeUnlockKey, "1");
+              updateSecretThemeButtonUi();
+            }
+            flashCodeMessage("sol theme unlocked");
           }
           closeCodeEntryModal();
         }
@@ -4977,8 +5157,10 @@
           localStorage.setItem("core_speedrun_best_level_v1", 1);
           localStorage.removeItem("void_secret_theme_zelda_unlocked");
           localStorage.removeItem("void_secret_theme_tjtheme_unlocked");
+          localStorage.removeItem("void_secret_theme_sol_unlocked");
           secretThemeUnlocked = false;
           tjThemeUnlocked = false;
+          solThemeUnlocked = false;
           updateSecretThemeButtonUi();
           setLevelDisplay();
           updateBestLevelUi();
