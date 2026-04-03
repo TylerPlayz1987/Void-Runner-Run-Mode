@@ -1,0 +1,870 @@
+      body {
+        margin: 0;
+        background: #000;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-family: "Courier New", monospace;
+        overflow: hidden;
+      }
+
+      #topControls {
+        display: none;
+        align-self: flex-end;
+        gap: 6px;
+        margin-bottom: 5px;
+        z-index: 10;
+      }
+
+      #pauseBtn,
+      .top-control-btn {
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        border-radius: 3px;
+        font-size: 11px;
+        padding: 4px 8px;
+        line-height: 1.1;
+      }
+
+      #pauseBtn {
+        background: #0f0;
+        color: #000;
+      }
+
+      .top-control-btn {
+        color: #000;
+      }
+
+      #topAchBtn {
+        background: #ff0;
+      }
+
+      #topMobileBtn {
+        background: #0aa;
+        color: #fff;
+      }
+
+      #topThemeBtn {
+        background: #88f;
+        color: #000;
+      }
+
+      #topCheatsBtn {
+        background: #fa0;
+      }
+
+      #gameShell {
+        width: 800px;
+        display: flex;
+        flex-direction: column;
+        transform-origin: top center;
+      }
+
+      #container {
+        position: relative;
+        border: 4px solid #333;
+        width: 800px;
+        height: 400px;
+        background: #050505;
+        display: flex;
+        flex-direction: column;
+      }
+
+      canvas {
+        display: block;
+        z-index: 5;
+        image-rendering: pixelated;
+      }
+
+      #ui-left,
+      #ui-right {
+        position: absolute;
+        top: 15px;
+        pointer-events: none;
+        z-index: 100;
+      }
+
+      #ui-left {
+        left: 15px;
+        display: flex;
+        gap: 10px;
+      }
+
+      #ui-right {
+        right: 15px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 10px;
+      }
+
+      /* Speed Running Mode: Stopwatch timer for speed run (displays MM:SS.mmm format) */
+      #speedRunTimer {
+        background: rgba(0, 0, 0, 0.9);
+        padding: 6px 15px;
+        border: 2px solid #f44;
+        color: #f44;
+        font-weight: bold;
+        font-size: 18px;
+        border-radius: 2px;
+        font-family: "Courier New", monospace;
+        display: none;
+        text-shadow: 0 0 10px #f44;
+      }
+
+      #speedRunTimer.active {
+        display: block;
+      }
+
+      .stat {
+        background: rgba(0, 0, 0, 0.9);
+        padding: 6px 15px;
+        border: 1px solid #0f0;
+        color: #0f0;
+        font-weight: bold;
+        font-size: 14px;
+        border-radius: 2px;
+      }
+
+      #achievements-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 15px;
+      }
+
+      .achievement-badge {
+        width: 50px;
+        height: 50px;
+        background: rgba(0, 0, 0, 0.95);
+        border: 2px solid #ffd700;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: box-shadow 0.2s;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        position: relative;
+      }
+
+      .achievement-badge:hover {
+        box-shadow: 0 0 15px rgba(255, 215, 0, 0.8);
+      }
+
+      .achievement-badge-locked {
+        opacity: 0.4;
+        border-color: #666;
+        box-shadow: none;
+        background: rgba(40, 40, 40, 0.95);
+      }
+
+      .achievement-badge-locked canvas {
+        filter: grayscale(100%) brightness(0.7);
+      }
+
+
+      .achievement-tooltip {
+        position: absolute;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.95);
+        border: 1px solid #ffd700;
+        color: #ffd700;
+        padding: 8px 12px;
+        border-radius: 3px;
+        font-size: 11px;
+        font-family: "Courier New", monospace;
+        white-space: nowrap;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        margin-bottom: 5px;
+        z-index: 1000;
+      }
+
+      .achievement-badge:hover .achievement-tooltip {
+        opacity: 1;
+      }
+
+      #cp-notif {
+        position: absolute;
+        width: 100%;
+        top: 40%;
+        text-align: center;
+        color: #0f0;
+        font-size: 32px;
+        font-weight: bold;
+        opacity: 0;
+        transition: opacity 0.4s;
+        text-shadow: 0 0 20px #0f0;
+        pointer-events: none;
+        z-index: 150;
+      }
+
+      #versionPickerBtn {
+        position: absolute;
+        right: 8px;
+        bottom: 8px;
+        width: auto;
+        padding: 3px 7px;
+        font-size: 12px;
+        border-radius: 3px;
+        border: 1px solid #777;
+        background: rgba(0, 0, 0, 0.75);
+        color: #fff;
+        z-index: 320;
+        cursor: pointer;
+      }
+
+      #versionPickerBtn:hover {
+        border-color: #0ff;
+        color: #0ff;
+      }
+
+      #versionPickerMenu {
+        position: absolute;
+        right: 8px;
+        bottom: 34px;
+        width: 240px;
+        max-width: calc(100% - 16px);
+        background: rgba(0, 0, 0, 0.95);
+        border: 1px solid #0aa;
+        box-shadow: 0 0 14px rgba(0, 170, 170, 0.35);
+        color: #0f0;
+        padding: 8px;
+        z-index: 325;
+        display: none;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      #versionPickerHeader {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      #versionPickerTitle {
+        font-size: 12px;
+        letter-spacing: 1px;
+      }
+
+      #versionPickerClose {
+        width: auto;
+        padding: 2px 8px;
+        min-width: 0;
+      }
+
+      #versionPickerList {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        max-height: 170px;
+        overflow-y: auto;
+      }
+
+      .version-option-btn {
+        width: 100%;
+        text-align: left;
+        padding: 7px 8px;
+        font-size: 12px;
+        border-radius: 3px;
+        border: 1px solid #0f0;
+        color: #0f0;
+        background: #111;
+      }
+
+      .version-option-btn:hover {
+        background: #0f0;
+        color: #000;
+      }
+
+      .version-option-btn.current {
+        border-color: #777;
+        color: #aaa;
+        background: #191919;
+      }
+
+      #tutorialHint {
+        position: absolute;
+        left: 50%;
+        bottom: 18px;
+        transform: translateX(-50%);
+        pointer-events: none;
+        z-index: 180;
+        min-width: 420px;
+        max-width: 90%;
+        text-align: center;
+        color: #9ef;
+        border-color: #9ef;
+        font-size: 13px;
+      }
+
+      #mobileControls {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        padding: 0;
+        display: none;
+        pointer-events: none;
+        z-index: 170;
+      }
+
+      #mobileControls.active {
+        display: block;
+        pointer-events: none;
+      }
+
+      #mobileControls.customizing {
+        display: block;
+        pointer-events: auto;
+        z-index: 270;
+        background: rgba(0, 0, 0, 0.15);
+      }
+
+      #mobileControls.customizing.show-grid {
+        background-color: rgba(0, 0, 0, 0.2);
+        background-image:
+          linear-gradient(rgba(0, 255, 255, 0.14) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 255, 255, 0.14) 1px, transparent 1px);
+        background-size: 40px 40px;
+      }
+
+      #customizeGridOverlay {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        display: none;
+        z-index: 1;
+        background-image:
+          linear-gradient(rgba(0, 255, 255, 0.16) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(0, 255, 255, 0.16) 1px, transparent 1px);
+        background-size: 40px 40px;
+        opacity: 0.7;
+      }
+
+      #mobileControls.show-grid #customizeGridOverlay {
+        display: block;
+      }
+
+      #customizeConfirmBar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: none;
+        justify-content: center;
+        gap: 10px;
+        padding: 15px;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 280;
+        border-top: 2px solid #0aa;
+      }
+
+      #customizeConfirmBar.active {
+        display: flex;
+      }
+
+      #customizeConfirmBar button {
+        padding: 10px 16px;
+        font-size: 14px;
+        width: auto;
+      }
+
+      #customizeGridBtn,
+      #resetControlLayoutBtn {
+        background: #444;
+        color: #fff;
+      }
+
+      #customizeGridBtn.active {
+        background: #0ff;
+        color: #000;
+      }
+
+      .mobile-btn {
+        width: 64px;
+        height: 64px;
+        border-radius: 50%;
+        border: 2px solid #0f0;
+        background: rgba(0, 0, 0, 0.7);
+        color: #0f0;
+        font-size: 18px;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        line-height: 1;
+        padding: 0;
+        pointer-events: auto;
+        user-select: none;
+        touch-action: none;
+      }
+
+      #btn-jump {
+        font-size: 15px;
+        letter-spacing: 0.5px;
+      }
+
+      .mobile-btn.wide {
+        width: 86px;
+        border-radius: 32px;
+        font-size: 13px;
+      }
+
+      .mobile-btn.customizing {
+        border: 3px dashed #0aa;
+        opacity: 0.8;
+        box-shadow: 0 0 10px rgba(0, 170, 170, 0.5);
+      }
+
+      .mobile-btn[data-code] {
+        position: absolute;
+      }
+
+      #confirmCustomizeBtn {
+        background: #0f0;
+        border: none;
+        color: #000;
+        padding: 12px 30px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+        margin-top: 10px;
+      }
+
+      #confirmCustomizeBtn:hover {
+        background: #0ff;
+      }
+
+      .mobile-btn.selected-for-customize {
+        border: 3px solid #0ff;
+        box-shadow: 0 0 15px #0ff;
+      }
+
+      #screenSizePage input[type="range"] {
+        width: 100%;
+      }
+
+      #resetConfirm,
+      #fullRestartConfirm,
+      #timeTravelAnimation {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.85);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 250;
+        color: #0f0;
+        text-align: center;
+      }
+
+      #resetConfirm .confirm-box,
+      #fullRestartConfirm .confirm-box,
+      #timeTravelAnimation .confirm-box {
+        width: 320px;
+        max-width: 90%;
+        background: #111;
+        border: 2px solid #0f0;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      #timeTravelAnimation p {
+        font-size: 22px;
+        margin: 0;
+        color: #0ff;
+      }
+
+      #timeTravelAnimation .clock {
+        position: relative;
+        width: 170px;
+        height: 170px;
+        margin: 0 auto 12px;
+        border-radius: 50%;
+        border: 3px solid #0f0;
+        background: rgba(0, 0, 0, 0.6);
+        box-shadow: 0 0 18px #0ff;
+      }
+
+      #timeTravelAnimation .clock-center {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 14px;
+        height: 14px;
+        margin: -7px 0 0 -7px;
+        background: #0f0;
+        border-radius: 50%;
+        z-index: 5;
+      }
+
+      #timeTravelAnimation .hand {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 4px;
+        height: 72px;
+        margin-left: -2px;
+        margin-top: -72px;
+        transform-origin: 50% 100%;
+        background: #0ff;
+        border-radius: 2px;
+        box-shadow: 0 0 8px #0ff;
+        transform: rotate(0deg);
+        transition: none;
+      }
+
+      #timeTravelAnimation .rewind-track {
+        width: 90%;
+        height: 12px;
+        margin: 12px auto 0;
+        background: #111;
+        border: 1px solid #0f0;
+        position: relative;
+      }
+
+      #timeTravelAnimation .rewind-track span {
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        background: #0ff;
+        width: 0;
+        transition: width 0.1s linear;
+      }
+
+      .overlay {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.9);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 200;
+      }
+
+      #tourExplain {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(92%, 690px);
+        pointer-events: none;
+        z-index: 260;
+        text-align: center;
+        color: #9ef;
+        border-color: #9ef;
+        background: rgba(0, 0, 0, 0.93);
+      }
+
+      #codeFlashMessage {
+        margin-top: 10px;
+        color: #fc3;
+        font-size: 18px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        opacity: 0;
+        text-shadow: 0 0 12px #fc3;
+        pointer-events: none;
+      }
+
+      #startMenuVersionTag {
+        margin-top: -8px;
+        margin-bottom: 10px;
+        color: #fc3;
+        font-size: 14px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px rgba(255, 204, 51, 0.8);
+      }
+
+      #changelogContent {
+        width: 100%;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      #codeFlashMessage.active {
+        animation: codeFlashPulse 1s ease-in-out 3;
+      }
+
+      .code-entry-box {
+        width: 320px;
+        max-width: 90%;
+        background: #111;
+        border: 2px solid #fc3;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+      }
+
+      #codeEntryInput {
+        width: 100%;
+        box-sizing: border-box;
+        background: #222;
+        border: 1px solid #fc3;
+        color: #fc3;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: 16px;
+        font-family: inherit;
+        text-align: center;
+      }
+
+      .code-entry-actions {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .warning-box {
+        width: 360px;
+        max-width: 92%;
+        background: #111;
+        border: 2px solid #ff86c5;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+        color: #ffd4ee;
+        box-shadow: 0 0 20px rgba(255, 134, 197, 0.35);
+      }
+
+      #aprilFoolsWarningTitle {
+        color: #ff9fd0;
+        margin-bottom: 6px;
+      }
+
+      .warning-box p {
+        margin: 0;
+        line-height: 1.45;
+        color: #ffe9f6;
+      }
+
+      .warning-actions {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+      }
+
+      .warning-actions button {
+        flex: 1;
+      }
+
+      #aprilFoolsWarningModal {
+        z-index: 320;
+      }
+
+      @keyframes codeFlashPulse {
+        0%,
+        100% {
+          opacity: 0;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .menu-page {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        width: 340px;
+        max-width: 90%;
+      }
+
+      .audio-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        width: 100%;
+        align-items: start;
+      }
+
+      .audio-left,
+      .audio-right {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .audio-right {
+        align-items: stretch;
+      }
+
+      .audio-right button {
+        width: 100%;
+      }
+
+      h1 {
+        color: #0f0;
+        margin-bottom: 15px;
+        letter-spacing: 5px;
+        font-size: 24px;
+      }
+
+      button {
+        background: #0f0;
+        border: none;
+        padding: 12px;
+        font-size: 16px;
+        font-weight: bold;
+        cursor: pointer;
+        border-radius: 5px;
+        width: 100%;
+      }
+
+      .small-btn {
+        padding: 8px;
+        font-size: 14px;
+        background: #444;
+        color: #fff;
+      }
+
+      .setting-item {
+        width: 100%;
+        color: #0f0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 10px 0;
+      }
+
+      .theme-buttons {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        max-height: 172px;
+        overflow-y: auto;
+        padding-right: 4px;
+        align-content: start;
+      }
+
+      .theme-btn {
+        width: 100%;
+        padding: 9px 8px;
+        font-size: 13px;
+        background: #222;
+        color: #0f0;
+        border: 1px solid #0f0;
+      }
+
+      #themePage {
+        max-height: 100%;
+        overflow: hidden;
+      }
+
+      @media (max-height: 520px) {
+        .theme-buttons {
+          max-height: 146px;
+        }
+      }
+
+      .theme-btn.active {
+        background: #0f0;
+        color: #000;
+      }
+
+      #speedRunMenu .menu-page {
+        width: min(760px, 92vw);
+      }
+
+      .speed-run-grid {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 14px;
+        width: 100%;
+        align-items: start;
+      }
+
+      .speed-run-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .speed-run-achievements {
+        min-height: 230px;
+      }
+
+      .speed-run-action-row {
+        display: flex;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .speed-run-action-row button {
+        flex: 1;
+      }
+
+      @media (max-width: 760px) {
+        .speed-run-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .notes-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        max-height: 230px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
+      .notes-grid .setting-item {
+        margin: 0;
+      }
+
+      @media (max-width: 700px) {
+        .notes-grid {
+          grid-template-columns: 1fr;
+          max-height: 270px;
+        }
+
+        #versionPickerMenu {
+          width: 215px;
+        }
+      }
+
+      input[type="range"],
+      select {
+        width: 100%;
+        background: #222;
+        border: 1px solid #0f0;
+        color: #0f0;
+        padding: 5px;
+        border-radius: 5px;
+        font-family: inherit;
+      }

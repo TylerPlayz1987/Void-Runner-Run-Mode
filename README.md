@@ -106,7 +106,7 @@ Competitive time-attack mode to reach level 100 as fast as possible:
 - `draw()`: top-level render wrapper; when `isRetro8bit` is true on the classic theme, draws to a low-res offscreen canvas.
 
 ## Notes
-- Current version is 0.8.
+- Current version is 0.9.0.
 - Legacy builds are interchangeable through the version picker.
 - High score is saved as `core_best_v20` in localStorage.
 - Speed run best time uses `core_speedrun_best_time_v1`.
