@@ -1,6 +1,35 @@
 (function () {
+  const hiddenHudIds = ["ui-left", "ui-right", "speedRunTimer"];
+  const hudDisplayCache = {};
+
   function getEl(id) {
     return document.getElementById(id);
+  }
+
+  function hideHudForStoryMenu() {
+    for (let i = 0; i < hiddenHudIds.length; i += 1) {
+      const id = hiddenHudIds[i];
+      const el = getEl(id);
+      if (!el) continue;
+      if (!(id in hudDisplayCache)) {
+        hudDisplayCache[id] = el.style.display;
+      }
+      el.style.display = "none";
+    }
+  }
+
+  function restoreHudAfterStoryMenu() {
+    for (let i = 0; i < hiddenHudIds.length; i += 1) {
+      const id = hiddenHudIds[i];
+      const el = getEl(id);
+      if (!el) continue;
+      if (id in hudDisplayCache) {
+        el.style.display = hudDisplayCache[id];
+      } else {
+        el.style.display = "";
+      }
+      delete hudDisplayCache[id];
+    }
   }
 
   function open() {
@@ -8,6 +37,7 @@
     const modeMenu = getEl("modeMenu");
     if (!storyMenu || !modeMenu) return;
 
+    hideHudForStoryMenu();
     modeMenu.style.display = "none";
     storyMenu.style.display = "flex";
     storyMenu.setAttribute("aria-hidden", "false");
@@ -20,6 +50,7 @@
 
     storyMenu.style.display = "none";
     storyMenu.setAttribute("aria-hidden", "true");
+    restoreHudAfterStoryMenu();
     modeMenu.style.display = "flex";
   }
 
