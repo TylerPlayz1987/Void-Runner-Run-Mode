@@ -566,6 +566,84 @@
         z-index: 200;
       }
 
+      #storyModeBtn {
+        background: linear-gradient(180deg, #4cf0ff 0%, #0fa7b8 100%);
+        color: #001419;
+        box-shadow: 0 0 14px rgba(76, 240, 255, 0.4);
+      }
+
+      #modeMenu.story-cutscene-hidden {
+        visibility: hidden;
+      }
+
+      #storyCutsceneOverlay {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 240;
+        pointer-events: none;
+        overflow: hidden;
+        background: radial-gradient(circle at 50% 48%, rgba(22, 35, 45, 0.28) 0%, rgba(0, 0, 0, 0.92) 46%, rgba(0, 0, 0, 0.99) 100%);
+      }
+
+      #storyCutsceneOverlay.active {
+        display: block;
+      }
+
+      #storyCutsceneBlackHole {
+        position: absolute;
+        left: 50%;
+        top: 48%;
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        transform: translate(-50%, -50%) scale(0.7);
+        background: #000;
+        border: 1px solid rgba(120, 200, 255, 0.8);
+        box-shadow:
+          0 0 16px rgba(60, 210, 255, 0.65),
+          0 0 38px rgba(60, 210, 255, 0.35),
+          inset 0 0 12px rgba(0, 0, 0, 1);
+        animation: storyBlackHolePulse 0.7s ease-in-out infinite alternate;
+      }
+
+      #storyCutsceneBlackHole::before {
+        content: "";
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        width: 46px;
+        height: 16px;
+        transform: translate(-50%, -50%) rotate(-15deg);
+        border-radius: 50%;
+        border: 1px solid rgba(64, 242, 255, 0.85);
+        opacity: 0.9;
+        filter: blur(0.1px);
+      }
+
+      .story-cutscene-clone {
+        position: absolute;
+        margin: 0;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        will-change: left, top, transform, opacity;
+      }
+
+      .story-cutscene-clone.story-focus {
+        box-shadow: 0 0 28px rgba(76, 240, 255, 0.65);
+      }
+
+      @keyframes storyBlackHolePulse {
+        from {
+          transform: translate(-50%, -50%) scale(0.68);
+        }
+        to {
+          transform: translate(-50%, -50%) scale(1.22);
+        }
+      }
+
       #tourExplain {
         position: absolute;
         top: 14px;

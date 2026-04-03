@@ -4680,6 +4680,23 @@
         document.getElementById("tutorialBtn").onclick = () => startSelectedMode(true);
         // Mode menu entry point for Speed Running mode
         document.getElementById("speedRunModeBtn").onclick = () => showSpeedRunMenu();
+        document.getElementById("storyModeBtn").onclick = () => {
+          const modeMenuEl = document.getElementById("modeMenu");
+          const storyBtnEl = document.getElementById("storyModeBtn");
+          const cutsceneApi = window.VRStoryModeCutscene;
+          if (!cutsceneApi || typeof cutsceneApi.start !== "function") {
+            return;
+          }
+
+          cutsceneApi.start({
+            modeMenuEl,
+            storyBtnEl,
+            onComplete: () => {
+              // Story start menu will be added later; return to mode menu after cutscene.
+              modeMenuEl.style.display = "flex";
+            },
+          });
+        };
         document.getElementById("speedRunBackBtn").onclick = () => hideSpeedRunMenu();
         document.getElementById("speedRunStartBtn").onclick = () => startSpeedRunMode();
 
