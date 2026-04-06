@@ -131,6 +131,14 @@
           versionPickerBtn.setAttribute("aria-expanded", "false");
         }
 
+        function setBestStatLabel(label, value) {
+          const bestStat = document.getElementById("best-stat");
+          if (!bestStat) return;
+          bestStat.innerHTML = `${label}: <span id="best"></span>`;
+          const bestValueEl = document.getElementById("best");
+          if (bestValueEl) bestValueEl.textContent = value;
+        }
+
         function openVersionPicker() {
           versionPickerMenu.style.display = "flex";
           versionPickerBtn.setAttribute("aria-expanded", "true");
@@ -193,8 +201,13 @@
         updateSpeedRunBestTimeUi();
 
         function updateBestLevelUi() {
+          if (customLevelActive) {
+            const levelName = customLevelDraft && customLevelDraft.name ? customLevelDraft.name : "Untitled Level";
+            setBestStatLabel("Level Name", levelName);
+            return;
+          }
           const highScore = speedRunMode ? speedRunBestLevel : bestLevel;
-          document.getElementById("best").textContent = highScore;
+          setBestStatLabel("High Score", highScore);
         }
 
         function updateHudModeUi() {
@@ -745,6 +758,7 @@
 
         function createDefaultCustomLevel() {
           return {
+            name: "Untitled Level",
             width: 2600,
             spawn: { x: 60, y: 300 },
             goal: { x: 2380, y: 260, w: 40, h: 40 },
@@ -777,11 +791,13 @@
         function normalizeCustomLevel(levelData) {
           const fallback = createDefaultCustomLevel();
           const src = levelData && typeof levelData === "object" ? levelData : fallback;
+          const name = typeof src.name === "string" && src.name.trim() ? src.name.trim().slice(0, 32) : fallback.name;
           const width = clamp(Number(src.width) || fallback.width, 800, 30000);
           const spawn = src.spawn || fallback.spawn;
           const goalData = src.goal || fallback.goal;
 
           const normalized = {
+            name,
             width,
             spawn: {
               x: clamp(Number(spawn.x) || fallback.spawn.x, 0, width - 30),
@@ -2987,6 +3003,10 @@
           const level = ensureCustomLevelDraft();
           const widthInput = document.getElementById("makerLevelWidthInput");
           if (widthInput) widthInput.value = String(Math.round(level.width));
+          const bestLabel = document.getElementById("best-stat");
+          if (bestLabel && customLevelActive) {
+            bestLabel.innerHTML = `Level Name: <span id="best">${level.name || "Untitled Level"}</span>`;
+          }
           const platformSelect = document.getElementById("makerPlatformTypeSelect");
           if (platformSelect) platformSelect.value = makerPlatformType;
           const obstacleSelect = document.getElementById("makerObstacleTypeSelect");
@@ -3190,11 +3210,12 @@
           }
 
           ctx.fillStyle = "rgba(0,0,0,0.55)";
-          ctx.fillRect(10, 10, 276, 44);
+          ctx.fillRect(10, 10, 276, 58);
           ctx.fillStyle = "#bdefff";
           ctx.font = "12px Courier New";
           ctx.fillText(`Camera: ${Math.round(makerCameraX)} px`, 18, 28);
           ctx.fillText(`Level Length: ${Math.round(level.width)} px`, 18, 45);
+          ctx.fillText(`Name: ${level.name || "Untitled Level"}`, 18, 62);
         }
 
         // Core world rendering in current theme
@@ -5625,6 +5646,10 @@
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
         const codeEntryCancelBtn = document.getElementById("codeEntryCancelBtn");
+        const levelNameModal = document.getElementById("levelNameModal");
+        const levelNameInput = document.getElementById("levelNameInput");
+        const levelNameSubmitBtn = document.getElementById("levelNameSubmitBtn");
+        const levelNameCancelBtn = document.getElementById("levelNameCancelBtn");
         const sharedLevelModal = document.getElementById("sharedLevelModal");
         const sharedLevelInput = document.getElementById("sharedLevelInput");
         const sharedLevelPlayBtn = document.getElementById("sharedLevelPlayBtn");
@@ -5687,22 +5712,44 @@
           codeEntryModal.style.display = "none";
           codeEntryInput.value = "";
         }
+        let levelNameSubmitAction = null;
+        
+        function closeLevelNameModal() {
+          levelNameModal.style.display = "none";
+          levelNameInput.value = "";
+          levelNameSubmitAction = null;
+        }
+        
+        function openLevelNameModal(initialValue, onSubmit) {
+          levelNameSubmitAction = typeof onSubmit === "function" ? onSubmit : null;
+          levelNameInput.value = typeof initialValue === "string" ? initialValue : "";
+          levelNameModal.style.display = "flex";
+          levelNameInput.focus();
+          levelNameInput.select();
+        }
 
         function openAprilFoolsWarningModal() {
-          aprilFoolsWarningModal.style.display = "flex";
-        }
-
-        function closeAprilFoolsWarningModal() {
-          aprilFoolsWarningModal.style.display = "none";
-        }
-
-        function submitCodeEntry() {
-          const entered = codeEntryInput.value;
-          if (!entered) {
-            closeCodeEntryModal();
-            return;
-          }
-          const normalized = entered.trim().toLowerCase();
+            openLevelNameModal(level.name || "Untitled Level", async () => {
+              try {
+                const name = (levelNameInput.value || "").trim().slice(0, 32) || "Untitled Level";
+                level.name = name;
+                const code = encodeCustomLevel(level);
+                const output = document.getElementById("makerCodeOutput");
+                output.value = code;
+                output.focus();
+                output.select();
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                  await navigator.clipboard.writeText(code);
+                  flashCodeMessage("level code copied");
+                } else {
+                  flashCodeMessage("level code generated");
+                }
+                updateMakerUi();
+                updateBestLevelUi();
+              } catch (_err) {
+                flashCodeMessage("failed to generate code");
+              }
+            });
           if (normalized === code1) {
             flashCodeMessage("test done");
           } else if (normalized === secretThemeCode) {
@@ -5776,6 +5823,13 @@
         };
         codeEntrySubmitBtn.onclick = submitCodeEntry;
         codeEntryCancelBtn.onclick = closeCodeEntryModal;
+        levelNameSubmitBtn.onclick = () => {
+          if (typeof levelNameSubmitAction === "function") {
+            levelNameSubmitAction();
+          }
+          closeLevelNameModal();
+        };
+        levelNameCancelBtn.onclick = closeLevelNameModal;
         sharedLevelPlayBtn.onclick = submitSharedLevelCode;
         sharedLevelCancelBtn.onclick = closeSharedLevelModal;
         codeEntryInput.addEventListener("keydown", (e) => {
@@ -5785,6 +5839,18 @@
           } else if (e.code === "Escape") {
             e.preventDefault();
             closeCodeEntryModal();
+          }
+        });
+        levelNameInput.addEventListener("keydown", (e) => {
+          if (e.code === "Enter") {
+            e.preventDefault();
+            if (typeof levelNameSubmitAction === "function") {
+              levelNameSubmitAction();
+            }
+            closeLevelNameModal();
+          } else if (e.code === "Escape") {
+            e.preventDefault();
+            closeLevelNameModal();
           }
         });
         sharedLevelInput.addEventListener("keydown", (e) => {
@@ -6894,6 +6960,12 @@
             if (codeEntryModal.style.display === "flex") {
               e.preventDefault();
               closeCodeEntryModal();
+              return;
+            }
+
+            if (levelNameModal.style.display === "flex") {
+              e.preventDefault();
+              closeLevelNameModal();
               return;
             }
 

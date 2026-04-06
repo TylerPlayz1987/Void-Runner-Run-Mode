@@ -637,6 +637,19 @@
         text-align: center;
       }
 
+      #levelNameInput {
+        width: 100%;
+        box-sizing: border-box;
+        background: #222;
+        border: 1px solid #fc3;
+        color: #fc3;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: 16px;
+        font-family: inherit;
+        text-align: center;
+      }
+
       .code-entry-actions {
         display: flex;
         gap: 8px;
