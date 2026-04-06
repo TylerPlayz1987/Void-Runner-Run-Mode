@@ -792,6 +792,23 @@
           return Math.max(min, Math.min(max, v));
         }
 
+        function encodeBytesToBase64(bytes) {
+          let binary = "";
+          for (const byte of bytes) {
+            binary += String.fromCharCode(byte);
+          }
+          return btoa(binary);
+        }
+
+        function decodeBase64ToBytes(base64) {
+          const binary = atob(base64);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          return bytes;
+        }
+
         function normalizeCustomLevel(levelData) {
           const fallback = createDefaultCustomLevel();
           const src = levelData && typeof levelData === "object" ? levelData : fallback;
@@ -969,7 +986,8 @@
             data: normalizeCustomLevel(levelData),
           };
           const json = JSON.stringify(payload);
-          const base64 = btoa(unescape(encodeURIComponent(json)));
+          const bytes = new TextEncoder().encode(json);
+          const base64 = encodeBytesToBase64(bytes);
           return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
         }
 
@@ -981,7 +999,8 @@
           const normalizedB64 = compact.replace(/-/g, "+").replace(/_/g, "/");
           const padLength = (4 - (normalizedB64.length % 4)) % 4;
           const padded = normalizedB64 + "=".repeat(padLength);
-          const json = decodeURIComponent(escape(atob(padded)));
+          const bytes = decodeBase64ToBytes(padded);
+          const json = new TextDecoder().decode(bytes);
           const parsed = JSON.parse(json);
           if (!parsed || parsed.tag !== "void-runner-custom-level") {
             throw new Error("Invalid level code");
@@ -3041,16 +3060,17 @@
           document.querySelectorAll(".maker-tool-btn").forEach((btn) => {
             btn.classList.toggle("active", btn.dataset.tool === makerTool);
           });
-          canvas.style.cursor = makerTool === "select" ? "grab" : "crosshair";
+          canvas.style.cursor = makerMode && !makerTesting
+            ? (makerTool === "select" ? "grab" : "crosshair")
+            : "default";
         }
 
         function updateMakerUi() {
           const level = ensureCustomLevelDraft();
           const widthInput = document.getElementById("makerLevelWidthInput");
           if (widthInput) widthInput.value = String(Math.round(level.width));
-          const bestLabel = document.getElementById("best-stat");
-          if (bestLabel && customLevelActive) {
-            bestLabel.innerHTML = `Level Name: <span id="best">${level.name || "Untitled Level"}</span>`;
+          if (customLevelActive) {
+            setBestStatLabel("Level Name", level.name || "Untitled Level");
           }
           const platformSelect = document.getElementById("makerPlatformTypeSelect");
           if (platformSelect) platformSelect.value = makerPlatformType;
@@ -5466,23 +5486,13 @@
           if (!hit) return;
           const obj = hit.obj;
           makerSelected = hit;
-          if (hit.type === "spike") {
-            makerDragState = {
-              type: hit.type,
-              index: hit.index,
-              obj,
-              dx: worldX - obj.x,
-              dy: worldY - obj.y,
-            };
-          } else {
-            makerDragState = {
-              type: hit.type,
-              index: hit.index,
-              obj,
-              dx: worldX - obj.x,
-              dy: worldY - obj.y,
-            };
-          }
+          makerDragState = {
+            type: hit.type,
+            index: hit.index,
+            obj,
+            dx: worldX - obj.x,
+            dy: worldY - obj.y,
+          };
         }
 
         function onMakerPointerDown(ev) {
