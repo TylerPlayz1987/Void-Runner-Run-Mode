@@ -907,7 +907,10 @@
         top: 12px;
         right: 12px;
         width: 340px;
-        max-width: min(340px, calc(100% - 24px));
+        max-width: calc(100vw - 16px);
+        min-width: 260px;
+        min-height: 220px;
+        max-height: calc(100vh - 16px);
         z-index: 280;
         background: rgba(6, 12, 18, 0.95);
         border: 1px solid #3ad;
@@ -917,6 +920,8 @@
         display: flex;
         flex-direction: column;
         gap: 8px;
+        resize: both;
+        overflow: auto;
       }
 
       #makerHeader {

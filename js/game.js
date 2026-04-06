@@ -198,6 +198,9 @@
         }
 
         function updateHudModeUi() {
+          const inMakerEditor = makerMode && !makerTesting;
+          document.getElementById("ui-left").style.display = inMakerEditor ? "none" : "flex";
+          document.getElementById("ui-right").style.display = inMakerEditor ? "none" : "flex";
           document.getElementById("death-stat").style.display = speedRunMode ? "none" : "block";
           updateBestLevelUi();
         }
@@ -1838,6 +1841,7 @@
                 document.getElementById("makerStopTestBtn").style.display = "none";
                 setTopControlsVisible(false);
                 running = false;
+                updateHudModeUi();
                 updateMakerUi();
               } else {
                 returnToStartMenu();
@@ -5257,6 +5261,7 @@
           makerPanState = null;
           makerCameraX = Math.max(0, Math.min(makerCameraX, ensureCustomLevelDraft().width - 800));
           setTutorialUiVisible(false);
+          updateHudModeUi();
           currentLevel = 1;
           lastCheckpoint = 1;
           setLevelDisplay();
@@ -5552,6 +5557,7 @@
           customLevelActive = false;
           running = false;
           setTopControlsVisible(false);
+          updateHudModeUi();
           updateMakerUi();
         };
 
