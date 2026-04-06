@@ -5597,17 +5597,27 @@
         document.getElementById("makerExportBtn").onclick = async () => {
           try {
             const level = ensureCustomLevelDraft();
-            const code = encodeCustomLevel(level);
-            const output = document.getElementById("makerCodeOutput");
-            output.value = code;
-            output.focus();
-            output.select();
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-              await navigator.clipboard.writeText(code);
-              flashCodeMessage("level code copied");
-            } else {
-              flashCodeMessage("level code generated");
-            }
+            openLevelNameModal(level.name || "Untitled Level", async () => {
+              try {
+                const name = (levelNameInput.value || "").trim().slice(0, 32) || "Untitled Level";
+                level.name = name;
+                const code = encodeCustomLevel(level);
+                const output = document.getElementById("makerCodeOutput");
+                output.value = code;
+                output.focus();
+                output.select();
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                  await navigator.clipboard.writeText(code);
+                  flashCodeMessage("level code copied");
+                } else {
+                  flashCodeMessage("level code generated");
+                }
+                updateMakerUi();
+                updateBestLevelUi();
+              } catch (_err) {
+                flashCodeMessage("failed to generate code");
+              }
+            });
           } catch (_err) {
             flashCodeMessage("failed to generate code");
           }
@@ -5729,27 +5739,20 @@
         }
 
         function openAprilFoolsWarningModal() {
-            openLevelNameModal(level.name || "Untitled Level", async () => {
-              try {
-                const name = (levelNameInput.value || "").trim().slice(0, 32) || "Untitled Level";
-                level.name = name;
-                const code = encodeCustomLevel(level);
-                const output = document.getElementById("makerCodeOutput");
-                output.value = code;
-                output.focus();
-                output.select();
-                if (navigator.clipboard && navigator.clipboard.writeText) {
-                  await navigator.clipboard.writeText(code);
-                  flashCodeMessage("level code copied");
-                } else {
-                  flashCodeMessage("level code generated");
-                }
-                updateMakerUi();
-                updateBestLevelUi();
-              } catch (_err) {
-                flashCodeMessage("failed to generate code");
-              }
-            });
+          aprilFoolsWarningModal.style.display = "flex";
+        }
+
+        function closeAprilFoolsWarningModal() {
+          aprilFoolsWarningModal.style.display = "none";
+        }
+
+        function submitCodeEntry() {
+          const entered = codeEntryInput.value;
+          if (!entered) {
+            closeCodeEntryModal();
+            return;
+          }
+          const normalized = entered.trim().toLowerCase();
           if (normalized === code1) {
             flashCodeMessage("test done");
           } else if (normalized === secretThemeCode) {
