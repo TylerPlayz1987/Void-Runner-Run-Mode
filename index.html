@@ -387,14 +387,26 @@
         </div>
         <canvas id="canvas"></canvas>
         <div id="levelMakerPanel" style="display: none" aria-label="Level maker controls">
-          <div id="makerHeader">LEVEL MAKER</div>
+          <div id="makerHeader">
+            <span id="makerHeaderTitle">LEVEL MAKER</span>
+            <span id="makerHeaderDragText">Drag</span>
+          </div>
           <div id="makerToolRow">
             <button class="maker-tool-btn active" data-tool="select">Select</button>
             <button class="maker-tool-btn" data-tool="platform">Platform</button>
-            <button class="maker-tool-btn" data-tool="spike">Spike</button>
-            <button class="maker-tool-btn" data-tool="block">Block</button>
+            <button class="maker-tool-btn" data-tool="obstacle">Obstacle</button>
             <button class="maker-tool-btn" data-tool="goal">Goal</button>
             <button class="maker-tool-btn danger" data-tool="delete">Delete</button>
+          </div>
+          <div class="maker-inline-row">
+            <label for="makerObstacleTypeSelect">Obstacle</label>
+            <select id="makerObstacleTypeSelect">
+              <option value="spike">Spike</option>
+              <option value="block">Solid Block</option>
+              <option value="seeker">Seeker</option>
+              <option value="lavaStatic">Lava</option>
+              <option value="well">Gravity Well</option>
+            </select>
           </div>
           <div class="maker-inline-row">
             <label for="makerLevelWidthInput">Length</label>
@@ -412,7 +424,7 @@
             <button id="makerImportBtn" class="small-btn">Load Code</button>
           </div>
           <textarea id="makerCodeOutput" class="shared-level-input" readonly placeholder="Generated code appears here"></textarea>
-          <div id="makerHint">Drag with Select. Place with tools. Hold Shift while dragging to pan the camera.</div>
+          <div id="makerHint">Drag the panel header to move it. Use Obstacle + dropdown to place hazards. Hold Shift while dragging in the canvas to pan the camera.</div>
         </div>
         <button id="versionPickerBtn" aria-haspopup="dialog" aria-expanded="false" title="Choose game version">v0.9.0</button>
         <div id="versionPickerMenu" aria-label="Game versions" role="dialog">

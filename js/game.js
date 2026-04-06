@@ -81,11 +81,13 @@
           customLevelActive = false,
           playingSharedLevel = false,
           makerTool = "select",
+          makerObstacleType = "spike",
           makerCameraX = 0,
           makerDragState = null,
           makerPanState = null,
           makerSelected = null,
-          customLevelDraft = null;
+          customLevelDraft = null,
+          makerPanelDragState = null;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -750,11 +752,12 @@
               { x: 1760, y: 300, w: 220, h: 18 },
               { x: 2200, y: 330, w: 260, h: 20 },
             ],
-            spikes: [
-              { x: 880, y: 300, w: 26, h: 14, shape: "wide" },
-            ],
-            blocks: [
-              { x: 1580, y: 220, w: 40, h: 85 },
+            obstacles: [
+              { type: "spike", x: 880, y: 300, w: 26, h: 14, shape: "wide" },
+              { type: "block", x: 1580, y: 220, w: 40, h: 85 },
+              { type: "seeker", x: 1180, y: 250, w: 20, h: 14, range: 45, speed: 2.2, shape: "split" },
+              { type: "lavaStatic", x: 2000, y: 350, w: 80, h: 50 },
+              { type: "well", x: 2110, y: 230, r: 75, core: 10 },
             ],
           };
         }
@@ -787,8 +790,7 @@
               h: clamp(Number(goalData.h) || fallback.goal.h, 20, 140),
             },
             platforms: [],
-            spikes: [],
-            blocks: [],
+            obstacles: [],
           };
 
           const platforms = Array.isArray(src.platforms) ? src.platforms : fallback.platforms;
@@ -802,29 +804,67 @@
             });
           }
 
-          const spikes = Array.isArray(src.spikes) ? src.spikes : [];
-          for (const s of spikes) {
-            if (!s || typeof s !== "object") continue;
-            normalized.spikes.push({
-              x: clamp(Number(s.x) || 0, 0, width - 8),
-              y: clamp(Number(s.y) || 0, 0, 390),
-              w: clamp(Number(s.w) || 18, 8, 80),
-              h: clamp(Number(s.h) || 12, 6, 80),
-              shape: ["triangle", "wide", "split", "needle"].includes(s.shape)
-                ? s.shape
-                : "triangle",
-            });
+          const obstacleList = [];
+          if (Array.isArray(src.obstacles)) obstacleList.push(...src.obstacles);
+          if (Array.isArray(src.spikes)) {
+            for (const s of src.spikes) obstacleList.push(Object.assign({ type: "spike" }, s));
+          }
+          if (Array.isArray(src.blocks)) {
+            for (const b of src.blocks) obstacleList.push(Object.assign({ type: "block" }, b));
           }
 
-          const blocks = Array.isArray(src.blocks) ? src.blocks : [];
-          for (const b of blocks) {
-            if (!b || typeof b !== "object") continue;
-            normalized.blocks.push({
-              x: clamp(Number(b.x) || 0, 0, width - 8),
-              y: clamp(Number(b.y) || 0, 0, 390),
-              w: clamp(Number(b.w) || 30, 10, 220),
-              h: clamp(Number(b.h) || 60, 10, 260),
-            });
+          for (const o of obstacleList) {
+            if (!o || typeof o !== "object") continue;
+            const type = String(o.type || "").trim();
+            if (type === "spike") {
+              normalized.obstacles.push({
+                type: "spike",
+                x: clamp(Number(o.x) || 0, 0, width - 8),
+                y: clamp(Number(o.y) || 0, 0, 390),
+                w: clamp(Number(o.w) || 18, 8, 80),
+                h: clamp(Number(o.h) || 12, 6, 80),
+                shape: ["triangle", "wide", "split", "needle"].includes(o.shape)
+                  ? o.shape
+                  : "triangle",
+              });
+            } else if (type === "block") {
+              normalized.obstacles.push({
+                type: "block",
+                x: clamp(Number(o.x) || 0, 0, width - 8),
+                y: clamp(Number(o.y) || 0, 0, 390),
+                w: clamp(Number(o.w) || 30, 10, 220),
+                h: clamp(Number(o.h) || 60, 10, 260),
+              });
+            } else if (type === "seeker") {
+              normalized.obstacles.push({
+                type: "seeker",
+                x: clamp(Number(o.x) || 0, 0, width - 8),
+                y: clamp(Number(o.y) || 0, 0, 390),
+                w: clamp(Number(o.w) || 18, 8, 80),
+                h: clamp(Number(o.h) || 12, 6, 80),
+                range: clamp(Number(o.range) || 40, 10, 220),
+                speed: clamp(Number(o.speed) || 2.2, 0.5, 8),
+                shape: ["triangle", "wide", "split", "needle"].includes(o.shape)
+                  ? o.shape
+                  : "triangle",
+              });
+            } else if (type === "lavaStatic") {
+              normalized.obstacles.push({
+                type: "lavaStatic",
+                x: clamp(Number(o.x) || 0, 0, width - 12),
+                y: clamp(Number(o.y) || 0, 0, 390),
+                w: clamp(Number(o.w) || 60, 10, 320),
+                h: clamp(Number(o.h) || 50, 10, 220),
+              });
+            } else if (type === "well") {
+              normalized.obstacles.push({
+                type: "well",
+                x: clamp(Number(o.x) || 0, 0, width),
+                y: clamp(Number(o.y) || 0, 0, 390),
+                r: clamp(Number(o.r) || 85, 25, 220),
+                core: clamp(Number(o.core) || 10, 0, 40),
+              });
+            }
           }
 
           if (!normalized.platforms.length) {
@@ -910,52 +950,80 @@
             });
           }
 
-          for (const s of level.spikes) {
-            platforms.push({
-              x: s.x - 2,
-              y: s.y,
-              w: Math.max(8, s.w + 4),
-              h: 8,
-              isPhase: false,
-              isSinking: false,
-              isTouched: false,
-              hasSpike: true,
-              spikeX: 2,
-              spikeW: s.w,
-              spikeH: s.h,
-              spikeShape: s.shape || "triangle",
-              moveRange: 0,
-              startX: s.x - 2,
-              moveDir: 1,
-              moveSpeed: 1.5,
-              hasSeeker: false,
-              seekerX: 0,
-              seekerDir: 1,
-              seekerW: SPIKE_W,
-              seekerH: SPIKE_H,
-              seekerShape: "triangle",
-              hasSpeedZone: false,
-              speedZoneType: null,
-              speedZoneX: 0,
-              speedZoneW: 0,
-              speedZoneDuration: 0,
-              speedZoneMul: 1,
-              hasFakeHazard: false,
-              fakeType: null,
-              fakeX: 0,
-              fakeW: 0,
-              fakeH: 0,
-            });
-          }
-
-          for (const b of level.blocks) {
-            hazards.push({
-              type: "block",
-              x: b.x,
-              y: b.y,
-              w: b.w,
-              h: b.h,
-            });
+          for (const o of level.obstacles) {
+            if (o.type === "spike") {
+              platforms.push({
+                x: o.x - 2,
+                y: o.y,
+                w: Math.max(8, o.w + 4),
+                h: 8,
+                isPhase: false,
+                isSinking: false,
+                isTouched: false,
+                hasSpike: true,
+                spikeX: 2,
+                spikeW: o.w,
+                spikeH: o.h,
+                spikeShape: o.shape || "triangle",
+                moveRange: 0,
+                startX: o.x - 2,
+                moveDir: 1,
+                moveSpeed: 1.5,
+                hasSeeker: false,
+                seekerX: 0,
+                seekerDir: 1,
+                seekerW: SPIKE_W,
+                seekerH: SPIKE_H,
+                seekerShape: "triangle",
+                hasSpeedZone: false,
+                speedZoneType: null,
+                speedZoneX: 0,
+                speedZoneW: 0,
+                speedZoneDuration: 0,
+                speedZoneMul: 1,
+                hasFakeHazard: false,
+                fakeType: null,
+                fakeX: 0,
+                fakeW: 0,
+                fakeH: 0,
+              });
+            } else if (o.type === "block") {
+              hazards.push({
+                type: "block",
+                x: o.x,
+                y: o.y,
+                w: o.w,
+                h: o.h,
+              });
+            } else if (o.type === "lavaStatic") {
+              hazards.push({
+                type: "lavaStatic",
+                x: o.x,
+                y: o.y,
+                w: o.w,
+                h: o.h,
+              });
+            } else if (o.type === "seeker") {
+              hazards.push({
+                type: "seeker",
+                x: o.x,
+                y: o.y,
+                w: o.w,
+                h: o.h,
+                minX: o.x - o.range,
+                maxX: o.x + o.range,
+                speed: o.speed,
+                dir: 1,
+                shape: o.shape || "triangle",
+              });
+            } else if (o.type === "well") {
+              wells.push({
+                x: o.x,
+                y: o.y,
+                r: o.r,
+                core: o.core,
+              });
+            }
           }
 
           goal.x = level.goal.x;
@@ -2074,6 +2142,15 @@
                   style: lavaFx.particleStyle,
                 });
               }
+            } else if (h.type === "seeker") {
+              h.x += (h.speed || 2.2) * (h.dir || 1);
+              if (h.x >= h.maxX) {
+                h.x = h.maxX;
+                h.dir = -1;
+              } else if (h.x <= h.minX) {
+                h.x = h.minX;
+                h.dir = 1;
+              }
             } else if (h.r) {
               h.sy += h.s * h.dir;
               if (h.sy > h.r || h.sy < 50) h.dir *= -1;
@@ -2847,6 +2924,8 @@
           const level = ensureCustomLevelDraft();
           const widthInput = document.getElementById("makerLevelWidthInput");
           if (widthInput) widthInput.value = String(Math.round(level.width));
+          const obstacleSelect = document.getElementById("makerObstacleTypeSelect");
+          if (obstacleSelect) obstacleSelect.value = makerObstacleType;
           const stopTestBtn = document.getElementById("makerStopTestBtn");
           const testBtn = document.getElementById("makerTestBtn");
           if (stopTestBtn) stopTestBtn.style.display = makerTesting ? "block" : "none";
@@ -2860,18 +2939,22 @@
           for (let i = 0; i < level.platforms.length; i++) {
             all.push({ type: "platform", index: i, obj: level.platforms[i], z: 1 });
           }
-          for (let i = 0; i < level.blocks.length; i++) {
-            all.push({ type: "block", index: i, obj: level.blocks[i], z: 2 });
-          }
-          for (let i = 0; i < level.spikes.length; i++) {
-            all.push({ type: "spike", index: i, obj: level.spikes[i], z: 3 });
+          for (let i = 0; i < level.obstacles.length; i++) {
+            all.push({ type: "obstacle", index: i, obj: level.obstacles[i], z: 2 });
           }
           all.push({ type: "goal", index: -1, obj: level.goal, z: 4 });
 
           all.sort((a, b) => a.z - b.z);
           for (let i = all.length - 1; i >= 0; i--) {
             const item = all[i];
-            if (item.type === "spike") {
+            if (item.type === "obstacle" && item.obj.type === "well") {
+              const w = item.obj;
+              const dx = worldX - w.x;
+              const dy = worldY - w.y;
+              if (dx * dx + dy * dy <= w.r * w.r) {
+                return item;
+              }
+            } else if (item.type === "obstacle" && item.obj.type === "spike") {
               const s = item.obj;
               if (
                 worldX >= s.x &&
@@ -2900,8 +2983,7 @@
           if (!hit || hit.type === "goal") return;
           const level = ensureCustomLevelDraft();
           if (hit.type === "platform") level.platforms.splice(hit.index, 1);
-          else if (hit.type === "spike") level.spikes.splice(hit.index, 1);
-          else if (hit.type === "block") level.blocks.splice(hit.index, 1);
+          else if (hit.type === "obstacle") level.obstacles.splice(hit.index, 1);
         }
 
         function drawMakerScene() {
@@ -2945,14 +3027,35 @@
             ctx.fillRect(p.x - makerCameraX, p.y, p.w, p.h);
           }
 
-          ctx.fillStyle = "#f15959";
-          for (const b of level.blocks) {
-            ctx.fillRect(b.x - makerCameraX, b.y, b.w, b.h);
-          }
-
-          ctx.fillStyle = "#ffb366";
-          for (const s of level.spikes) {
-            drawSpike(s.x, s.y, s.w, s.h, s.shape || "triangle", makerCameraX);
+          for (const o of level.obstacles) {
+            if (o.type === "spike") {
+              ctx.fillStyle = "#ffb366";
+              drawSpike(o.x, o.y, o.w, o.h, o.shape || "triangle", makerCameraX);
+            } else if (o.type === "block") {
+              ctx.fillStyle = "#f15959";
+              ctx.fillRect(o.x - makerCameraX, o.y, o.w, o.h);
+            } else if (o.type === "lavaStatic") {
+              ctx.fillStyle = "#ff6a2b";
+              ctx.fillRect(o.x - makerCameraX, o.y, o.w, o.h);
+            } else if (o.type === "seeker") {
+              ctx.fillStyle = "#ff79ff";
+              ctx.fillRect(o.x - makerCameraX, o.y, o.w, o.h);
+              ctx.strokeStyle = "rgba(255, 170, 255, 0.8)";
+              ctx.beginPath();
+              ctx.moveTo(o.x - makerCameraX - (o.range || 0), o.y + o.h / 2);
+              ctx.lineTo(o.x - makerCameraX + o.w + (o.range || 0), o.y + o.h / 2);
+              ctx.stroke();
+            } else if (o.type === "well") {
+              ctx.strokeStyle = "#7a7aff";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.arc(o.x - makerCameraX, o.y, o.r, 0, Math.PI * 2);
+              ctx.stroke();
+              ctx.fillStyle = "rgba(122, 122, 255, 0.15)";
+              ctx.beginPath();
+              ctx.arc(o.x - makerCameraX, o.y, o.r, 0, Math.PI * 2);
+              ctx.fill();
+            }
           }
 
           ctx.strokeStyle = "#67ffc1";
@@ -2970,9 +3073,14 @@
           if (makerSelected && makerSelected.obj) {
             ctx.strokeStyle = "#fff";
             ctx.lineWidth = 2;
-            if (makerSelected.type === "spike") {
+            if (makerSelected.type === "obstacle" && makerSelected.obj.type === "spike") {
               const s = makerSelected.obj;
               ctx.strokeRect(s.x - makerCameraX - 2, s.y - s.h - 2, s.w + 4, s.h + 4);
+            } else if (makerSelected.type === "obstacle" && makerSelected.obj.type === "well") {
+              const w = makerSelected.obj;
+              ctx.beginPath();
+              ctx.arc(w.x - makerCameraX, w.y, w.r + 3, 0, Math.PI * 2);
+              ctx.stroke();
             } else {
               const o = makerSelected.obj;
               ctx.strokeRect(o.x - makerCameraX - 2, o.y - 2, o.w + 4, o.h + 4);
@@ -4496,6 +4604,28 @@
                 ctx.lineWidth = 2;
                 ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
               }
+            } else if (h.type === "lavaStatic") {
+              let glow = ctx.createRadialGradient(
+                h.x - camX + h.w / 2,
+                h.y + h.h / 2,
+                0,
+                h.x - camX + h.w / 2,
+                h.y + h.h / 2,
+                Math.max(20, h.h),
+              );
+              glow.addColorStop(0, lavaFx.glowInner);
+              glow.addColorStop(0.45, lavaFx.glowMid);
+              glow.addColorStop(1, lavaFx.glowOuter);
+              ctx.fillStyle = glow;
+              ctx.fillRect(h.x - camX - 10, h.y - 10, h.w + 20, h.h + 20);
+              ctx.fillStyle = lavaFx.fill;
+              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+              ctx.strokeStyle = lavaFx.stroke;
+              ctx.lineWidth = 2;
+              ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
+            } else if (h.type === "seeker") {
+              ctx.fillStyle = t.hazards;
+              drawSpike(h.x, h.y + h.h, h.w, h.h, h.shape || "split", camX);
             } else {
               ctx.fillStyle = t.hazards;
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
@@ -5073,10 +5203,18 @@
 
           if (makerTool === "platform") {
             level.platforms.push({ x: clamp(x, 0, level.width - 120), y: clamp(y, 0, 380), w: 140, h: 18 });
-          } else if (makerTool === "spike") {
-            level.spikes.push({ x: clamp(x, 0, level.width - 24), y: clamp(y, 12, 390), w: 24, h: 12, shape: "triangle" });
-          } else if (makerTool === "block") {
-            level.blocks.push({ x: clamp(x, 0, level.width - 30), y: clamp(y, 0, 380), w: 40, h: 80 });
+          } else if (makerTool === "obstacle") {
+            if (makerObstacleType === "spike") {
+              level.obstacles.push({ type: "spike", x: clamp(x, 0, level.width - 24), y: clamp(y, 12, 390), w: 24, h: 12, shape: "triangle" });
+            } else if (makerObstacleType === "block") {
+              level.obstacles.push({ type: "block", x: clamp(x, 0, level.width - 30), y: clamp(y, 0, 380), w: 40, h: 80 });
+            } else if (makerObstacleType === "seeker") {
+              level.obstacles.push({ type: "seeker", x: clamp(x, 0, level.width - 20), y: clamp(y, 0, 390), w: 20, h: 14, range: 45, speed: 2.2, shape: "split" });
+            } else if (makerObstacleType === "lavaStatic") {
+              level.obstacles.push({ type: "lavaStatic", x: clamp(x, 0, level.width - 80), y: clamp(y, 0, 390), w: 80, h: 45 });
+            } else if (makerObstacleType === "well") {
+              level.obstacles.push({ type: "well", x: clamp(x, 0, level.width), y: clamp(y, 0, 390), r: 75, core: 10 });
+            }
           }
         }
 
@@ -5154,9 +5292,12 @@
           const obj = makerDragState.obj;
           if (!obj) return;
 
-          if (makerDragState.type === "spike") {
+          if (makerDragState.type === "obstacle" && obj.type === "spike") {
             obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
             obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, obj.h, 390);
+          } else if (makerDragState.type === "obstacle" && obj.type === "well") {
+            obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width);
+            obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, 0, 390);
           } else if (makerDragState.type === "goal") {
             obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
             obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, 0, 390 - obj.h);
@@ -5190,14 +5331,50 @@
           });
         });
 
+        document.getElementById("makerObstacleTypeSelect").addEventListener("change", (ev) => {
+          makerObstacleType = String(ev.target.value || "spike");
+        });
+
+        const makerPanel = document.getElementById("levelMakerPanel");
+        const makerHeader = document.getElementById("makerHeader");
+        makerHeader.addEventListener("mousedown", (ev) => {
+          if (!makerMode || makerTesting) return;
+          const panelRect = makerPanel.getBoundingClientRect();
+          makerPanelDragState = {
+            offsetX: ev.clientX - panelRect.left,
+            offsetY: ev.clientY - panelRect.top,
+          };
+          ev.preventDefault();
+        });
+
+        window.addEventListener("mousemove", (ev) => {
+          if (!makerPanelDragState || !makerMode || makerTesting) return;
+          const containerRect = container.getBoundingClientRect();
+          const panelRect = makerPanel.getBoundingClientRect();
+          let left = ev.clientX - containerRect.left - makerPanelDragState.offsetX;
+          let top = ev.clientY - containerRect.top - makerPanelDragState.offsetY;
+          left = clamp(left, 0, containerRect.width - panelRect.width);
+          top = clamp(top, 0, containerRect.height - panelRect.height);
+          makerPanel.style.left = `${left}px`;
+          makerPanel.style.top = `${top}px`;
+          makerPanel.style.right = "auto";
+          makerPanel.style.bottom = "auto";
+        });
+
+        window.addEventListener("mouseup", () => {
+          makerPanelDragState = null;
+        });
+
         document.getElementById("makerApplyLengthBtn").onclick = () => {
           const level = ensureCustomLevelDraft();
           const requested = parseInt(document.getElementById("makerLevelWidthInput").value, 10);
           level.width = clamp(Number.isFinite(requested) ? requested : level.width, 800, 30000);
           level.goal.x = clamp(level.goal.x, 0, level.width - level.goal.w);
           for (const p of level.platforms) p.x = clamp(p.x, 0, level.width - p.w);
-          for (const s of level.spikes) s.x = clamp(s.x, 0, level.width - s.w);
-          for (const b of level.blocks) b.x = clamp(b.x, 0, level.width - b.w);
+          for (const o of level.obstacles) {
+            if (o.type === "well") o.x = clamp(o.x, 0, level.width);
+            else o.x = clamp(o.x, 0, level.width - (o.w || 0));
+          }
           clampMakerCamera();
           updateMakerUi();
         };
@@ -6635,20 +6812,28 @@
               return;
             }
             if (e.code === "Digit3") {
-              makerTool = "spike";
+              makerTool = "obstacle";
               updateMakerToolButtons();
               e.preventDefault();
               return;
             }
             if (e.code === "Digit4") {
-              makerTool = "block";
+              makerTool = "goal";
               updateMakerToolButtons();
               e.preventDefault();
               return;
             }
             if (e.code === "Digit5") {
-              makerTool = "goal";
+              makerTool = "delete";
               updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "KeyO") {
+              const obstacleOrder = ["spike", "block", "seeker", "lavaStatic", "well"];
+              const idx = obstacleOrder.indexOf(makerObstacleType);
+              makerObstacleType = obstacleOrder[(idx + 1) % obstacleOrder.length];
+              updateMakerUi();
               e.preventDefault();
               return;
             }
