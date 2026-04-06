@@ -70,10 +70,10 @@
 
         <div id="startMenu" class="overlay">
           <h1>Void Runner</h1>
-          <div id="startMenuVersionTag">v0.9 - Story Mode!</div>
+          <div id="startMenuVersionTag">v0.9 - Level Maker!</div>
           <button id="startBtn" style="width: 200px">Start</button>
           <button id="menuCodesBtn" style="width: 200px; margin-top: 8px; background: #fc3; color: #111">Codes</button>
-          <button id="playSharedLevelBtn" style="width: 200px; margin-top: 8px; background: #3ad; color: #03131d">Play Shared Level</button>
+          <button id="playSharedLevelBtn" style="width: 200px; margin-top: 8px; background: #3ad; color: #03131d">Play Custom Level</button>
           <button id="openChangelogBtn" class="small-btn" style="width: 200px; margin-top: 8px;">Changelog</button>
           <div id="codeFlashMessage">test done</div>
         </div>
@@ -125,7 +125,7 @@
             <h1>CHANGELOG</h1>
             <div id="changelogContent" class="stat" style="text-align: left; line-height: 1.45; max-width: 320px; max-height: 240px; overflow-y: auto;">
               <ul>
-                <li>Added Story mode W1</li>
+                <li>Added Level Maker</li>
                 <li>Bug fixes</li>
               </ul>
             </div>
@@ -144,7 +144,7 @@
             Speed Running
           </button>
           <button id="levelMakerModeBtn" style="width: 220px; margin-bottom: 8px; background: #3ad; color: #03131d">
-            Level Maker
+            Level Maker(PC)
           </button>
           <button id="modeBackBtn" class="small-btn" style="width: 220px">
             Back
@@ -262,10 +262,6 @@
           </div>
           <div id="themePage" class="menu-page" style="display: none">
             <h1>Theme</h1>
-            <div class="setting-item">
-              <span>Default Theme</span>
-              <select id="defaultThemeSelect"></select>
-            </div>
             <div class="setting-item">
               <span>THEME</span>
               <div class="theme-buttons" id="themeButtons">
@@ -409,6 +405,7 @@
             <button class="maker-tool-btn active" data-tool="select">Select</button>
             <button class="maker-tool-btn" data-tool="platform">Platform</button>
             <button class="maker-tool-btn" data-tool="obstacle">Obstacle</button>
+            <button class="maker-tool-btn" data-tool="powerup">Power-up</button>
             <button class="maker-tool-btn" data-tool="goal">Goal</button>
             <button class="maker-tool-btn danger" data-tool="delete">Delete</button>
           </div>
@@ -433,6 +430,12 @@
               <option value="lavaWall">Lava Wall</option>
               <option value="well">Gravity Well</option>
               <option value="block">Solid Block</option>
+            </select>
+          </div>
+          <div class="maker-inline-row">
+            <label for="makerPowerupTypeSelect">Power-up</label>
+            <select id="makerPowerupTypeSelect">
+              <option value="shield">Shield</option>
             </select>
           </div>
           <div class="maker-inline-row">

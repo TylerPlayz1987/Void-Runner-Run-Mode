@@ -83,6 +83,7 @@
           makerTool = "select",
           makerPlatformType = "normal",
           makerObstacleType = "spike",
+          makerPowerupType = "shield",
           makerCameraX = 0,
           makerDragState = null,
           makerPanState = null,
@@ -547,13 +548,9 @@
         }
         
         let shieldItem = null,
+          customLevelShieldItems = [],
           wells = [],
-          currentTheme = (() => {
-            const saved = localStorage.getItem("void_default_theme_v1");
-            return saved && window.VR_THEME_DATA && window.VR_THEME_DATA.themes && window.VR_THEME_DATA.themes[saved]
-              ? saved
-              : "classic";
-          })(),
+          currentTheme = "classic",
           infiniteInvincibility = false;
         const { themes, getLavaFx, getWellFx } = window.VR_THEME_DATA;
         const themeBackgroundImages = {};
@@ -783,6 +780,7 @@
               { type: "lavaWall", x: 2000, w: 30, h: 120, speed: 2, holdMax: 50 },
               { type: "well", x: 2110, y: 230, r: 75, core: 10 },
             ],
+            powerups: [],
           };
         }
 
@@ -819,6 +817,7 @@
             },
             platforms: [],
             obstacles: [],
+            powerups: [],
           };
 
           const platforms = Array.isArray(src.platforms) ? src.platforms : fallback.platforms;
@@ -939,6 +938,23 @@
             }
           }
 
+          const powerupList = Array.isArray(src.powerups) ? src.powerups : [];
+          for (const p of powerupList) {
+            if (!p || typeof p !== "object") continue;
+            const type = String(p.type || "").trim();
+            if (type === "shield") {
+              const w = clamp(Number(p.w) || 20, 10, 60);
+              const h = clamp(Number(p.h) || 20, 10, 60);
+              normalized.powerups.push({
+                type: "shield",
+                x: clamp(Number(p.x) || 0, 0, width - w),
+                y: clamp(Number(p.y) || 0, 0, 390 - h),
+                w,
+                h,
+              });
+            }
+          }
+
           if (!normalized.platforms.length) {
             normalized.platforms.push({ x: 0, y: 350, w: 500, h: 50 });
           }
@@ -979,6 +995,7 @@
         function applyCustomLevelToWorld(levelData) {
           const level = normalizeCustomLevel(levelData);
           shieldItem = null;
+          customLevelShieldItems = [];
           wells = [];
           hazards = [];
           lavaParticles = [];
@@ -1109,6 +1126,19 @@
                 y: o.y,
                 r: o.r,
                 core: o.core,
+              });
+            }
+          }
+
+          if (Array.isArray(level.powerups)) {
+            for (const p of level.powerups) {
+              if (!p || p.type !== "shield") continue;
+              customLevelShieldItems.push({
+                x: p.x,
+                y: p.y,
+                w: p.w,
+                h: p.h,
+                collected: false,
               });
             }
           }
@@ -1364,6 +1394,7 @@
         // - creates base ground and progressively harder obstacles
         function generateLevel() {
           shieldItem = null;
+          customLevelShieldItems = [];
           wells = [];
           platforms = [{ x: 0, y: 350, w: 300, h: 50, isPhase: false }];
           hazards = [];
@@ -1548,6 +1579,7 @@
         }
 
         function generateTutorialLevel() {
+          customLevelShieldItems = [];
           shieldItem = {
             x: 2725,
             y: 160,
@@ -2385,16 +2417,21 @@
           nX = resolvedX;
           nY = resolvedY;
 
-          if (shieldItem && !shieldItem.collected) {
+          const activeShieldItems = customLevelActive
+            ? customLevelShieldItems
+            : (shieldItem ? [shieldItem] : []);
+          for (const s of activeShieldItems) {
+            if (!s || s.collected) continue;
             if (
-              nX < shieldItem.x + shieldItem.w &&
-              nX + player.w > shieldItem.x &&
-              nY < shieldItem.y + shieldItem.h &&
-              nY + player.h > shieldItem.y
+              nX < s.x + s.w &&
+              nX + player.w > s.x &&
+              nY < s.y + s.h &&
+              nY + player.h > s.y
             ) {
-              shieldItem.collected = true;
+              s.collected = true;
               player.hasShield = true;
               play.wn();
+              break;
             }
           }
           if (player.invincibleTimer <= 0 && !dead && !infiniteInvincibility) {
@@ -3019,6 +3056,8 @@
           if (platformSelect) platformSelect.value = makerPlatformType;
           const obstacleSelect = document.getElementById("makerObstacleTypeSelect");
           if (obstacleSelect) obstacleSelect.value = makerObstacleType;
+          const powerupSelect = document.getElementById("makerPowerupTypeSelect");
+          if (powerupSelect) powerupSelect.value = makerPowerupType;
           const themeSelect = document.getElementById("makerThemeSelect");
           if (themeSelect) themeSelect.value = level.theme || "classic";
           const stopTestBtn = document.getElementById("makerStopTestBtn");
@@ -3036,6 +3075,9 @@
           }
           for (let i = 0; i < level.obstacles.length; i++) {
             all.push({ type: "obstacle", index: i, obj: level.obstacles[i], z: 2 });
+          }
+          for (let i = 0; i < level.powerups.length; i++) {
+            all.push({ type: "powerup", index: i, obj: level.powerups[i], z: 3 });
           }
           all.push({ type: "goal", index: -1, obj: level.goal, z: 4 });
 
@@ -3085,6 +3127,7 @@
           const level = ensureCustomLevelDraft();
           if (hit.type === "platform") level.platforms.splice(hit.index, 1);
           else if (hit.type === "obstacle") level.obstacles.splice(hit.index, 1);
+          else if (hit.type === "powerup") level.powerups.splice(hit.index, 1);
         }
 
         function drawMakerScene() {
@@ -3187,6 +3230,16 @@
               ctx.beginPath();
               ctx.arc(o.x - makerCameraX, o.y, o.r, 0, Math.PI * 2);
               ctx.fill();
+            }
+          }
+
+          for (const p of level.powerups) {
+            if (p.type === "shield") {
+              ctx.fillStyle = "rgba(70, 220, 255, 0.2)";
+              ctx.fillRect(p.x - makerCameraX, p.y, p.w, p.h);
+              ctx.strokeStyle = "#66e6ff";
+              ctx.lineWidth = 2;
+              ctx.strokeRect(p.x - makerCameraX, p.y, p.w, p.h);
             }
           }
 
@@ -4265,24 +4318,28 @@
             );
             ctx.restore();
           });
-          if (shieldItem && !shieldItem.collected) {
-            const shieldGlitch = getWallGlitchAmount(shieldItem.x, shieldItem.w);
+          const activeShieldItems = customLevelActive
+            ? customLevelShieldItems
+            : (shieldItem ? [shieldItem] : []);
+          for (const s of activeShieldItems) {
+            if (!s || s.collected) continue;
+            const shieldGlitch = getWallGlitchAmount(s.x, s.w);
             const shieldOffset = getObjectGlitchOffset(
               shieldGlitch,
-              (shieldItem.x + shieldItem.y) * 0.01,
+              (s.x + s.y) * 0.01,
             );
             ctx.save();
             ctx.translate(shieldOffset.x, shieldOffset.y);
             ctx.strokeStyle = "#0cf";
             ctx.lineWidth = 3;
-            ctx.strokeRect(shieldItem.x - camX, shieldItem.y, 20, 20);
+            ctx.strokeRect(s.x - camX, s.y, 20, 20);
             ctx.fillStyle = "rgba(0,200,255,0.5)";
-            ctx.fillRect(shieldItem.x - camX + 5, shieldItem.y + 5, 10, 10);
+            ctx.fillRect(s.x - camX + 5, s.y + 5, 10, 10);
             drawWallGlitchOverlay(
-              shieldItem.x - camX,
-              shieldItem.y,
-              shieldItem.w,
-              shieldItem.h,
+              s.x - camX,
+              s.y,
+              s.w,
+              s.h,
               shieldGlitch,
             );
             ctx.restore();
@@ -5398,6 +5455,10 @@
             } else if (makerObstacleType === "well") {
               level.obstacles.push({ type: "well", x: clamp(x, 0, level.width), y: clamp(y, 0, 390), r: 75, core: 10 });
             }
+          } else if (makerTool === "powerup") {
+            if (makerPowerupType === "shield") {
+              level.powerups.push({ type: "shield", x: clamp(x, 0, level.width - 20), y: clamp(y, 0, 390 - 20), w: 20, h: 20 });
+            }
           }
         }
 
@@ -5525,6 +5586,10 @@
           makerObstacleType = String(ev.target.value || "spike");
         });
 
+        document.getElementById("makerPowerupTypeSelect").addEventListener("change", (ev) => {
+          makerPowerupType = String(ev.target.value || "shield");
+        });
+
         document.getElementById("makerThemeSelect").addEventListener("change", (ev) => {
           const level = ensureCustomLevelDraft();
           const nextTheme = String(ev.target.value || "classic");
@@ -5580,6 +5645,9 @@
             if (o.type === "well") o.x = clamp(o.x, 0, level.width);
             else if (o.type === "lavaWall") o.x = clamp(o.x, 0, level.width - o.w);
             else o.x = clamp(o.x, 0, level.width - (o.w || 0));
+          }
+          for (const p of level.powerups) {
+            p.x = clamp(p.x, 0, level.width - (p.w || 0));
           }
           clampMakerCamera();
           updateMakerUi();
@@ -5736,7 +5804,6 @@
             }
             themeBtn.style.display = spec.unlocked ? "" : "none";
           }
-          updateDefaultThemeDropdown();
         }
 
         function closeCodeEntryModal() {
@@ -5947,6 +6014,7 @@
           hazards = [];
           wells = [];
           shieldItem = null;
+          customLevelShieldItems = [];
           
           generateLevel();
           resetPlayerForRun(330);
@@ -6514,57 +6582,9 @@
           }
         }
 
-        function getAvailableThemeOptions() {
-          const options = [];
-          document.querySelectorAll(".theme-btn").forEach((btn) => {
-            const name = btn.dataset.theme;
-            if (!name) return;
-            if (btn.style.display === "none") return;
-            options.push({
-              value: name,
-              label: btn.textContent || name,
-            });
-          });
-          if (!options.some((opt) => opt.value === "classic")) {
-            options.unshift({ value: "classic", label: "Classic" });
-          }
-          return options;
-        }
-
-        function normalizeDefaultTheme(themeName) {
-          const options = getAvailableThemeOptions();
-          if (options.some((opt) => opt.value === themeName)) return themeName;
-          return "classic";
-        }
-
-        function updateDefaultThemeDropdown() {
-          const select = document.getElementById("defaultThemeSelect");
-          if (!select) return;
-
-          const options = getAvailableThemeOptions();
-          const selected = normalizeDefaultTheme(localStorage.getItem("void_default_theme_v1") || currentTheme);
-          select.innerHTML = "";
-
-          for (const opt of options) {
-            const optionEl = document.createElement("option");
-            optionEl.value = opt.value;
-            optionEl.textContent = opt.label;
-            select.appendChild(optionEl);
-          }
-
-          select.value = selected;
-          localStorage.setItem("void_default_theme_v1", selected);
-        }
-
         function setTheme(themeName) {
           currentTheme = themeName;
           updateThemeButtonsUi();
-          const defaultThemeSelect = document.getElementById("defaultThemeSelect");
-          if (defaultThemeSelect) {
-            defaultThemeSelect.value = normalizeDefaultTheme(
-              localStorage.getItem("void_default_theme_v1") || "classic"
-            );
-          }
           
           // Adjust stat colors for better visibility on dark theme backgrounds
           const levelStat = document.querySelector('#ui-left > .stat:first-child');
@@ -6615,17 +6635,8 @@
           closeAprilFoolsWarningModal();
           setTheme("classic");
         };
-        const defaultThemeSelect = document.getElementById("defaultThemeSelect");
-        if (defaultThemeSelect) {
-          defaultThemeSelect.onchange = () => {
-            const normalized = normalizeDefaultTheme(defaultThemeSelect.value);
-            localStorage.setItem("void_default_theme_v1", normalized);
-            setTheme(normalized);
-          };
-        }
         updateSecretThemeButtonUi();
-        updateDefaultThemeDropdown();
-        setTheme(normalizeDefaultTheme(localStorage.getItem("void_default_theme_v1") || currentTheme));
+        setTheme(currentTheme);
         document.getElementById("retroToggleBtn").onclick = () => {
           isRetro8bit = !isRetro8bit;
           document.getElementById("retroToggleBtn").textContent =
@@ -7036,6 +7047,16 @@
             activeTag === "TEXTAREA" ||
             activeTag === "SELECT" ||
             (document.activeElement && document.activeElement.isContentEditable);
+
+          // Let text inputs receive "p" normally (e.g., level naming modal).
+          if (e.code === "KeyP" && typingInField) {
+            return;
+          }
+
+          if (e.code === "KeyP" && makerMode && !makerTesting) {
+            e.preventDefault();
+            return;
+          }
 
           const isPauseShortcut = e.code === "KeyP" || e.code === "Escape";
           if (isPauseShortcut) {
