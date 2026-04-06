@@ -903,11 +903,11 @@
       }
 
       #levelMakerPanel {
-        position: absolute;
-        top: 10px;
-        right: 10px;
+        position: fixed;
+        top: 12px;
+        right: 12px;
         width: 340px;
-        max-width: calc(100% - 20px);
+        max-width: min(340px, calc(100% - 24px));
         z-index: 280;
         background: rgba(6, 12, 18, 0.95);
         border: 1px solid #3ad;
@@ -1011,6 +1011,7 @@
         #levelMakerPanel {
           width: 300px;
           top: auto;
+          right: 10px;
           bottom: 10px;
           max-height: 82%;
           overflow-y: auto;

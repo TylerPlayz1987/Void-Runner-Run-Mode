@@ -5489,6 +5489,10 @@
 
         const makerPanel = document.getElementById("levelMakerPanel");
         const makerHeader = document.getElementById("makerHeader");
+        // Float the panel in the viewport so it is not constrained by the game box.
+        if (makerPanel && makerPanel.parentElement !== document.body) {
+          document.body.appendChild(makerPanel);
+        }
         makerHeader.addEventListener("pointerdown", (ev) => {
           if (!makerMode || makerTesting) return;
           const panelRect = makerPanel.getBoundingClientRect();
@@ -5504,12 +5508,11 @@
         window.addEventListener("pointermove", (ev) => {
           if (!makerPanelDragState || !makerMode || makerTesting) return;
           if (ev.pointerId !== makerPanelDragState.pointerId) return;
-          const containerRect = container.getBoundingClientRect();
           const panelRect = makerPanel.getBoundingClientRect();
-          let left = ev.clientX - containerRect.left - makerPanelDragState.offsetX;
-          let top = ev.clientY - containerRect.top - makerPanelDragState.offsetY;
-          left = clamp(left, 0, containerRect.width - panelRect.width);
-          top = clamp(top, 0, containerRect.height - panelRect.height);
+          let left = ev.clientX - makerPanelDragState.offsetX;
+          let top = ev.clientY - makerPanelDragState.offsetY;
+          left = clamp(left, 0, window.innerWidth - panelRect.width);
+          top = clamp(top, 0, window.innerHeight - panelRect.height);
           makerPanel.style.left = `${left}px`;
           makerPanel.style.top = `${top}px`;
           makerPanel.style.right = "auto";
