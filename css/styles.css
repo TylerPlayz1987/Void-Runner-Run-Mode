@@ -868,3 +868,118 @@
         border-radius: 5px;
         font-family: inherit;
       }
+
+      .shared-level-box {
+        width: min(560px, 92%);
+        background: #101418;
+        border: 2px solid #3ad;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .shared-level-input {
+        width: 100%;
+        min-height: 84px;
+        box-sizing: border-box;
+        resize: vertical;
+        background: #0a1015;
+        color: #bdefff;
+        border: 1px solid #3ad;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: 13px;
+        font-family: "Courier New", monospace;
+      }
+
+      .shared-level-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .shared-level-actions button {
+        flex: 1;
+      }
+
+      #levelMakerPanel {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        width: 340px;
+        max-width: calc(100% - 20px);
+        z-index: 280;
+        background: rgba(6, 12, 18, 0.95);
+        border: 1px solid #3ad;
+        box-shadow: 0 0 16px rgba(51, 170, 221, 0.25);
+        padding: 10px;
+        color: #bdefff;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      #makerHeader {
+        font-size: 14px;
+        letter-spacing: 1px;
+        color: #6ce5ff;
+        font-weight: bold;
+      }
+
+      #makerToolRow {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+
+      .maker-tool-btn {
+        width: 100%;
+        background: #1a2b37;
+        color: #bdefff;
+        border: 1px solid #3ad;
+        padding: 7px 6px;
+        font-size: 12px;
+      }
+
+      .maker-tool-btn.active {
+        background: #3ad;
+        color: #03131d;
+      }
+
+      .maker-tool-btn.danger {
+        border-color: #f66;
+        color: #ffd8d8;
+      }
+
+      .maker-inline-row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .maker-inline-row label {
+        font-size: 12px;
+      }
+
+      #makerLevelWidthInput {
+        width: 110px;
+        background: #0a1015;
+        color: #bdefff;
+        border: 1px solid #3ad;
+      }
+
+      #makerHint {
+        font-size: 11px;
+        color: #9fd4e4;
+        line-height: 1.35;
+      }
+
+      @media (max-width: 900px) {
+        #levelMakerPanel {
+          width: 300px;
+          top: auto;
+          bottom: 10px;
+          max-height: 82%;
+          overflow-y: auto;
+        }
+      }

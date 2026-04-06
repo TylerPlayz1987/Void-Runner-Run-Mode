@@ -75,7 +75,17 @@
           buttonPositions = JSON.parse(JSON.stringify(defaultButtonPositions)),
           buttonSizes = JSON.parse(JSON.stringify(defaultButtonSizes)),
           currentCustomizingButton = null,
-          customizeStartData = null;
+          customizeStartData = null,
+          makerMode = false,
+          makerTesting = false,
+          customLevelActive = false,
+          playingSharedLevel = false,
+          makerTool = "select",
+          makerCameraX = 0,
+          makerDragState = null,
+          makerPanState = null,
+          makerSelected = null,
+          customLevelDraft = null;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -722,7 +732,237 @@
         function setLevelDisplay() {
           document.getElementById("lvl").textContent = tutorialMode
             ? "TUTORIAL"
-            : currentLevel;
+            : customLevelActive
+              ? "CUSTOM"
+              : currentLevel;
+        }
+
+        function createDefaultCustomLevel() {
+          return {
+            width: 2600,
+            spawn: { x: 60, y: 300 },
+            goal: { x: 2380, y: 260, w: 40, h: 40 },
+            platforms: [
+              { x: 0, y: 350, w: 480, h: 50 },
+              { x: 620, y: 300, w: 180, h: 18 },
+              { x: 980, y: 255, w: 160, h: 18 },
+              { x: 1360, y: 245, w: 220, h: 18 },
+              { x: 1760, y: 300, w: 220, h: 18 },
+              { x: 2200, y: 330, w: 260, h: 20 },
+            ],
+            spikes: [
+              { x: 880, y: 300, w: 26, h: 14, shape: "wide" },
+            ],
+            blocks: [
+              { x: 1580, y: 220, w: 40, h: 85 },
+            ],
+          };
+        }
+
+        function cloneCustomLevelData(levelData) {
+          return JSON.parse(JSON.stringify(levelData));
+        }
+
+        function clamp(v, min, max) {
+          return Math.max(min, Math.min(max, v));
+        }
+
+        function normalizeCustomLevel(levelData) {
+          const fallback = createDefaultCustomLevel();
+          const src = levelData && typeof levelData === "object" ? levelData : fallback;
+          const width = clamp(Number(src.width) || fallback.width, 800, 30000);
+          const spawn = src.spawn || fallback.spawn;
+          const goalData = src.goal || fallback.goal;
+
+          const normalized = {
+            width,
+            spawn: {
+              x: clamp(Number(spawn.x) || fallback.spawn.x, 0, width - 30),
+              y: clamp(Number(spawn.y) || fallback.spawn.y, 0, 380),
+            },
+            goal: {
+              x: clamp(Number(goalData.x) || fallback.goal.x, 0, width - 20),
+              y: clamp(Number(goalData.y) || fallback.goal.y, 0, 360),
+              w: clamp(Number(goalData.w) || fallback.goal.w, 20, 140),
+              h: clamp(Number(goalData.h) || fallback.goal.h, 20, 140),
+            },
+            platforms: [],
+            spikes: [],
+            blocks: [],
+          };
+
+          const platforms = Array.isArray(src.platforms) ? src.platforms : fallback.platforms;
+          for (const p of platforms) {
+            if (!p || typeof p !== "object") continue;
+            normalized.platforms.push({
+              x: clamp(Number(p.x) || 0, 0, width - 10),
+              y: clamp(Number(p.y) || 0, 0, 390),
+              w: clamp(Number(p.w) || 100, 20, 1000),
+              h: clamp(Number(p.h) || 18, 8, 120),
+            });
+          }
+
+          const spikes = Array.isArray(src.spikes) ? src.spikes : [];
+          for (const s of spikes) {
+            if (!s || typeof s !== "object") continue;
+            normalized.spikes.push({
+              x: clamp(Number(s.x) || 0, 0, width - 8),
+              y: clamp(Number(s.y) || 0, 0, 390),
+              w: clamp(Number(s.w) || 18, 8, 80),
+              h: clamp(Number(s.h) || 12, 6, 80),
+              shape: ["triangle", "wide", "split", "needle"].includes(s.shape)
+                ? s.shape
+                : "triangle",
+            });
+          }
+
+          const blocks = Array.isArray(src.blocks) ? src.blocks : [];
+          for (const b of blocks) {
+            if (!b || typeof b !== "object") continue;
+            normalized.blocks.push({
+              x: clamp(Number(b.x) || 0, 0, width - 8),
+              y: clamp(Number(b.y) || 0, 0, 390),
+              w: clamp(Number(b.w) || 30, 10, 220),
+              h: clamp(Number(b.h) || 60, 10, 260),
+            });
+          }
+
+          if (!normalized.platforms.length) {
+            normalized.platforms.push({ x: 0, y: 350, w: 500, h: 50 });
+          }
+
+          return normalized;
+        }
+
+        function encodeCustomLevel(levelData) {
+          const payload = {
+            tag: "void-runner-custom-level",
+            v: 1,
+            data: normalizeCustomLevel(levelData),
+          };
+          const json = JSON.stringify(payload);
+          const base64 = btoa(unescape(encodeURIComponent(json)));
+          return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+        }
+
+        function decodeCustomLevel(code) {
+          if (!code || typeof code !== "string") {
+            throw new Error("No code provided");
+          }
+          const compact = code.trim().replace(/\s+/g, "");
+          const normalizedB64 = compact.replace(/-/g, "+").replace(/_/g, "/");
+          const padLength = (4 - (normalizedB64.length % 4)) % 4;
+          const padded = normalizedB64 + "=".repeat(padLength);
+          const json = decodeURIComponent(escape(atob(padded)));
+          const parsed = JSON.parse(json);
+          if (!parsed || parsed.tag !== "void-runner-custom-level") {
+            throw new Error("Invalid level code");
+          }
+          if (parsed.v !== 1) {
+            throw new Error("Unsupported level code version");
+          }
+          return normalizeCustomLevel(parsed.data);
+        }
+
+        function applyCustomLevelToWorld(levelData) {
+          const level = normalizeCustomLevel(levelData);
+          shieldItem = null;
+          wells = [];
+          hazards = [];
+          lavaParticles = [];
+          platforms = [];
+
+          for (const p of level.platforms) {
+            platforms.push({
+              x: p.x,
+              y: p.y,
+              w: p.w,
+              h: p.h,
+              isPhase: false,
+              isSinking: false,
+              isTouched: false,
+              hasSpike: false,
+              spikeX: 0,
+              spikeW: SPIKE_W,
+              spikeH: SPIKE_H,
+              spikeShape: "triangle",
+              moveRange: 0,
+              startX: p.x,
+              moveDir: 1,
+              moveSpeed: 1.5,
+              hasSeeker: false,
+              seekerX: 0,
+              seekerDir: 1,
+              seekerW: SPIKE_W,
+              seekerH: SPIKE_H,
+              seekerShape: "triangle",
+              hasSpeedZone: false,
+              speedZoneType: null,
+              speedZoneX: 0,
+              speedZoneW: 0,
+              speedZoneDuration: 0,
+              speedZoneMul: 1,
+              hasFakeHazard: false,
+              fakeType: null,
+              fakeX: 0,
+              fakeW: 0,
+              fakeH: 0,
+            });
+          }
+
+          for (const s of level.spikes) {
+            platforms.push({
+              x: s.x - 2,
+              y: s.y,
+              w: Math.max(8, s.w + 4),
+              h: 8,
+              isPhase: false,
+              isSinking: false,
+              isTouched: false,
+              hasSpike: true,
+              spikeX: 2,
+              spikeW: s.w,
+              spikeH: s.h,
+              spikeShape: s.shape || "triangle",
+              moveRange: 0,
+              startX: s.x - 2,
+              moveDir: 1,
+              moveSpeed: 1.5,
+              hasSeeker: false,
+              seekerX: 0,
+              seekerDir: 1,
+              seekerW: SPIKE_W,
+              seekerH: SPIKE_H,
+              seekerShape: "triangle",
+              hasSpeedZone: false,
+              speedZoneType: null,
+              speedZoneX: 0,
+              speedZoneW: 0,
+              speedZoneDuration: 0,
+              speedZoneMul: 1,
+              hasFakeHazard: false,
+              fakeType: null,
+              fakeX: 0,
+              fakeW: 0,
+              fakeH: 0,
+            });
+          }
+
+          for (const b of level.blocks) {
+            hazards.push({
+              type: "block",
+              x: b.x,
+              y: b.y,
+              w: b.w,
+              h: b.h,
+            });
+          }
+
+          goal.x = level.goal.x;
+          goal.y = level.goal.y;
+          goal.w = level.goal.w;
+          goal.h = level.goal.h;
+          return level;
         }
 
         function setTutorialUiVisible(visible) {
@@ -1297,8 +1537,8 @@
           updateTutorialHint();
         }
         // Handle player death and reset after falling/out of bounds/hazard hit
-        function resetPlayerForRun(spawnY = 200) {
-          player.x = 50;
+        function resetPlayerForRun(spawnY = 200, spawnX = 50) {
+          player.x = spawnX;
           player.y = spawnY;
           player.vx = 0;
           player.vy = 0;
@@ -1326,6 +1566,23 @@
 
         function die() {
           if (player.spaghettified) return;
+          if (customLevelActive) {
+            shake = 10;
+            deathCount++;
+            document.getElementById("deaths").textContent = deathCount;
+            play.di();
+            const loaded = applyCustomLevelToWorld(customLevelDraft);
+            resetPlayerForRun(loaded.spawn.y, loaded.spawn.x);
+            player.hasShield = false;
+            player.spaghettified = false;
+            player.deathScale = 1;
+            player.deathRotate = 0;
+            player.speedZoneTimer = 0;
+            player.speedZoneType = null;
+            player.speedZoneMul = 1;
+            player.standPlatform = null;
+            return;
+          }
           // Speed Running Mode: any death instantly shows game over (no respawn)
           if (speedRunMode) {
             showSpeedRunGameOver();
@@ -1438,6 +1695,28 @@
         }
 
         function win() {
+          if (customLevelActive) {
+            play.wn();
+            cpNotif.textContent = "Custom Level Complete!";
+            cpNotif.style.opacity = "1";
+            running = false;
+            setTimeout(() => {
+              cpNotif.textContent = "Checkpoint Reached";
+              cpNotif.style.opacity = "0";
+              if (makerMode) {
+                makerTesting = false;
+                customLevelActive = false;
+                playingSharedLevel = false;
+                document.getElementById("makerStopTestBtn").style.display = "none";
+                setTopControlsVisible(false);
+                running = false;
+                updateMakerUi();
+              } else {
+                returnToStartMenu();
+              }
+            }, 1500);
+            return;
+          }
           if (tutorialMode) {
             play.cp();
             const prevText = cpNotif.textContent;
@@ -1547,6 +1826,7 @@
         // Main game simulation, runs every frame before draw()
         function update() {
           if (!running || isPaused) return;
+          if (makerMode && !makerTesting) return;
           frameCount++;
           if (shake > 0) shake *= 0.9;
           if (flashAlpha > 0) flashAlpha -= 0.02;
@@ -2546,6 +2826,165 @@
           ctx.closePath();
           ctx.fill();
           ctx.stroke();
+        }
+
+        function ensureCustomLevelDraft() {
+          if (!customLevelDraft) {
+            customLevelDraft = createDefaultCustomLevel();
+          }
+          customLevelDraft = normalizeCustomLevel(customLevelDraft);
+          return customLevelDraft;
+        }
+
+        function updateMakerToolButtons() {
+          document.querySelectorAll(".maker-tool-btn").forEach((btn) => {
+            btn.classList.toggle("active", btn.dataset.tool === makerTool);
+          });
+          canvas.style.cursor = makerTool === "select" ? "grab" : "crosshair";
+        }
+
+        function updateMakerUi() {
+          const level = ensureCustomLevelDraft();
+          const widthInput = document.getElementById("makerLevelWidthInput");
+          if (widthInput) widthInput.value = String(Math.round(level.width));
+          const stopTestBtn = document.getElementById("makerStopTestBtn");
+          const testBtn = document.getElementById("makerTestBtn");
+          if (stopTestBtn) stopTestBtn.style.display = makerTesting ? "block" : "none";
+          if (testBtn) testBtn.textContent = makerTesting ? "Testing..." : "Test";
+          updateMakerToolButtons();
+        }
+
+        function hitTestMakerObject(worldX, worldY) {
+          const level = ensureCustomLevelDraft();
+          const all = [];
+          for (let i = 0; i < level.platforms.length; i++) {
+            all.push({ type: "platform", index: i, obj: level.platforms[i], z: 1 });
+          }
+          for (let i = 0; i < level.blocks.length; i++) {
+            all.push({ type: "block", index: i, obj: level.blocks[i], z: 2 });
+          }
+          for (let i = 0; i < level.spikes.length; i++) {
+            all.push({ type: "spike", index: i, obj: level.spikes[i], z: 3 });
+          }
+          all.push({ type: "goal", index: -1, obj: level.goal, z: 4 });
+
+          all.sort((a, b) => a.z - b.z);
+          for (let i = all.length - 1; i >= 0; i--) {
+            const item = all[i];
+            if (item.type === "spike") {
+              const s = item.obj;
+              if (
+                worldX >= s.x &&
+                worldX <= s.x + s.w &&
+                worldY >= s.y - s.h &&
+                worldY <= s.y
+              ) {
+                return item;
+              }
+            } else {
+              const o = item.obj;
+              if (
+                worldX >= o.x &&
+                worldX <= o.x + o.w &&
+                worldY >= o.y &&
+                worldY <= o.y + o.h
+              ) {
+                return item;
+              }
+            }
+          }
+          return null;
+        }
+
+        function deleteMakerObject(hit) {
+          if (!hit || hit.type === "goal") return;
+          const level = ensureCustomLevelDraft();
+          if (hit.type === "platform") level.platforms.splice(hit.index, 1);
+          else if (hit.type === "spike") level.spikes.splice(hit.index, 1);
+          else if (hit.type === "block") level.blocks.splice(hit.index, 1);
+        }
+
+        function drawMakerScene() {
+          const level = ensureCustomLevelDraft();
+          ctx = mainCtx;
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          const g = ctx.createLinearGradient(0, 0, 0, 400);
+          g.addColorStop(0, "#071019");
+          g.addColorStop(1, "#0f1c28");
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, 800, 400);
+
+          const worldStart = Math.floor(makerCameraX / 20) * 20;
+          const worldEnd = makerCameraX + 820;
+          for (let x = worldStart; x <= worldEnd; x += 20) {
+            const sx = x - makerCameraX;
+            ctx.strokeStyle = x % 100 === 0 ? "rgba(80,160,220,0.28)" : "rgba(80,160,220,0.1)";
+            ctx.lineWidth = x % 100 === 0 ? 1.5 : 1;
+            ctx.beginPath();
+            ctx.moveTo(sx, 0);
+            ctx.lineTo(sx, 400);
+            ctx.stroke();
+          }
+          for (let y = 0; y <= 400; y += 20) {
+            ctx.strokeStyle = y % 100 === 0 ? "rgba(80,160,220,0.26)" : "rgba(80,160,220,0.09)";
+            ctx.lineWidth = y % 100 === 0 ? 1.5 : 1;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(800, y);
+            ctx.stroke();
+          }
+
+          const levelEndX = level.width - makerCameraX;
+          ctx.fillStyle = "rgba(40, 220, 255, 0.2)";
+          ctx.fillRect(levelEndX - 2, 0, 4, 400);
+
+          ctx.fillStyle = "#60798d";
+          for (const p of level.platforms) {
+            ctx.fillRect(p.x - makerCameraX, p.y, p.w, p.h);
+          }
+
+          ctx.fillStyle = "#f15959";
+          for (const b of level.blocks) {
+            ctx.fillRect(b.x - makerCameraX, b.y, b.w, b.h);
+          }
+
+          ctx.fillStyle = "#ffb366";
+          for (const s of level.spikes) {
+            drawSpike(s.x, s.y, s.w, s.h, s.shape || "triangle", makerCameraX);
+          }
+
+          ctx.strokeStyle = "#67ffc1";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(level.goal.x - makerCameraX, level.goal.y, level.goal.w, level.goal.h);
+          ctx.fillStyle = "rgba(103,255,193,0.25)";
+          ctx.fillRect(level.goal.x - makerCameraX, level.goal.y, level.goal.w, level.goal.h);
+
+          ctx.strokeStyle = "#7ee8ff";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(level.spawn.x - makerCameraX, level.spawn.y, 20, 20);
+          ctx.fillStyle = "rgba(126,232,255,0.28)";
+          ctx.fillRect(level.spawn.x - makerCameraX, level.spawn.y, 20, 20);
+
+          if (makerSelected && makerSelected.obj) {
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 2;
+            if (makerSelected.type === "spike") {
+              const s = makerSelected.obj;
+              ctx.strokeRect(s.x - makerCameraX - 2, s.y - s.h - 2, s.w + 4, s.h + 4);
+            } else {
+              const o = makerSelected.obj;
+              ctx.strokeRect(o.x - makerCameraX - 2, o.y - 2, o.w + 4, o.h + 4);
+            }
+          }
+
+          ctx.fillStyle = "rgba(0,0,0,0.55)";
+          ctx.fillRect(10, 10, 276, 44);
+          ctx.fillStyle = "#bdefff";
+          ctx.font = "12px Courier New";
+          ctx.fillText(`Camera: ${Math.round(makerCameraX)} px`, 18, 28);
+          ctx.fillText(`Level Length: ${Math.round(level.width)} px`, 18, 45);
         }
 
         // Core world rendering in current theme
@@ -4242,6 +4681,10 @@
         // Top-level draw entry - handles retro scaling wrapper
         // Converts main rendering to low-res offscreen buffer when 8-bit mode is enabled.
         function draw() {
+          if (makerMode && !makerTesting) {
+            drawMakerScene();
+            return;
+          }
           const isRetro = isRetro8bit;
           if (isRetro) {
             retroCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -4278,7 +4721,7 @@
         // Pause/resume and menu toggling (also handles music pause/resume)
         function toggle() {
           // Speed Running Mode: pause menu disabled during speed runs (no pausing allowed)
-          if (!running || speedRunGameOverMode || speedRunMode) return;
+          if (!running || speedRunGameOverMode || speedRunMode || makerMode) return;
           isPaused = !isPaused;
           const m = document.getElementById("bgMusic");
           if (m) {
@@ -4392,6 +4835,10 @@
         function returnToStartMenu() {
           clearPostTutorialTour();
           tutorialMode = false;
+          makerMode = false;
+          makerTesting = false;
+          customLevelActive = false;
+          playingSharedLevel = false;
           speedRunMode = false;
           speedRunGameOverMode = false;
           updateHudModeUi();
@@ -4411,10 +4858,13 @@
           document.getElementById("topControls").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("sharedLevelModal").style.display = "none";
+          document.getElementById("levelMakerPanel").style.display = "none";
           document.getElementById("changelogMenu").style.display = "none";
           document.getElementById("speedRunMenu").style.display = "none";
           document.getElementById("speedRunTimer").classList.remove("active");
           document.getElementById("startMenu").style.display = "flex";
+          canvas.style.cursor = "default";
         }
 
         function showSpeedRunMenu() {
@@ -4456,7 +4906,7 @@
         }
 
         function openPauseShortcut(pageId) {
-          if (!running || speedRunMode || speedRunGameOverMode) return;
+          if (!running || speedRunMode || speedRunGameOverMode || makerMode) return;
           isPaused = true;
           const m = document.getElementById("bgMusic");
           if (m) m.pause();
@@ -4477,6 +4927,11 @@
         function startSelectedMode(isTutorial) {
           ensureAudioContext();
           clearPostTutorialTour();
+          makerMode = false;
+          makerTesting = false;
+          customLevelActive = false;
+          playingSharedLevel = false;
+          document.getElementById("levelMakerPanel").style.display = "none";
           tutorialMode = isTutorial;
           speedRunMode = false;
           updateHudModeUi();
@@ -4514,6 +4969,300 @@
           }
         };
 
+        function startCustomLevelPlay(levelData, fromMaker = false) {
+          ensureAudioContext();
+          clearPostTutorialTour();
+          tutorialMode = false;
+          speedRunMode = false;
+          speedRunGameOverMode = false;
+          makerMode = !!fromMaker;
+          makerTesting = !!fromMaker;
+          customLevelActive = true;
+          playingSharedLevel = !fromMaker;
+          updateHudModeUi();
+          showingPostTutorialSettings = false;
+          setTutorialUiVisible(false);
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
+
+          customLevelDraft = normalizeCustomLevel(levelData);
+          const loaded = applyCustomLevelToWorld(customLevelDraft);
+          resetPlayerForRun(loaded.spawn.y, loaded.spawn.x);
+
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("sharedLevelModal").style.display = "none";
+          document.getElementById("speedRunMenu").style.display = "none";
+          document.getElementById("levelMakerPanel").style.display = fromMaker ? "flex" : "none";
+          setTopControlsVisible(false);
+
+          running = true;
+          isPaused = false;
+          if (!loopStarted) {
+            loopStarted = true;
+            (function loop() {
+              update();
+              draw();
+              requestAnimationFrame(loop);
+            })();
+          }
+          updateMakerUi();
+        }
+
+        function enterLevelMakerMode() {
+          ensureAudioContext();
+          clearPostTutorialTour();
+          tutorialMode = false;
+          speedRunMode = false;
+          speedRunGameOverMode = false;
+          makerMode = true;
+          makerTesting = false;
+          customLevelActive = false;
+          playingSharedLevel = false;
+          isPaused = false;
+          running = false;
+          makerTool = "select";
+          makerSelected = null;
+          makerDragState = null;
+          makerPanState = null;
+          makerCameraX = Math.max(0, Math.min(makerCameraX, ensureCustomLevelDraft().width - 800));
+          setTutorialUiVisible(false);
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("sharedLevelModal").style.display = "none";
+          document.getElementById("pauseMenu").style.display = "none";
+          document.getElementById("levelMakerPanel").style.display = "flex";
+          setTopControlsVisible(false);
+          updateMakerUi();
+          if (!loopStarted) {
+            loopStarted = true;
+            (function loop() {
+              update();
+              draw();
+              requestAnimationFrame(loop);
+            })();
+          }
+        }
+
+        function clampMakerCamera() {
+          const level = ensureCustomLevelDraft();
+          makerCameraX = clamp(makerCameraX, 0, Math.max(0, level.width - 800));
+        }
+
+        function getMakerWorldPoint(ev) {
+          const rect = canvas.getBoundingClientRect();
+          const x = ((ev.clientX - rect.left) / rect.width) * canvas.width;
+          const y = ((ev.clientY - rect.top) / rect.height) * canvas.height;
+          return {
+            screenX: x,
+            screenY: y,
+            worldX: x + makerCameraX,
+            worldY: y,
+          };
+        }
+
+        function placeMakerObject(worldX, worldY) {
+          const level = ensureCustomLevelDraft();
+          const snap = 10;
+          const x = Math.round(worldX / snap) * snap;
+          const y = Math.round(worldY / snap) * snap;
+
+          if (makerTool === "platform") {
+            level.platforms.push({ x: clamp(x, 0, level.width - 120), y: clamp(y, 0, 380), w: 140, h: 18 });
+          } else if (makerTool === "spike") {
+            level.spikes.push({ x: clamp(x, 0, level.width - 24), y: clamp(y, 12, 390), w: 24, h: 12, shape: "triangle" });
+          } else if (makerTool === "block") {
+            level.blocks.push({ x: clamp(x, 0, level.width - 30), y: clamp(y, 0, 380), w: 40, h: 80 });
+          }
+        }
+
+        function startMakerDrag(hit, worldX, worldY) {
+          if (!hit) return;
+          const obj = hit.obj;
+          makerSelected = hit;
+          if (hit.type === "spike") {
+            makerDragState = {
+              type: hit.type,
+              index: hit.index,
+              obj,
+              dx: worldX - obj.x,
+              dy: worldY - obj.y,
+            };
+          } else {
+            makerDragState = {
+              type: hit.type,
+              index: hit.index,
+              obj,
+              dx: worldX - obj.x,
+              dy: worldY - obj.y,
+            };
+          }
+        }
+
+        function onMakerPointerDown(ev) {
+          if (!makerMode || makerTesting) return;
+          if (ev.button !== 0 && ev.button !== 1) return;
+          const p = getMakerWorldPoint(ev);
+          const level = ensureCustomLevelDraft();
+
+          if (ev.shiftKey || ev.button === 1) {
+            makerPanState = { x: ev.clientX, startCam: makerCameraX };
+            canvas.style.cursor = "grabbing";
+            return;
+          }
+
+          if (makerTool === "goal") {
+            level.goal.x = clamp(p.worldX - level.goal.w * 0.5, 0, level.width - level.goal.w);
+            level.goal.y = clamp(p.worldY - level.goal.h * 0.5, 0, 390 - level.goal.h);
+            makerSelected = { type: "goal", index: -1, obj: level.goal };
+            startMakerDrag(makerSelected, p.worldX, p.worldY);
+            return;
+          }
+
+          const hit = hitTestMakerObject(p.worldX, p.worldY);
+          if (makerTool === "delete") {
+            deleteMakerObject(hit);
+            if (makerSelected && hit && makerSelected.obj === hit.obj) makerSelected = null;
+            return;
+          }
+
+          if (makerTool === "select") {
+            makerSelected = hit;
+            if (hit) startMakerDrag(hit, p.worldX, p.worldY);
+            return;
+          }
+
+          placeMakerObject(p.worldX, p.worldY);
+          clampMakerCamera();
+        }
+
+        function onMakerPointerMove(ev) {
+          if (!makerMode || makerTesting) return;
+          const level = ensureCustomLevelDraft();
+          if (makerPanState) {
+            const dx = ev.clientX - makerPanState.x;
+            makerCameraX = makerPanState.startCam - dx;
+            clampMakerCamera();
+            return;
+          }
+          if (!makerDragState) return;
+          const p = getMakerWorldPoint(ev);
+          const obj = makerDragState.obj;
+          if (!obj) return;
+
+          if (makerDragState.type === "spike") {
+            obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
+            obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, obj.h, 390);
+          } else if (makerDragState.type === "goal") {
+            obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
+            obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, 0, 390 - obj.h);
+          } else {
+            obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
+            obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, 0, 390 - obj.h);
+          }
+        }
+
+        function stopMakerPointerInteraction() {
+          makerDragState = null;
+          makerPanState = null;
+          updateMakerToolButtons();
+        }
+
+        canvas.addEventListener("mousedown", onMakerPointerDown);
+        window.addEventListener("mousemove", onMakerPointerMove);
+        window.addEventListener("mouseup", stopMakerPointerInteraction);
+
+        canvas.addEventListener("wheel", (ev) => {
+          if (!makerMode || makerTesting) return;
+          ev.preventDefault();
+          makerCameraX += ev.deltaY * 0.9;
+          clampMakerCamera();
+        }, { passive: false });
+
+        document.querySelectorAll(".maker-tool-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            makerTool = btn.dataset.tool || "select";
+            updateMakerToolButtons();
+          });
+        });
+
+        document.getElementById("makerApplyLengthBtn").onclick = () => {
+          const level = ensureCustomLevelDraft();
+          const requested = parseInt(document.getElementById("makerLevelWidthInput").value, 10);
+          level.width = clamp(Number.isFinite(requested) ? requested : level.width, 800, 30000);
+          level.goal.x = clamp(level.goal.x, 0, level.width - level.goal.w);
+          for (const p of level.platforms) p.x = clamp(p.x, 0, level.width - p.w);
+          for (const s of level.spikes) s.x = clamp(s.x, 0, level.width - s.w);
+          for (const b of level.blocks) b.x = clamp(b.x, 0, level.width - b.w);
+          clampMakerCamera();
+          updateMakerUi();
+        };
+
+        document.getElementById("makerTestBtn").onclick = () => {
+          if (makerTesting) return;
+          const level = ensureCustomLevelDraft();
+          startCustomLevelPlay(level, true);
+        };
+
+        document.getElementById("makerStopTestBtn").onclick = () => {
+          if (!makerTesting) return;
+          makerTesting = false;
+          customLevelActive = false;
+          running = false;
+          setTopControlsVisible(false);
+          updateMakerUi();
+        };
+
+        document.getElementById("makerNewBtn").onclick = () => {
+          customLevelDraft = createDefaultCustomLevel();
+          makerSelected = null;
+          makerCameraX = 0;
+          updateMakerUi();
+        };
+
+        document.getElementById("makerExitBtn").onclick = () => {
+          returnToStartMenu();
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "flex";
+        };
+
+        document.getElementById("makerExportBtn").onclick = async () => {
+          try {
+            const level = ensureCustomLevelDraft();
+            const code = encodeCustomLevel(level);
+            const output = document.getElementById("makerCodeOutput");
+            output.value = code;
+            output.focus();
+            output.select();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(code);
+              flashCodeMessage("level code copied");
+            } else {
+              flashCodeMessage("level code generated");
+            }
+          } catch (_err) {
+            flashCodeMessage("failed to generate code");
+          }
+        };
+
+        document.getElementById("makerImportBtn").onclick = () => {
+          const raw = prompt("Paste shared level code");
+          if (!raw) return;
+          try {
+            customLevelDraft = decodeCustomLevel(raw);
+            makerSelected = null;
+            makerCameraX = 0;
+            updateMakerUi();
+            flashCodeMessage("level loaded");
+          } catch (_err) {
+            flashCodeMessage("invalid level code");
+          }
+        };
+
         document.getElementById("startBtn").onclick = () => {
           ensureAudioContext();
           document.getElementById("startMenu").style.display = "none";
@@ -4533,6 +5282,10 @@
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
         const codeEntryCancelBtn = document.getElementById("codeEntryCancelBtn");
+        const sharedLevelModal = document.getElementById("sharedLevelModal");
+        const sharedLevelInput = document.getElementById("sharedLevelInput");
+        const sharedLevelPlayBtn = document.getElementById("sharedLevelPlayBtn");
+        const sharedLevelCancelBtn = document.getElementById("sharedLevelCancelBtn");
         const aprilFoolsWarningModal = document.getElementById("aprilFoolsWarningModal");
         const aprilFoolsConfirmBtn = document.getElementById("aprilFoolsConfirmBtn");
         const aprilFoolsBackBtn = document.getElementById("aprilFoolsBackBtn");
@@ -4643,6 +5396,28 @@
           codeEntryInput.focus();
         }
 
+        function openSharedLevelModal() {
+          sharedLevelModal.style.display = "flex";
+          sharedLevelInput.value = "";
+          sharedLevelInput.focus();
+        }
+
+        function closeSharedLevelModal() {
+          sharedLevelModal.style.display = "none";
+          sharedLevelInput.value = "";
+        }
+
+        function submitSharedLevelCode() {
+          try {
+            const parsed = decodeCustomLevel(sharedLevelInput.value || "");
+            closeSharedLevelModal();
+            startCustomLevelPlay(parsed, false);
+            flashCodeMessage("shared level loaded");
+          } catch (err) {
+            flashCodeMessage("invalid level code");
+          }
+        }
+
         function flashCodeMessage(text) {
           const flashEl = document.getElementById("codeFlashMessage");
           flashEl.textContent = text;
@@ -4653,8 +5428,13 @@
         document.getElementById("menuCodesBtn").onclick = () => {
           openCodeEntryModal();
         };
+        document.getElementById("playSharedLevelBtn").onclick = () => {
+          openSharedLevelModal();
+        };
         codeEntrySubmitBtn.onclick = submitCodeEntry;
         codeEntryCancelBtn.onclick = closeCodeEntryModal;
+        sharedLevelPlayBtn.onclick = submitSharedLevelCode;
+        sharedLevelCancelBtn.onclick = closeSharedLevelModal;
         codeEntryInput.addEventListener("keydown", (e) => {
           if (e.code === "Enter") {
             e.preventDefault();
@@ -4662,6 +5442,15 @@
           } else if (e.code === "Escape") {
             e.preventDefault();
             closeCodeEntryModal();
+          }
+        });
+        sharedLevelInput.addEventListener("keydown", (e) => {
+          if ((e.code === "Enter" && (e.ctrlKey || e.metaKey)) || (e.code === "NumpadEnter" && (e.ctrlKey || e.metaKey))) {
+            e.preventDefault();
+            submitSharedLevelCode();
+          } else if (e.code === "Escape") {
+            e.preventDefault();
+            closeSharedLevelModal();
           }
         });
         document.getElementById("openChangelogBtn").onclick = () => {
@@ -4680,6 +5469,7 @@
         document.getElementById("tutorialBtn").onclick = () => startSelectedMode(true);
         // Mode menu entry point for Speed Running mode
         document.getElementById("speedRunModeBtn").onclick = () => showSpeedRunMenu();
+        document.getElementById("levelMakerModeBtn").onclick = () => enterLevelMakerMode();
         document.getElementById("speedRunBackBtn").onclick = () => hideSpeedRunMenu();
         document.getElementById("speedRunStartBtn").onclick = () => startSpeedRunMode();
 
@@ -5764,6 +6554,12 @@
               return;
             }
 
+            if (sharedLevelModal.style.display === "flex") {
+              e.preventDefault();
+              closeSharedLevelModal();
+              return;
+            }
+
             if (aprilFoolsWarningModal.style.display === "flex") {
               e.preventDefault();
               closeAprilFoolsWarningModal();
@@ -5788,6 +6584,14 @@
               if (submenuBack()) return;
             }
 
+            if (makerMode && !makerTesting) {
+              e.preventDefault();
+              returnToStartMenu();
+              document.getElementById("startMenu").style.display = "none";
+              document.getElementById("modeMenu").style.display = "flex";
+              return;
+            }
+
             e.preventDefault();
             toggle();
             return;
@@ -5795,6 +6599,59 @@
 
           if (typingInField) {
             return;
+          }
+
+          if (makerMode && !makerTesting) {
+            if (e.code === "Delete" || e.code === "Backspace") {
+              if (makerSelected && makerSelected.type !== "goal") {
+                deleteMakerObject(makerSelected);
+                makerSelected = null;
+                e.preventDefault();
+              }
+              return;
+            }
+            if (e.code === "KeyA") {
+              makerCameraX -= 60;
+              clampMakerCamera();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "KeyD") {
+              makerCameraX += 60;
+              clampMakerCamera();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "Digit1") {
+              makerTool = "select";
+              updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "Digit2") {
+              makerTool = "platform";
+              updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "Digit3") {
+              makerTool = "spike";
+              updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "Digit4") {
+              makerTool = "block";
+              updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "Digit5") {
+              makerTool = "goal";
+              updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
           }
 
           keys[e.code] = 1;

@@ -73,8 +73,19 @@
           <div id="startMenuVersionTag">v0.9 - Story Mode!</div>
           <button id="startBtn" style="width: 200px">Start</button>
           <button id="menuCodesBtn" style="width: 200px; margin-top: 8px; background: #fc3; color: #111">Codes</button>
+          <button id="playSharedLevelBtn" style="width: 200px; margin-top: 8px; background: #3ad; color: #03131d">Play Shared Level</button>
           <button id="openChangelogBtn" class="small-btn" style="width: 200px; margin-top: 8px;">Changelog</button>
           <div id="codeFlashMessage">test done</div>
+        </div>
+        <div id="sharedLevelModal" class="overlay" style="display: none" role="dialog" aria-modal="true" aria-labelledby="sharedLevelTitle">
+          <div class="shared-level-box">
+            <h1 id="sharedLevelTitle">PLAY SHARED LEVEL</h1>
+            <textarea id="sharedLevelInput" class="shared-level-input" placeholder="Paste shared level code"></textarea>
+            <div class="shared-level-actions">
+              <button id="sharedLevelPlayBtn" style="background: #3ad; color: #03131d">Play Level</button>
+              <button id="sharedLevelCancelBtn" class="small-btn">Cancel</button>
+            </div>
+          </div>
         </div>
         <div id="codeEntryModal" class="overlay" style="display: none" role="dialog" aria-modal="true" aria-labelledby="codeEntryTitle">
           <div class="code-entry-box">
@@ -121,6 +132,9 @@
           </button>
           <button id="speedRunModeBtn" style="width: 220px; margin-bottom: 8px">
             Speed Running
+          </button>
+          <button id="levelMakerModeBtn" style="width: 220px; margin-bottom: 8px; background: #3ad; color: #03131d">
+            Level Maker
           </button>
           <button id="modeBackBtn" class="small-btn" style="width: 220px">
             Back
@@ -372,6 +386,34 @@
           </div>
         </div>
         <canvas id="canvas"></canvas>
+        <div id="levelMakerPanel" style="display: none" aria-label="Level maker controls">
+          <div id="makerHeader">LEVEL MAKER</div>
+          <div id="makerToolRow">
+            <button class="maker-tool-btn active" data-tool="select">Select</button>
+            <button class="maker-tool-btn" data-tool="platform">Platform</button>
+            <button class="maker-tool-btn" data-tool="spike">Spike</button>
+            <button class="maker-tool-btn" data-tool="block">Block</button>
+            <button class="maker-tool-btn" data-tool="goal">Goal</button>
+            <button class="maker-tool-btn danger" data-tool="delete">Delete</button>
+          </div>
+          <div class="maker-inline-row">
+            <label for="makerLevelWidthInput">Length</label>
+            <input id="makerLevelWidthInput" type="number" min="800" max="30000" step="100" value="2600" />
+            <button id="makerApplyLengthBtn" class="small-btn">Apply</button>
+          </div>
+          <div class="maker-inline-row">
+            <button id="makerTestBtn" style="background: #3ad; color: #03131d">Test</button>
+            <button id="makerStopTestBtn" class="small-btn" style="display: none">Stop Test</button>
+            <button id="makerNewBtn" class="small-btn">New</button>
+            <button id="makerExitBtn" class="small-btn">Exit</button>
+          </div>
+          <div class="maker-inline-row">
+            <button id="makerExportBtn" style="background: #fc3; color: #111">Generate Code</button>
+            <button id="makerImportBtn" class="small-btn">Load Code</button>
+          </div>
+          <textarea id="makerCodeOutput" class="shared-level-input" readonly placeholder="Generated code appears here"></textarea>
+          <div id="makerHint">Drag with Select. Place with tools. Hold Shift while dragging to pan the camera.</div>
+        </div>
         <button id="versionPickerBtn" aria-haspopup="dialog" aria-expanded="false" title="Choose game version">v0.9.0</button>
         <div id="versionPickerMenu" aria-label="Game versions" role="dialog">
           <div id="versionPickerHeader">
