@@ -2973,7 +2973,6 @@
           if (!customLevelDraft) {
             customLevelDraft = createDefaultCustomLevel();
           }
-          customLevelDraft = normalizeCustomLevel(customLevelDraft);
           return customLevelDraft;
         }
 
