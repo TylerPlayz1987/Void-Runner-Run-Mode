@@ -81,6 +81,7 @@
           customLevelActive = false,
           playingSharedLevel = false,
           makerTool = "select",
+          makerPlatformType = "normal",
           makerObstacleType = "spike",
           makerCameraX = 0,
           makerDragState = null,
@@ -745,18 +746,18 @@
             spawn: { x: 60, y: 300 },
             goal: { x: 2380, y: 260, w: 40, h: 40 },
             platforms: [
-              { x: 0, y: 350, w: 480, h: 50 },
-              { x: 620, y: 300, w: 180, h: 18 },
-              { x: 980, y: 255, w: 160, h: 18 },
-              { x: 1360, y: 245, w: 220, h: 18 },
-              { x: 1760, y: 300, w: 220, h: 18 },
-              { x: 2200, y: 330, w: 260, h: 20 },
+              { x: 0, y: 350, w: 480, h: 50, kind: "normal" },
+              { x: 620, y: 300, w: 180, h: 18, kind: "moving", moveRange: 70, moveSpeed: 1.7 },
+              { x: 980, y: 255, w: 160, h: 18, kind: "phase", isPhase: true },
+              { x: 1360, y: 245, w: 220, h: 18, kind: "speedBoost", hasSpeedZone: true, speedZoneType: "boost", speedZoneX: 40, speedZoneW: 110, speedZoneDuration: 600, speedZoneMul: 1.6 },
+              { x: 1760, y: 300, w: 220, h: 18, kind: "sinking", isSinking: true },
+              { x: 2200, y: 330, w: 260, h: 20, kind: "fakeSpike", hasFakeHazard: true, fakeType: "ghostSpike", fakeX: 90, fakeW: 26, fakeH: 16 },
             ],
             obstacles: [
               { type: "spike", x: 880, y: 300, w: 26, h: 14, shape: "wide" },
               { type: "block", x: 1580, y: 220, w: 40, h: 85 },
               { type: "seeker", x: 1180, y: 250, w: 20, h: 14, range: 45, speed: 2.2, shape: "split" },
-              { type: "lavaStatic", x: 2000, y: 350, w: 80, h: 50 },
+              { type: "lavaWall", x: 2000, w: 30, h: 120, speed: 2, holdMax: 50 },
               { type: "well", x: 2110, y: 230, r: 75, core: 10 },
             ],
           };
@@ -796,11 +797,46 @@
           const platforms = Array.isArray(src.platforms) ? src.platforms : fallback.platforms;
           for (const p of platforms) {
             if (!p || typeof p !== "object") continue;
+            const kind = String(p.kind || "normal");
+            const w = clamp(Number(p.w) || 100, 20, 1000);
+            const h = clamp(Number(p.h) || 18, 8, 120);
+            const speedZoneW = clamp(Number(p.speedZoneW) || Math.min(90, w), 10, w);
             normalized.platforms.push({
               x: clamp(Number(p.x) || 0, 0, width - 10),
               y: clamp(Number(p.y) || 0, 0, 390),
-              w: clamp(Number(p.w) || 100, 20, 1000),
-              h: clamp(Number(p.h) || 18, 8, 120),
+              w,
+              h,
+              kind,
+              isPhase: kind === "phase" || !!p.isPhase,
+              isSinking: kind === "sinking" || !!p.isSinking,
+              moveRange: kind === "moving" ? clamp(Number(p.moveRange) || 70, 10, 240) : clamp(Number(p.moveRange) || 0, 0, 240),
+              moveSpeed: clamp(Number(p.moveSpeed) || 1.7, 0.2, 8),
+              hasSpeedZone: kind === "speedBoost" || kind === "speedSlow" || !!p.hasSpeedZone,
+              speedZoneType:
+                kind === "speedBoost"
+                  ? "boost"
+                  : kind === "speedSlow"
+                    ? "slow"
+                    : (p.speedZoneType === "slow" ? "slow" : "boost"),
+              speedZoneX: clamp(Number(p.speedZoneX) || 20, 0, Math.max(0, w - speedZoneW)),
+              speedZoneW,
+              speedZoneDuration: clamp(Number(p.speedZoneDuration) || 600, 120, 2400),
+              speedZoneMul:
+                kind === "speedSlow"
+                  ? clamp(Number(p.speedZoneMul) || 0.58, 0.25, 0.95)
+                  : kind === "speedBoost"
+                    ? clamp(Number(p.speedZoneMul) || 1.6, 1.05, 3)
+                    : clamp(Number(p.speedZoneMul) || 1.5, 0.25, 3),
+              hasFakeHazard: kind === "fakeSpike" || kind === "fakeBlock" || !!p.hasFakeHazard,
+              fakeType:
+                kind === "fakeSpike"
+                  ? "ghostSpike"
+                  : kind === "fakeBlock"
+                    ? "ghostBlock"
+                    : (p.fakeType === "ghostBlock" ? "ghostBlock" : "ghostSpike"),
+              fakeW: clamp(Number(p.fakeW) || (kind === "fakeBlock" ? 28 : 24), 10, Math.max(10, w)),
+              fakeH: clamp(Number(p.fakeH) || (kind === "fakeBlock" ? 18 : 14), 8, 80),
+              fakeX: clamp(Number(p.fakeX) || 0, 0, Math.max(0, w - clamp(Number(p.fakeW) || 24, 10, w))),
             });
           }
 
@@ -855,6 +891,15 @@
                 y: clamp(Number(o.y) || 0, 0, 390),
                 w: clamp(Number(o.w) || 60, 10, 320),
                 h: clamp(Number(o.h) || 50, 10, 220),
+              });
+            } else if (type === "lavaWall") {
+              normalized.obstacles.push({
+                type: "lavaWall",
+                x: clamp(Number(o.x) || 0, 0, width - 10),
+                w: clamp(Number(o.w) || 30, 10, 100),
+                h: clamp(Number(o.h) || 120, 25, 340),
+                speed: clamp(Number(o.speed) || 2, 0.2, 8),
+                holdMax: clamp(Number(o.holdMax) || 50, 5, 220),
               });
             } else if (type === "well") {
               normalized.obstacles.push({
@@ -918,35 +963,36 @@
               y: p.y,
               w: p.w,
               h: p.h,
-              isPhase: false,
-              isSinking: false,
+              kind: p.kind || "normal",
+              isPhase: !!p.isPhase,
+              isSinking: !!p.isSinking,
               isTouched: false,
               hasSpike: false,
               spikeX: 0,
               spikeW: SPIKE_W,
               spikeH: SPIKE_H,
               spikeShape: "triangle",
-              moveRange: 0,
+              moveRange: Number(p.moveRange) || 0,
               startX: p.x,
               moveDir: 1,
-              moveSpeed: 1.5,
+              moveSpeed: Number(p.moveSpeed) || 1.5,
               hasSeeker: false,
               seekerX: 0,
               seekerDir: 1,
               seekerW: SPIKE_W,
               seekerH: SPIKE_H,
               seekerShape: "triangle",
-              hasSpeedZone: false,
-              speedZoneType: null,
-              speedZoneX: 0,
-              speedZoneW: 0,
-              speedZoneDuration: 0,
-              speedZoneMul: 1,
-              hasFakeHazard: false,
-              fakeType: null,
-              fakeX: 0,
-              fakeW: 0,
-              fakeH: 0,
+              hasSpeedZone: !!p.hasSpeedZone,
+              speedZoneType: p.speedZoneType || null,
+              speedZoneX: Number(p.speedZoneX) || 0,
+              speedZoneW: Number(p.speedZoneW) || 0,
+              speedZoneDuration: Number(p.speedZoneDuration) || 0,
+              speedZoneMul: Number(p.speedZoneMul) || 1,
+              hasFakeHazard: !!p.hasFakeHazard,
+              fakeType: p.fakeType || null,
+              fakeX: Number(p.fakeX) || 0,
+              fakeW: Number(p.fakeW) || 0,
+              fakeH: Number(p.fakeH) || 0,
             });
           }
 
@@ -1002,6 +1048,20 @@
                 y: o.y,
                 w: o.w,
                 h: o.h,
+              });
+            } else if (o.type === "lavaWall") {
+              hazards.push({
+                type: "lava",
+                x: o.x,
+                w: o.w,
+                y: 400,
+                h: 0,
+                maxH: o.h,
+                speed: o.speed,
+                rising: true,
+                hold: 0,
+                holdMax: o.holdMax,
+                warned: false,
               });
             } else if (o.type === "seeker") {
               hazards.push({
@@ -2924,6 +2984,8 @@
           const level = ensureCustomLevelDraft();
           const widthInput = document.getElementById("makerLevelWidthInput");
           if (widthInput) widthInput.value = String(Math.round(level.width));
+          const platformSelect = document.getElementById("makerPlatformTypeSelect");
+          if (platformSelect) platformSelect.value = makerPlatformType;
           const obstacleSelect = document.getElementById("makerObstacleTypeSelect");
           if (obstacleSelect) obstacleSelect.value = makerObstacleType;
           const stopTestBtn = document.getElementById("makerStopTestBtn");
@@ -2962,6 +3024,12 @@
                 worldY >= s.y - s.h &&
                 worldY <= s.y
               ) {
+                return item;
+              }
+            } else if (item.type === "obstacle" && item.obj.type === "lavaWall") {
+              const l = item.obj;
+              const topY = 400 - l.h;
+              if (worldX >= l.x && worldX <= l.x + l.w && worldY >= topY && worldY <= 400) {
                 return item;
               }
             } else {
@@ -3024,7 +3092,35 @@
 
           ctx.fillStyle = "#60798d";
           for (const p of level.platforms) {
+            if (p.isPhase) ctx.fillStyle = "#58a7ff";
+            else if (p.isSinking) ctx.fillStyle = "#8f8f8f";
+            else if (p.moveRange > 0) ctx.fillStyle = "#87909a";
+            else ctx.fillStyle = "#60798d";
             ctx.fillRect(p.x - makerCameraX, p.y, p.w, p.h);
+
+            if (p.moveRange > 0) {
+              ctx.strokeStyle = "rgba(190, 220, 255, 0.5)";
+              ctx.beginPath();
+              ctx.moveTo(p.x - makerCameraX - p.moveRange, p.y + p.h / 2);
+              ctx.lineTo(p.x - makerCameraX + p.w + p.moveRange, p.y + p.h / 2);
+              ctx.stroke();
+            }
+            if (p.hasSpeedZone) {
+              const zx = p.x - makerCameraX + p.speedZoneX;
+              ctx.fillStyle = p.speedZoneType === "slow" ? "rgba(255,190,80,0.7)" : "rgba(70,255,210,0.7)";
+              ctx.fillRect(zx, p.y + 2, p.speedZoneW, Math.max(3, p.h - 4));
+            }
+            if (p.hasFakeHazard) {
+              ctx.save();
+              ctx.globalAlpha = 0.55;
+              ctx.fillStyle = "#cfd9ff";
+              if (p.fakeType === "ghostBlock") {
+                ctx.fillRect(p.x - makerCameraX + p.fakeX, p.y - p.fakeH, p.fakeW, p.fakeH);
+              } else {
+                drawSpike(p.x + p.fakeX, p.y, p.fakeW, p.fakeH, "triangle", makerCameraX);
+              }
+              ctx.restore();
+            }
           }
 
           for (const o of level.obstacles) {
@@ -3037,6 +3133,9 @@
             } else if (o.type === "lavaStatic") {
               ctx.fillStyle = "#ff6a2b";
               ctx.fillRect(o.x - makerCameraX, o.y, o.w, o.h);
+            } else if (o.type === "lavaWall") {
+              ctx.fillStyle = "#ff6a2b";
+              ctx.fillRect(o.x - makerCameraX, 400 - o.h, o.w, o.h);
             } else if (o.type === "seeker") {
               ctx.fillStyle = "#ff79ff";
               ctx.fillRect(o.x - makerCameraX, o.y, o.w, o.h);
@@ -5202,7 +5301,53 @@
           const y = Math.round(worldY / snap) * snap;
 
           if (makerTool === "platform") {
-            level.platforms.push({ x: clamp(x, 0, level.width - 120), y: clamp(y, 0, 380), w: 140, h: 18 });
+            const platform = {
+              x: clamp(x, 0, level.width - 140),
+              y: clamp(y, 0, 380),
+              w: 140,
+              h: 18,
+              kind: makerPlatformType,
+              isPhase: false,
+              isSinking: false,
+              moveRange: 0,
+              moveSpeed: 1.7,
+              hasSpeedZone: false,
+              speedZoneType: null,
+              speedZoneX: 20,
+              speedZoneW: 90,
+              speedZoneDuration: 600,
+              speedZoneMul: 1.6,
+              hasFakeHazard: false,
+              fakeType: null,
+              fakeX: 30,
+              fakeW: 24,
+              fakeH: 14,
+            };
+            if (makerPlatformType === "moving") {
+              platform.moveRange = 70;
+              platform.moveSpeed = 1.7;
+            } else if (makerPlatformType === "phase") {
+              platform.isPhase = true;
+            } else if (makerPlatformType === "sinking") {
+              platform.isSinking = true;
+            } else if (makerPlatformType === "speedBoost") {
+              platform.hasSpeedZone = true;
+              platform.speedZoneType = "boost";
+              platform.speedZoneMul = 1.6;
+            } else if (makerPlatformType === "speedSlow") {
+              platform.hasSpeedZone = true;
+              platform.speedZoneType = "slow";
+              platform.speedZoneMul = 0.58;
+            } else if (makerPlatformType === "fakeSpike") {
+              platform.hasFakeHazard = true;
+              platform.fakeType = "ghostSpike";
+            } else if (makerPlatformType === "fakeBlock") {
+              platform.hasFakeHazard = true;
+              platform.fakeType = "ghostBlock";
+              platform.fakeW = 28;
+              platform.fakeH = 18;
+            }
+            level.platforms.push(platform);
           } else if (makerTool === "obstacle") {
             if (makerObstacleType === "spike") {
               level.obstacles.push({ type: "spike", x: clamp(x, 0, level.width - 24), y: clamp(y, 12, 390), w: 24, h: 12, shape: "triangle" });
@@ -5210,8 +5355,8 @@
               level.obstacles.push({ type: "block", x: clamp(x, 0, level.width - 30), y: clamp(y, 0, 380), w: 40, h: 80 });
             } else if (makerObstacleType === "seeker") {
               level.obstacles.push({ type: "seeker", x: clamp(x, 0, level.width - 20), y: clamp(y, 0, 390), w: 20, h: 14, range: 45, speed: 2.2, shape: "split" });
-            } else if (makerObstacleType === "lavaStatic") {
-              level.obstacles.push({ type: "lavaStatic", x: clamp(x, 0, level.width - 80), y: clamp(y, 0, 390), w: 80, h: 45 });
+            } else if (makerObstacleType === "lavaWall") {
+              level.obstacles.push({ type: "lavaWall", x: clamp(x, 0, level.width - 30), w: 30, h: clamp(400 - y, 25, 340), speed: 2, holdMax: 50 });
             } else if (makerObstacleType === "well") {
               level.obstacles.push({ type: "well", x: clamp(x, 0, level.width), y: clamp(y, 0, 390), r: 75, core: 10 });
             }
@@ -5298,6 +5443,9 @@
           } else if (makerDragState.type === "obstacle" && obj.type === "well") {
             obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width);
             obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, 0, 390);
+          } else if (makerDragState.type === "obstacle" && obj.type === "lavaWall") {
+            obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
+            obj.h = clamp(400 - Math.round((p.worldY - makerDragState.dy) / 10) * 10, 25, 340);
           } else if (makerDragState.type === "goal") {
             obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
             obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, 0, 390 - obj.h);
@@ -5331,24 +5479,31 @@
           });
         });
 
+        document.getElementById("makerPlatformTypeSelect").addEventListener("change", (ev) => {
+          makerPlatformType = String(ev.target.value || "normal");
+        });
+
         document.getElementById("makerObstacleTypeSelect").addEventListener("change", (ev) => {
           makerObstacleType = String(ev.target.value || "spike");
         });
 
         const makerPanel = document.getElementById("levelMakerPanel");
         const makerHeader = document.getElementById("makerHeader");
-        makerHeader.addEventListener("mousedown", (ev) => {
+        makerHeader.addEventListener("pointerdown", (ev) => {
           if (!makerMode || makerTesting) return;
           const panelRect = makerPanel.getBoundingClientRect();
           makerPanelDragState = {
+            pointerId: ev.pointerId,
             offsetX: ev.clientX - panelRect.left,
             offsetY: ev.clientY - panelRect.top,
           };
+          makerHeader.setPointerCapture(ev.pointerId);
           ev.preventDefault();
         });
 
-        window.addEventListener("mousemove", (ev) => {
+        window.addEventListener("pointermove", (ev) => {
           if (!makerPanelDragState || !makerMode || makerTesting) return;
+          if (ev.pointerId !== makerPanelDragState.pointerId) return;
           const containerRect = container.getBoundingClientRect();
           const panelRect = makerPanel.getBoundingClientRect();
           let left = ev.clientX - containerRect.left - makerPanelDragState.offsetX;
@@ -5361,9 +5516,11 @@
           makerPanel.style.bottom = "auto";
         });
 
-        window.addEventListener("mouseup", () => {
+        const clearMakerPanelDrag = () => {
           makerPanelDragState = null;
-        });
+        };
+        window.addEventListener("pointerup", clearMakerPanelDrag);
+        window.addEventListener("pointercancel", clearMakerPanelDrag);
 
         document.getElementById("makerApplyLengthBtn").onclick = () => {
           const level = ensureCustomLevelDraft();
@@ -5373,6 +5530,7 @@
           for (const p of level.platforms) p.x = clamp(p.x, 0, level.width - p.w);
           for (const o of level.obstacles) {
             if (o.type === "well") o.x = clamp(o.x, 0, level.width);
+            else if (o.type === "lavaWall") o.x = clamp(o.x, 0, level.width - o.w);
             else o.x = clamp(o.x, 0, level.width - (o.w || 0));
           }
           clampMakerCamera();
@@ -6830,7 +6988,7 @@
               return;
             }
             if (e.code === "KeyO") {
-              const obstacleOrder = ["spike", "block", "seeker", "lavaStatic", "well"];
+              const obstacleOrder = ["spike", "seeker", "lavaWall", "well", "block"];
               const idx = obstacleOrder.indexOf(makerObstacleType);
               makerObstacleType = obstacleOrder[(idx + 1) % obstacleOrder.length];
               updateMakerUi();
