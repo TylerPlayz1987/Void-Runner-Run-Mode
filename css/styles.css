@@ -566,6 +566,26 @@
         z-index: 200;
       }
 
+      /* Story-mode inspired grid background for menu overlays */
+      #startMenu,
+      #changelogMenu,
+      #modeMenu,
+      #speedRunMenu,
+      #speedRunGameOver,
+      #pauseMenu {
+        background-color: #03110c;
+        background-image:
+          radial-gradient(circle at 50% 14%, rgba(18, 140, 88, 0.16), rgba(0, 0, 0, 0.75) 58%),
+          repeating-linear-gradient(
+            90deg,
+            rgba(12, 120, 74, 0.28) 0,
+            rgba(12, 120, 74, 0.28) 2px,
+            rgba(1, 10, 7, 0) 2px,
+            rgba(1, 10, 7, 0) 28px
+          ),
+          linear-gradient(180deg, rgba(2, 16, 11, 0.96), rgba(0, 0, 0, 0.94));
+      }
+
       #tourExplain {
         position: absolute;
         top: 14px;
