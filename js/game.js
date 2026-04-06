@@ -548,7 +548,12 @@
         
         let shieldItem = null,
           wells = [],
-          currentTheme = "classic",
+          currentTheme = (() => {
+            const saved = localStorage.getItem("void_default_theme_v1");
+            return saved && window.VR_THEME_DATA && window.VR_THEME_DATA.themes && window.VR_THEME_DATA.themes[saved]
+              ? saved
+              : "classic";
+          })(),
           infiniteInvincibility = false;
         const { themes, getLavaFx, getWellFx } = window.VR_THEME_DATA;
         const themeBackgroundImages = {};
@@ -759,6 +764,7 @@
         function createDefaultCustomLevel() {
           return {
             name: "Untitled Level",
+            theme: "classic",
             width: 2600,
             spawn: { x: 60, y: 300 },
             goal: { x: 2380, y: 260, w: 40, h: 40 },
@@ -792,12 +798,14 @@
           const fallback = createDefaultCustomLevel();
           const src = levelData && typeof levelData === "object" ? levelData : fallback;
           const name = typeof src.name === "string" && src.name.trim() ? src.name.trim().slice(0, 32) : fallback.name;
+          const levelTheme = typeof src.theme === "string" && themes[src.theme] ? src.theme : fallback.theme;
           const width = clamp(Number(src.width) || fallback.width, 800, 30000);
           const spawn = src.spawn || fallback.spawn;
           const goalData = src.goal || fallback.goal;
 
           const normalized = {
             name,
+            theme: levelTheme,
             width,
             spawn: {
               x: clamp(Number(spawn.x) || fallback.spawn.x, 0, width - 30),
@@ -3011,6 +3019,8 @@
           if (platformSelect) platformSelect.value = makerPlatformType;
           const obstacleSelect = document.getElementById("makerObstacleTypeSelect");
           if (obstacleSelect) obstacleSelect.value = makerObstacleType;
+          const themeSelect = document.getElementById("makerThemeSelect");
+          if (themeSelect) themeSelect.value = level.theme || "classic";
           const stopTestBtn = document.getElementById("makerStopTestBtn");
           const testBtn = document.getElementById("makerTestBtn");
           if (stopTestBtn) stopTestBtn.style.display = makerTesting ? "block" : "none";
@@ -5241,6 +5251,7 @@
 
           customLevelDraft = normalizeCustomLevel(levelData);
           const loaded = applyCustomLevelToWorld(customLevelDraft);
+          setTheme(loaded.theme || "classic");
           resetPlayerForRun(loaded.spawn.y, loaded.spawn.x);
 
           document.getElementById("startMenu").style.display = "none";
@@ -5279,7 +5290,9 @@
           makerSelected = null;
           makerDragState = null;
           makerPanState = null;
-          makerCameraX = Math.max(0, Math.min(makerCameraX, ensureCustomLevelDraft().width - 800));
+          const level = ensureCustomLevelDraft();
+          setTheme(level.theme || "classic");
+          makerCameraX = Math.max(0, Math.min(makerCameraX, level.width - 800));
           setTutorialUiVisible(false);
           updateHudModeUi();
           currentLevel = 1;
@@ -5512,6 +5525,13 @@
           makerObstacleType = String(ev.target.value || "spike");
         });
 
+        document.getElementById("makerThemeSelect").addEventListener("change", (ev) => {
+          const level = ensureCustomLevelDraft();
+          const nextTheme = String(ev.target.value || "classic");
+          level.theme = themes[nextTheme] ? nextTheme : "classic";
+          setTheme(level.theme);
+        });
+
         const makerPanel = document.getElementById("levelMakerPanel");
         const makerHeader = document.getElementById("makerHeader");
         // Float the panel in the viewport so it is not constrained by the game box.
@@ -5716,6 +5736,7 @@
             }
             themeBtn.style.display = spec.unlocked ? "" : "none";
           }
+          updateDefaultThemeDropdown();
         }
 
         function closeCodeEntryModal() {
@@ -6493,9 +6514,57 @@
           }
         }
 
+        function getAvailableThemeOptions() {
+          const options = [];
+          document.querySelectorAll(".theme-btn").forEach((btn) => {
+            const name = btn.dataset.theme;
+            if (!name) return;
+            if (btn.style.display === "none") return;
+            options.push({
+              value: name,
+              label: btn.textContent || name,
+            });
+          });
+          if (!options.some((opt) => opt.value === "classic")) {
+            options.unshift({ value: "classic", label: "Classic" });
+          }
+          return options;
+        }
+
+        function normalizeDefaultTheme(themeName) {
+          const options = getAvailableThemeOptions();
+          if (options.some((opt) => opt.value === themeName)) return themeName;
+          return "classic";
+        }
+
+        function updateDefaultThemeDropdown() {
+          const select = document.getElementById("defaultThemeSelect");
+          if (!select) return;
+
+          const options = getAvailableThemeOptions();
+          const selected = normalizeDefaultTheme(localStorage.getItem("void_default_theme_v1") || currentTheme);
+          select.innerHTML = "";
+
+          for (const opt of options) {
+            const optionEl = document.createElement("option");
+            optionEl.value = opt.value;
+            optionEl.textContent = opt.label;
+            select.appendChild(optionEl);
+          }
+
+          select.value = selected;
+          localStorage.setItem("void_default_theme_v1", selected);
+        }
+
         function setTheme(themeName) {
           currentTheme = themeName;
           updateThemeButtonsUi();
+          const defaultThemeSelect = document.getElementById("defaultThemeSelect");
+          if (defaultThemeSelect) {
+            defaultThemeSelect.value = normalizeDefaultTheme(
+              localStorage.getItem("void_default_theme_v1") || "classic"
+            );
+          }
           
           // Adjust stat colors for better visibility on dark theme backgrounds
           const levelStat = document.querySelector('#ui-left > .stat:first-child');
@@ -6546,7 +6615,17 @@
           closeAprilFoolsWarningModal();
           setTheme("classic");
         };
+        const defaultThemeSelect = document.getElementById("defaultThemeSelect");
+        if (defaultThemeSelect) {
+          defaultThemeSelect.onchange = () => {
+            const normalized = normalizeDefaultTheme(defaultThemeSelect.value);
+            localStorage.setItem("void_default_theme_v1", normalized);
+            setTheme(normalized);
+          };
+        }
         updateSecretThemeButtonUi();
+        updateDefaultThemeDropdown();
+        setTheme(normalizeDefaultTheme(localStorage.getItem("void_default_theme_v1") || currentTheme));
         document.getElementById("retroToggleBtn").onclick = () => {
           isRetro8bit = !isRetro8bit;
           document.getElementById("retroToggleBtn").textContent =

@@ -791,6 +791,18 @@
         border: 1px solid #0f0;
       }
 
+      #defaultThemeSelect {
+        width: 100%;
+        box-sizing: border-box;
+        background: #222;
+        color: #0f0;
+        border: 1px solid #0f0;
+        border-radius: 5px;
+        padding: 9px 10px;
+        font-size: 14px;
+        font-family: inherit;
+      }
+
       #themePage {
         max-height: 100%;
         overflow: hidden;
@@ -1011,6 +1023,15 @@
       }
 
       #makerPlatformTypeSelect {
+        flex: 1;
+        min-width: 140px;
+        background: #0a1015;
+        color: #bdefff;
+        border: 1px solid #3ad;
+        font-size: 12px;
+      }
+
+      #makerThemeSelect {
         flex: 1;
         min-width: 140px;
         background: #0a1015;
