@@ -75,7 +75,21 @@
           buttonPositions = JSON.parse(JSON.stringify(defaultButtonPositions)),
           buttonSizes = JSON.parse(JSON.stringify(defaultButtonSizes)),
           currentCustomizingButton = null,
-          customizeStartData = null;
+          customizeStartData = null,
+          makerMode = false,
+          makerTesting = false,
+          customLevelActive = false,
+          playingSharedLevel = false,
+          makerTool = "select",
+          makerPlatformType = "normal",
+          makerObstacleType = "spike",
+          makerPowerupType = "shield",
+          makerCameraX = 0,
+          makerDragState = null,
+          makerPanState = null,
+          makerSelected = null,
+          customLevelDraft = null,
+          makerPanelDragState = null;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -116,6 +130,14 @@
         function closeVersionPicker() {
           versionPickerMenu.style.display = "none";
           versionPickerBtn.setAttribute("aria-expanded", "false");
+        }
+
+        function setBestStatLabel(label, value) {
+          const bestStat = document.getElementById("best-stat");
+          if (!bestStat) return;
+          bestStat.innerHTML = `${label}: <span id="best"></span>`;
+          const bestValueEl = document.getElementById("best");
+          if (bestValueEl) bestValueEl.textContent = value;
         }
 
         function openVersionPicker() {
@@ -180,11 +202,19 @@
         updateSpeedRunBestTimeUi();
 
         function updateBestLevelUi() {
+          if (customLevelActive) {
+            const levelName = customLevelDraft && customLevelDraft.name ? customLevelDraft.name : "Untitled Level";
+            setBestStatLabel("Level Name", levelName);
+            return;
+          }
           const highScore = speedRunMode ? speedRunBestLevel : bestLevel;
-          document.getElementById("best").textContent = highScore;
+          setBestStatLabel("High Score", highScore);
         }
 
         function updateHudModeUi() {
+          const inMakerEditor = makerMode && !makerTesting;
+          document.getElementById("ui-left").style.display = inMakerEditor ? "none" : "flex";
+          document.getElementById("ui-right").style.display = inMakerEditor ? "none" : "flex";
           document.getElementById("death-stat").style.display = speedRunMode ? "none" : "block";
           updateBestLevelUi();
         }
@@ -518,6 +548,7 @@
         }
         
         let shieldItem = null,
+          customLevelShieldItems = [],
           wells = [],
           currentTheme = "classic",
           infiniteInvincibility = false;
@@ -722,7 +753,420 @@
         function setLevelDisplay() {
           document.getElementById("lvl").textContent = tutorialMode
             ? "TUTORIAL"
-            : currentLevel;
+            : customLevelActive
+              ? "CUSTOM"
+              : currentLevel;
+        }
+
+        function createDefaultCustomLevel() {
+          return {
+            name: "Untitled Level",
+            theme: "classic",
+            width: 2600,
+            spawn: { x: 60, y: 300 },
+            goal: { x: 2380, y: 260, w: 40, h: 40 },
+            platforms: [
+              { x: 0, y: 350, w: 480, h: 50, kind: "normal" },
+              { x: 620, y: 300, w: 180, h: 18, kind: "moving", moveRange: 70, moveSpeed: 1.7 },
+              { x: 980, y: 255, w: 160, h: 18, kind: "phase", isPhase: true },
+              { x: 1360, y: 245, w: 220, h: 18, kind: "speedBoost", hasSpeedZone: true, speedZoneType: "boost", speedZoneX: 40, speedZoneW: 110, speedZoneDuration: 600, speedZoneMul: 1.6 },
+              { x: 1760, y: 300, w: 220, h: 18, kind: "sinking", isSinking: true },
+              { x: 2200, y: 330, w: 260, h: 20, kind: "fakeSpike", hasFakeHazard: true, fakeType: "ghostSpike", fakeX: 90, fakeW: 26, fakeH: 16 },
+            ],
+            obstacles: [
+              { type: "spike", x: 880, y: 300, w: 26, h: 14, shape: "wide" },
+              { type: "block", x: 1580, y: 220, w: 40, h: 85 },
+              { type: "seeker", x: 1180, y: 250, w: 20, h: 14, range: 45, speed: 2.2, shape: "split" },
+              { type: "lavaWall", x: 2000, w: 30, h: 120, speed: 2, holdMax: 50 },
+              { type: "well", x: 2110, y: 230, r: 75, core: 10 },
+            ],
+            powerups: [],
+          };
+        }
+
+        function cloneCustomLevelData(levelData) {
+          return JSON.parse(JSON.stringify(levelData));
+        }
+
+        function clamp(v, min, max) {
+          return Math.max(min, Math.min(max, v));
+        }
+
+        function encodeBytesToBase64(bytes) {
+          let binary = "";
+          for (const byte of bytes) {
+            binary += String.fromCharCode(byte);
+          }
+          return btoa(binary);
+        }
+
+        function decodeBase64ToBytes(base64) {
+          const binary = atob(base64);
+          const bytes = new Uint8Array(binary.length);
+          for (let i = 0; i < binary.length; i++) {
+            bytes[i] = binary.charCodeAt(i);
+          }
+          return bytes;
+        }
+
+        function normalizeCustomLevel(levelData) {
+          const fallback = createDefaultCustomLevel();
+          const src = levelData && typeof levelData === "object" ? levelData : fallback;
+          const name = typeof src.name === "string" && src.name.trim() ? src.name.trim().slice(0, 32) : fallback.name;
+          const levelTheme = typeof src.theme === "string" && themes[src.theme] ? src.theme : fallback.theme;
+          const width = clamp(Number(src.width) || fallback.width, 800, 30000);
+          const spawn = src.spawn || fallback.spawn;
+          const goalData = src.goal || fallback.goal;
+
+          const normalized = {
+            name,
+            theme: levelTheme,
+            width,
+            spawn: {
+              x: clamp(Number(spawn.x) || fallback.spawn.x, 0, width - 30),
+              y: clamp(Number(spawn.y) || fallback.spawn.y, 0, 380),
+            },
+            goal: {
+              x: clamp(Number(goalData.x) || fallback.goal.x, 0, width - 20),
+              y: clamp(Number(goalData.y) || fallback.goal.y, 0, 360),
+              w: clamp(Number(goalData.w) || fallback.goal.w, 20, 140),
+              h: clamp(Number(goalData.h) || fallback.goal.h, 20, 140),
+            },
+            platforms: [],
+            obstacles: [],
+            powerups: [],
+          };
+
+          const platforms = Array.isArray(src.platforms) ? src.platforms : fallback.platforms;
+          for (const p of platforms) {
+            if (!p || typeof p !== "object") continue;
+            const kind = String(p.kind || "normal");
+            const w = clamp(Number(p.w) || 100, 20, 1000);
+            const h = clamp(Number(p.h) || 18, 8, 120);
+            const speedZoneW = clamp(Number(p.speedZoneW) || Math.min(90, w), 10, w);
+            normalized.platforms.push({
+              x: clamp(Number(p.x) || 0, 0, width - 10),
+              y: clamp(Number(p.y) || 0, 0, 390),
+              w,
+              h,
+              kind,
+              isPhase: kind === "phase" || !!p.isPhase,
+              isSinking: kind === "sinking" || !!p.isSinking,
+              moveRange: kind === "moving" ? clamp(Number(p.moveRange) || 70, 10, 240) : clamp(Number(p.moveRange) || 0, 0, 240),
+              moveSpeed: clamp(Number(p.moveSpeed) || 1.7, 0.2, 8),
+              hasSpeedZone: kind === "speedBoost" || kind === "speedSlow" || !!p.hasSpeedZone,
+              speedZoneType:
+                kind === "speedBoost"
+                  ? "boost"
+                  : kind === "speedSlow"
+                    ? "slow"
+                    : (p.speedZoneType === "slow" ? "slow" : "boost"),
+              speedZoneX: clamp(Number(p.speedZoneX) || 20, 0, Math.max(0, w - speedZoneW)),
+              speedZoneW,
+              speedZoneDuration: clamp(Number(p.speedZoneDuration) || 600, 120, 2400),
+              speedZoneMul:
+                kind === "speedSlow"
+                  ? clamp(Number(p.speedZoneMul) || 0.58, 0.25, 0.95)
+                  : kind === "speedBoost"
+                    ? clamp(Number(p.speedZoneMul) || 1.6, 1.05, 3)
+                    : clamp(Number(p.speedZoneMul) || 1.5, 0.25, 3),
+              hasFakeHazard: kind === "fakeSpike" || kind === "fakeBlock" || !!p.hasFakeHazard,
+              fakeType:
+                kind === "fakeSpike"
+                  ? "ghostSpike"
+                  : kind === "fakeBlock"
+                    ? "ghostBlock"
+                    : (p.fakeType === "ghostBlock" ? "ghostBlock" : "ghostSpike"),
+              fakeW: clamp(Number(p.fakeW) || (kind === "fakeBlock" ? 28 : 24), 10, Math.max(10, w)),
+              fakeH: clamp(Number(p.fakeH) || (kind === "fakeBlock" ? 18 : 14), 8, 80),
+              fakeX: clamp(Number(p.fakeX) || 0, 0, Math.max(0, w - clamp(Number(p.fakeW) || 24, 10, w))),
+            });
+          }
+
+          const obstacleList = [];
+          if (Array.isArray(src.obstacles)) obstacleList.push(...src.obstacles);
+          if (Array.isArray(src.spikes)) {
+            for (const s of src.spikes) obstacleList.push(Object.assign({ type: "spike" }, s));
+          }
+          if (Array.isArray(src.blocks)) {
+            for (const b of src.blocks) obstacleList.push(Object.assign({ type: "block" }, b));
+          }
+
+          for (const o of obstacleList) {
+            if (!o || typeof o !== "object") continue;
+            const type = String(o.type || "").trim();
+            if (type === "spike") {
+              normalized.obstacles.push({
+                type: "spike",
+                x: clamp(Number(o.x) || 0, 0, width - 8),
+                y: clamp(Number(o.y) || 0, 0, 390),
+                w: clamp(Number(o.w) || 18, 8, 80),
+                h: clamp(Number(o.h) || 12, 6, 80),
+                shape: ["triangle", "wide", "split", "needle"].includes(o.shape)
+                  ? o.shape
+                  : "triangle",
+              });
+            } else if (type === "block") {
+              normalized.obstacles.push({
+                type: "block",
+                x: clamp(Number(o.x) || 0, 0, width - 8),
+                y: clamp(Number(o.y) || 0, 0, 390),
+                w: clamp(Number(o.w) || 30, 10, 220),
+                h: clamp(Number(o.h) || 60, 10, 260),
+              });
+            } else if (type === "seeker") {
+              normalized.obstacles.push({
+                type: "seeker",
+                x: clamp(Number(o.x) || 0, 0, width - 8),
+                y: clamp(Number(o.y) || 0, 0, 390),
+                w: clamp(Number(o.w) || 18, 8, 80),
+                h: clamp(Number(o.h) || 12, 6, 80),
+                range: clamp(Number(o.range) || 40, 10, 220),
+                speed: clamp(Number(o.speed) || 2.2, 0.5, 8),
+                shape: ["triangle", "wide", "split", "needle"].includes(o.shape)
+                  ? o.shape
+                  : "triangle",
+              });
+            } else if (type === "lavaStatic") {
+              normalized.obstacles.push({
+                type: "lavaStatic",
+                x: clamp(Number(o.x) || 0, 0, width - 12),
+                y: clamp(Number(o.y) || 0, 0, 390),
+                w: clamp(Number(o.w) || 60, 10, 320),
+                h: clamp(Number(o.h) || 50, 10, 220),
+              });
+            } else if (type === "lavaWall") {
+              normalized.obstacles.push({
+                type: "lavaWall",
+                x: clamp(Number(o.x) || 0, 0, width - 10),
+                w: clamp(Number(o.w) || 30, 10, 100),
+                h: clamp(Number(o.h) || 120, 25, 340),
+                speed: clamp(Number(o.speed) || 2, 0.2, 8),
+                holdMax: clamp(Number(o.holdMax) || 50, 5, 220),
+              });
+            } else if (type === "well") {
+              normalized.obstacles.push({
+                type: "well",
+                x: clamp(Number(o.x) || 0, 0, width),
+                y: clamp(Number(o.y) || 0, 0, 390),
+                r: clamp(Number(o.r) || 85, 25, 220),
+                core: clamp(Number(o.core) || 10, 0, 40),
+              });
+            }
+          }
+
+          const powerupList = Array.isArray(src.powerups) ? src.powerups : [];
+          for (const p of powerupList) {
+            if (!p || typeof p !== "object") continue;
+            const type = String(p.type || "").trim();
+            if (type === "shield") {
+              const w = clamp(Number(p.w) || 20, 10, 60);
+              const h = clamp(Number(p.h) || 20, 10, 60);
+              normalized.powerups.push({
+                type: "shield",
+                x: clamp(Number(p.x) || 0, 0, width - w),
+                y: clamp(Number(p.y) || 0, 0, 390 - h),
+                w,
+                h,
+              });
+            }
+          }
+
+          if (!normalized.platforms.length) {
+            normalized.platforms.push({ x: 0, y: 350, w: 500, h: 50 });
+          }
+
+          return normalized;
+        }
+
+        function encodeCustomLevel(levelData) {
+          const payload = {
+            tag: "void-runner-custom-level",
+            v: 1,
+            data: normalizeCustomLevel(levelData),
+          };
+          const json = JSON.stringify(payload);
+          const bytes = new TextEncoder().encode(json);
+          const base64 = encodeBytesToBase64(bytes);
+          return base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+        }
+
+        function decodeCustomLevel(code) {
+          if (!code || typeof code !== "string") {
+            throw new Error("No code provided");
+          }
+          const compact = code.trim().replace(/\s+/g, "");
+          const normalizedB64 = compact.replace(/-/g, "+").replace(/_/g, "/");
+          const padLength = (4 - (normalizedB64.length % 4)) % 4;
+          const padded = normalizedB64 + "=".repeat(padLength);
+          const bytes = decodeBase64ToBytes(padded);
+          const json = new TextDecoder().decode(bytes);
+          const parsed = JSON.parse(json);
+          if (!parsed || parsed.tag !== "void-runner-custom-level") {
+            throw new Error("Invalid level code");
+          }
+          if (parsed.v !== 1) {
+            throw new Error("Unsupported level code version");
+          }
+          return normalizeCustomLevel(parsed.data);
+        }
+
+        function applyCustomLevelToWorld(levelData) {
+          const level = normalizeCustomLevel(levelData);
+          shieldItem = null;
+          customLevelShieldItems = [];
+          wells = [];
+          hazards = [];
+          lavaParticles = [];
+          platforms = [];
+
+          for (const p of level.platforms) {
+            platforms.push({
+              x: p.x,
+              y: p.y,
+              w: p.w,
+              h: p.h,
+              kind: p.kind || "normal",
+              isPhase: !!p.isPhase,
+              isSinking: !!p.isSinking,
+              isTouched: false,
+              hasSpike: false,
+              spikeX: 0,
+              spikeW: SPIKE_W,
+              spikeH: SPIKE_H,
+              spikeShape: "triangle",
+              moveRange: Number(p.moveRange) || 0,
+              startX: p.x,
+              moveDir: 1,
+              moveSpeed: Number(p.moveSpeed) || 1.5,
+              hasSeeker: false,
+              seekerX: 0,
+              seekerDir: 1,
+              seekerW: SPIKE_W,
+              seekerH: SPIKE_H,
+              seekerShape: "triangle",
+              hasSpeedZone: !!p.hasSpeedZone,
+              speedZoneType: p.speedZoneType || null,
+              speedZoneX: Number(p.speedZoneX) || 0,
+              speedZoneW: Number(p.speedZoneW) || 0,
+              speedZoneDuration: Number(p.speedZoneDuration) || 0,
+              speedZoneMul: Number(p.speedZoneMul) || 1,
+              hasFakeHazard: !!p.hasFakeHazard,
+              fakeType: p.fakeType || null,
+              fakeX: Number(p.fakeX) || 0,
+              fakeW: Number(p.fakeW) || 0,
+              fakeH: Number(p.fakeH) || 0,
+            });
+          }
+
+          for (const o of level.obstacles) {
+            if (o.type === "spike") {
+              platforms.push({
+                x: o.x - 2,
+                y: o.y,
+                w: Math.max(8, o.w + 4),
+                h: 8,
+                isPhase: false,
+                isSinking: false,
+                isTouched: false,
+                hasSpike: true,
+                spikeX: 2,
+                spikeW: o.w,
+                spikeH: o.h,
+                spikeShape: o.shape || "triangle",
+                moveRange: 0,
+                startX: o.x - 2,
+                moveDir: 1,
+                moveSpeed: 1.5,
+                hasSeeker: false,
+                seekerX: 0,
+                seekerDir: 1,
+                seekerW: SPIKE_W,
+                seekerH: SPIKE_H,
+                seekerShape: "triangle",
+                hasSpeedZone: false,
+                speedZoneType: null,
+                speedZoneX: 0,
+                speedZoneW: 0,
+                speedZoneDuration: 0,
+                speedZoneMul: 1,
+                hasFakeHazard: false,
+                fakeType: null,
+                fakeX: 0,
+                fakeW: 0,
+                fakeH: 0,
+              });
+            } else if (o.type === "block") {
+              hazards.push({
+                type: "block",
+                x: o.x,
+                y: o.y,
+                w: o.w,
+                h: o.h,
+              });
+            } else if (o.type === "lavaStatic") {
+              hazards.push({
+                type: "lavaStatic",
+                x: o.x,
+                y: o.y,
+                w: o.w,
+                h: o.h,
+              });
+            } else if (o.type === "lavaWall") {
+              hazards.push({
+                type: "lava",
+                x: o.x,
+                w: o.w,
+                y: 400,
+                h: 0,
+                maxH: o.h,
+                speed: o.speed,
+                rising: true,
+                hold: 0,
+                holdMax: o.holdMax,
+                warned: false,
+              });
+            } else if (o.type === "seeker") {
+              hazards.push({
+                type: "seeker",
+                x: o.x,
+                y: o.y,
+                w: o.w,
+                h: o.h,
+                minX: o.x - o.range,
+                maxX: o.x + o.range,
+                speed: o.speed,
+                dir: 1,
+                shape: o.shape || "triangle",
+              });
+            } else if (o.type === "well") {
+              wells.push({
+                x: o.x,
+                y: o.y,
+                r: o.r,
+                core: o.core,
+              });
+            }
+          }
+
+          if (Array.isArray(level.powerups)) {
+            for (const p of level.powerups) {
+              if (!p || p.type !== "shield") continue;
+              customLevelShieldItems.push({
+                x: p.x,
+                y: p.y,
+                w: p.w,
+                h: p.h,
+                collected: false,
+              });
+            }
+          }
+
+          goal.x = level.goal.x;
+          goal.y = level.goal.y;
+          goal.w = level.goal.w;
+          goal.h = level.goal.h;
+          return level;
         }
 
         function setTutorialUiVisible(visible) {
@@ -969,6 +1413,7 @@
         // - creates base ground and progressively harder obstacles
         function generateLevel() {
           shieldItem = null;
+          customLevelShieldItems = [];
           wells = [];
           platforms = [{ x: 0, y: 350, w: 300, h: 50, isPhase: false }];
           hazards = [];
@@ -1153,6 +1598,7 @@
         }
 
         function generateTutorialLevel() {
+          customLevelShieldItems = [];
           shieldItem = {
             x: 2725,
             y: 160,
@@ -1297,8 +1743,8 @@
           updateTutorialHint();
         }
         // Handle player death and reset after falling/out of bounds/hazard hit
-        function resetPlayerForRun(spawnY = 200) {
-          player.x = 50;
+        function resetPlayerForRun(spawnY = 200, spawnX = 50) {
+          player.x = spawnX;
           player.y = spawnY;
           player.vx = 0;
           player.vy = 0;
@@ -1326,6 +1772,23 @@
 
         function die() {
           if (player.spaghettified) return;
+          if (customLevelActive) {
+            shake = 10;
+            deathCount++;
+            document.getElementById("deaths").textContent = deathCount;
+            play.di();
+            const loaded = applyCustomLevelToWorld(customLevelDraft);
+            resetPlayerForRun(loaded.spawn.y, loaded.spawn.x);
+            player.hasShield = false;
+            player.spaghettified = false;
+            player.deathScale = 1;
+            player.deathRotate = 0;
+            player.speedZoneTimer = 0;
+            player.speedZoneType = null;
+            player.speedZoneMul = 1;
+            player.standPlatform = null;
+            return;
+          }
           // Speed Running Mode: any death instantly shows game over (no respawn)
           if (speedRunMode) {
             showSpeedRunGameOver();
@@ -1438,6 +1901,29 @@
         }
 
         function win() {
+          if (customLevelActive) {
+            play.wn();
+            cpNotif.textContent = "Custom Level Complete!";
+            cpNotif.style.opacity = "1";
+            running = false;
+            setTimeout(() => {
+              cpNotif.textContent = "Checkpoint Reached";
+              cpNotif.style.opacity = "0";
+              if (makerMode) {
+                makerTesting = false;
+                customLevelActive = false;
+                playingSharedLevel = false;
+                document.getElementById("makerStopTestBtn").style.display = "none";
+                setTopControlsVisible(false);
+                running = false;
+                updateHudModeUi();
+                updateMakerUi();
+              } else {
+                returnToStartMenu();
+              }
+            }, 1500);
+            return;
+          }
           if (tutorialMode) {
             play.cp();
             const prevText = cpNotif.textContent;
@@ -1547,6 +2033,7 @@
         // Main game simulation, runs every frame before draw()
         function update() {
           if (!running || isPaused) return;
+          if (makerMode && !makerTesting) return;
           frameCount++;
           if (shake > 0) shake *= 0.9;
           if (flashAlpha > 0) flashAlpha -= 0.02;
@@ -1794,6 +2281,15 @@
                   style: lavaFx.particleStyle,
                 });
               }
+            } else if (h.type === "seeker") {
+              h.x += (h.speed || 2.2) * (h.dir || 1);
+              if (h.x >= h.maxX) {
+                h.x = h.maxX;
+                h.dir = -1;
+              } else if (h.x <= h.minX) {
+                h.x = h.minX;
+                h.dir = 1;
+              }
             } else if (h.r) {
               h.sy += h.s * h.dir;
               if (h.sy > h.r || h.sy < 50) h.dir *= -1;
@@ -1940,16 +2436,21 @@
           nX = resolvedX;
           nY = resolvedY;
 
-          if (shieldItem && !shieldItem.collected) {
+          const activeShieldItems = customLevelActive
+            ? customLevelShieldItems
+            : (shieldItem ? [shieldItem] : []);
+          for (const s of activeShieldItems) {
+            if (!s || s.collected) continue;
             if (
-              nX < shieldItem.x + shieldItem.w &&
-              nX + player.w > shieldItem.x &&
-              nY < shieldItem.y + shieldItem.h &&
-              nY + player.h > shieldItem.y
+              nX < s.x + s.w &&
+              nX + player.w > s.x &&
+              nY < s.y + s.h &&
+              nY + player.h > s.y
             ) {
-              shieldItem.collected = true;
+              s.collected = true;
               player.hasShield = true;
               play.wn();
+              break;
             }
           }
           if (player.invincibleTimer <= 0 && !dead && !infiniteInvincibility) {
@@ -2546,6 +3047,258 @@
           ctx.closePath();
           ctx.fill();
           ctx.stroke();
+        }
+
+        function ensureCustomLevelDraft() {
+          if (!customLevelDraft) {
+            customLevelDraft = createDefaultCustomLevel();
+          }
+          return customLevelDraft;
+        }
+
+        function updateMakerToolButtons() {
+          document.querySelectorAll(".maker-tool-btn").forEach((btn) => {
+            btn.classList.toggle("active", btn.dataset.tool === makerTool);
+          });
+          canvas.style.cursor = makerMode && !makerTesting
+            ? (makerTool === "select" ? "grab" : "crosshair")
+            : "default";
+        }
+
+        function updateMakerUi() {
+          const level = ensureCustomLevelDraft();
+          const widthInput = document.getElementById("makerLevelWidthInput");
+          if (widthInput) widthInput.value = String(Math.round(level.width));
+          if (customLevelActive) {
+            setBestStatLabel("Level Name", level.name || "Untitled Level");
+          }
+          const platformSelect = document.getElementById("makerPlatformTypeSelect");
+          if (platformSelect) platformSelect.value = makerPlatformType;
+          const obstacleSelect = document.getElementById("makerObstacleTypeSelect");
+          if (obstacleSelect) obstacleSelect.value = makerObstacleType;
+          const powerupSelect = document.getElementById("makerPowerupTypeSelect");
+          if (powerupSelect) powerupSelect.value = makerPowerupType;
+          const themeSelect = document.getElementById("makerThemeSelect");
+          if (themeSelect) themeSelect.value = level.theme || "classic";
+          const stopTestBtn = document.getElementById("makerStopTestBtn");
+          const testBtn = document.getElementById("makerTestBtn");
+          if (stopTestBtn) stopTestBtn.style.display = makerTesting ? "block" : "none";
+          if (testBtn) testBtn.textContent = makerTesting ? "Testing..." : "Test";
+          updateMakerToolButtons();
+        }
+
+        function hitTestMakerObject(worldX, worldY) {
+          const level = ensureCustomLevelDraft();
+          const all = [];
+          for (let i = 0; i < level.platforms.length; i++) {
+            all.push({ type: "platform", index: i, obj: level.platforms[i], z: 1 });
+          }
+          for (let i = 0; i < level.obstacles.length; i++) {
+            all.push({ type: "obstacle", index: i, obj: level.obstacles[i], z: 2 });
+          }
+          for (let i = 0; i < level.powerups.length; i++) {
+            all.push({ type: "powerup", index: i, obj: level.powerups[i], z: 3 });
+          }
+          all.push({ type: "goal", index: -1, obj: level.goal, z: 4 });
+
+          all.sort((a, b) => a.z - b.z);
+          for (let i = all.length - 1; i >= 0; i--) {
+            const item = all[i];
+            if (item.type === "obstacle" && item.obj.type === "well") {
+              const w = item.obj;
+              const dx = worldX - w.x;
+              const dy = worldY - w.y;
+              if (dx * dx + dy * dy <= w.r * w.r) {
+                return item;
+              }
+            } else if (item.type === "obstacle" && item.obj.type === "spike") {
+              const s = item.obj;
+              if (
+                worldX >= s.x &&
+                worldX <= s.x + s.w &&
+                worldY >= s.y - s.h &&
+                worldY <= s.y
+              ) {
+                return item;
+              }
+            } else if (item.type === "obstacle" && item.obj.type === "lavaWall") {
+              const l = item.obj;
+              const topY = 400 - l.h;
+              if (worldX >= l.x && worldX <= l.x + l.w && worldY >= topY && worldY <= 400) {
+                return item;
+              }
+            } else {
+              const o = item.obj;
+              if (
+                worldX >= o.x &&
+                worldX <= o.x + o.w &&
+                worldY >= o.y &&
+                worldY <= o.y + o.h
+              ) {
+                return item;
+              }
+            }
+          }
+          return null;
+        }
+
+        function deleteMakerObject(hit) {
+          if (!hit || hit.type === "goal") return;
+          const level = ensureCustomLevelDraft();
+          if (hit.type === "platform") level.platforms.splice(hit.index, 1);
+          else if (hit.type === "obstacle") level.obstacles.splice(hit.index, 1);
+          else if (hit.type === "powerup") level.powerups.splice(hit.index, 1);
+        }
+
+        function drawMakerScene() {
+          const level = ensureCustomLevelDraft();
+          ctx = mainCtx;
+          ctx.setTransform(1, 0, 0, 1, 0, 0);
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          const g = ctx.createLinearGradient(0, 0, 0, 400);
+          g.addColorStop(0, "#071019");
+          g.addColorStop(1, "#0f1c28");
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, 800, 400);
+
+          const worldStart = Math.floor(makerCameraX / 20) * 20;
+          const worldEnd = makerCameraX + 820;
+          for (let x = worldStart; x <= worldEnd; x += 20) {
+            const sx = x - makerCameraX;
+            ctx.strokeStyle = x % 100 === 0 ? "rgba(80,160,220,0.28)" : "rgba(80,160,220,0.1)";
+            ctx.lineWidth = x % 100 === 0 ? 1.5 : 1;
+            ctx.beginPath();
+            ctx.moveTo(sx, 0);
+            ctx.lineTo(sx, 400);
+            ctx.stroke();
+          }
+          for (let y = 0; y <= 400; y += 20) {
+            ctx.strokeStyle = y % 100 === 0 ? "rgba(80,160,220,0.26)" : "rgba(80,160,220,0.09)";
+            ctx.lineWidth = y % 100 === 0 ? 1.5 : 1;
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(800, y);
+            ctx.stroke();
+          }
+
+          const levelEndX = level.width - makerCameraX;
+          ctx.fillStyle = "rgba(40, 220, 255, 0.2)";
+          ctx.fillRect(levelEndX - 2, 0, 4, 400);
+
+          ctx.fillStyle = "#60798d";
+          for (const p of level.platforms) {
+            if (p.isPhase) ctx.fillStyle = "#58a7ff";
+            else if (p.isSinking) ctx.fillStyle = "#8f8f8f";
+            else if (p.moveRange > 0) ctx.fillStyle = "#87909a";
+            else ctx.fillStyle = "#60798d";
+            ctx.fillRect(p.x - makerCameraX, p.y, p.w, p.h);
+
+            if (p.moveRange > 0) {
+              ctx.strokeStyle = "rgba(190, 220, 255, 0.5)";
+              ctx.beginPath();
+              ctx.moveTo(p.x - makerCameraX - p.moveRange, p.y + p.h / 2);
+              ctx.lineTo(p.x - makerCameraX + p.w + p.moveRange, p.y + p.h / 2);
+              ctx.stroke();
+            }
+            if (p.hasSpeedZone) {
+              const zx = p.x - makerCameraX + p.speedZoneX;
+              ctx.fillStyle = p.speedZoneType === "slow" ? "rgba(255,190,80,0.7)" : "rgba(70,255,210,0.7)";
+              ctx.fillRect(zx, p.y + 2, p.speedZoneW, Math.max(3, p.h - 4));
+            }
+            if (p.hasFakeHazard) {
+              ctx.save();
+              ctx.globalAlpha = 0.55;
+              ctx.fillStyle = "#cfd9ff";
+              if (p.fakeType === "ghostBlock") {
+                ctx.fillRect(p.x - makerCameraX + p.fakeX, p.y - p.fakeH, p.fakeW, p.fakeH);
+              } else {
+                drawSpike(p.x + p.fakeX, p.y, p.fakeW, p.fakeH, "triangle", makerCameraX);
+              }
+              ctx.restore();
+            }
+          }
+
+          for (const o of level.obstacles) {
+            if (o.type === "spike") {
+              ctx.fillStyle = "#ffb366";
+              drawSpike(o.x, o.y, o.w, o.h, o.shape || "triangle", makerCameraX);
+            } else if (o.type === "block") {
+              ctx.fillStyle = "#f15959";
+              ctx.fillRect(o.x - makerCameraX, o.y, o.w, o.h);
+            } else if (o.type === "lavaStatic") {
+              ctx.fillStyle = "#ff6a2b";
+              ctx.fillRect(o.x - makerCameraX, o.y, o.w, o.h);
+            } else if (o.type === "lavaWall") {
+              ctx.fillStyle = "#ff6a2b";
+              ctx.fillRect(o.x - makerCameraX, 400 - o.h, o.w, o.h);
+            } else if (o.type === "seeker") {
+              ctx.fillStyle = "#ff79ff";
+              ctx.fillRect(o.x - makerCameraX, o.y, o.w, o.h);
+              ctx.strokeStyle = "rgba(255, 170, 255, 0.8)";
+              ctx.beginPath();
+              ctx.moveTo(o.x - makerCameraX - (o.range || 0), o.y + o.h / 2);
+              ctx.lineTo(o.x - makerCameraX + o.w + (o.range || 0), o.y + o.h / 2);
+              ctx.stroke();
+            } else if (o.type === "well") {
+              ctx.strokeStyle = "#7a7aff";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.arc(o.x - makerCameraX, o.y, o.r, 0, Math.PI * 2);
+              ctx.stroke();
+              ctx.fillStyle = "rgba(122, 122, 255, 0.15)";
+              ctx.beginPath();
+              ctx.arc(o.x - makerCameraX, o.y, o.r, 0, Math.PI * 2);
+              ctx.fill();
+            }
+          }
+
+          for (const p of level.powerups) {
+            if (p.type === "shield") {
+              ctx.fillStyle = "rgba(70, 220, 255, 0.2)";
+              ctx.fillRect(p.x - makerCameraX, p.y, p.w, p.h);
+              ctx.strokeStyle = "#66e6ff";
+              ctx.lineWidth = 2;
+              ctx.strokeRect(p.x - makerCameraX, p.y, p.w, p.h);
+            }
+          }
+
+          ctx.strokeStyle = "#67ffc1";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(level.goal.x - makerCameraX, level.goal.y, level.goal.w, level.goal.h);
+          ctx.fillStyle = "rgba(103,255,193,0.25)";
+          ctx.fillRect(level.goal.x - makerCameraX, level.goal.y, level.goal.w, level.goal.h);
+
+          ctx.strokeStyle = "#7ee8ff";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(level.spawn.x - makerCameraX, level.spawn.y, 20, 20);
+          ctx.fillStyle = "rgba(126,232,255,0.28)";
+          ctx.fillRect(level.spawn.x - makerCameraX, level.spawn.y, 20, 20);
+
+          if (makerSelected && makerSelected.obj) {
+            ctx.strokeStyle = "#fff";
+            ctx.lineWidth = 2;
+            if (makerSelected.type === "obstacle" && makerSelected.obj.type === "spike") {
+              const s = makerSelected.obj;
+              ctx.strokeRect(s.x - makerCameraX - 2, s.y - s.h - 2, s.w + 4, s.h + 4);
+            } else if (makerSelected.type === "obstacle" && makerSelected.obj.type === "well") {
+              const w = makerSelected.obj;
+              ctx.beginPath();
+              ctx.arc(w.x - makerCameraX, w.y, w.r + 3, 0, Math.PI * 2);
+              ctx.stroke();
+            } else {
+              const o = makerSelected.obj;
+              ctx.strokeRect(o.x - makerCameraX - 2, o.y - 2, o.w + 4, o.h + 4);
+            }
+          }
+
+          ctx.fillStyle = "rgba(0,0,0,0.55)";
+          ctx.fillRect(10, 10, 276, 58);
+          ctx.fillStyle = "#bdefff";
+          ctx.font = "12px Courier New";
+          ctx.fillText(`Camera: ${Math.round(makerCameraX)} px`, 18, 28);
+          ctx.fillText(`Level Length: ${Math.round(level.width)} px`, 18, 45);
+          ctx.fillText(`Name: ${level.name || "Untitled Level"}`, 18, 62);
         }
 
         // Core world rendering in current theme
@@ -3585,24 +4338,28 @@
             );
             ctx.restore();
           });
-          if (shieldItem && !shieldItem.collected) {
-            const shieldGlitch = getWallGlitchAmount(shieldItem.x, shieldItem.w);
+          const activeShieldItems = customLevelActive
+            ? customLevelShieldItems
+            : (shieldItem ? [shieldItem] : []);
+          for (const s of activeShieldItems) {
+            if (!s || s.collected) continue;
+            const shieldGlitch = getWallGlitchAmount(s.x, s.w);
             const shieldOffset = getObjectGlitchOffset(
               shieldGlitch,
-              (shieldItem.x + shieldItem.y) * 0.01,
+              (s.x + s.y) * 0.01,
             );
             ctx.save();
             ctx.translate(shieldOffset.x, shieldOffset.y);
             ctx.strokeStyle = "#0cf";
             ctx.lineWidth = 3;
-            ctx.strokeRect(shieldItem.x - camX, shieldItem.y, 20, 20);
+            ctx.strokeRect(s.x - camX, s.y, 20, 20);
             ctx.fillStyle = "rgba(0,200,255,0.5)";
-            ctx.fillRect(shieldItem.x - camX + 5, shieldItem.y + 5, 10, 10);
+            ctx.fillRect(s.x - camX + 5, s.y + 5, 10, 10);
             drawWallGlitchOverlay(
-              shieldItem.x - camX,
-              shieldItem.y,
-              shieldItem.w,
-              shieldItem.h,
+              s.x - camX,
+              s.y,
+              s.w,
+              s.h,
               shieldGlitch,
             );
             ctx.restore();
@@ -4057,6 +4814,28 @@
                 ctx.lineWidth = 2;
                 ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
               }
+            } else if (h.type === "lavaStatic") {
+              let glow = ctx.createRadialGradient(
+                h.x - camX + h.w / 2,
+                h.y + h.h / 2,
+                0,
+                h.x - camX + h.w / 2,
+                h.y + h.h / 2,
+                Math.max(20, h.h),
+              );
+              glow.addColorStop(0, lavaFx.glowInner);
+              glow.addColorStop(0.45, lavaFx.glowMid);
+              glow.addColorStop(1, lavaFx.glowOuter);
+              ctx.fillStyle = glow;
+              ctx.fillRect(h.x - camX - 10, h.y - 10, h.w + 20, h.h + 20);
+              ctx.fillStyle = lavaFx.fill;
+              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+              ctx.strokeStyle = lavaFx.stroke;
+              ctx.lineWidth = 2;
+              ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
+            } else if (h.type === "seeker") {
+              ctx.fillStyle = t.hazards;
+              drawSpike(h.x, h.y + h.h, h.w, h.h, h.shape || "split", camX);
             } else {
               ctx.fillStyle = t.hazards;
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
@@ -4242,6 +5021,10 @@
         // Top-level draw entry - handles retro scaling wrapper
         // Converts main rendering to low-res offscreen buffer when 8-bit mode is enabled.
         function draw() {
+          if (makerMode && !makerTesting) {
+            drawMakerScene();
+            return;
+          }
           const isRetro = isRetro8bit;
           if (isRetro) {
             retroCtx.setTransform(1, 0, 0, 1, 0, 0);
@@ -4278,7 +5061,7 @@
         // Pause/resume and menu toggling (also handles music pause/resume)
         function toggle() {
           // Speed Running Mode: pause menu disabled during speed runs (no pausing allowed)
-          if (!running || speedRunGameOverMode || speedRunMode) return;
+          if (!running || speedRunGameOverMode || speedRunMode || makerMode) return;
           isPaused = !isPaused;
           const m = document.getElementById("bgMusic");
           if (m) {
@@ -4392,6 +5175,10 @@
         function returnToStartMenu() {
           clearPostTutorialTour();
           tutorialMode = false;
+          makerMode = false;
+          makerTesting = false;
+          customLevelActive = false;
+          playingSharedLevel = false;
           speedRunMode = false;
           speedRunGameOverMode = false;
           updateHudModeUi();
@@ -4411,10 +5198,13 @@
           document.getElementById("topControls").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
           document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("sharedLevelModal").style.display = "none";
+          document.getElementById("levelMakerPanel").style.display = "none";
           document.getElementById("changelogMenu").style.display = "none";
           document.getElementById("speedRunMenu").style.display = "none";
           document.getElementById("speedRunTimer").classList.remove("active");
           document.getElementById("startMenu").style.display = "flex";
+          canvas.style.cursor = "default";
         }
 
         function showSpeedRunMenu() {
@@ -4456,7 +5246,7 @@
         }
 
         function openPauseShortcut(pageId) {
-          if (!running || speedRunMode || speedRunGameOverMode) return;
+          if (!running || speedRunMode || speedRunGameOverMode || makerMode) return;
           isPaused = true;
           const m = document.getElementById("bgMusic");
           if (m) m.pause();
@@ -4477,6 +5267,11 @@
         function startSelectedMode(isTutorial) {
           ensureAudioContext();
           clearPostTutorialTour();
+          makerMode = false;
+          makerTesting = false;
+          customLevelActive = false;
+          playingSharedLevel = false;
+          document.getElementById("levelMakerPanel").style.display = "none";
           tutorialMode = isTutorial;
           speedRunMode = false;
           updateHudModeUi();
@@ -4514,6 +5309,432 @@
           }
         };
 
+        function startCustomLevelPlay(levelData, fromMaker = false) {
+          ensureAudioContext();
+          clearPostTutorialTour();
+          tutorialMode = false;
+          speedRunMode = false;
+          speedRunGameOverMode = false;
+          makerMode = !!fromMaker;
+          makerTesting = !!fromMaker;
+          customLevelActive = true;
+          playingSharedLevel = !fromMaker;
+          updateHudModeUi();
+          showingPostTutorialSettings = false;
+          setTutorialUiVisible(false);
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
+
+          customLevelDraft = normalizeCustomLevel(levelData);
+          const loaded = applyCustomLevelToWorld(customLevelDraft);
+          setTheme(loaded.theme || "classic");
+          resetPlayerForRun(loaded.spawn.y, loaded.spawn.x);
+
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("sharedLevelModal").style.display = "none";
+          document.getElementById("speedRunMenu").style.display = "none";
+          document.getElementById("levelMakerPanel").style.display = fromMaker ? "flex" : "none";
+          setTopControlsVisible(false);
+
+          running = true;
+          isPaused = false;
+          if (!loopStarted) {
+            loopStarted = true;
+            (function loop() {
+              update();
+              draw();
+              requestAnimationFrame(loop);
+            })();
+          }
+          updateMakerUi();
+        }
+
+        function enterLevelMakerMode() {
+          ensureAudioContext();
+          clearPostTutorialTour();
+          tutorialMode = false;
+          speedRunMode = false;
+          speedRunGameOverMode = false;
+          makerMode = true;
+          makerTesting = false;
+          customLevelActive = false;
+          playingSharedLevel = false;
+          isPaused = false;
+          running = false;
+          makerTool = "select";
+          makerSelected = null;
+          makerDragState = null;
+          makerPanState = null;
+          const level = ensureCustomLevelDraft();
+          setTheme(level.theme || "classic");
+          makerCameraX = Math.max(0, Math.min(makerCameraX, level.width - 800));
+          setTutorialUiVisible(false);
+          updateHudModeUi();
+          currentLevel = 1;
+          lastCheckpoint = 1;
+          setLevelDisplay();
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("sharedLevelModal").style.display = "none";
+          document.getElementById("pauseMenu").style.display = "none";
+          document.getElementById("levelMakerPanel").style.display = "flex";
+          setTopControlsVisible(false);
+          updateMakerUi();
+          if (!loopStarted) {
+            loopStarted = true;
+            (function loop() {
+              update();
+              draw();
+              requestAnimationFrame(loop);
+            })();
+          }
+        }
+
+        function clampMakerCamera() {
+          const level = ensureCustomLevelDraft();
+          makerCameraX = clamp(makerCameraX, 0, Math.max(0, level.width - 800));
+        }
+
+        function getMakerWorldPoint(ev) {
+          const rect = canvas.getBoundingClientRect();
+          const x = ((ev.clientX - rect.left) / rect.width) * canvas.width;
+          const y = ((ev.clientY - rect.top) / rect.height) * canvas.height;
+          return {
+            screenX: x,
+            screenY: y,
+            worldX: x + makerCameraX,
+            worldY: y,
+          };
+        }
+
+        function placeMakerObject(worldX, worldY) {
+          const level = ensureCustomLevelDraft();
+          const snap = 10;
+          const x = Math.round(worldX / snap) * snap;
+          const y = Math.round(worldY / snap) * snap;
+
+          if (makerTool === "platform") {
+            const platform = {
+              x: clamp(x, 0, level.width - 140),
+              y: clamp(y, 0, 380),
+              w: 140,
+              h: 18,
+              kind: makerPlatformType,
+              isPhase: false,
+              isSinking: false,
+              moveRange: 0,
+              moveSpeed: 1.7,
+              hasSpeedZone: false,
+              speedZoneType: null,
+              speedZoneX: 20,
+              speedZoneW: 90,
+              speedZoneDuration: 600,
+              speedZoneMul: 1.6,
+              hasFakeHazard: false,
+              fakeType: null,
+              fakeX: 30,
+              fakeW: 24,
+              fakeH: 14,
+            };
+            if (makerPlatformType === "moving") {
+              platform.moveRange = 70;
+              platform.moveSpeed = 1.7;
+            } else if (makerPlatformType === "phase") {
+              platform.isPhase = true;
+            } else if (makerPlatformType === "sinking") {
+              platform.isSinking = true;
+            } else if (makerPlatformType === "speedBoost") {
+              platform.hasSpeedZone = true;
+              platform.speedZoneType = "boost";
+              platform.speedZoneMul = 1.6;
+            } else if (makerPlatformType === "speedSlow") {
+              platform.hasSpeedZone = true;
+              platform.speedZoneType = "slow";
+              platform.speedZoneMul = 0.58;
+            } else if (makerPlatformType === "fakeSpike") {
+              platform.hasFakeHazard = true;
+              platform.fakeType = "ghostSpike";
+            } else if (makerPlatformType === "fakeBlock") {
+              platform.hasFakeHazard = true;
+              platform.fakeType = "ghostBlock";
+              platform.fakeW = 28;
+              platform.fakeH = 18;
+            }
+            level.platforms.push(platform);
+          } else if (makerTool === "obstacle") {
+            if (makerObstacleType === "spike") {
+              level.obstacles.push({ type: "spike", x: clamp(x, 0, level.width - 24), y: clamp(y, 12, 390), w: 24, h: 12, shape: "triangle" });
+            } else if (makerObstacleType === "block") {
+              level.obstacles.push({ type: "block", x: clamp(x, 0, level.width - 30), y: clamp(y, 0, 380), w: 40, h: 80 });
+            } else if (makerObstacleType === "seeker") {
+              level.obstacles.push({ type: "seeker", x: clamp(x, 0, level.width - 20), y: clamp(y, 0, 390), w: 20, h: 14, range: 45, speed: 2.2, shape: "split" });
+            } else if (makerObstacleType === "lavaWall") {
+              level.obstacles.push({ type: "lavaWall", x: clamp(x, 0, level.width - 30), w: 30, h: clamp(400 - y, 25, 340), speed: 2, holdMax: 50 });
+            } else if (makerObstacleType === "well") {
+              level.obstacles.push({ type: "well", x: clamp(x, 0, level.width), y: clamp(y, 0, 390), r: 75, core: 10 });
+            }
+          } else if (makerTool === "powerup") {
+            if (makerPowerupType === "shield") {
+              level.powerups.push({ type: "shield", x: clamp(x, 0, level.width - 20), y: clamp(y, 0, 390 - 20), w: 20, h: 20 });
+            }
+          }
+        }
+
+        function startMakerDrag(hit, worldX, worldY) {
+          if (!hit) return;
+          const obj = hit.obj;
+          makerSelected = hit;
+          makerDragState = {
+            type: hit.type,
+            index: hit.index,
+            obj,
+            dx: worldX - obj.x,
+            dy: worldY - obj.y,
+          };
+        }
+
+        function onMakerPointerDown(ev) {
+          if (!makerMode || makerTesting) return;
+          if (ev.button !== 0 && ev.button !== 1) return;
+          const p = getMakerWorldPoint(ev);
+          const level = ensureCustomLevelDraft();
+
+          if (ev.shiftKey || ev.button === 1) {
+            makerPanState = { x: ev.clientX, startCam: makerCameraX };
+            canvas.style.cursor = "grabbing";
+            return;
+          }
+
+          if (makerTool === "goal") {
+            level.goal.x = clamp(p.worldX - level.goal.w * 0.5, 0, level.width - level.goal.w);
+            level.goal.y = clamp(p.worldY - level.goal.h * 0.5, 0, 390 - level.goal.h);
+            makerSelected = { type: "goal", index: -1, obj: level.goal };
+            startMakerDrag(makerSelected, p.worldX, p.worldY);
+            return;
+          }
+
+          const hit = hitTestMakerObject(p.worldX, p.worldY);
+          if (makerTool === "delete") {
+            deleteMakerObject(hit);
+            if (makerSelected && hit && makerSelected.obj === hit.obj) makerSelected = null;
+            return;
+          }
+
+          if (makerTool === "select") {
+            makerSelected = hit;
+            if (hit) startMakerDrag(hit, p.worldX, p.worldY);
+            return;
+          }
+
+          placeMakerObject(p.worldX, p.worldY);
+          clampMakerCamera();
+        }
+
+        function onMakerPointerMove(ev) {
+          if (!makerMode || makerTesting) return;
+          const level = ensureCustomLevelDraft();
+          if (makerPanState) {
+            const dx = ev.clientX - makerPanState.x;
+            makerCameraX = makerPanState.startCam - dx;
+            clampMakerCamera();
+            return;
+          }
+          if (!makerDragState) return;
+          const p = getMakerWorldPoint(ev);
+          const obj = makerDragState.obj;
+          if (!obj) return;
+
+          if (makerDragState.type === "obstacle" && obj.type === "spike") {
+            obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
+            obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, obj.h, 390);
+          } else if (makerDragState.type === "obstacle" && obj.type === "well") {
+            obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width);
+            obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, 0, 390);
+          } else if (makerDragState.type === "obstacle" && obj.type === "lavaWall") {
+            obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
+            obj.h = clamp(400 - Math.round((p.worldY - makerDragState.dy) / 10) * 10, 25, 340);
+          } else if (makerDragState.type === "goal") {
+            obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
+            obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, 0, 390 - obj.h);
+          } else {
+            obj.x = clamp(Math.round((p.worldX - makerDragState.dx) / 10) * 10, 0, level.width - obj.w);
+            obj.y = clamp(Math.round((p.worldY - makerDragState.dy) / 10) * 10, 0, 390 - obj.h);
+          }
+        }
+
+        function stopMakerPointerInteraction() {
+          makerDragState = null;
+          makerPanState = null;
+          updateMakerToolButtons();
+        }
+
+        canvas.addEventListener("mousedown", onMakerPointerDown);
+        window.addEventListener("mousemove", onMakerPointerMove);
+        window.addEventListener("mouseup", stopMakerPointerInteraction);
+
+        canvas.addEventListener("wheel", (ev) => {
+          if (!makerMode || makerTesting) return;
+          ev.preventDefault();
+          makerCameraX += ev.deltaY * 0.9;
+          clampMakerCamera();
+        }, { passive: false });
+
+        document.querySelectorAll(".maker-tool-btn").forEach((btn) => {
+          btn.addEventListener("click", () => {
+            makerTool = btn.dataset.tool || "select";
+            updateMakerToolButtons();
+          });
+        });
+
+        document.getElementById("makerPlatformTypeSelect").addEventListener("change", (ev) => {
+          makerPlatformType = String(ev.target.value || "normal");
+        });
+
+        document.getElementById("makerObstacleTypeSelect").addEventListener("change", (ev) => {
+          makerObstacleType = String(ev.target.value || "spike");
+        });
+
+        document.getElementById("makerPowerupTypeSelect").addEventListener("change", (ev) => {
+          makerPowerupType = String(ev.target.value || "shield");
+        });
+
+        document.getElementById("makerThemeSelect").addEventListener("change", (ev) => {
+          const level = ensureCustomLevelDraft();
+          const nextTheme = String(ev.target.value || "classic");
+          level.theme = themes[nextTheme] ? nextTheme : "classic";
+          setTheme(level.theme);
+        });
+
+        const makerPanel = document.getElementById("levelMakerPanel");
+        const makerHeader = document.getElementById("makerHeader");
+        // Float the panel in the viewport so it is not constrained by the game box.
+        if (makerPanel && makerPanel.parentElement !== document.body) {
+          document.body.appendChild(makerPanel);
+        }
+        makerHeader.addEventListener("pointerdown", (ev) => {
+          if (!makerMode || makerTesting) return;
+          const panelRect = makerPanel.getBoundingClientRect();
+          makerPanelDragState = {
+            pointerId: ev.pointerId,
+            offsetX: ev.clientX - panelRect.left,
+            offsetY: ev.clientY - panelRect.top,
+          };
+          makerHeader.setPointerCapture(ev.pointerId);
+          ev.preventDefault();
+        });
+
+        window.addEventListener("pointermove", (ev) => {
+          if (!makerPanelDragState || !makerMode || makerTesting) return;
+          if (ev.pointerId !== makerPanelDragState.pointerId) return;
+          const panelRect = makerPanel.getBoundingClientRect();
+          let left = ev.clientX - makerPanelDragState.offsetX;
+          let top = ev.clientY - makerPanelDragState.offsetY;
+          left = clamp(left, 0, window.innerWidth - panelRect.width);
+          top = clamp(top, 0, window.innerHeight - panelRect.height);
+          makerPanel.style.left = `${left}px`;
+          makerPanel.style.top = `${top}px`;
+          makerPanel.style.right = "auto";
+          makerPanel.style.bottom = "auto";
+        });
+
+        const clearMakerPanelDrag = () => {
+          makerPanelDragState = null;
+        };
+        window.addEventListener("pointerup", clearMakerPanelDrag);
+        window.addEventListener("pointercancel", clearMakerPanelDrag);
+
+        document.getElementById("makerApplyLengthBtn").onclick = () => {
+          const level = ensureCustomLevelDraft();
+          const requested = parseInt(document.getElementById("makerLevelWidthInput").value, 10);
+          level.width = clamp(Number.isFinite(requested) ? requested : level.width, 800, 30000);
+          level.goal.x = clamp(level.goal.x, 0, level.width - level.goal.w);
+          for (const p of level.platforms) p.x = clamp(p.x, 0, level.width - p.w);
+          for (const o of level.obstacles) {
+            if (o.type === "well") o.x = clamp(o.x, 0, level.width);
+            else if (o.type === "lavaWall") o.x = clamp(o.x, 0, level.width - o.w);
+            else o.x = clamp(o.x, 0, level.width - (o.w || 0));
+          }
+          for (const p of level.powerups) {
+            p.x = clamp(p.x, 0, level.width - (p.w || 0));
+          }
+          clampMakerCamera();
+          updateMakerUi();
+        };
+
+        document.getElementById("makerTestBtn").onclick = () => {
+          if (makerTesting) return;
+          const level = ensureCustomLevelDraft();
+          startCustomLevelPlay(level, true);
+        };
+
+        document.getElementById("makerStopTestBtn").onclick = () => {
+          if (!makerTesting) return;
+          makerTesting = false;
+          customLevelActive = false;
+          running = false;
+          setTopControlsVisible(false);
+          updateHudModeUi();
+          updateMakerUi();
+        };
+
+        document.getElementById("makerNewBtn").onclick = () => {
+          customLevelDraft = createDefaultCustomLevel();
+          makerSelected = null;
+          makerCameraX = 0;
+          updateMakerUi();
+        };
+
+        document.getElementById("makerExitBtn").onclick = () => {
+          returnToStartMenu();
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "flex";
+        };
+
+        document.getElementById("makerExportBtn").onclick = async () => {
+          try {
+            const level = ensureCustomLevelDraft();
+            openLevelNameModal(level.name || "Untitled Level", async () => {
+              try {
+                const name = (levelNameInput.value || "").trim().slice(0, 32) || "Untitled Level";
+                level.name = name;
+                const code = encodeCustomLevel(level);
+                const output = document.getElementById("makerCodeOutput");
+                output.value = code;
+                output.focus();
+                output.select();
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                  await navigator.clipboard.writeText(code);
+                  flashCodeMessage("level code copied");
+                } else {
+                  flashCodeMessage("level code generated");
+                }
+                updateMakerUi();
+                updateBestLevelUi();
+              } catch (_err) {
+                flashCodeMessage("failed to generate code");
+              }
+            });
+          } catch (_err) {
+            flashCodeMessage("failed to generate code");
+          }
+        };
+
+        document.getElementById("makerImportBtn").onclick = () => {
+          const raw = prompt("Paste shared level code");
+          if (!raw) return;
+          try {
+            customLevelDraft = decodeCustomLevel(raw);
+            makerSelected = null;
+            makerCameraX = 0;
+            updateMakerUi();
+            flashCodeMessage("level loaded");
+          } catch (_err) {
+            flashCodeMessage("invalid level code");
+          }
+        };
+
         document.getElementById("startBtn").onclick = () => {
           ensureAudioContext();
           document.getElementById("startMenu").style.display = "none";
@@ -4533,6 +5754,14 @@
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
         const codeEntryCancelBtn = document.getElementById("codeEntryCancelBtn");
+        const levelNameModal = document.getElementById("levelNameModal");
+        const levelNameInput = document.getElementById("levelNameInput");
+        const levelNameSubmitBtn = document.getElementById("levelNameSubmitBtn");
+        const levelNameCancelBtn = document.getElementById("levelNameCancelBtn");
+        const sharedLevelModal = document.getElementById("sharedLevelModal");
+        const sharedLevelInput = document.getElementById("sharedLevelInput");
+        const sharedLevelPlayBtn = document.getElementById("sharedLevelPlayBtn");
+        const sharedLevelCancelBtn = document.getElementById("sharedLevelCancelBtn");
         const aprilFoolsWarningModal = document.getElementById("aprilFoolsWarningModal");
         const aprilFoolsConfirmBtn = document.getElementById("aprilFoolsConfirmBtn");
         const aprilFoolsBackBtn = document.getElementById("aprilFoolsBackBtn");
@@ -4591,6 +5820,21 @@
           codeEntryModal.style.display = "none";
           codeEntryInput.value = "";
         }
+        let levelNameSubmitAction = null;
+        
+        function closeLevelNameModal() {
+          levelNameModal.style.display = "none";
+          levelNameInput.value = "";
+          levelNameSubmitAction = null;
+        }
+        
+        function openLevelNameModal(initialValue, onSubmit) {
+          levelNameSubmitAction = typeof onSubmit === "function" ? onSubmit : null;
+          levelNameInput.value = typeof initialValue === "string" ? initialValue : "";
+          levelNameModal.style.display = "flex";
+          levelNameInput.focus();
+          levelNameInput.select();
+        }
 
         function openAprilFoolsWarningModal() {
           aprilFoolsWarningModal.style.display = "flex";
@@ -4643,6 +5887,28 @@
           codeEntryInput.focus();
         }
 
+        function openSharedLevelModal() {
+          sharedLevelModal.style.display = "flex";
+          sharedLevelInput.value = "";
+          sharedLevelInput.focus();
+        }
+
+        function closeSharedLevelModal() {
+          sharedLevelModal.style.display = "none";
+          sharedLevelInput.value = "";
+        }
+
+        function submitSharedLevelCode() {
+          try {
+            const parsed = decodeCustomLevel(sharedLevelInput.value || "");
+            closeSharedLevelModal();
+            startCustomLevelPlay(parsed, false);
+            flashCodeMessage("shared level loaded");
+          } catch (err) {
+            flashCodeMessage("invalid level code");
+          }
+        }
+
         function flashCodeMessage(text) {
           const flashEl = document.getElementById("codeFlashMessage");
           flashEl.textContent = text;
@@ -4653,8 +5919,20 @@
         document.getElementById("menuCodesBtn").onclick = () => {
           openCodeEntryModal();
         };
+        document.getElementById("playSharedLevelBtn").onclick = () => {
+          openSharedLevelModal();
+        };
         codeEntrySubmitBtn.onclick = submitCodeEntry;
         codeEntryCancelBtn.onclick = closeCodeEntryModal;
+        levelNameSubmitBtn.onclick = () => {
+          if (typeof levelNameSubmitAction === "function") {
+            levelNameSubmitAction();
+          }
+          closeLevelNameModal();
+        };
+        levelNameCancelBtn.onclick = closeLevelNameModal;
+        sharedLevelPlayBtn.onclick = submitSharedLevelCode;
+        sharedLevelCancelBtn.onclick = closeSharedLevelModal;
         codeEntryInput.addEventListener("keydown", (e) => {
           if (e.code === "Enter") {
             e.preventDefault();
@@ -4662,6 +5940,27 @@
           } else if (e.code === "Escape") {
             e.preventDefault();
             closeCodeEntryModal();
+          }
+        });
+        levelNameInput.addEventListener("keydown", (e) => {
+          if (e.code === "Enter") {
+            e.preventDefault();
+            if (typeof levelNameSubmitAction === "function") {
+              levelNameSubmitAction();
+            }
+            closeLevelNameModal();
+          } else if (e.code === "Escape") {
+            e.preventDefault();
+            closeLevelNameModal();
+          }
+        });
+        sharedLevelInput.addEventListener("keydown", (e) => {
+          if ((e.code === "Enter" && (e.ctrlKey || e.metaKey)) || (e.code === "NumpadEnter" && (e.ctrlKey || e.metaKey))) {
+            e.preventDefault();
+            submitSharedLevelCode();
+          } else if (e.code === "Escape") {
+            e.preventDefault();
+            closeSharedLevelModal();
           }
         });
         document.getElementById("openChangelogBtn").onclick = () => {
@@ -4680,6 +5979,7 @@
         document.getElementById("tutorialBtn").onclick = () => startSelectedMode(true);
         // Mode menu entry point for Speed Running mode
         document.getElementById("speedRunModeBtn").onclick = () => showSpeedRunMenu();
+        document.getElementById("levelMakerModeBtn").onclick = () => enterLevelMakerMode();
         document.getElementById("speedRunBackBtn").onclick = () => hideSpeedRunMenu();
         document.getElementById("speedRunStartBtn").onclick = () => startSpeedRunMode();
 
@@ -4724,6 +6024,7 @@
           hazards = [];
           wells = [];
           shieldItem = null;
+          customLevelShieldItems = [];
           
           generateLevel();
           resetPlayerForRun(330);
@@ -5345,6 +6646,7 @@
           setTheme("classic");
         };
         updateSecretThemeButtonUi();
+        setTheme(currentTheme);
         document.getElementById("retroToggleBtn").onclick = () => {
           isRetro8bit = !isRetro8bit;
           document.getElementById("retroToggleBtn").textContent =
@@ -5756,11 +7058,33 @@
             activeTag === "SELECT" ||
             (document.activeElement && document.activeElement.isContentEditable);
 
+          // Let text inputs receive "p" normally (e.g., level naming modal).
+          if (e.code === "KeyP" && typingInField) {
+            return;
+          }
+
+          if (e.code === "KeyP" && makerMode && !makerTesting) {
+            e.preventDefault();
+            return;
+          }
+
           const isPauseShortcut = e.code === "KeyP" || e.code === "Escape";
           if (isPauseShortcut) {
             if (codeEntryModal.style.display === "flex") {
               e.preventDefault();
               closeCodeEntryModal();
+              return;
+            }
+
+            if (levelNameModal.style.display === "flex") {
+              e.preventDefault();
+              closeLevelNameModal();
+              return;
+            }
+
+            if (sharedLevelModal.style.display === "flex") {
+              e.preventDefault();
+              closeSharedLevelModal();
               return;
             }
 
@@ -5788,6 +7112,14 @@
               if (submenuBack()) return;
             }
 
+            if (makerMode && !makerTesting) {
+              e.preventDefault();
+              returnToStartMenu();
+              document.getElementById("startMenu").style.display = "none";
+              document.getElementById("modeMenu").style.display = "flex";
+              return;
+            }
+
             e.preventDefault();
             toggle();
             return;
@@ -5795,6 +7127,67 @@
 
           if (typingInField) {
             return;
+          }
+
+          if (makerMode && !makerTesting) {
+            if (e.code === "Delete" || e.code === "Backspace") {
+              if (makerSelected && makerSelected.type !== "goal") {
+                deleteMakerObject(makerSelected);
+                makerSelected = null;
+                e.preventDefault();
+              }
+              return;
+            }
+            if (e.code === "KeyA") {
+              makerCameraX -= 60;
+              clampMakerCamera();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "KeyD") {
+              makerCameraX += 60;
+              clampMakerCamera();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "Digit1") {
+              makerTool = "select";
+              updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "Digit2") {
+              makerTool = "platform";
+              updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "Digit3") {
+              makerTool = "obstacle";
+              updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "Digit4") {
+              makerTool = "goal";
+              updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "Digit5") {
+              makerTool = "delete";
+              updateMakerToolButtons();
+              e.preventDefault();
+              return;
+            }
+            if (e.code === "KeyO") {
+              const obstacleOrder = ["spike", "seeker", "lavaWall", "well", "block"];
+              const idx = obstacleOrder.indexOf(makerObstacleType);
+              makerObstacleType = obstacleOrder[(idx + 1) % obstacleOrder.length];
+              updateMakerUi();
+              e.preventDefault();
+              return;
+            }
           }
 
           keys[e.code] = 1;

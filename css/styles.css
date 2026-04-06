@@ -566,6 +566,26 @@
         z-index: 200;
       }
 
+      /* Story-mode inspired grid background for menu overlays */
+      #startMenu,
+      #changelogMenu,
+      #modeMenu,
+      #speedRunMenu,
+      #speedRunGameOver,
+      #pauseMenu {
+        background-color: #03110c;
+        background-image:
+          radial-gradient(circle at 50% 14%, rgba(18, 140, 88, 0.16), rgba(0, 0, 0, 0.75) 58%),
+          repeating-linear-gradient(
+            90deg,
+            rgba(12, 120, 74, 0.28) 0,
+            rgba(12, 120, 74, 0.28) 2px,
+            rgba(1, 10, 7, 0) 2px,
+            rgba(1, 10, 7, 0) 28px
+          ),
+          linear-gradient(180deg, rgba(2, 16, 11, 0.96), rgba(0, 0, 0, 0.94));
+      }
+
       #tourExplain {
         position: absolute;
         top: 14px;
@@ -625,6 +645,19 @@
       }
 
       #codeEntryInput {
+        width: 100%;
+        box-sizing: border-box;
+        background: #222;
+        border: 1px solid #fc3;
+        color: #fc3;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: 16px;
+        font-family: inherit;
+        text-align: center;
+      }
+
+      #levelNameInput {
         width: 100%;
         box-sizing: border-box;
         background: #222;
@@ -867,4 +900,176 @@
         padding: 5px;
         border-radius: 5px;
         font-family: inherit;
+      }
+
+      .shared-level-box {
+        width: min(560px, 92%);
+        background: #101418;
+        border: 2px solid #3ad;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .shared-level-input {
+        width: 100%;
+        min-height: 84px;
+        box-sizing: border-box;
+        resize: vertical;
+        background: #0a1015;
+        color: #bdefff;
+        border: 1px solid #3ad;
+        border-radius: 5px;
+        padding: 10px;
+        font-size: 13px;
+        font-family: "Courier New", monospace;
+      }
+
+      .shared-level-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .shared-level-actions button {
+        flex: 1;
+      }
+
+      #levelMakerPanel {
+        position: fixed;
+        top: 12px;
+        right: 12px;
+        width: 340px;
+        max-width: calc(100vw - 16px);
+        min-width: 260px;
+        min-height: 220px;
+        max-height: calc(100vh - 16px);
+        z-index: 280;
+        background: rgba(6, 12, 18, 0.95);
+        border: 1px solid #3ad;
+        box-shadow: 0 0 16px rgba(51, 170, 221, 0.25);
+        padding: 10px;
+        color: #bdefff;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        resize: both;
+        overflow: auto;
+      }
+
+      #makerHeader {
+        font-size: 14px;
+        letter-spacing: 1px;
+        color: #6ce5ff;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2px 2px 6px;
+        cursor: move;
+        user-select: none;
+        touch-action: none;
+        border-bottom: 1px solid rgba(108, 229, 255, 0.25);
+      }
+
+      #makerHeaderDragText {
+        font-size: 11px;
+        letter-spacing: 0;
+        color: #8eb5c3;
+        font-weight: normal;
+      }
+
+      #makerToolRow {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+
+      .maker-tool-btn {
+        width: 100%;
+        background: #1a2b37;
+        color: #bdefff;
+        border: 1px solid #3ad;
+        padding: 7px 6px;
+        font-size: 12px;
+      }
+
+      .maker-tool-btn.active {
+        background: #3ad;
+        color: #03131d;
+      }
+
+      .maker-tool-btn.danger {
+        border-color: #f66;
+        color: #ffd8d8;
+      }
+
+      .maker-inline-row {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+      }
+
+      .maker-inline-row label {
+        font-size: 12px;
+      }
+
+      #makerLevelWidthInput {
+        width: 110px;
+        background: #0a1015;
+        color: #bdefff;
+        border: 1px solid #3ad;
+      }
+
+      #makerObstacleTypeSelect {
+        flex: 1;
+        min-width: 140px;
+        background: #0a1015;
+        color: #bdefff;
+        border: 1px solid #3ad;
+        font-size: 12px;
+      }
+
+      #makerPlatformTypeSelect {
+        flex: 1;
+        min-width: 140px;
+        background: #0a1015;
+        color: #bdefff;
+        border: 1px solid #3ad;
+        font-size: 12px;
+      }
+
+      #makerThemeSelect {
+        flex: 1;
+        min-width: 140px;
+        background: #0a1015;
+        color: #bdefff;
+        border: 1px solid #3ad;
+        font-size: 12px;
+      }
+
+      #makerPowerupTypeSelect {
+        flex: 1;
+        min-width: 140px;
+        background: #0a1015;
+        color: #bdefff;
+        border: 1px solid #3ad;
+        font-size: 12px;
+      }
+
+      #makerHint {
+        font-size: 11px;
+        color: #9fd4e4;
+        line-height: 1.35;
+      }
+
+      @media (max-width: 900px) {
+        #levelMakerPanel {
+          width: 300px;
+          top: auto;
+          right: 10px;
+          bottom: 10px;
+          max-height: 82%;
+          overflow-y: auto;
+        }
       }

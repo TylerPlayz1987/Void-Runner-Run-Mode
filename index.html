@@ -70,11 +70,32 @@
 
         <div id="startMenu" class="overlay">
           <h1>Void Runner</h1>
-          <div id="startMenuVersionTag">v0.9 - Story Mode!</div>
+          <div id="startMenuVersionTag">v0.9 - Level Maker!</div>
           <button id="startBtn" style="width: 200px">Start</button>
           <button id="menuCodesBtn" style="width: 200px; margin-top: 8px; background: #fc3; color: #111">Codes</button>
+          <button id="playSharedLevelBtn" style="width: 200px; margin-top: 8px; background: #3ad; color: #03131d">Play Custom Level</button>
           <button id="openChangelogBtn" class="small-btn" style="width: 200px; margin-top: 8px;">Changelog</button>
           <div id="codeFlashMessage">test done</div>
+        </div>
+        <div id="sharedLevelModal" class="overlay" style="display: none" role="dialog" aria-modal="true" aria-labelledby="sharedLevelTitle">
+          <div class="shared-level-box">
+            <h1 id="sharedLevelTitle">PLAY SHARED LEVEL</h1>
+            <textarea id="sharedLevelInput" class="shared-level-input" placeholder="Paste shared level code" aria-label="Shared level code"></textarea>
+            <div class="shared-level-actions">
+              <button id="sharedLevelPlayBtn" style="background: #3ad; color: #03131d">Play Level</button>
+              <button id="sharedLevelCancelBtn" class="small-btn">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <div id="levelNameModal" class="overlay" style="display: none" role="dialog" aria-modal="true" aria-labelledby="levelNameTitle">
+          <div class="code-entry-box">
+            <h1 id="levelNameTitle">NAME LEVEL</h1>
+            <input id="levelNameInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Enter level name" aria-label="Level name" />
+            <div class="code-entry-actions">
+              <button id="levelNameSubmitBtn" style="background: #fc3; color: #111">Continue</button>
+              <button id="levelNameCancelBtn" class="small-btn">Cancel</button>
+            </div>
+          </div>
         </div>
         <div id="codeEntryModal" class="overlay" style="display: none" role="dialog" aria-modal="true" aria-labelledby="codeEntryTitle">
           <div class="code-entry-box">
@@ -104,7 +125,7 @@
             <h1>CHANGELOG</h1>
             <div id="changelogContent" class="stat" style="text-align: left; line-height: 1.45; max-width: 320px; max-height: 240px; overflow-y: auto;">
               <ul>
-                <li>Added Story mode W1</li>
+                <li>Added Level Maker</li>
                 <li>Bug fixes</li>
               </ul>
             </div>
@@ -121,6 +142,9 @@
           </button>
           <button id="speedRunModeBtn" style="width: 220px; margin-bottom: 8px">
             Speed Running
+          </button>
+          <button id="levelMakerModeBtn" style="width: 220px; margin-bottom: 8px; background: #3ad; color: #03131d">
+            Level Maker(PC)
           </button>
           <button id="modeBackBtn" class="small-btn" style="width: 220px">
             Back
@@ -372,6 +396,84 @@
           </div>
         </div>
         <canvas id="canvas"></canvas>
+        <div id="levelMakerPanel" style="display: none" aria-label="Level maker controls">
+          <div id="makerHeader">
+            <span id="makerHeaderTitle">LEVEL MAKER</span>
+            <span id="makerHeaderDragText">Drag</span>
+          </div>
+          <div id="makerToolRow">
+            <button class="maker-tool-btn active" data-tool="select">Select</button>
+            <button class="maker-tool-btn" data-tool="platform">Platform</button>
+            <button class="maker-tool-btn" data-tool="obstacle">Obstacle</button>
+            <button class="maker-tool-btn" data-tool="powerup">Power-up</button>
+            <button class="maker-tool-btn" data-tool="goal">Goal</button>
+            <button class="maker-tool-btn danger" data-tool="delete">Delete</button>
+          </div>
+          <div class="maker-inline-row">
+            <label for="makerPlatformTypeSelect">Platform</label>
+            <select id="makerPlatformTypeSelect">
+              <option value="normal">Normal</option>
+              <option value="moving">Moving</option>
+              <option value="phase">Phase</option>
+              <option value="sinking">Sinking</option>
+              <option value="speedBoost">Speed Zone Boost</option>
+              <option value="speedSlow">Speed Zone Slow</option>
+              <option value="fakeSpike">Fake Hazard Spike</option>
+              <option value="fakeBlock">Fake Hazard Block</option>
+            </select>
+          </div>
+          <div class="maker-inline-row">
+            <label for="makerObstacleTypeSelect">Obstacle</label>
+            <select id="makerObstacleTypeSelect">
+              <option value="spike">Spike</option>
+              <option value="seeker">Seeker</option>
+              <option value="lavaWall">Lava Wall</option>
+              <option value="well">Gravity Well</option>
+              <option value="block">Solid Block</option>
+            </select>
+          </div>
+          <div class="maker-inline-row">
+            <label for="makerPowerupTypeSelect">Power-up</label>
+            <select id="makerPowerupTypeSelect">
+              <option value="shield">Shield</option>
+            </select>
+          </div>
+          <div class="maker-inline-row">
+            <label for="makerThemeSelect">Theme</label>
+            <select id="makerThemeSelect">
+              <option value="classic">Classic</option>
+              <option value="sunny">Sunny</option>
+              <option value="moony">Moony</option>
+              <option value="toybox">Toybox</option>
+              <option value="deepsea">Deep Sea</option>
+              <option value="cyber">Cyber</option>
+              <option value="glitchworld">Glitch World</option>
+              <option value="easter">Easter</option>
+              <option value="aprilfools">April Fools</option>
+              <option value="magma">Magma</option>
+              <option value="stardust">Star-Dust</option>
+              <option value="pirate">Pirate</option>
+              <option value="jungle">Jungle</option>
+            </select>
+          </div>
+          <div class="maker-inline-row">
+            <label for="makerLevelWidthInput">Length</label>
+            <input id="makerLevelWidthInput" type="number" min="800" max="30000" step="100" value="2600" />
+            <button id="makerApplyLengthBtn" class="small-btn">Apply</button>
+          </div>
+          <div class="maker-inline-row">
+            <button id="makerTestBtn" style="background: #3ad; color: #03131d">Test</button>
+            <button id="makerStopTestBtn" class="small-btn" style="display: none">Stop Test</button>
+            <button id="makerNewBtn" class="small-btn">New</button>
+            <button id="makerExitBtn" class="small-btn">Exit</button>
+          </div>
+          <div class="maker-inline-row">
+            <button id="makerExportBtn" style="background: #fc3; color: #111">Generate Code</button>
+            <button id="makerImportBtn" class="small-btn">Load Code</button>
+          </div>
+          <textarea id="makerCodeOutput" class="shared-level-input" readonly placeholder="Generated code appears here"></textarea>
+          <div id="makerHint">Drag the header to move anywhere on screen. Drag panel corner/edge to resize. Use Platform/Obstacle dropdowns for run-mode variants. Hold Shift while dragging in canvas to pan.</div>
+        </div>
         <button id="versionPickerBtn" aria-haspopup="dialog" aria-expanded="false" title="Choose game version">v0.9.0</button>
         <div id="versionPickerMenu" aria-label="Game versions" role="dialog">
           <div id="versionPickerHeader">
