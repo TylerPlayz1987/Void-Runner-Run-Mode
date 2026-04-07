@@ -6690,29 +6690,13 @@
         // Mode menu entry point for Speed Running mode
         document.getElementById("speedRunModeBtn").onclick = () => showSpeedRunMenu();
         document.getElementById("storyModeBtn").onclick = () => {
-          const modeMenuEl = document.getElementById("modeMenu");
-          const storyBtnEl = document.getElementById("storyModeBtn");
-          const cutsceneApi = window.VRStoryModeCutscene;
           const storyMenuApi = window.VRStoryModeMenu;
-          const openStoryMenu = () => {
-            if (storyMenuApi && typeof storyMenuApi.open === "function") {
-              storyMenuApi.open();
-            } else {
-              modeMenuEl.style.display = "flex";
-            }
-          };
-          if (!cutsceneApi || typeof cutsceneApi.start !== "function") {
-            openStoryMenu();
+          if (storyMenuApi && typeof storyMenuApi.open === "function") {
+            storyMenuApi.open();
             return;
           }
-
-          cutsceneApi.start({
-            modeMenuEl,
-            storyBtnEl,
-            onComplete: () => {
-              openStoryMenu();
-            },
-          });
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("storyModeMenu").style.display = "flex";
         };
         document.getElementById("levelMakerModeBtn").onclick = () => enterLevelMakerMode();
         document.getElementById("speedRunBackBtn").onclick = () => hideSpeedRunMenu();
