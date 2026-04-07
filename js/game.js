@@ -608,6 +608,53 @@
           }
           return themeSpikeImages[themeName];
         }
+        function parseThemeColor(color, fallback) {
+          if (typeof color !== "string") return fallback;
+          const normalized = color.trim();
+          const shortHex = normalized.match(/^#([0-9a-f]{3})$/i);
+          if (shortHex) {
+            const [r, g, b] = shortHex[1].split("").map((part) => parseInt(part + part, 16));
+            return { r, g, b };
+          }
+          const fullHex = normalized.match(/^#([0-9a-f]{6})$/i);
+          if (fullHex) {
+            return {
+              r: parseInt(fullHex[1].slice(0, 2), 16),
+              g: parseInt(fullHex[1].slice(2, 4), 16),
+              b: parseInt(fullHex[1].slice(4, 6), 16),
+            };
+          }
+          return fallback;
+        }
+        function mixThemeColors(colorA, colorB, amount) {
+          const clampedAmount = Math.max(0, Math.min(1, amount));
+          const a = parseThemeColor(colorA, { r: 255, g: 255, b: 255 });
+          const b = parseThemeColor(colorB, a);
+          return {
+            r: Math.round(a.r + (b.r - a.r) * clampedAmount),
+            g: Math.round(a.g + (b.g - a.g) * clampedAmount),
+            b: Math.round(a.b + (b.b - a.b) * clampedAmount),
+          };
+        }
+        function rgbaFromRgb(rgb, alpha = 1) {
+          return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        }
+        function getThemePlatformPalette(themeName) {
+          const theme = themes[themeName] || themes.classic;
+          const fallbackTheme = themes.classic;
+          const platformBase = parseThemeColor(theme.plat, parseThemeColor(fallbackTheme.plat, { r: 51, g: 51, b: 51 }));
+          const backgroundBase = parseThemeColor(theme.bg, parseThemeColor(fallbackTheme.bg, platformBase));
+          const brightBase = parseThemeColor("#ffffff", platformBase);
+          return {
+            bodyTop: mixThemeColors(platformBase, backgroundBase, 0.16),
+            bodyBottom: mixThemeColors(platformBase, backgroundBase, 0.48),
+            bodyTopTouched: mixThemeColors(platformBase, backgroundBase, 0.28),
+            bodyBottomTouched: mixThemeColors(platformBase, backgroundBase, 0.66),
+            accent: mixThemeColors(platformBase, brightBase, 0.12),
+            stripe: mixThemeColors(platformBase, backgroundBase, 0.34),
+            outline: mixThemeColors(platformBase, backgroundBase, 0.74),
+          };
+        }
         function drawSolPlatform(x, y, w, h, fallbackColor) {
           const solPlatformImage = getThemePlatformImage("catmodel");
           if (solPlatformImage && solPlatformImage.complete && solPlatformImage.naturalWidth > 0) {
@@ -632,16 +679,17 @@
         function drawNeonRailyardPlatform(p, camX, touched) {
           const x = p.x - camX;
           const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.18 + p.x * 0.01);
+          const palette = getThemePlatformPalette("neonrailyard");
           const body = ctx.createLinearGradient(x, p.y, x, p.y + p.h);
-          body.addColorStop(0, touched ? "#253142" : "#2b3f5c");
-          body.addColorStop(1, touched ? "#151f2d" : "#1a2738");
+          body.addColorStop(0, touched ? rgbaFromRgb(palette.bodyTopTouched) : rgbaFromRgb(palette.bodyTop));
+          body.addColorStop(1, touched ? rgbaFromRgb(palette.bodyBottomTouched) : rgbaFromRgb(palette.bodyBottom));
           ctx.fillStyle = body;
           ctx.fillRect(x, p.y, p.w, p.h);
 
-          ctx.fillStyle = `rgba(80,245,255,${0.42 + pulse * 0.35})`;
+          ctx.fillStyle = rgbaFromRgb(palette.accent, 0.42 + pulse * 0.35);
           ctx.fillRect(x + 1, p.y + 1, p.w - 2, Math.max(2, p.h * 0.2));
 
-          ctx.strokeStyle = "rgba(20,30,46,0.7)";
+          ctx.strokeStyle = rgbaFromRgb(palette.stripe, 0.7);
           ctx.lineWidth = 1;
           for (let sx = 6; sx < p.w; sx += 16) {
             ctx.beginPath();
@@ -650,15 +698,16 @@
             ctx.stroke();
           }
 
-          ctx.strokeStyle = `rgba(100,255,245,${0.48 + pulse * 0.32})`;
+          ctx.strokeStyle = rgbaFromRgb(palette.accent, 0.48 + pulse * 0.32);
           ctx.lineWidth = 1.5;
           ctx.strokeRect(x + 0.5, p.y + 0.5, p.w - 1, p.h - 1);
         }
         function drawCrystalCavernPlatform(p, camX, touched) {
           const x = p.x - camX;
+          const palette = getThemePlatformPalette("crystalcavern");
           const base = ctx.createLinearGradient(x, p.y, x, p.y + p.h);
-          base.addColorStop(0, touched ? "#30485a" : "#3a5f78");
-          base.addColorStop(1, touched ? "#243646" : "#2a3f52");
+          base.addColorStop(0, touched ? rgbaFromRgb(palette.bodyTopTouched) : rgbaFromRgb(palette.bodyTop));
+          base.addColorStop(1, touched ? rgbaFromRgb(palette.bodyBottomTouched) : rgbaFromRgb(palette.bodyBottom));
           ctx.fillStyle = base;
           ctx.fillRect(x, p.y, p.w, p.h);
 
@@ -667,7 +716,7 @@
             const shardX = x + 8 + i * ((p.w - 16) / 5);
             const shardW = 8 + shardSeed * 6;
             const shardH = 4 + (i % 3) * 2;
-            ctx.fillStyle = i % 2 === 0 ? "rgba(170,255,255,0.25)" : "rgba(145,205,255,0.22)";
+            ctx.fillStyle = i % 2 === 0 ? rgbaFromRgb(palette.accent, 0.25) : rgbaFromRgb(palette.accent, 0.18);
             ctx.beginPath();
             ctx.moveTo(shardX, p.y + p.h - 2);
             ctx.lineTo(shardX + shardW * 0.5, p.y + p.h - 2 - shardH);
@@ -677,19 +726,20 @@
           }
 
           const shimmer = 0.35 + 0.25 * Math.sin(frameCount * 0.1 + p.x * 0.02);
-          ctx.strokeStyle = `rgba(205,255,255,${shimmer})`;
+          ctx.strokeStyle = rgbaFromRgb(palette.accent, shimmer);
           ctx.lineWidth = 1.4;
           ctx.strokeRect(x + 0.5, p.y + 0.5, p.w - 1, p.h - 1);
         }
         function drawClockworkSkyforgePlatform(p, camX, touched) {
           const x = p.x - camX;
+          const palette = getThemePlatformPalette("clockworkskyforge");
           const metal = ctx.createLinearGradient(x, p.y, x, p.y + p.h);
-          metal.addColorStop(0, touched ? "#8a5f2f" : "#a87436");
-          metal.addColorStop(1, touched ? "#5c3d21" : "#6b4724");
+          metal.addColorStop(0, touched ? rgbaFromRgb(palette.bodyTopTouched) : rgbaFromRgb(palette.bodyTop));
+          metal.addColorStop(1, touched ? rgbaFromRgb(palette.bodyBottomTouched) : rgbaFromRgb(palette.bodyBottom));
           ctx.fillStyle = metal;
           ctx.fillRect(x, p.y, p.w, p.h);
 
-          ctx.strokeStyle = "rgba(255,220,150,0.28)";
+          ctx.strokeStyle = rgbaFromRgb(palette.accent, 0.28);
           ctx.lineWidth = 1;
           for (let bx = 8; bx < p.w; bx += 20) {
             ctx.beginPath();
@@ -698,7 +748,7 @@
             ctx.stroke();
           }
 
-          ctx.fillStyle = "rgba(255,232,175,0.68)";
+          ctx.fillStyle = rgbaFromRgb(palette.accent, 0.68);
           for (let rx = 10; rx < p.w; rx += 24) {
             ctx.beginPath();
             ctx.arc(x + rx, p.y + 4, 1.8, 0, Math.PI * 2);
@@ -708,7 +758,7 @@
             ctx.fill();
           }
 
-          ctx.strokeStyle = "rgba(70,42,20,0.75)";
+          ctx.strokeStyle = rgbaFromRgb(palette.outline, 0.75);
           ctx.lineWidth = 1.4;
           ctx.strokeRect(x + 0.5, p.y + 0.5, p.w - 1, p.h - 1);
         }
@@ -6377,10 +6427,13 @@
         const secretThemeUnlockKey = "void_secret_theme_zelda_unlocked";
         const tjThemeCode = "tj_theme";
         const tjThemeUnlockKey = "void_secret_theme_tjtheme_unlocked";
+        const aprilFoolsThemeCode = "april_fools2026";
+        const aprilFoolsThemeUnlockKey = "void_secret_theme_aprilfools_unlocked";
         const solThemeCode = "sol";
         const solThemeUnlockKey = "void_secret_theme_sol_unlocked";
         let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
         let tjThemeUnlocked = localStorage.getItem(tjThemeUnlockKey) === "1";
+        let aprilFoolsThemeUnlocked = localStorage.getItem(aprilFoolsThemeUnlockKey) === "1";
         let solThemeUnlocked = localStorage.getItem(solThemeUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
@@ -6420,6 +6473,18 @@
             },
             {
               container: document.getElementById("themeButtons"),
+              theme: "aprilfools",
+              label: "April Fools",
+              unlocked: aprilFoolsThemeUnlocked,
+            },
+            {
+              container: document.getElementById("speedRunThemeButtons"),
+              theme: "aprilfools",
+              label: "April Fools",
+              unlocked: aprilFoolsThemeUnlocked,
+            },
+            {
+              container: document.getElementById("themeButtons"),
               theme: "catmodel",
               label: "Sol",
               unlocked: solThemeUnlocked,
@@ -6441,9 +6506,15 @@
               themeBtn.className = "theme-btn";
               themeBtn.dataset.theme = spec.theme;
               themeBtn.textContent = spec.label;
-              themeBtn.onclick = () => setTheme(spec.theme);
               spec.container.appendChild(themeBtn);
             }
+            themeBtn.onclick = () => {
+              if (spec.theme === "aprilfools") {
+                trySetTheme(spec.theme);
+              } else {
+                setTheme(spec.theme);
+              }
+            };
             themeBtn.style.display = spec.unlocked ? "" : "none";
           }
         }
@@ -6499,6 +6570,13 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("tj's theme unlocked");
+          } else if (normalized === aprilFoolsThemeCode) {
+            if (!aprilFoolsThemeUnlocked) {
+              aprilFoolsThemeUnlocked = true;
+              localStorage.setItem(aprilFoolsThemeUnlockKey, "1");
+              updateSecretThemeButtonUi();
+            }
+            flashCodeMessage("april fools theme unlocked");
           } else if (normalized === solThemeCode) {
             if (!solThemeUnlocked) {
               solThemeUnlocked = true;
