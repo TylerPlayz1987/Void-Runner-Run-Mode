@@ -131,7 +131,7 @@ const themes = {
     player: "#6ef4ff",
     hazards: "#ff7b39",
     glow: true,
-    music: null,
+    music: "theme_bg/Neon_Railroad.ogg",
   },
   crystalcavern: {
     bg: "#101126",
@@ -139,7 +139,7 @@ const themes = {
     player: "#bffcff",
     hazards: "#9a6bff",
     stars: true,
-    music: null,
+    music: "theme_bg/Crystal.ogg",
   },
   clockworkskyforge: {
     bg: "#2a1b12",
