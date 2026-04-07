@@ -556,6 +556,8 @@
         const themeBackgroundImages = {};
         const themeGoalImages = {};
         const themePlayerImages = {};
+        const themePlatformImages = {};
+        const themeSpikeImages = {};
         function getThemeBackgroundImage(themeName) {
           const theme = themes[themeName];
           if (!theme || !theme.bgImage) return null;
@@ -585,6 +587,180 @@
             themePlayerImages[themeName] = image;
           }
           return themePlayerImages[themeName];
+        }
+        function getThemePlatformImage(themeName) {
+          const theme = themes[themeName];
+          if (!theme || !theme.platformImage) return null;
+          if (!themePlatformImages[themeName]) {
+            const image = new Image();
+            image.src = theme.platformImage;
+            themePlatformImages[themeName] = image;
+          }
+          return themePlatformImages[themeName];
+        }
+        function getThemeSpikeImage(themeName) {
+          const theme = themes[themeName];
+          if (!theme || !theme.spikeImage) return null;
+          if (!themeSpikeImages[themeName]) {
+            const image = new Image();
+            image.src = theme.spikeImage;
+            themeSpikeImages[themeName] = image;
+          }
+          return themeSpikeImages[themeName];
+        }
+        function parseThemeColor(color, fallback) {
+          if (typeof color !== "string") return fallback;
+          const normalized = color.trim();
+          const shortHex = normalized.match(/^#([0-9a-f]{3})$/i);
+          if (shortHex) {
+            const [r, g, b] = shortHex[1].split("").map((part) => parseInt(part + part, 16));
+            return { r, g, b };
+          }
+          const fullHex = normalized.match(/^#([0-9a-f]{6})$/i);
+          if (fullHex) {
+            return {
+              r: parseInt(fullHex[1].slice(0, 2), 16),
+              g: parseInt(fullHex[1].slice(2, 4), 16),
+              b: parseInt(fullHex[1].slice(4, 6), 16),
+            };
+          }
+          return fallback;
+        }
+        function mixThemeColors(colorA, colorB, amount) {
+          const clampedAmount = Math.max(0, Math.min(1, amount));
+          const a = parseThemeColor(colorA, { r: 255, g: 255, b: 255 });
+          const b = parseThemeColor(colorB, a);
+          return {
+            r: Math.round(a.r + (b.r - a.r) * clampedAmount),
+            g: Math.round(a.g + (b.g - a.g) * clampedAmount),
+            b: Math.round(a.b + (b.b - a.b) * clampedAmount),
+          };
+        }
+        function rgbaFromRgb(rgb, alpha = 1) {
+          return `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, ${alpha})`;
+        }
+        function getThemePlatformPalette(themeName) {
+          const theme = themes[themeName] || themes.classic;
+          const fallbackTheme = themes.classic;
+          const platformBase = parseThemeColor(theme.plat, parseThemeColor(fallbackTheme.plat, { r: 51, g: 51, b: 51 }));
+          const backgroundBase = parseThemeColor(theme.bg, parseThemeColor(fallbackTheme.bg, platformBase));
+          const brightBase = parseThemeColor("#ffffff", platformBase);
+          return {
+            bodyTop: mixThemeColors(platformBase, backgroundBase, 0.16),
+            bodyBottom: mixThemeColors(platformBase, backgroundBase, 0.48),
+            bodyTopTouched: mixThemeColors(platformBase, backgroundBase, 0.28),
+            bodyBottomTouched: mixThemeColors(platformBase, backgroundBase, 0.66),
+            accent: mixThemeColors(platformBase, brightBase, 0.12),
+            stripe: mixThemeColors(platformBase, backgroundBase, 0.34),
+            outline: mixThemeColors(platformBase, backgroundBase, 0.74),
+          };
+        }
+        function drawSolPlatform(x, y, w, h, fallbackColor) {
+          const solPlatformImage = getThemePlatformImage("catmodel");
+          if (solPlatformImage && solPlatformImage.complete && solPlatformImage.naturalWidth > 0) {
+            const srcY = Math.floor(solPlatformImage.naturalHeight * 0.78);
+            const srcH = Math.max(1, solPlatformImage.naturalHeight - srcY);
+            ctx.drawImage(
+              solPlatformImage,
+              0,
+              srcY,
+              solPlatformImage.naturalWidth,
+              srcH,
+              x,
+              y,
+              w,
+              h,
+            );
+          } else {
+            ctx.fillStyle = fallbackColor;
+            ctx.fillRect(x, y, w, h);
+          }
+        }
+        function drawNeonRailyardPlatform(p, camX, touched) {
+          const x = p.x - camX;
+          const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.18 + p.x * 0.01);
+          const palette = getThemePlatformPalette("neonrailyard");
+          const body = ctx.createLinearGradient(x, p.y, x, p.y + p.h);
+          body.addColorStop(0, touched ? rgbaFromRgb(palette.bodyTopTouched) : rgbaFromRgb(palette.bodyTop));
+          body.addColorStop(1, touched ? rgbaFromRgb(palette.bodyBottomTouched) : rgbaFromRgb(palette.bodyBottom));
+          ctx.fillStyle = body;
+          ctx.fillRect(x, p.y, p.w, p.h);
+
+          ctx.fillStyle = rgbaFromRgb(palette.accent, 0.42 + pulse * 0.35);
+          ctx.fillRect(x + 1, p.y + 1, p.w - 2, Math.max(2, p.h * 0.2));
+
+          ctx.strokeStyle = rgbaFromRgb(palette.stripe, 0.7);
+          ctx.lineWidth = 1;
+          for (let sx = 6; sx < p.w; sx += 16) {
+            ctx.beginPath();
+            ctx.moveTo(x + sx, p.y + 3);
+            ctx.lineTo(x + sx - 4, p.y + p.h - 2);
+            ctx.stroke();
+          }
+
+          ctx.strokeStyle = rgbaFromRgb(palette.accent, 0.48 + pulse * 0.32);
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(x + 0.5, p.y + 0.5, p.w - 1, p.h - 1);
+        }
+        function drawCrystalCavernPlatform(p, camX, touched) {
+          const x = p.x - camX;
+          const palette = getThemePlatformPalette("crystalcavern");
+          const base = ctx.createLinearGradient(x, p.y, x, p.y + p.h);
+          base.addColorStop(0, touched ? rgbaFromRgb(palette.bodyTopTouched) : rgbaFromRgb(palette.bodyTop));
+          base.addColorStop(1, touched ? rgbaFromRgb(palette.bodyBottomTouched) : rgbaFromRgb(palette.bodyBottom));
+          ctx.fillStyle = base;
+          ctx.fillRect(x, p.y, p.w, p.h);
+
+          for (let i = 0; i < 5; i++) {
+            const shardSeed = Math.sin(p.x * 0.013 + i * 1.7) * 0.5 + 0.5;
+            const shardX = x + 8 + i * ((p.w - 16) / 5);
+            const shardW = 8 + shardSeed * 6;
+            const shardH = 4 + (i % 3) * 2;
+            ctx.fillStyle = i % 2 === 0 ? rgbaFromRgb(palette.accent, 0.25) : rgbaFromRgb(palette.accent, 0.18);
+            ctx.beginPath();
+            ctx.moveTo(shardX, p.y + p.h - 2);
+            ctx.lineTo(shardX + shardW * 0.5, p.y + p.h - 2 - shardH);
+            ctx.lineTo(shardX + shardW, p.y + p.h - 2);
+            ctx.closePath();
+            ctx.fill();
+          }
+
+          const shimmer = 0.35 + 0.25 * Math.sin(frameCount * 0.1 + p.x * 0.02);
+          ctx.strokeStyle = rgbaFromRgb(palette.accent, shimmer);
+          ctx.lineWidth = 1.4;
+          ctx.strokeRect(x + 0.5, p.y + 0.5, p.w - 1, p.h - 1);
+        }
+        function drawClockworkSkyforgePlatform(p, camX, touched) {
+          const x = p.x - camX;
+          const palette = getThemePlatformPalette("clockworkskyforge");
+          const metal = ctx.createLinearGradient(x, p.y, x, p.y + p.h);
+          metal.addColorStop(0, touched ? rgbaFromRgb(palette.bodyTopTouched) : rgbaFromRgb(palette.bodyTop));
+          metal.addColorStop(1, touched ? rgbaFromRgb(palette.bodyBottomTouched) : rgbaFromRgb(palette.bodyBottom));
+          ctx.fillStyle = metal;
+          ctx.fillRect(x, p.y, p.w, p.h);
+
+          ctx.strokeStyle = rgbaFromRgb(palette.accent, 0.28);
+          ctx.lineWidth = 1;
+          for (let bx = 8; bx < p.w; bx += 20) {
+            ctx.beginPath();
+            ctx.moveTo(x + bx, p.y + 2);
+            ctx.lineTo(x + bx, p.y + p.h - 2);
+            ctx.stroke();
+          }
+
+          ctx.fillStyle = rgbaFromRgb(palette.accent, 0.68);
+          for (let rx = 10; rx < p.w; rx += 24) {
+            ctx.beginPath();
+            ctx.arc(x + rx, p.y + 4, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + rx, p.y + p.h - 4, 1.8, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          ctx.strokeStyle = rgbaFromRgb(palette.outline, 0.75);
+          ctx.lineWidth = 1.4;
+          ctx.strokeRect(x + 0.5, p.y + 0.5, p.w - 1, p.h - 1);
         }
         // Theme particles/background add-ons (cosmetic)
         const cyberBldgs = Array.from({ length: 12 }, () => ({
@@ -1284,8 +1460,23 @@
             h: Math.floor((10 + Math.random() * 7) * Math.min(1.2, scale)),
           };
         }
-        function drawSpike(sx, sy, w, h, shape, camX) {
+        function drawSpike(sx, sy, w, h, shape, camX, isSeeker = false) {
           const drawX = sx - camX;
+          if (currentTheme === "catmodel") {
+            const solSpikeImage = getThemeSpikeImage("catmodel");
+            if (solSpikeImage && solSpikeImage.complete && solSpikeImage.naturalWidth > 0) {
+              ctx.drawImage(solSpikeImage, drawX, sy - h, w, h);
+              if (isSeeker) {
+                // Seeker spikes get a cyan shimmer to differentiate from regular Sol spikes.
+                ctx.fillStyle = "rgba(110,245,255,0.34)";
+                ctx.fillRect(drawX, sy - h, w, h);
+                ctx.strokeStyle = "rgba(170,255,255,0.8)";
+                ctx.lineWidth = 1.5;
+                ctx.strokeRect(drawX + 0.5, sy - h + 0.5, Math.max(0, w - 1), Math.max(0, h - 1));
+              }
+              return;
+            }
+          }
           if (shape === "split") {
             const gap = Math.max(2, Math.floor(w * 0.2));
             const toothW = Math.max(4, (w - gap) / 2);
@@ -1845,6 +2036,66 @@
           return s;
         }
         function emitJumpDust() {
+          if (currentTheme === "catmodel") {
+            for (let i = 0; i < 16; i++) {
+              jumpDust.push({
+                x: player.x + player.w / 2 + (Math.random() - 0.5) * 10,
+                y: player.y + player.h - 1,
+                vx: (Math.random() - 0.5) * 1.8,
+                vy: -3.2 - Math.random() * 2.4,
+                size: 2 + Math.random() * 3,
+                alpha: 0.95,
+                life: 18 + Math.floor(Math.random() * 12),
+                kind: "solFlame",
+              });
+            }
+            return;
+          }
+          if (currentTheme === "neonrailyard") {
+            for (let i = 0; i < 14; i++) {
+              jumpDust.push({
+                x: player.x + player.w / 2 + (Math.random() - 0.5) * 11,
+                y: player.y + player.h,
+                vx: (Math.random() - 0.5) * 2.1,
+                vy: -3.4 - Math.random() * 1.8,
+                size: 1.8 + Math.random() * 2.1,
+                alpha: 0.9,
+                life: 16 + Math.floor(Math.random() * 9),
+                kind: "neonSpark",
+              });
+            }
+            return;
+          }
+          if (currentTheme === "crystalcavern") {
+            for (let i = 0; i < 12; i++) {
+              jumpDust.push({
+                x: player.x + player.w / 2 + (Math.random() - 0.5) * 10,
+                y: player.y + player.h,
+                vx: (Math.random() - 0.5) * 1.7,
+                vy: -3.1 - Math.random() * 1.7,
+                size: 2 + Math.random() * 2.2,
+                alpha: 0.88,
+                life: 20 + Math.floor(Math.random() * 10),
+                kind: "crystalShard",
+              });
+            }
+            return;
+          }
+          if (currentTheme === "clockworkskyforge") {
+            for (let i = 0; i < 13; i++) {
+              jumpDust.push({
+                x: player.x + player.w / 2 + (Math.random() - 0.5) * 12,
+                y: player.y + player.h,
+                vx: (Math.random() - 0.5) * 1.9,
+                vy: -3 - Math.random() * 1.6,
+                size: 1.8 + Math.random() * 2,
+                alpha: 0.9,
+                life: 18 + Math.floor(Math.random() * 10),
+                kind: "forgeEmber",
+              });
+            }
+            return;
+          }
           for (let i = 0; i < 12; i++) {
             jumpDust.push({
               x: player.x + player.w / 2 + (Math.random() - 0.5) * 8,
@@ -2833,6 +3084,66 @@
               y + player.h - 2,
             );
             ctx.stroke();
+          } else if (currentTheme === "neonrailyard") {
+            const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.2);
+            const shell = ctx.createLinearGradient(x, y, x, y + player.h);
+            shell.addColorStop(0, "#89fcff");
+            shell.addColorStop(1, "#42b9cf");
+            ctx.fillStyle = shell;
+            ctx.fillRect(x + 1, y + 1, player.w - 2, player.h - 2);
+            ctx.strokeStyle = "rgba(20,50,70,0.9)";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x + 1, y + 1, player.w - 2, player.h - 2);
+            ctx.fillStyle = `rgba(255,190,120,${0.5 + pulse * 0.35})`;
+            ctx.fillRect(x + 3, y + 3, player.w - 6, 2);
+            ctx.fillStyle = "#11324f";
+            ctx.fillRect(x + 5, y + 7, 4, 4);
+            ctx.fillRect(x + 11, y + 7, 4, 4);
+            ctx.fillStyle = "#0b1f30";
+            ctx.fillRect(x + 7, y + 13, 6, 3);
+          } else if (currentTheme === "crystalcavern") {
+            ctx.fillStyle = "#8ee6ff";
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y - 2);
+            ctx.lineTo(x + 19, y + 6);
+            ctx.lineTo(x + 15, y + 20);
+            ctx.lineTo(x + 5, y + 20);
+            ctx.lineTo(x + 1, y + 6);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = "rgba(255,255,255,0.45)";
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y + 1);
+            ctx.lineTo(x + 15, y + 7);
+            ctx.lineTo(x + 12, y + 15);
+            ctx.lineTo(x + 8, y + 15);
+            ctx.lineTo(x + 5, y + 7);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = "rgba(120,190,255,0.85)";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 3, y + 3, 14, 14);
+          } else if (currentTheme === "clockworkskyforge") {
+            ctx.fillStyle = "#d39b4f";
+            ctx.fillRect(x + 1, y + 1, player.w - 2, player.h - 2);
+            ctx.fillStyle = "#9c6a33";
+            ctx.fillRect(x + 4, y + 4, player.w - 8, player.h - 8);
+            ctx.strokeStyle = "#5a381d";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x + 1, y + 1, player.w - 2, player.h - 2);
+            ctx.fillStyle = "#f4d48a";
+            ctx.beginPath();
+            ctx.arc(x + 6, y + 6, 1.6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 14, y + 6, 1.6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 6, y + 14, 1.6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(x + 14, y + 14, 1.6, 0, Math.PI * 2);
+            ctx.fill();
           } else if (currentTheme === "catmodel") {
             const solPlayerImage = getThemePlayerImage("catmodel");
             if (
@@ -3926,6 +4237,136 @@
               ctx.arc(fx, fy, r, 0, Math.PI * 2);
               ctx.fill();
             }
+          } else if (currentTheme === "neonrailyard") {
+            const sky = ctx.createLinearGradient(0, 0, 0, 400);
+            sky.addColorStop(0, "#040913");
+            sky.addColorStop(0.55, "#0b1730");
+            sky.addColorStop(1, "#050b18");
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, 800, 400);
+
+            for (let i = 0; i < 14; i++) {
+              const by = 150 + (i % 5) * 18;
+              const bx = ((i * 135 - camX * 0.18) % 980) - 120;
+              const bw = 110 + (i % 4) * 35;
+              const bh = 220 + (i % 3) * 25;
+              ctx.fillStyle = i % 2 === 0 ? "rgba(8,14,25,0.82)" : "rgba(10,18,31,0.78)";
+              ctx.fillRect(bx, by, bw, bh);
+              ctx.fillStyle = i % 2 === 0 ? "rgba(96,246,255,0.2)" : "rgba(255,164,90,0.18)";
+              for (let w = 0; w < 5; w++) {
+                const wy = by + 18 + w * 28;
+                ctx.fillRect(bx + 8, wy, bw - 16, 2);
+              }
+            }
+
+            for (let i = 0; i < 16; i++) {
+              const railY = 232 + i * 10 + Math.sin(frameCount * 0.03 + i) * 3;
+              const railX = ((i * 90 - camX * 0.6) % 980) - 120;
+              ctx.strokeStyle = i % 2 === 0 ? "rgba(90,255,255,0.26)" : "rgba(255,170,95,0.22)";
+              ctx.lineWidth = 2;
+              ctx.beginPath();
+              ctx.moveTo(railX, railY);
+              ctx.lineTo(railX + 240, railY - 8);
+              ctx.stroke();
+            }
+
+            for (let i = 0; i < 22; i++) {
+              const sx = ((i * 63 + frameCount * (1.4 + (i % 3) * 0.2)) % 900) - 40;
+              const sy = 26 + (i * 17) % 160;
+              const alpha = 0.35 + 0.25 * Math.sin(frameCount * 0.09 + i);
+              ctx.fillStyle = `rgba(120,255,250,${alpha})`;
+              ctx.fillRect(sx, sy, 2, 2);
+            }
+          } else if (currentTheme === "crystalcavern") {
+            const cave = ctx.createLinearGradient(0, 0, 0, 400);
+            cave.addColorStop(0, "#0b1128");
+            cave.addColorStop(0.55, "#131b38");
+            cave.addColorStop(1, "#0c1328");
+            ctx.fillStyle = cave;
+            ctx.fillRect(0, 0, 800, 400);
+
+            for (let i = 0; i < 10; i++) {
+              const cx = ((i * 155 - camX * 0.12) % 980) - 120;
+              const cy = 50 + (i % 4) * 35;
+              const cw = 120 + (i % 3) * 45;
+              const ch = 170 + (i % 2) * 40;
+              ctx.fillStyle = "rgba(18,28,54,0.56)";
+              ctx.beginPath();
+              ctx.moveTo(cx, cy + ch);
+              ctx.lineTo(cx + cw * 0.25, cy);
+              ctx.lineTo(cx + cw * 0.7, cy + ch * 0.1);
+              ctx.lineTo(cx + cw, cy + ch);
+              ctx.closePath();
+              ctx.fill();
+            }
+
+            for (let i = 0; i < 18; i++) {
+              const gx = ((i * 88 - camX * 0.24 + frameCount * 0.4) % 940) - 70;
+              const gy = 70 + (i * 29) % 300;
+              const twinkle = 0.24 + (Math.sin(frameCount * 0.07 + i * 1.3) + 1) * 0.18;
+              ctx.fillStyle = `rgba(165,240,255,${twinkle})`;
+              ctx.beginPath();
+              ctx.moveTo(gx, gy - 5);
+              ctx.lineTo(gx + 4, gy);
+              ctx.lineTo(gx, gy + 5);
+              ctx.lineTo(gx - 4, gy);
+              ctx.closePath();
+              ctx.fill();
+            }
+
+            for (let i = 0; i < 20; i++) {
+              const dripX = ((i * 46 - camX * 0.04) % 860) - 20;
+              const dripY = (i * 19 + frameCount * 0.5) % 380;
+              ctx.fillStyle = "rgba(130,190,255,0.18)";
+              ctx.fillRect(dripX, dripY, 1.5, 6);
+            }
+          } else if (currentTheme === "clockworkskyforge") {
+            const sky = ctx.createLinearGradient(0, 0, 0, 400);
+            sky.addColorStop(0, "#2e1d12");
+            sky.addColorStop(0.55, "#3b2414");
+            sky.addColorStop(1, "#1e130c");
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, 800, 400);
+
+            for (let i = 0; i < 9; i++) {
+              const gx = ((i * 170 - camX * (0.06 + (i % 2) * 0.03)) % 1000) - 130;
+              const gy = 80 + (i % 3) * 95;
+              const radius = 34 + (i % 4) * 12;
+              const rot = frameCount * (0.008 + (i % 3) * 0.003) * (i % 2 === 0 ? 1 : -1);
+              ctx.save();
+              ctx.translate(gx, gy);
+              ctx.rotate(rot);
+              ctx.strokeStyle = "rgba(180,130,70,0.36)";
+              ctx.lineWidth = 4;
+              ctx.beginPath();
+              ctx.arc(0, 0, radius, 0, Math.PI * 2);
+              ctx.stroke();
+              for (let t = 0; t < 8; t++) {
+                const a = (t / 8) * Math.PI * 2;
+                const tx = Math.cos(a) * radius;
+                const ty = Math.sin(a) * radius;
+                ctx.fillStyle = "rgba(200,150,95,0.34)";
+                ctx.fillRect(tx - 2, ty - 6, 4, 12);
+              }
+              ctx.restore();
+            }
+
+            const cloudColor = "rgba(235,210,170,0.12)";
+            for (let i = 0; i < 10; i++) {
+              const cx = ((i * 140 - camX * 0.2 + frameCount * (0.35 + i * 0.02)) % 980) - 120;
+              const cy = 42 + (i % 4) * 32;
+              ctx.fillStyle = cloudColor;
+              ctx.beginPath();
+              ctx.ellipse(cx, cy, 40 + (i % 3) * 16, 14 + (i % 2) * 7, 0, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            for (let i = 0; i < 14; i++) {
+              const ex = ((i * 70 + frameCount * 1.1) % 900) - 50;
+              const ey = 190 + (i * 13) % 190;
+              ctx.fillStyle = "rgba(255,140,65,0.22)";
+              ctx.fillRect(ex, ey, 2, 6);
+            }
           } else {
             ctx.fillStyle = t.bg;
             ctx.fillRect(0, 0, 800, 400);
@@ -3937,7 +4378,9 @@
             currentTheme === "deepsea" ||
             currentTheme === "cyber" ||
             currentTheme === "glitchworld" ||
-            currentTheme === "aprilfools"
+            currentTheme === "aprilfools" ||
+            currentTheme === "neonrailyard" ||
+            currentTheme === "crystalcavern"
           ) {
             stars.forEach((s) => {
               if (currentTheme === "deepsea") {
@@ -4383,8 +4826,46 @@
           // Jump dust particles
           for (let i = jumpDust.length - 1; i >= 0; i--) {
             const p = jumpDust[i];
-            ctx.fillStyle = `rgba(168,168,168,${p.alpha})`;
-            ctx.fillRect(p.x - camX, p.y, p.size, p.size);
+            if (p.kind === "solFlame") {
+              const heat = p.life / 30;
+              const g = Math.floor(90 + heat * 130);
+              const b = Math.floor(25 + heat * 40);
+              ctx.fillStyle = `rgba(255,${g},${b},${p.alpha})`;
+              ctx.beginPath();
+              ctx.arc(p.x - camX, p.y, p.size * 0.75, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = `rgba(255,245,180,${Math.max(0, p.alpha - 0.25)})`;
+              ctx.beginPath();
+              ctx.arc(p.x - camX, p.y + 0.6, p.size * 0.35, 0, Math.PI * 2);
+              ctx.fill();
+            } else if (p.kind === "neonSpark") {
+              const blink = 0.55 + 0.45 * Math.sin(frameCount * 0.3 + p.x * 0.1);
+              ctx.fillStyle = `rgba(95,255,250,${p.alpha * blink})`;
+              ctx.fillRect(p.x - camX, p.y, p.size + 1, Math.max(1, p.size * 0.7));
+              ctx.fillStyle = `rgba(255,175,100,${Math.max(0, p.alpha - 0.2)})`;
+              ctx.fillRect(p.x - camX + p.size * 0.2, p.y - 1, Math.max(1, p.size * 0.45), p.size + 1);
+            } else if (p.kind === "crystalShard") {
+              ctx.fillStyle = `rgba(165,235,255,${p.alpha})`;
+              ctx.beginPath();
+              ctx.moveTo(p.x - camX, p.y - p.size * 0.6);
+              ctx.lineTo(p.x - camX + p.size * 0.55, p.y);
+              ctx.lineTo(p.x - camX, p.y + p.size * 0.7);
+              ctx.lineTo(p.x - camX - p.size * 0.5, p.y);
+              ctx.closePath();
+              ctx.fill();
+              ctx.fillStyle = `rgba(255,255,255,${Math.max(0, p.alpha - 0.25)})`;
+              ctx.fillRect(p.x - camX - 0.5, p.y - 0.5, 1, 1);
+            } else if (p.kind === "forgeEmber") {
+              ctx.fillStyle = `rgba(255,150,70,${p.alpha})`;
+              ctx.beginPath();
+              ctx.arc(p.x - camX, p.y, p.size * 0.62, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.fillStyle = `rgba(255,225,140,${Math.max(0, p.alpha - 0.22)})`;
+              ctx.fillRect(p.x - camX - p.size * 0.18, p.y - p.size * 0.18, p.size * 0.36, p.size * 0.36);
+            } else {
+              ctx.fillStyle = `rgba(168,168,168,${p.alpha})`;
+              ctx.fillRect(p.x - camX, p.y, p.size, p.size);
+            }
             p.x += p.vx;
             p.y += p.vy;
             p.vy += 0.2;
@@ -4455,7 +4936,10 @@
                   "stardust",
                   "pirate",
                   "jungle",
-                ][Math.floor(frameCount / 8) % 12]
+                  "neonrailyard",
+                  "crystalcavern",
+                  "clockworkskyforge",
+                ][Math.floor(frameCount / 8) % 15]
               : currentTheme;
           ctx.save();
           ctx.translate(goalOffset.x, goalOffset.y);
@@ -4678,6 +5162,64 @@
             ctx.closePath();
             ctx.fill();
             ctx.restore();
+          } else if (goalTheme === "neonrailyard") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            const spin = frameCount * 0.08;
+            for (let i = 0; i < 2; i++) {
+              ctx.save();
+              ctx.rotate(spin + i * Math.PI * 0.5);
+              ctx.strokeStyle = i === 0 ? "rgba(110,255,250,0.9)" : "rgba(255,180,95,0.85)";
+              ctx.lineWidth = 2.4;
+              ctx.strokeRect(-gw * 0.33, -gh * 0.33, gw * 0.66, gh * 0.66);
+              ctx.restore();
+            }
+            ctx.fillStyle = "rgba(130,255,255,0.35)";
+            ctx.beginPath();
+            ctx.arc(0, 0, gw * 0.22, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          } else if (goalTheme === "crystalcavern") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            const pulse = 0.85 + 0.15 * Math.sin(frameCount * 0.09);
+            ctx.fillStyle = "rgba(170,240,255,0.9)";
+            ctx.beginPath();
+            ctx.moveTo(0, -gh * 0.52 * pulse);
+            ctx.lineTo(gw * 0.42 * pulse, -gh * 0.1);
+            ctx.lineTo(gw * 0.2 * pulse, gh * 0.48);
+            ctx.lineTo(-gw * 0.2 * pulse, gh * 0.48);
+            ctx.lineTo(-gw * 0.42 * pulse, -gh * 0.1);
+            ctx.closePath();
+            ctx.fill();
+            ctx.strokeStyle = "rgba(120,200,255,0.95)";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = "rgba(255,255,255,0.45)";
+            ctx.fillRect(-2, -gh * 0.18, 4, gh * 0.36);
+            ctx.restore();
+          } else if (goalTheme === "clockworkskyforge") {
+            ctx.save();
+            ctx.translate(gx + gw / 2, gy + gh / 2);
+            const rot = frameCount * 0.06;
+            ctx.rotate(rot);
+            ctx.strokeStyle = "rgba(225,175,95,0.95)";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(0, 0, gw * 0.33, 0, Math.PI * 2);
+            ctx.stroke();
+            for (let i = 0; i < 8; i++) {
+              const a = (i / 8) * Math.PI * 2;
+              const tx = Math.cos(a) * gw * 0.33;
+              const ty = Math.sin(a) * gw * 0.33;
+              ctx.fillStyle = "rgba(205,150,75,0.9)";
+              ctx.fillRect(tx - 1.7, ty - 4.8, 3.4, 9.6);
+            }
+            ctx.fillStyle = "rgba(245,220,155,0.9)";
+            ctx.beginPath();
+            ctx.arc(0, 0, gw * 0.14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
           } else if (goalTheme === "zelda") {
             // Triforce objective marker.
             ctx.save();
@@ -4703,8 +5245,13 @@
             ctx.restore();
           } else if (goalTheme === "catmodel") {
             const solGoalImage = getThemeGoalImage("catmodel");
+            const solGoalScale = 1.35;
             if (solGoalImage && solGoalImage.complete && solGoalImage.naturalWidth > 0) {
-              ctx.drawImage(solGoalImage, gx, gy, gw, gh);
+              const drawW = gw * solGoalScale;
+              const drawH = gh * solGoalScale;
+              const drawX = gx - (drawW - gw) / 2;
+              const drawY = gy - (drawH - gh) / 2;
+              ctx.drawImage(solGoalImage, drawX, drawY, drawW, drawH);
             } else {
               // Sol fallback: glowing ellipse with glow
               ctx.save();
@@ -4714,7 +5261,15 @@
               ctx.shadowColor = "rgba(245, 217, 255, 0.8)";
               ctx.fillStyle = "rgba(232, 171, 255, 0.9)";
               ctx.beginPath();
-              ctx.ellipse(0, 0, gw * 0.45 * pulse, gh * 0.5 * pulse, 0, 0, Math.PI * 2);
+              ctx.ellipse(
+                0,
+                0,
+                gw * 0.45 * solGoalScale * pulse,
+                gh * 0.5 * solGoalScale * pulse,
+                0,
+                0,
+                Math.PI * 2,
+              );
               ctx.fill();
               ctx.strokeStyle = "#d9a8ff";
               ctx.lineWidth = 2;
@@ -4794,6 +5349,34 @@
                   ctx.arc(dropletX, dropletY, radius, 0, Math.PI * 2);
                   ctx.fill();
                 }
+              } else if (currentTheme === "catmodel") {
+                const solSpikeImage = getThemeSpikeImage("catmodel");
+                let glow = ctx.createRadialGradient(
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  0,
+                  h.x - camX + h.w / 2,
+                  h.y + h.h / 2,
+                  Math.max(20, h.h),
+                );
+                glow.addColorStop(0, "rgba(37,150,190,0.72)");
+                glow.addColorStop(0.45, "rgba(37,150,190,0.42)");
+                glow.addColorStop(1, "rgba(10,50,70,0)");
+                ctx.fillStyle = glow;
+                ctx.fillRect(h.x - camX - 14, h.y - 14, h.w + 28, h.h + 28);
+
+                if (solSpikeImage && solSpikeImage.complete && solSpikeImage.naturalWidth > 0) {
+                  // Stretch texture with height so visuals extend as the lava wall rises.
+                  ctx.drawImage(solSpikeImage, h.x - camX, h.y, h.w, h.h);
+                  ctx.fillStyle = "rgba(37,150,190,0.45)";
+                  ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+                } else {
+                  ctx.fillStyle = "#2596be";
+                  ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+                }
+                ctx.strokeStyle = "rgba(159,224,245,0.85)";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
               } else {
                 let glow = ctx.createRadialGradient(
                   h.x - camX + h.w / 2,
@@ -4835,7 +5418,7 @@
               ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
             } else if (h.type === "seeker") {
               ctx.fillStyle = t.hazards;
-              drawSpike(h.x, h.y + h.h, h.w, h.h, h.shape || "split", camX);
+              drawSpike(h.x, h.y + h.h, h.w, h.h, h.shape || "split", camX, true);
             } else {
               ctx.fillStyle = t.hazards;
               ctx.fillRect(h.x - camX, h.y, h.w, h.h);
@@ -4866,6 +5449,18 @@
                 ctx.moveTo(p.x - camX + 5, p.y + p.h / 2);
                 ctx.lineTo(p.x - camX + p.w - 5, p.y + p.h / 2);
                 ctx.stroke();
+              } else if (currentTheme === "neonrailyard") {
+                drawNeonRailyardPlatform(p, camX, p.isTouched);
+              } else if (currentTheme === "crystalcavern") {
+                drawCrystalCavernPlatform(p, camX, p.isTouched);
+              } else if (currentTheme === "clockworkskyforge") {
+                drawClockworkSkyforgePlatform(p, camX, p.isTouched);
+              } else if (currentTheme === "catmodel") {
+                drawSolPlatform(p.x - camX, p.y, p.w, p.h, t.plat);
+                if (p.isTouched) {
+                  ctx.fillStyle = "rgba(0,0,0,0.22)";
+                  ctx.fillRect(p.x - camX, p.y, p.w, p.h);
+                }
               } else {
                 ctx.fillStyle = isEasterTheme
                   ? p.isTouched
@@ -4928,6 +5523,14 @@
                   ctx.lineTo(sx + 4, p.y + p.h - 6);
                   ctx.stroke();
                 }
+              } else if (currentTheme === "neonrailyard") {
+                drawNeonRailyardPlatform(p, camX, false);
+              } else if (currentTheme === "crystalcavern") {
+                drawCrystalCavernPlatform(p, camX, false);
+              } else if (currentTheme === "clockworkskyforge") {
+                drawClockworkSkyforgePlatform(p, camX, false);
+              } else if (currentTheme === "catmodel") {
+                drawSolPlatform(p.x - camX, p.y, p.w, p.h, t.plat);
               } else {
                 ctx.fillStyle =
                   isEasterTheme
@@ -4982,7 +5585,7 @@
               let sw = p.hasSpike ? p.spikeW : p.seekerW;
               let sh = p.hasSpike ? p.spikeH : p.seekerH;
               let ss = p.hasSpike ? p.spikeShape : p.seekerShape;
-              drawSpike(sx, p.y, sw, sh, ss, camX);
+              drawSpike(sx, p.y, sw, sh, ss, camX, p.hasSeeker);
             }
             if (p.hasFakeHazard) {
               const fx = p.x + p.fakeX;
@@ -5006,8 +5609,87 @@
           ctx.globalAlpha = 1;
           if (!player.spaghettified)
             player.trail.forEach((tr, i) => {
-              ctx.globalAlpha = i / 15;
-              drawPlayer(150 - (player.x - tr.x), tr.y, t.player);
+              const drawX = 150 - (player.x - tr.x);
+              const drawY = tr.y;
+              if (currentTheme === "catmodel") {
+                const trailAlpha = Math.max(0, i / 16);
+                const pulse = 0.75 + Math.sin(frameCount * 0.35 + i) * 0.18;
+                const flameH = Math.max(6, player.h * (0.32 + i * 0.02) * pulse);
+                const flameW = Math.max(4, player.w * (0.3 + i * 0.015));
+                ctx.globalAlpha = trailAlpha;
+                ctx.fillStyle = "rgba(255,130,35,0.95)";
+                ctx.beginPath();
+                ctx.ellipse(
+                  drawX + player.w * 0.5,
+                  drawY + player.h * 0.88,
+                  flameW,
+                  flameH,
+                  0,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.fill();
+                ctx.fillStyle = "rgba(255,235,170,0.92)";
+                ctx.beginPath();
+                ctx.ellipse(
+                  drawX + player.w * 0.5,
+                  drawY + player.h * 0.9,
+                  flameW * 0.45,
+                  flameH * 0.52,
+                  0,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.fill();
+              } else if (currentTheme === "neonrailyard") {
+                const trailAlpha = Math.max(0, i / 16);
+                const pulse = 0.6 + 0.4 * Math.sin(frameCount * 0.25 + i);
+                ctx.globalAlpha = trailAlpha;
+                ctx.strokeStyle = `rgba(105,255,250,${0.85 * pulse})`;
+                ctx.lineWidth = Math.max(1.4, 4 - i * 0.2);
+                ctx.beginPath();
+                ctx.moveTo(drawX + player.w * 0.25, drawY + player.h * 0.7);
+                ctx.lineTo(drawX + player.w * 0.75, drawY + player.h * 0.3);
+                ctx.stroke();
+                ctx.strokeStyle = `rgba(255,170,90,${0.55 * pulse})`;
+                ctx.beginPath();
+                ctx.moveTo(drawX + player.w * 0.2, drawY + player.h * 0.82);
+                ctx.lineTo(drawX + player.w * 0.82, drawY + player.h * 0.42);
+                ctx.stroke();
+              } else if (currentTheme === "crystalcavern") {
+                const trailAlpha = Math.max(0, i / 16);
+                ctx.globalAlpha = trailAlpha;
+                ctx.fillStyle = "rgba(170,240,255,0.85)";
+                ctx.beginPath();
+                ctx.moveTo(drawX + player.w * 0.5, drawY + player.h * 0.2);
+                ctx.lineTo(drawX + player.w * 0.82, drawY + player.h * 0.55);
+                ctx.lineTo(drawX + player.w * 0.5, drawY + player.h * 0.9);
+                ctx.lineTo(drawX + player.w * 0.18, drawY + player.h * 0.55);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = "rgba(255,255,255,0.4)";
+                ctx.fillRect(drawX + player.w * 0.47, drawY + player.h * 0.38, 1.5, player.h * 0.3);
+              } else if (currentTheme === "clockworkskyforge") {
+                const trailAlpha = Math.max(0, i / 16);
+                const spin = frameCount * 0.2 + i;
+                const radius = Math.max(2.6, player.w * 0.16 + i * 0.18);
+                ctx.globalAlpha = trailAlpha;
+                ctx.strokeStyle = "rgba(220,170,95,0.85)";
+                ctx.lineWidth = 1.6;
+                ctx.beginPath();
+                ctx.arc(drawX + player.w * 0.5, drawY + player.h * 0.5, radius, 0, Math.PI * 2);
+                ctx.stroke();
+                for (let t = 0; t < 6; t++) {
+                  const a = spin + (t / 6) * Math.PI * 2;
+                  const tx = drawX + player.w * 0.5 + Math.cos(a) * radius;
+                  const ty = drawY + player.h * 0.5 + Math.sin(a) * radius;
+                  ctx.fillStyle = "rgba(250,220,145,0.82)";
+                  ctx.fillRect(tx - 1, ty - 2, 2, 4);
+                }
+              } else {
+                ctx.globalAlpha = i / 15;
+                drawPlayer(drawX, drawY, t.player);
+              }
             });
           ctx.globalAlpha = 1;
           drawPlayer(150, player.y, t.player);
@@ -5745,10 +6427,13 @@
         const secretThemeUnlockKey = "void_secret_theme_zelda_unlocked";
         const tjThemeCode = "tj_theme";
         const tjThemeUnlockKey = "void_secret_theme_tjtheme_unlocked";
+        const aprilFoolsThemeCode = "april_fools2026";
+        const aprilFoolsThemeUnlockKey = "void_secret_theme_aprilfools_unlocked";
         const solThemeCode = "sol";
         const solThemeUnlockKey = "void_secret_theme_sol_unlocked";
         let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
         let tjThemeUnlocked = localStorage.getItem(tjThemeUnlockKey) === "1";
+        let aprilFoolsThemeUnlocked = localStorage.getItem(aprilFoolsThemeUnlockKey) === "1";
         let solThemeUnlocked = localStorage.getItem(solThemeUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
@@ -5788,6 +6473,18 @@
             },
             {
               container: document.getElementById("themeButtons"),
+              theme: "aprilfools",
+              label: "April Fools",
+              unlocked: aprilFoolsThemeUnlocked,
+            },
+            {
+              container: document.getElementById("speedRunThemeButtons"),
+              theme: "aprilfools",
+              label: "April Fools",
+              unlocked: aprilFoolsThemeUnlocked,
+            },
+            {
+              container: document.getElementById("themeButtons"),
               theme: "catmodel",
               label: "Sol",
               unlocked: solThemeUnlocked,
@@ -5809,9 +6506,15 @@
               themeBtn.className = "theme-btn";
               themeBtn.dataset.theme = spec.theme;
               themeBtn.textContent = spec.label;
-              themeBtn.onclick = () => setTheme(spec.theme);
               spec.container.appendChild(themeBtn);
             }
+            themeBtn.onclick = () => {
+              if (spec.theme === "aprilfools") {
+                trySetTheme(spec.theme);
+              } else {
+                setTheme(spec.theme);
+              }
+            };
             themeBtn.style.display = spec.unlocked ? "" : "none";
           }
         }
@@ -5867,6 +6570,13 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("tj's theme unlocked");
+          } else if (normalized === aprilFoolsThemeCode) {
+            if (!aprilFoolsThemeUnlocked) {
+              aprilFoolsThemeUnlocked = true;
+              localStorage.setItem(aprilFoolsThemeUnlockKey, "1");
+              updateSecretThemeButtonUi();
+            }
+            flashCodeMessage("april fools theme unlocked");
           } else if (normalized === solThemeCode) {
             if (!solThemeUnlocked) {
               solThemeUnlocked = true;
