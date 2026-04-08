@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "author": "copilot",
+    "version": 1,
+    "character": "Sunny",
+    "coordinateSystem": "pixels",
+    "notes": "Sunny uses a sun head and a fully yellow body (#FFFF00). Happy states rotate rays clockwise; faster cycle means happier."
+  },
+  "sheets": {
+    "sunny-character-anim": {
+      "path": "story_assets/sprites/sunny/sunny-character-anim.svg",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "sheetWidth": 960,
+      "sheetHeight": 96,
+      "frames": {
+        "neutral": { "x": 0, "y": 0, "w": 96, "h": 96, "index": 0 },
+        "walk_left": { "x": 96, "y": 0, "w": 96, "h": 96, "index": 1 },
+        "walk_right": { "x": 192, "y": 0, "w": 96, "h": 96, "index": 2 },
+        "blink": { "x": 288, "y": 0, "w": 96, "h": 96, "index": 3 },
+        "happy_spin_1": { "x": 384, "y": 0, "w": 96, "h": 96, "index": 4 },
+        "happy_spin_2": { "x": 480, "y": 0, "w": 96, "h": 96, "index": 5 },
+        "happy_spin_3": { "x": 576, "y": 0, "w": 96, "h": 96, "index": 6 },
+        "jump_prep": { "x": 672, "y": 0, "w": 96, "h": 96, "index": 7 },
+        "jump": { "x": 768, "y": 0, "w": 96, "h": 96, "index": 8 },
+        "land": { "x": 864, "y": 0, "w": 96, "h": 96, "index": 9 }
+      },
+      "defaults": {
+        "idle": "neutral",
+        "walkCycle": ["walk_left", "neutral", "walk_right", "neutral"],
+        "happyClockwise": ["happy_spin_1", "happy_spin_2", "happy_spin_3"],
+        "happySpeedFps": {
+          "mild": 6,
+          "happy": 10,
+          "very_happy": 16
+        }
+      }
+    },
+    "sunny-dialogue-expressions": {
+      "path": "story_assets/sprites/sunny/sunny-dialogue-expressions.svg",
+      "frameWidth": 96,
+      "frameHeight": 96,
+      "sheetWidth": 960,
+      "sheetHeight": 96,
+      "frames": {
+        "neutral": { "x": 0, "y": 0, "w": 96, "h": 96, "index": 0 },
+        "happy_spin_1": { "x": 96, "y": 0, "w": 96, "h": 96, "index": 1 },
+        "happy_spin_2": { "x": 192, "y": 0, "w": 96, "h": 96, "index": 2 },
+        "happy_spin_3": { "x": 288, "y": 0, "w": 96, "h": 96, "index": 3 },
+        "worried": { "x": 384, "y": 0, "w": 96, "h": 96, "index": 4 },
+        "angry": { "x": 480, "y": 0, "w": 96, "h": 96, "index": 5 },
+        "sad": { "x": 576, "y": 0, "w": 96, "h": 96, "index": 6 },
+        "blink": { "x": 672, "y": 0, "w": 96, "h": 96, "index": 7 },
+        "surprised": { "x": 768, "y": 0, "w": 96, "h": 96, "index": 8 },
+        "talking": { "x": 864, "y": 0, "w": 96, "h": 96, "index": 9 }
+      },
+      "defaults": {
+        "idleExpression": "neutral",
+        "talkCycle": ["talking", "neutral", "talking", "happy_spin_1"],
+        "happierClockwise": ["happy_spin_1", "happy_spin_2", "happy_spin_3"]
+      }
+    },
+    "sunny-dialogue-portraits": {
+      "path": "story_assets/sprites/sunny/sunny-dialogue-portraits.svg",
+      "frameWidth": 128,
+      "frameHeight": 128,
+      "sheetWidth": 1280,
+      "sheetHeight": 128,
+      "frames": {
+        "neutral": { "x": 0, "y": 0, "w": 128, "h": 128, "index": 0 },
+        "happy_spin_1": { "x": 128, "y": 0, "w": 128, "h": 128, "index": 1 },
+        "happy_spin_2": { "x": 256, "y": 0, "w": 128, "h": 128, "index": 2 },
+        "happy_spin_3": { "x": 384, "y": 0, "w": 128, "h": 128, "index": 3 },
+        "worried": { "x": 512, "y": 0, "w": 128, "h": 128, "index": 4 },
+        "sad": { "x": 640, "y": 0, "w": 128, "h": 128, "index": 5 },
+        "blink": { "x": 768, "y": 0, "w": 128, "h": 128, "index": 6 },
+        "surprised": { "x": 896, "y": 0, "w": 128, "h": 128, "index": 7 },
+        "talking": { "x": 1024, "y": 0, "w": 128, "h": 128, "index": 8 },
+        "talking_fast": { "x": 1152, "y": 0, "w": 128, "h": 128, "index": 9 }
+      },
+      "defaults": {
+        "idleExpression": "neutral",
+        "happierClockwise": ["happy_spin_1", "happy_spin_2", "happy_spin_3"]
+      }
+    }
+  }
+}

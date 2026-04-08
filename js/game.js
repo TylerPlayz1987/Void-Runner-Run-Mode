@@ -89,7 +89,8 @@
           makerPanState = null,
           makerSelected = null,
           customLevelDraft = null,
-          makerPanelDragState = null;
+          makerPanelDragState = null,
+          classicRevampedFacing = 1;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
           mainCtx = canvas.getContext("2d"),
@@ -654,6 +655,454 @@
             stripe: mixThemeColors(platformBase, backgroundBase, 0.34),
             outline: mixThemeColors(platformBase, backgroundBase, 0.74),
           };
+        }
+        function drawClassicRevampedPlatform(p, camX, touched) {
+          const x = p.x - camX;
+          const y = p.y;
+          const w = p.w;
+          const h = p.h;
+          const topColor = touched ? { r: 62, g: 62, b: 66 } : { r: 78, g: 78, b: 84 };
+          const bodyColor = touched ? { r: 36, g: 36, b: 40 } : { r: 48, g: 48, b: 54 };
+          const sideColor = touched ? { r: 20, g: 20, b: 24 } : { r: 28, g: 28, b: 32 };
+          const highlightColor = { r: 212, g: 212, b: 218 };
+          const depth = Math.max(4, Math.min(10, Math.round(h * 0.42)));
+          const lip = Math.max(2, Math.round(depth * 0.42));
+
+          ctx.fillStyle = rgbaFromRgb(bodyColor);
+          ctx.fillRect(x, y + lip, w, h - lip);
+
+          ctx.beginPath();
+          ctx.moveTo(x + 1, y + 1);
+          ctx.lineTo(x + w - 1, y + 1);
+          ctx.lineTo(x + w + depth, y + depth * 0.65);
+          ctx.lineTo(x + depth, y + depth * 0.65);
+          ctx.closePath();
+          ctx.fillStyle = rgbaFromRgb(topColor);
+          ctx.fill();
+
+          // Give each platform type a unique top-surface texture while keeping the same 3D form.
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(x + 1, y + 1);
+          ctx.lineTo(x + w - 1, y + 1);
+          ctx.lineTo(x + w + depth, y + depth * 0.65);
+          ctx.lineTo(x + depth, y + depth * 0.65);
+          ctx.closePath();
+          ctx.clip();
+          if (p.isPhase) {
+            ctx.strokeStyle = "rgba(150,220,255,0.28)";
+            ctx.lineWidth = 1;
+            for (let ty = y + 2; ty < y + depth * 0.65 + 1; ty += 3) {
+              ctx.beginPath();
+              ctx.moveTo(x + 1, ty);
+              ctx.lineTo(x + w + depth - 1, ty);
+              ctx.stroke();
+            }
+          } else if (p.isSinking) {
+            ctx.strokeStyle = "rgba(20,20,24,0.5)";
+            ctx.lineWidth = 1;
+            for (let tx = x + 4; tx < x + w + depth - 2; tx += 12) {
+              ctx.beginPath();
+              ctx.moveTo(tx, y + 1);
+              ctx.lineTo(tx + 8, y + depth * 0.65);
+              ctx.stroke();
+            }
+          } else if (p.moveRange > 0) {
+            ctx.strokeStyle = "rgba(230,230,235,0.2)";
+            ctx.lineWidth = 1;
+            for (let tx = x - 8; tx < x + w + depth + 8; tx += 10) {
+              ctx.beginPath();
+              ctx.moveTo(tx, y + depth * 0.65);
+              ctx.lineTo(tx + 10, y + 1);
+              ctx.stroke();
+            }
+          } else {
+            ctx.fillStyle = "rgba(255,255,255,0.14)";
+            for (let tx = x + 6; tx < x + w + depth - 4; tx += 16) {
+              ctx.fillRect(tx, y + 2, 2, 2);
+            }
+          }
+          ctx.restore();
+
+          ctx.beginPath();
+          ctx.moveTo(x + w - 1, y + 1);
+          ctx.lineTo(x + w + depth, y + depth * 0.65);
+          ctx.lineTo(x + w + depth, y + h + depth * 0.65);
+          ctx.lineTo(x + w - 1, y + h);
+          ctx.closePath();
+          ctx.fillStyle = rgbaFromRgb(sideColor);
+          ctx.fill();
+
+          // Strong front-face texture differences so platform types are easy to tell apart.
+          const frontY = y + lip;
+          const frontH = Math.max(2, h - lip);
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(x + 1, frontY + 1, Math.max(1, w - 2), Math.max(1, frontH - 2));
+          ctx.clip();
+          if (p.isPhase) {
+            ctx.fillStyle = "rgba(110,220,255,0.3)";
+            for (let yy = frontY + 2; yy < frontY + frontH; yy += 6) {
+              ctx.fillRect(x + 2, yy, w - 4, 2);
+            }
+            ctx.strokeStyle = "rgba(185,245,255,0.55)";
+            ctx.lineWidth = 1;
+            for (let yy = frontY + 4; yy < frontY + frontH; yy += 12) {
+              ctx.beginPath();
+              ctx.moveTo(x + 3, yy);
+              ctx.lineTo(x + w - 3, yy);
+              ctx.stroke();
+            }
+          } else if (p.isSinking) {
+            ctx.strokeStyle = "rgba(8,8,10,0.8)";
+            ctx.lineWidth = 1.2;
+            for (let cx = x + 6; cx < x + w - 6; cx += 18) {
+              ctx.beginPath();
+              ctx.moveTo(cx, frontY + 2);
+              ctx.lineTo(cx + 3, frontY + frontH * 0.35);
+              ctx.lineTo(cx - 2, frontY + frontH * 0.62);
+              ctx.lineTo(cx + 4, frontY + frontH - 2);
+              ctx.stroke();
+            }
+          } else if (p.moveRange > 0) {
+            const slide = Math.floor((frameCount * 0.8) % 14);
+            ctx.fillStyle = "rgba(220,220,230,0.3)";
+            for (let cx = x - 12 + slide; cx < x + w + 12; cx += 14) {
+              ctx.beginPath();
+              ctx.moveTo(cx, frontY + 2);
+              ctx.lineTo(cx + 7, frontY + 2);
+              ctx.lineTo(cx + 2, frontY + frontH - 2);
+              ctx.lineTo(cx - 5, frontY + frontH - 2);
+              ctx.closePath();
+              ctx.fill();
+            }
+          } else {
+            ctx.strokeStyle = "rgba(255,255,255,0.22)";
+            ctx.lineWidth = 1;
+            for (let sx = x + 12; sx < x + w - 6; sx += 16) {
+              ctx.beginPath();
+              ctx.moveTo(sx, frontY + 2);
+              ctx.lineTo(sx, frontY + frontH - 2);
+              ctx.stroke();
+            }
+            ctx.fillStyle = "rgba(235,235,240,0.35)";
+            for (let sx = x + 8; sx < x + w - 6; sx += 20) {
+              ctx.fillRect(sx, frontY + 4, 2, 2);
+              ctx.fillRect(sx, frontY + frontH - 6, 2, 2);
+            }
+          }
+          ctx.restore();
+
+          ctx.fillStyle = rgbaFromRgb(highlightColor, 0.75);
+          ctx.fillRect(x + 2, y + 2, w - 4, 2);
+          ctx.fillStyle = "rgba(16,16,18,0.68)";
+          ctx.fillRect(x + 2, y + h - 3, w - 4, 2);
+
+          ctx.strokeStyle = "rgba(255,255,255,0.45)";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(x + 0.5, y + 0.5, w - 1, h - 1);
+        }
+        function drawClassicRevampedBlock(x, y, w, h, camX, touched) {
+          const drawX = x - camX;
+          const hazardBase = parseThemeColor((themes.classic || {}).hazards, { r: 243, g: 51, b: 51 });
+          const topColor = touched
+            ? mixThemeColors(hazardBase, { r: 110, g: 22, b: 22 }, 0.5)
+            : mixThemeColors(hazardBase, { r: 255, g: 170, b: 170 }, 0.26);
+          const bodyColor = touched
+            ? mixThemeColors(hazardBase, { r: 60, g: 10, b: 10 }, 0.4)
+            : mixThemeColors(hazardBase, { r: 100, g: 20, b: 20 }, 0.18);
+          const palette = getThemePlatformPalette("classic");
+          const sideColor = mixThemeColors(bodyColor, palette.outline, 0.5);
+          const topShadow = mixThemeColors(topColor, palette.stripe, 0.35);
+          const depth = Math.max(5, Math.min(12, Math.round(Math.min(w, h) * 0.18)));
+
+          ctx.fillStyle = rgbaFromRgb(sideColor);
+          ctx.fillRect(drawX + depth, y + depth, w, h);
+          ctx.fillStyle = rgbaFromRgb(bodyColor);
+          ctx.fillRect(drawX, y, w, h);
+
+          ctx.beginPath();
+          ctx.moveTo(drawX, y);
+          ctx.lineTo(drawX + w, y);
+          ctx.lineTo(drawX + w + depth, y + depth);
+          ctx.lineTo(drawX + depth, y + depth);
+          ctx.closePath();
+          ctx.fillStyle = rgbaFromRgb(topShadow);
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(drawX + w, y);
+          ctx.lineTo(drawX + w + depth, y + depth);
+          ctx.lineTo(drawX + w + depth, y + h + depth);
+          ctx.lineTo(drawX + w, y + h);
+          ctx.closePath();
+          ctx.fillStyle = rgbaFromRgb(sideColor);
+          ctx.fill();
+
+          ctx.strokeStyle = rgbaFromRgb(palette.outline, 0.85);
+          ctx.lineWidth = 1.4;
+          ctx.strokeRect(drawX + 0.5, y + 0.5, w - 1, h - 1);
+          ctx.strokeStyle = rgbaFromRgb(mixThemeColors(palette.accent, { r: 255, g: 255, b: 255 }, 0.14), 0.7);
+          ctx.beginPath();
+          ctx.moveTo(drawX + 3, y + 3);
+          ctx.lineTo(drawX + w - 3, y + 3);
+          ctx.stroke();
+        }
+        function drawClassicRevampedSpike(sx, sy, w, h, shape, camX, isSeeker = false) {
+          const drawX = sx - camX;
+          const spikeTop = isSeeker ? { r: 255, g: 118, b: 118 } : { r: 255, g: 92, b: 92 };
+          const spikeFront = isSeeker ? { r: 188, g: 22, b: 22 } : { r: 221, g: 28, b: 28 };
+          const spikeSide = isSeeker ? { r: 112, g: 10, b: 10 } : { r: 136, g: 12, b: 12 };
+          const spikeEdge = { r: 255, g: 230, b: 230 };
+          const depth = Math.max(3, Math.min(8, Math.round(Math.min(w, h) * 0.22)));
+
+          const drawSingleSpike = (baseX, baseW) => {
+            const tipX = baseX + baseW * 0.5;
+            ctx.fillStyle = rgbaFromRgb(spikeFront);
+            ctx.beginPath();
+            ctx.moveTo(baseX, sy);
+            ctx.lineTo(tipX, sy - h);
+            ctx.lineTo(baseX + baseW, sy);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(tipX, sy - h);
+            ctx.lineTo(baseX + baseW, sy);
+            ctx.lineTo(baseX + baseW + depth, sy - depth * 0.35);
+            ctx.lineTo(tipX + depth * 0.45, sy - h + depth * 0.25);
+            ctx.closePath();
+            ctx.fillStyle = rgbaFromRgb(spikeSide);
+            ctx.fill();
+
+            ctx.beginPath();
+            ctx.moveTo(baseX, sy);
+            ctx.lineTo(tipX, sy - h);
+            ctx.lineTo(baseX + baseW * 0.2, sy);
+            ctx.closePath();
+            ctx.fillStyle = rgbaFromRgb(spikeTop);
+            ctx.fill();
+
+            ctx.strokeStyle = rgbaFromRgb(spikeEdge, 0.85);
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(baseX, sy);
+            ctx.lineTo(tipX, sy - h);
+            ctx.lineTo(baseX + baseW, sy);
+            ctx.stroke();
+          };
+
+          if (shape === "split") {
+            const gap = Math.max(2, Math.floor(w * 0.18));
+            const toothW = Math.max(4, Math.floor((w - gap) / 2));
+            drawSingleSpike(drawX, toothW);
+            drawSingleSpike(drawX + toothW + gap, toothW);
+          } else if (shape === "needle") {
+            drawSingleSpike(drawX + Math.max(0, (w - Math.min(w, 10)) / 2), Math.min(w, 10));
+          } else {
+            drawSingleSpike(drawX, w);
+          }
+
+          if (isSeeker) {
+            ctx.save();
+            ctx.globalAlpha = 0.22 + 0.12 * Math.sin(frameCount * 0.18 + sx * 0.01);
+            ctx.fillStyle = "rgba(255,170,170,0.55)";
+            ctx.fillRect(drawX - 1, sy - h, w + 2, h);
+            ctx.restore();
+          }
+        }
+        function drawClassicRevampedShieldPowerup(x, y, w, h) {
+          const centerX = x + w / 2;
+          const shellGradient = ctx.createLinearGradient(x, y, x, y + h);
+          shellGradient.addColorStop(0, "#fbfdff");
+          shellGradient.addColorStop(0.2, "#d9e0ea");
+          shellGradient.addColorStop(0.55, "#ffffff");
+          shellGradient.addColorStop(1, "#a0a9b8");
+
+          const faceGradient = ctx.createLinearGradient(x, y, x, y + h);
+          faceGradient.addColorStop(0, "#63d7ff");
+          faceGradient.addColorStop(0.52, "#2fa2ea");
+          faceGradient.addColorStop(1, "#1058b0");
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(centerX, y + 1);
+          ctx.lineTo(x + w - 2, y + 4);
+          ctx.lineTo(x + w - 3, y + h * 0.56);
+          ctx.quadraticCurveTo(x + w - 3, y + h * 0.9, centerX, y + h - 1);
+          ctx.quadraticCurveTo(x + 3, y + h * 0.9, x + 2, y + h * 0.56);
+          ctx.lineTo(x + 2, y + 4);
+          ctx.closePath();
+          ctx.fillStyle = shellGradient;
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(centerX, y + 2.5);
+          ctx.lineTo(x + w - 4, y + 5);
+          ctx.lineTo(x + w - 4, y + h * 0.55);
+          ctx.quadraticCurveTo(x + w - 4, y + h * 0.84, centerX, y + h - 2.5);
+          ctx.quadraticCurveTo(x + 4, y + h * 0.84, x + 4, y + h * 0.55);
+          ctx.lineTo(x + 4, y + 5);
+          ctx.closePath();
+          ctx.fillStyle = faceGradient;
+          ctx.fill();
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(centerX - 5.4, y + 5.3);
+          ctx.quadraticCurveTo(x + 5.2, y + 7, x + 4.8, y + h * 0.58);
+          ctx.quadraticCurveTo(x + 5.2, y + h * 0.75, centerX - 1.2, y + h - 2.5);
+          ctx.lineTo(centerX - 5.2, y + h - 2.5);
+          ctx.quadraticCurveTo(x + 2.9, y + h * 0.75, x + 3.3, y + h * 0.52);
+          ctx.quadraticCurveTo(x + 2.8, y + 6.1, centerX - 5.4, y + 5.3);
+          ctx.closePath();
+          ctx.fillStyle = "rgba(255,255,255,0.18)";
+          ctx.fill();
+
+          ctx.beginPath();
+          ctx.moveTo(x + 4.4, y + 5.8);
+          ctx.lineTo(centerX - 1.6, y + 3.4);
+          ctx.strokeStyle = "rgba(255,255,255,0.42)";
+          ctx.lineWidth = 1;
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(centerX, y + 1);
+          ctx.lineTo(x + w - 2, y + 4);
+          ctx.lineTo(x + w - 3, y + h * 0.56);
+          ctx.quadraticCurveTo(x + w - 3, y + h * 0.9, centerX, y + h - 1);
+          ctx.quadraticCurveTo(x + 3, y + h * 0.9, x + 2, y + h * 0.56);
+          ctx.lineTo(x + 2, y + 4);
+          ctx.closePath();
+          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = "rgba(255,255,255,0.94)";
+          ctx.stroke();
+          ctx.lineWidth = 1;
+          ctx.strokeStyle = "rgba(60,78,96,0.92)";
+          ctx.stroke();
+
+          ctx.fillStyle = "rgba(255,255,255,0.55)";
+          ctx.beginPath();
+          ctx.arc(x + 6.2, y + 6.1, 1.1, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+          ctx.restore();
+        }
+        function drawClassicRevampedLavaWall(x, y, w, h) {
+          const depth = Math.max(8, Math.min(22, Math.round(w * 0.35)));
+          const topRim = Math.max(4, Math.round(h * 0.06));
+          const sideX = x + w - depth;
+
+          const shadow = ctx.createLinearGradient(x, y, x, y + h);
+          shadow.addColorStop(0, "rgba(0,0,0,0.28)");
+          shadow.addColorStop(1, "rgba(0,0,0,0.52)");
+          ctx.fillStyle = shadow;
+          ctx.fillRect(x + depth * 0.15, y + 2, w, h);
+
+          const front = ctx.createLinearGradient(x, y, x, y + h);
+          front.addColorStop(0, "#ffcb4f");
+          front.addColorStop(0.12, "#ff7d1b");
+          front.addColorStop(0.45, "#ff431f");
+          front.addColorStop(1, "#9f0f0f");
+          ctx.fillStyle = front;
+          ctx.fillRect(x, y, w - depth, h);
+
+          const side = ctx.createLinearGradient(sideX, y, x + w, y);
+          side.addColorStop(0, "#8b120f");
+          side.addColorStop(1, "#4e0507");
+          ctx.fillStyle = side;
+          ctx.beginPath();
+          ctx.moveTo(x + w - depth, y + topRim);
+          ctx.lineTo(x + w, y);
+          ctx.lineTo(x + w, y + h);
+          ctx.lineTo(x + w - depth, y + h - topRim);
+          ctx.closePath();
+          ctx.fill();
+
+          const top = ctx.createLinearGradient(x, y, x, y + topRim + 6);
+          top.addColorStop(0, "rgba(255,255,255,0.5)");
+          top.addColorStop(1, "rgba(255,150,80,0.18)");
+          ctx.fillStyle = top;
+          ctx.beginPath();
+          ctx.moveTo(x + 1, y + 1);
+          ctx.lineTo(x + w - depth + 1, y + 1);
+          ctx.lineTo(x + w - depth - 1, y + topRim + 1);
+          ctx.lineTo(x + 2, y + topRim + 1);
+          ctx.closePath();
+          ctx.fill();
+
+          ctx.strokeStyle = "rgba(255,245,200,0.9)";
+          ctx.lineWidth = 1.2;
+          ctx.strokeRect(x + 0.5, y + 0.5, w - depth - 1, h - 1);
+          ctx.strokeStyle = "rgba(95,10,14,0.95)";
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x + w - depth + 0.5, y + topRim);
+          ctx.lineTo(x + w + 0.5, y + 0.5);
+          ctx.lineTo(x + w + 0.5, y + h + 0.5);
+          ctx.lineTo(x + w - depth + 0.5, y + h - topRim);
+          ctx.stroke();
+
+          ctx.save();
+          ctx.globalAlpha = 0.75;
+          ctx.fillStyle = "rgba(255,255,255,0.16)";
+          for (let i = 0; i < 4; i++) {
+            const stripeY = y + 4 + i * Math.max(8, Math.floor(h / 5));
+            ctx.fillRect(x + 3, stripeY, w - depth - 6, 2);
+          }
+          ctx.restore();
+        }
+        function getClassicRevampedPlayerFrame() {
+          if (!player.grounded) {
+            return player.vy < -1 ? 6 : 7;
+          }
+          if (player.dashTimer > 0) return 4;
+          if (Math.abs(player.vx) > 0.35) {
+            return Math.floor(frameCount / 6) % 2 === 0 ? 1 : 2;
+          }
+          const idleCycle = frameCount % 300;
+          if (idleCycle < 20) return 3;
+          if (idleCycle >= 150 && idleCycle < 180) return 4;
+          return 0;
+        }
+        function drawClassicRevampedPlayer(x, y) {
+          if (player.vx > 0.2) {
+            classicRevampedFacing = 1;
+          } else if (player.vx < -0.2) {
+            classicRevampedFacing = -1;
+          }
+          const isIdle = player.grounded && player.dashTimer <= 0 && Math.abs(player.vx) <= 0.35;
+          const idleBob = isIdle ? Math.sin(frameCount * 0.08) * 1.2 : 0;
+          const sheet = getThemePlayerImage("classicrevamped");
+          const theme = themes.classicrevamped || {};
+          const frameWidth = theme.playerFrameWidth || 96;
+          const frameHeight = theme.playerFrameHeight || 96;
+          const totalFrames = Math.max(1, theme.playerFrameCount || 1);
+          if (sheet && sheet.complete && sheet.naturalWidth > 0) {
+            const frameIndex = Math.min(totalFrames - 1, Math.max(0, getClassicRevampedPlayerFrame()));
+            const srcX = frameIndex * frameWidth;
+            const drawW = player.w + 22;
+            const drawH = player.h + 22;
+            const centerX = x + player.w / 2;
+            const centerY = y + player.h / 2 + idleBob;
+            ctx.save();
+            ctx.translate(centerX, centerY);
+            ctx.scale(classicRevampedFacing, 1);
+            ctx.drawImage(sheet, srcX, 0, frameWidth, frameHeight, -drawW / 2, -drawH / 2, drawW, drawH);
+            ctx.restore();
+            return;
+          }
+
+          const palette = getThemePlatformPalette("classicrevamped");
+          ctx.save();
+          ctx.translate(0, idleBob);
+          ctx.fillStyle = rgbaFromRgb(palette.bodyBottom);
+          ctx.fillRect(x, y, player.w, player.h);
+          ctx.fillStyle = rgbaFromRgb(palette.bodyTop);
+          ctx.fillRect(x + 2, y + 2, player.w - 4, player.h - 4);
+          ctx.strokeStyle = rgbaFromRgb(palette.outline, 0.85);
+          ctx.strokeRect(x + 0.5, y + 0.5, player.w - 1, player.h - 1);
+          ctx.restore();
         }
         function drawSolPlatform(x, y, w, h, fallbackColor) {
           const solPlatformImage = getThemePlatformImage("catmodel");
@@ -2051,6 +2500,21 @@
             }
             return;
           }
+          if (currentTheme === "classicrevamped") {
+            for (let i = 0; i < 12; i++) {
+              jumpDust.push({
+                x: player.x + player.w / 2 + (Math.random() - 0.5) * 9,
+                y: player.y + player.h,
+                vx: (Math.random() - 0.5) * 1.9,
+                vy: -3.1 - Math.random() * 1.6,
+                size: 1.8 + Math.random() * 2,
+                alpha: 0.86,
+                life: 18 + Math.floor(Math.random() * 8),
+                kind: "classicRevampedDust",
+              });
+            }
+            return;
+          }
           if (currentTheme === "neonrailyard") {
             for (let i = 0; i < 14; i++) {
               jumpDust.push({
@@ -3084,6 +3548,8 @@
               y + player.h - 2,
             );
             ctx.stroke();
+          } else if (currentTheme === "classicrevamped") {
+            drawClassicRevampedPlayer(x, y);
           } else if (currentTheme === "neonrailyard") {
             const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.2);
             const shell = ctx.createLinearGradient(x, y, x, y + player.h);
@@ -3541,8 +4007,12 @@
               ctx.fillStyle = "#ff6a2b";
               ctx.fillRect(o.x - makerCameraX, o.y, o.w, o.h);
             } else if (o.type === "lavaWall") {
-              ctx.fillStyle = "#ff6a2b";
-              ctx.fillRect(o.x - makerCameraX, 400 - o.h, o.w, o.h);
+              if (currentTheme === "classicrevamped") {
+                drawClassicRevampedLavaWall(o.x - makerCameraX, 400 - o.h, o.w, o.h);
+              } else {
+                ctx.fillStyle = "#ff6a2b";
+                ctx.fillRect(o.x - makerCameraX, 400 - o.h, o.w, o.h);
+              }
             } else if (o.type === "seeker") {
               ctx.fillStyle = "#ff79ff";
               ctx.fillRect(o.x - makerCameraX, o.y, o.w, o.h);
@@ -3552,25 +4022,69 @@
               ctx.lineTo(o.x - makerCameraX + o.w + (o.range || 0), o.y + o.h / 2);
               ctx.stroke();
             } else if (o.type === "well") {
-              ctx.strokeStyle = "#7a7aff";
-              ctx.lineWidth = 2;
-              ctx.beginPath();
-              ctx.arc(o.x - makerCameraX, o.y, o.r, 0, Math.PI * 2);
-              ctx.stroke();
-              ctx.fillStyle = "rgba(122, 122, 255, 0.15)";
-              ctx.beginPath();
-              ctx.arc(o.x - makerCameraX, o.y, o.r, 0, Math.PI * 2);
-              ctx.fill();
+              if (currentTheme === "classicrevamped") {
+                const drawX = o.x - makerCameraX;
+                const drawY = o.y;
+                const outerR = o.r * 0.95;
+                const innerR = Math.max(8, o.r * 0.52);
+                const coreR = o.core > 0 ? Math.max(4, o.core * 0.85) : 0;
+
+                ctx.fillStyle = "rgba(0,0,0,0.28)";
+                ctx.beginPath();
+                ctx.ellipse(drawX, drawY + outerR * 0.22, outerR * 1.02, outerR * 0.76, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                const outer = ctx.createRadialGradient(drawX, drawY, innerR * 0.2, drawX, drawY, outerR);
+                outer.addColorStop(0, "rgba(138, 80, 255, 0.22)");
+                outer.addColorStop(0.55, "rgba(40, 22, 84, 0.72)");
+                outer.addColorStop(1, "rgba(0,0,0,0.92)");
+                ctx.fillStyle = outer;
+                ctx.beginPath();
+                ctx.ellipse(drawX, drawY, outerR, outerR * 0.8, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.strokeStyle = "rgba(190, 150, 255, 0.8)";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.ellipse(drawX, drawY, outerR, outerR * 0.8, 0, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.fillStyle = "rgba(0,0,0,0.9)";
+                ctx.beginPath();
+                ctx.ellipse(drawX, drawY, innerR, innerR * 0.76, 0, 0, Math.PI * 2);
+                ctx.fill();
+
+                if (coreR > 0) {
+                  ctx.fillStyle = "rgba(65, 10, 105, 0.95)";
+                  ctx.beginPath();
+                  ctx.ellipse(drawX, drawY, coreR, coreR * 0.82, 0, 0, Math.PI * 2);
+                  ctx.fill();
+                }
+              } else {
+                ctx.strokeStyle = "#7a7aff";
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(o.x - makerCameraX, o.y, o.r, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.fillStyle = "rgba(122, 122, 255, 0.15)";
+                ctx.beginPath();
+                ctx.arc(o.x - makerCameraX, o.y, o.r, 0, Math.PI * 2);
+                ctx.fill();
+              }
             }
           }
 
           for (const p of level.powerups) {
             if (p.type === "shield") {
-              ctx.fillStyle = "rgba(70, 220, 255, 0.2)";
-              ctx.fillRect(p.x - makerCameraX, p.y, p.w, p.h);
-              ctx.strokeStyle = "#66e6ff";
-              ctx.lineWidth = 2;
-              ctx.strokeRect(p.x - makerCameraX, p.y, p.w, p.h);
+              if (currentTheme === "classicrevamped") {
+                drawClassicRevampedShieldPowerup(p.x - makerCameraX, p.y, p.w, p.h);
+              } else {
+                ctx.fillStyle = "rgba(70, 220, 255, 0.2)";
+                ctx.fillRect(p.x - makerCameraX, p.y, p.w, p.h);
+                ctx.strokeStyle = "#66e6ff";
+                ctx.lineWidth = 2;
+                ctx.strokeRect(p.x - makerCameraX, p.y, p.w, p.h);
+              }
             }
           }
 
@@ -4367,6 +4881,41 @@
               ctx.fillStyle = "rgba(255,140,65,0.22)";
               ctx.fillRect(ex, ey, 2, 6);
             }
+          } else if (currentTheme === "classicrevamped") {
+            const sky = ctx.createLinearGradient(0, 0, 0, 400);
+            sky.addColorStop(0, "#021008");
+            sky.addColorStop(0.5, "#03170f");
+            sky.addColorStop(1, "#010704");
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, 800, 400);
+
+            // Full-screen green grid, similar to main menu but covering the entire playfield.
+            ctx.strokeStyle = "rgba(84,210,128,0.25)";
+            ctx.lineWidth = 1;
+            for (let x = -24; x <= 824; x += 24) {
+              const drawX = x - (camX * 0.18 % 24);
+              ctx.beginPath();
+              ctx.moveTo(drawX, 0);
+              ctx.lineTo(drawX, 400);
+              ctx.stroke();
+            }
+            for (let y = -20; y <= 420; y += 20) {
+              const depth = y / 400;
+              const alpha = 0.14 + depth * 0.12;
+              ctx.strokeStyle = `rgba(88,205,125,${alpha})`;
+              ctx.beginPath();
+              ctx.moveTo(0, y);
+              ctx.lineTo(800, y);
+              ctx.stroke();
+            }
+
+            // Purple void hue overlay focused on the bottom/fall area.
+            const voidGlow = ctx.createLinearGradient(0, 250, 0, 400);
+            voidGlow.addColorStop(0, "rgba(60,18,98,0)");
+            voidGlow.addColorStop(0.45, "rgba(112,48,176,0.2)");
+            voidGlow.addColorStop(1, "rgba(165,86,245,0.3)");
+            ctx.fillStyle = voidGlow;
+            ctx.fillRect(0, 0, 800, 400);
           } else {
             ctx.fillStyle = t.bg;
             ctx.fillRect(0, 0, 800, 400);
@@ -4724,54 +5273,117 @@
             );
             ctx.save();
             ctx.translate(wellOffset.x, wellOffset.y);
-            ctx.beginPath();
-            ctx.arc(w.x - camX, w.y, w.r, 0, Math.PI * 2);
-            let g = ctx.createRadialGradient(
-              w.x - camX,
-              w.y,
-              0,
-              w.x - camX,
-              w.y,
-              w.r,
-            );
-            if (w.core > 0) {
-              g.addColorStop(0, wellFx.coreInner);
-              g.addColorStop(0.3, wellFx.coreMid);
-            } else {
-              g.addColorStop(0, wellFx.normalInner);
-              g.addColorStop(0.3, wellFx.normalMid);
-            }
-            g.addColorStop(1, "transparent");
-            ctx.fillStyle = g;
-            ctx.fill();
-            if (w.core > 0) {
+            const cx = w.x - camX;
+            const cy = w.y;
+            if (currentTheme === "classicrevamped") {
+              const ringPulse = 0.94 + Math.sin(frameCount * 0.06 + w.x * 0.01) * 0.06;
+
+              // Soft floor shadow to anchor the well and sell depth.
+              const floorShadow = ctx.createRadialGradient(cx, cy + w.r * 0.25, 0, cx, cy + w.r * 0.25, w.r * 1.15);
+              floorShadow.addColorStop(0, "rgba(0,0,0,0.38)");
+              floorShadow.addColorStop(1, "rgba(0,0,0,0)");
+              ctx.fillStyle = floorShadow;
               ctx.beginPath();
-              ctx.arc(
-                w.x - camX,
-                w.y,
-                w.core + Math.sin(frameCount / 5) * 2,
-                0,
-                Math.PI * 2,
-              );
-              ctx.fillStyle = wellFx.coreFill || "#000";
+              ctx.ellipse(cx, cy + w.r * 0.25, w.r * 1.1, w.r * 0.8, 0, 0, Math.PI * 2);
               ctx.fill();
-              ctx.strokeStyle = wellFx.coreStroke;
-              ctx.lineWidth = 3;
-              ctx.stroke();
-            }
-            for (let i = 0; i < 3; i++) {
+
+              // Outer rim glow and beveled ring.
+              const rimGlow = ctx.createRadialGradient(cx, cy, w.r * 0.1, cx, cy, w.r);
+              rimGlow.addColorStop(0, w.core > 0 ? wellFx.coreMid : wellFx.normalMid);
+              rimGlow.addColorStop(0.55, w.core > 0 ? wellFx.coreInner : wellFx.normalInner);
+              rimGlow.addColorStop(1, "transparent");
+              ctx.fillStyle = rimGlow;
               ctx.beginPath();
-              ctx.arc(
-                w.x - camX,
-                w.y,
-                (w.core || 10) + 10 + i * 15,
-                frameCount / 20 + i,
-                frameCount / 20 + i + 1,
-              );
-              ctx.strokeStyle =
-                w.core > 0 ? wellFx.coreRing : wellFx.normalRing;
+              ctx.ellipse(cx, cy, w.r * 1.02, w.r * 0.86, 0, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.strokeStyle = w.core > 0 ? wellFx.coreRing : wellFx.normalRing;
+              ctx.lineWidth = 2.5;
+              ctx.beginPath();
+              ctx.ellipse(cx, cy, w.r * ringPulse, w.r * 0.82 * ringPulse, 0, 0, Math.PI * 2);
               ctx.stroke();
+
+              // Inner pit with stronger central darkness for 3D depth.
+              const pit = ctx.createRadialGradient(cx, cy + 1, 0, cx, cy + 1, w.r * 0.7);
+              pit.addColorStop(0, w.core > 0 ? wellFx.coreMid : wellFx.normalMid);
+              pit.addColorStop(0.45, w.core > 0 ? "rgba(20,10,32,0.9)" : "rgba(10,10,16,0.9)");
+              pit.addColorStop(1, "rgba(0,0,0,0.96)");
+              ctx.fillStyle = pit;
+              ctx.beginPath();
+              ctx.ellipse(cx, cy, w.r * 0.72, w.r * 0.58, 0, 0, Math.PI * 2);
+              ctx.fill();
+
+              // Core orb and highlight.
+              if (w.core > 0) {
+                const coreR = w.core + Math.sin(frameCount / 5) * 2;
+                ctx.fillStyle = wellFx.coreFill || "#000";
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, coreR * 1.08, coreR * 0.84, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = wellFx.coreStroke;
+                ctx.lineWidth = 2.5;
+                ctx.stroke();
+
+                ctx.fillStyle = "rgba(255,255,255,0.22)";
+                ctx.beginPath();
+                ctx.ellipse(cx - coreR * 0.28, cy - coreR * 0.22, coreR * 0.36, coreR * 0.24, -0.2, 0, Math.PI * 2);
+                ctx.fill();
+              }
+
+              // Orbiting detail arcs for a richer animated look.
+              for (let i = 0; i < 4; i++) {
+                const orbitR = (w.core || 10) + 8 + i * 10;
+                const start = frameCount / 20 + i * 0.95;
+                const arcLen = 0.55 + i * 0.08;
+                ctx.beginPath();
+                ctx.ellipse(cx, cy, orbitR, orbitR * 0.74, 0, start, start + arcLen);
+                ctx.strokeStyle = w.core > 0 ? wellFx.coreRing : wellFx.normalRing;
+                ctx.lineWidth = 1.4 - i * 0.2;
+                ctx.stroke();
+              }
+            } else {
+              ctx.beginPath();
+              ctx.arc(cx, cy, w.r, 0, Math.PI * 2);
+              let g = ctx.createRadialGradient(cx, cy, 0, cx, cy, w.r);
+              if (w.core > 0) {
+                g.addColorStop(0, wellFx.coreInner);
+                g.addColorStop(0.3, wellFx.coreMid);
+              } else {
+                g.addColorStop(0, wellFx.normalInner);
+                g.addColorStop(0.3, wellFx.normalMid);
+              }
+              g.addColorStop(1, "transparent");
+              ctx.fillStyle = g;
+              ctx.fill();
+              if (w.core > 0) {
+                ctx.beginPath();
+                ctx.arc(
+                  cx,
+                  cy,
+                  w.core + Math.sin(frameCount / 5) * 2,
+                  0,
+                  Math.PI * 2,
+                );
+                ctx.fillStyle = wellFx.coreFill || "#000";
+                ctx.fill();
+                ctx.strokeStyle = wellFx.coreStroke;
+                ctx.lineWidth = 3;
+                ctx.stroke();
+              }
+              for (let i = 0; i < 3; i++) {
+                ctx.beginPath();
+                ctx.arc(
+                  cx,
+                  cy,
+                  (w.core || 10) + 10 + i * 15,
+                  frameCount / 20 + i,
+                  frameCount / 20 + i + 1,
+                );
+                ctx.strokeStyle = w.core > 0 ? wellFx.coreRing : wellFx.normalRing;
+                ctx.stroke();
+              }
             }
+
             drawWallGlitchOverlay(
               w.x - camX - w.r,
               w.y - w.r,
@@ -4793,11 +5405,15 @@
             );
             ctx.save();
             ctx.translate(shieldOffset.x, shieldOffset.y);
-            ctx.strokeStyle = "#0cf";
-            ctx.lineWidth = 3;
-            ctx.strokeRect(s.x - camX, s.y, 20, 20);
-            ctx.fillStyle = "rgba(0,200,255,0.5)";
-            ctx.fillRect(s.x - camX + 5, s.y + 5, 10, 10);
+            if (currentTheme === "classicrevamped") {
+              drawClassicRevampedShieldPowerup(s.x - camX, s.y, s.w, s.h);
+            } else {
+              ctx.strokeStyle = "#0cf";
+              ctx.lineWidth = 3;
+              ctx.strokeRect(s.x - camX, s.y, 20, 20);
+              ctx.fillStyle = "rgba(0,200,255,0.5)";
+              ctx.fillRect(s.x - camX + 5, s.y + 5, 10, 10);
+            }
             drawWallGlitchOverlay(
               s.x - camX,
               s.y,
@@ -4862,6 +5478,17 @@
               ctx.fill();
               ctx.fillStyle = `rgba(255,225,140,${Math.max(0, p.alpha - 0.22)})`;
               ctx.fillRect(p.x - camX - p.size * 0.18, p.y - p.size * 0.18, p.size * 0.36, p.size * 0.36);
+            } else if (p.kind === "classicRevampedDust") {
+              ctx.fillStyle = `rgba(178,205,235,${p.alpha})`;
+              ctx.beginPath();
+              ctx.moveTo(p.x - camX, p.y - p.size * 0.55);
+              ctx.lineTo(p.x - camX + p.size * 0.45, p.y);
+              ctx.lineTo(p.x - camX, p.y + p.size * 0.6);
+              ctx.lineTo(p.x - camX - p.size * 0.45, p.y);
+              ctx.closePath();
+              ctx.fill();
+              ctx.fillStyle = `rgba(230,244,255,${Math.max(0, p.alpha - 0.25)})`;
+              ctx.fillRect(p.x - camX - 0.5, p.y - 0.5, 1, 1);
             } else {
               ctx.fillStyle = `rgba(168,168,168,${p.alpha})`;
               ctx.fillRect(p.x - camX, p.y, p.size, p.size);
@@ -5220,6 +5847,49 @@
             ctx.arc(0, 0, gw * 0.14, 0, Math.PI * 2);
             ctx.fill();
             ctx.restore();
+          } else if (goalTheme === "classicrevamped") {
+            // 3D objective block matching the revamped classic style.
+            const depth = Math.max(6, Math.round(Math.min(gw, gh) * 0.24));
+            const front = { r: 64, g: 64, b: 70 };
+            const top = { r: 92, g: 92, b: 98 };
+            const side = { r: 36, g: 36, b: 40 };
+            const pulse = 0.5 + 0.5 * Math.sin(frameCount * 0.1);
+
+            ctx.fillStyle = rgbaFromRgb(side, 0.95);
+            ctx.beginPath();
+            ctx.moveTo(gx + gw, gy);
+            ctx.lineTo(gx + gw + depth, gy + depth * 0.55);
+            ctx.lineTo(gx + gw + depth, gy + gh + depth * 0.55);
+            ctx.lineTo(gx + gw, gy + gh);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = rgbaFromRgb(top, 0.95);
+            ctx.beginPath();
+            ctx.moveTo(gx, gy);
+            ctx.lineTo(gx + gw, gy);
+            ctx.lineTo(gx + gw + depth, gy + depth * 0.55);
+            ctx.lineTo(gx + depth, gy + depth * 0.55);
+            ctx.closePath();
+            ctx.fill();
+
+            ctx.fillStyle = rgbaFromRgb(front, 0.95);
+            ctx.fillRect(gx, gy, gw, gh);
+
+            ctx.strokeStyle = "rgba(255,255,255,0.45)";
+            ctx.lineWidth = 1.4;
+            ctx.strokeRect(gx + 0.5, gy + 0.5, gw - 1, gh - 1);
+
+            // Subtle inner glow to keep it readable as a goal object.
+            ctx.fillStyle = `rgba(190,245,210,${0.22 + pulse * 0.18})`;
+            ctx.fillRect(gx + 4, gy + 4, gw - 8, gh - 8);
+
+            ctx.strokeStyle = `rgba(210,255,225,${0.35 + pulse * 0.25})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(gx + gw * 0.18, gy + gh * 0.52);
+            ctx.lineTo(gx + gw * 0.82, gy + gh * 0.52);
+            ctx.stroke();
           } else if (goalTheme === "zelda") {
             // Triforce objective marker.
             ctx.save();
@@ -5417,11 +6087,19 @@
               ctx.lineWidth = 2;
               ctx.strokeRect(h.x - camX, h.y, h.w, h.h);
             } else if (h.type === "seeker") {
-              ctx.fillStyle = t.hazards;
-              drawSpike(h.x, h.y + h.h, h.w, h.h, h.shape || "split", camX, true);
+              if (currentTheme === "classicrevamped") {
+                drawClassicRevampedSpike(h.x, h.y + h.h, h.w, h.h, h.shape || "split", camX, true);
+              } else {
+                ctx.fillStyle = t.hazards;
+                drawSpike(h.x, h.y + h.h, h.w, h.h, h.shape || "split", camX, true);
+              }
             } else {
-              ctx.fillStyle = t.hazards;
-              ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+              if (currentTheme === "classicrevamped") {
+                drawClassicRevampedBlock(h.x, h.y, h.w, h.h, camX, false);
+              } else {
+                ctx.fillStyle = t.hazards;
+                ctx.fillRect(h.x - camX, h.y, h.w, h.h);
+              }
             }
             drawWallGlitchOverlay(h.x - camX, h.y, h.w, h.h, hazardGlitch);
             ctx.restore();
@@ -5455,6 +6133,8 @@
                 drawCrystalCavernPlatform(p, camX, p.isTouched);
               } else if (currentTheme === "clockworkskyforge") {
                 drawClockworkSkyforgePlatform(p, camX, p.isTouched);
+              } else if (currentTheme === "classicrevamped") {
+                drawClassicRevampedPlatform(p, camX, p.isTouched);
               } else if (currentTheme === "catmodel") {
                 drawSolPlatform(p.x - camX, p.y, p.w, p.h, t.plat);
                 if (p.isTouched) {
@@ -5529,6 +6209,8 @@
                 drawCrystalCavernPlatform(p, camX, false);
               } else if (currentTheme === "clockworkskyforge") {
                 drawClockworkSkyforgePlatform(p, camX, false);
+              } else if (currentTheme === "classicrevamped") {
+                drawClassicRevampedPlatform(p, camX, p.isTouched);
               } else if (currentTheme === "catmodel") {
                 drawSolPlatform(p.x - camX, p.y, p.w, p.h, t.plat);
               } else {
@@ -5585,7 +6267,11 @@
               let sw = p.hasSpike ? p.spikeW : p.seekerW;
               let sh = p.hasSpike ? p.spikeH : p.seekerH;
               let ss = p.hasSpike ? p.spikeShape : p.seekerShape;
-              drawSpike(sx, p.y, sw, sh, ss, camX, p.hasSeeker);
+              if (currentTheme === "classicrevamped") {
+                drawClassicRevampedSpike(sx, p.y, sw, sh, ss, camX, p.hasSeeker);
+              } else {
+                drawSpike(sx, p.y, sw, sh, ss, camX, p.hasSeeker);
+              }
             }
             if (p.hasFakeHazard) {
               const fx = p.x + p.fakeX;
@@ -5594,7 +6280,11 @@
               ctx.fillStyle = currentTheme === "cyber" ? "#0ff" : "#fff";
               ctx.strokeStyle = currentTheme === "cyber" ? "#f0f" : "#88f";
               if (p.fakeType === "ghostSpike") {
-                drawSpike(fx, p.y, p.fakeW, p.fakeH, "triangle", camX);
+                if (currentTheme === "classicrevamped") {
+                  drawClassicRevampedSpike(fx, p.y, p.fakeW, p.fakeH, "triangle", camX);
+                } else {
+                  drawSpike(fx, p.y, p.fakeW, p.fakeH, "triangle", camX);
+                }
               } else {
                 const bx = fx - camX;
                 const by = p.y - p.fakeH;
@@ -6431,10 +7121,13 @@
         const aprilFoolsThemeUnlockKey = "void_secret_theme_aprilfools_unlocked";
         const solThemeCode = "sol";
         const solThemeUnlockKey = "void_secret_theme_sol_unlocked";
+        const classicRevampedThemeCode = "classic_new";
+        const classicRevampedThemeUnlockKey = "void_secret_theme_classicrevamped_unlocked";
         let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
         let tjThemeUnlocked = localStorage.getItem(tjThemeUnlockKey) === "1";
         let aprilFoolsThemeUnlocked = localStorage.getItem(aprilFoolsThemeUnlockKey) === "1";
         let solThemeUnlocked = localStorage.getItem(solThemeUnlockKey) === "1";
+        let classicRevampedThemeUnlocked = localStorage.getItem(classicRevampedThemeUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
@@ -6470,6 +7163,18 @@
               theme: "tjtheme",
               label: "TJ's Theme",
               unlocked: tjThemeUnlocked,
+            },
+            {
+              container: document.getElementById("themeButtons"),
+              theme: "classicrevamped",
+              label: "Classic Revamped",
+              unlocked: classicRevampedThemeUnlocked,
+            },
+            {
+              container: document.getElementById("speedRunThemeButtons"),
+              theme: "classicrevamped",
+              label: "Classic Revamped",
+              unlocked: classicRevampedThemeUnlocked,
             },
             {
               container: document.getElementById("themeButtons"),
@@ -6516,6 +7221,17 @@
               }
             };
             themeBtn.style.display = spec.unlocked ? "" : "none";
+          }
+
+          const makerThemeSelect = document.getElementById("makerThemeSelect");
+          if (makerThemeSelect) {
+            const classicRevampedOption = makerThemeSelect.querySelector('option[value="classicrevamped"]');
+            if (classicRevampedOption) {
+              classicRevampedOption.style.display = classicRevampedThemeUnlocked ? "" : "none";
+              if (!classicRevampedThemeUnlocked && makerThemeSelect.value === "classicrevamped") {
+                makerThemeSelect.value = "classic";
+              }
+            }
           }
         }
 
@@ -6584,6 +7300,13 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("sol theme unlocked");
+          } else if (normalized === classicRevampedThemeCode) {
+            if (!classicRevampedThemeUnlocked) {
+              classicRevampedThemeUnlocked = true;
+              localStorage.setItem(classicRevampedThemeUnlockKey, "1");
+              updateSecretThemeButtonUi();
+            }
+            flashCodeMessage("classic revamped unlocked");
           } else {
             flashCodeMessage("invalid code");
             return;
@@ -6689,6 +7412,15 @@
         document.getElementById("tutorialBtn").onclick = () => startSelectedMode(true);
         // Mode menu entry point for Speed Running mode
         document.getElementById("speedRunModeBtn").onclick = () => showSpeedRunMenu();
+        document.getElementById("storyModeBtn").onclick = () => {
+          const storyMenuApi = window.VRStoryModeMenu;
+          if (storyMenuApi && typeof storyMenuApi.open === "function") {
+            storyMenuApi.open();
+            return;
+          }
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("storyModeMenu").style.display = "flex";
+        };
         document.getElementById("levelMakerModeBtn").onclick = () => enterLevelMakerMode();
         document.getElementById("speedRunBackBtn").onclick = () => hideSpeedRunMenu();
         document.getElementById("speedRunStartBtn").onclick = () => startSpeedRunMode();
@@ -7176,9 +7908,11 @@
           localStorage.removeItem("void_secret_theme_zelda_unlocked");
           localStorage.removeItem("void_secret_theme_tjtheme_unlocked");
           localStorage.removeItem("void_secret_theme_sol_unlocked");
+          localStorage.removeItem("void_secret_theme_classicrevamped_unlocked");
           secretThemeUnlocked = false;
           tjThemeUnlocked = false;
           solThemeUnlocked = false;
+          classicRevampedThemeUnlocked = false;
           updateSecretThemeButtonUi();
           setLevelDisplay();
           updateBestLevelUi();

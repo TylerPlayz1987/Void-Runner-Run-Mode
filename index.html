@@ -2,6 +2,7 @@
 <html>
   <head>
     <link rel="stylesheet" href="css/styles.css" />
+    <link rel="stylesheet" href="css/story_mode/story-mode-menu.css" />
   </head>
 
   <body>
@@ -143,12 +144,35 @@
           <button id="speedRunModeBtn" style="width: 220px; margin-bottom: 8px">
             Speed Running
           </button>
+          <button id="storyModeBtn" style="width: 220px; margin-bottom: 8px">
+            Story Mode
+          </button>
           <button id="levelMakerModeBtn" style="width: 220px; margin-bottom: 8px; background: #3ad; color: #03131d">
             Level Maker(PC)
           </button>
           <button id="modeBackBtn" class="small-btn" style="width: 220px">
             Back
           </button>
+        </div>
+        <div id="storyModeMenu" class="overlay" style="display: none" aria-hidden="true">
+          <div class="story-menu-page">
+            <div class="story-kicker">Void Runner</div>
+            <h1>Story Mode</h1>
+            <div class="story-chapter-row">
+              <button id="storyPrevChapterBtn" class="story-nav-btn" aria-label="Previous chapter">◀</button>
+              <div class="story-world-card">
+                <div id="storyChapterLabel" class="story-world-label">Chapter 1</div>
+                <div id="storyChapterTitle" class="story-world-title">Into The Rift</div>
+                <div id="storyChapterDesc" class="story-world-desc">
+                  A strange force is tearing the void apart. Enter the rift and find
+                  the source.
+                </div>
+              </div>
+              <button id="storyNextChapterBtn" class="story-nav-btn" aria-label="Next chapter">▶</button>
+            </div>
+            <button id="storyStartBtn" class="story-primary-btn">Play Chapter 1</button>
+            <button id="storyBackBtn" class="small-btn" style="width: 240px">Back</button>
+          </div>
         </div>
         <div id="speedRunMenu" class="overlay" style="display: none">
           <div class="menu-page">
@@ -159,6 +183,7 @@
                   <span>THEME</span>
                   <div class="theme-buttons" id="speedRunThemeButtons">
                     <button class="theme-btn" data-theme="classic">Classic</button>
+                    <button class="theme-btn" data-theme="classicrevamped" style="display: none">Classic Revamped</button>
                     <button class="theme-btn" data-theme="sunny">Sunny</button>
                     <button class="theme-btn" data-theme="moony">Moony</button>
                     <button class="theme-btn" data-theme="toybox">Toybox</button>
@@ -263,6 +288,7 @@
               <span>THEME</span>
               <div class="theme-buttons" id="themeButtons">
                 <button class="theme-btn" data-theme="classic">Classic</button>
+                <button class="theme-btn" data-theme="classicrevamped" style="display: none">Classic Revamped</button>
                 <button class="theme-btn" data-theme="sunny">Sunny</button>
                 <button class="theme-btn" data-theme="moony">Moony</button>
                 <button class="theme-btn" data-theme="toybox">Toybox</button>
@@ -441,6 +467,7 @@
             <label for="makerThemeSelect">Theme</label>
             <select id="makerThemeSelect">
               <option value="classic">Classic</option>
+              <option value="classicrevamped" style="display: none">Classic Revamped</option>
               <option value="sunny">Sunny</option>
               <option value="moony">Moony</option>
               <option value="toybox">Toybox</option>
@@ -506,6 +533,7 @@
     <script src="js/data/achievements-data.js"></script>
     <script src="js/data/theme-data.js"></script>
     <script src="js/data/version-data.js"></script>
+    <script src="js/story_mode/story-mode-menu.js"></script>
     <script src="js/game.js"></script>
   </body>
 </html>
