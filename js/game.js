@@ -3285,7 +3285,36 @@
             ctx.fillRect(hX + 16, hY - 6, 4, 16);
             ctx.fillRect(hX + 22, hY, 4, 10);
           }
-          if (currentTheme === "moony") {
+          if (simpleBackgroundMode) {
+            const simpleThemePlayerColors = {
+              sunny: "#ffd452",
+              moony: "#d8ddff",
+              toybox: "#ff6a6a",
+              deepsea: "#5fd9ff",
+              cyber: "#4ff5ff",
+              glitchworld: "#f564ff",
+              easter: "#ffa9d6",
+              tjtheme: "#ffd94d",
+              aprilfools: "#ff9cd6",
+              pirate: "#f0c37a",
+              jungle: "#86cd71",
+              neonrailyard: "#9dfbff",
+              crystalcavern: "#a7eaff",
+              clockworkskyforge: "#f4c27a",
+              classicrevamped: "#7fcf7f",
+              magma: "#ff8a4f",
+              stardust: "#a8ccff",
+              catmodel: "#ddb5ff",
+              zelda: "#a8dc7b",
+            };
+            ctx.fillStyle = simpleThemePlayerColors[currentTheme] || c;
+            ctx.fillRect(x, y, player.w, player.h);
+            ctx.strokeStyle = "rgba(255,255,255,0.35)";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 0.75, y + 0.75, player.w - 1.5, player.h - 1.5);
+            ctx.fillStyle = "rgba(255,255,255,0.22)";
+            ctx.fillRect(x + 2, y + 2, player.w - 4, 3);
+          } else if (currentTheme === "moony") {
             ctx.fillStyle = "#fff";
             ctx.beginPath();
             ctx.arc(x + 10, y + 10, 10, 0, Math.PI * 2);
@@ -5603,25 +5632,27 @@
             (goal.x + goal.y + goal.w) * 0.01,
           );
           const goalTheme =
-            currentTheme === "aprilfools"
-              ? [
-                  "classic",
-                  "sunny",
-                  "moony",
-                  "toybox",
-                  "deepsea",
-                  "magma",
-                  "cyber",
-                  "glitchworld",
-                  "easter",
-                  "stardust",
-                  "pirate",
-                  "jungle",
-                  "neonrailyard",
-                  "crystalcavern",
-                  "clockworkskyforge",
-                ][Math.floor(frameCount / 8) % 15]
-              : currentTheme;
+            simpleBackgroundMode
+              ? "classic"
+              : currentTheme === "aprilfools"
+                ? [
+                    "classic",
+                    "sunny",
+                    "moony",
+                    "toybox",
+                    "deepsea",
+                    "magma",
+                    "cyber",
+                    "glitchworld",
+                    "easter",
+                    "stardust",
+                    "pirate",
+                    "jungle",
+                    "neonrailyard",
+                    "crystalcavern",
+                    "clockworkskyforge",
+                  ][Math.floor(frameCount / 8) % 15]
+                : currentTheme;
           ctx.save();
           ctx.translate(goalOffset.x, goalOffset.y);
           ctx.save();
