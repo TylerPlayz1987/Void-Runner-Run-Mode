@@ -821,9 +821,35 @@
         overflow: hidden;
       }
 
+      .visual-settings-grid {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1.35fr 0.65fr;
+        gap: 12px;
+        align-items: start;
+      }
+
+      .visual-settings-grid .setting-item {
+        margin: 0;
+      }
+
+      .visual-settings-grid .setting-item:last-child {
+        align-self: stretch;
+      }
+
+      .visual-settings-grid .setting-item:last-child .small-btn {
+        width: 100%;
+      }
+
       @media (max-height: 520px) {
         .theme-buttons {
           max-height: 146px;
+        }
+      }
+
+      @media (max-width: 700px) {
+        .visual-settings-grid {
+          grid-template-columns: 1fr;
         }
       }
 
