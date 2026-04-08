@@ -25,6 +25,7 @@
           musicMuted = false,
           sfxMuted = false,
           isRetro8bit = false,
+          simpleBackgroundMode = false,
           frameCount = 0,
           running = false,
           isPaused = false,
@@ -4126,6 +4127,54 @@
           ctx.fillText(`Name: ${level.name || "Untitled Level"}`, 18, 62);
         }
 
+        function drawSimpleThemeBackground(themeName, theme, camX) {
+          const palettes = {
+            sunny: ["#8bd2ff", "#e8f8ff"],
+            moony: ["#0f1630", "#26325c"],
+            toybox: ["#ffe56a", "#ffd061"],
+            deepsea: ["#0a4171", "#031a33"],
+            cyber: ["#2a0a4a", "#5a1975"],
+            glitchworld: ["#060511", "#1b0d31"],
+            easter: ["#f8f2ff", "#fceccf"],
+            tjtheme: ["#d8bfe8", "#8f5ab9"],
+            aprilfools: ["#fff4fb", "#fff7de"],
+            pirate: ["#5d8caf", "#1f4f77"],
+            jungle: ["#17502a", "#11351d"],
+            neonrailyard: ["#061123", "#0d1f3a"],
+            crystalcavern: ["#101935", "#0a1228"],
+            clockworkskyforge: ["#3b2414", "#21140c"],
+            classicrevamped: ["#04140e", "#041008"],
+            magma: ["#3a1612", "#1f0c0a"],
+            stardust: ["#050713", "#1a2250"],
+            catmodel: ["#0c402f", "#0a2018"],
+            zelda: ["#1a2012", "#30471e"],
+          };
+          const pair = palettes[themeName] || [theme.bg || "#111", "#060606"];
+          const g = ctx.createLinearGradient(0, 0, 0, 400);
+          g.addColorStop(0, pair[0]);
+          g.addColorStop(1, pair[1]);
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, 800, 400);
+
+          if (themeName === "classicrevamped") {
+            ctx.strokeStyle = "rgba(88,205,125,0.17)";
+            ctx.lineWidth = 1;
+            for (let x = -24; x <= 824; x += 24) {
+              const drawX = x - (camX * 0.15 % 24);
+              ctx.beginPath();
+              ctx.moveTo(drawX, 0);
+              ctx.lineTo(drawX, 400);
+              ctx.stroke();
+            }
+            for (let y = 0; y <= 400; y += 24) {
+              ctx.beginPath();
+              ctx.moveTo(0, y);
+              ctx.lineTo(800, y);
+              ctx.stroke();
+            }
+          }
+        }
+
         // Core world rendering in current theme
         function drawScene() {
           const t = themes[currentTheme];
@@ -4136,7 +4185,9 @@
               (Math.random() - 0.5) * shake,
             );
           const camX = player.x - 150;
-          if (t.aurora) {
+          if (simpleBackgroundMode) {
+            drawSimpleThemeBackground(currentTheme, t, camX);
+          } else if (t.aurora) {
             let s = Math.sin(frameCount / 100) * 20;
             let g = ctx.createLinearGradient(0, 0, 0, 400);
             g.addColorStop(0, "#000033");
@@ -4921,15 +4972,18 @@
             ctx.fillRect(0, 0, 800, 400);
           }
           if (
-            t.stars ||
-            currentTheme === "moony" ||
-            currentTheme === "stardust" ||
-            currentTheme === "deepsea" ||
-            currentTheme === "cyber" ||
-            currentTheme === "glitchworld" ||
-            currentTheme === "aprilfools" ||
-            currentTheme === "neonrailyard" ||
-            currentTheme === "crystalcavern"
+            !simpleBackgroundMode &&
+            (
+              t.stars ||
+              currentTheme === "moony" ||
+              currentTheme === "stardust" ||
+              currentTheme === "deepsea" ||
+              currentTheme === "cyber" ||
+              currentTheme === "glitchworld" ||
+              currentTheme === "aprilfools" ||
+              currentTheme === "neonrailyard" ||
+              currentTheme === "crystalcavern"
+            )
           ) {
             stars.forEach((s) => {
               if (currentTheme === "deepsea") {
@@ -4959,7 +5013,7 @@
               }
             });
           }
-          if (currentTheme === "stardust") {
+          if (!simpleBackgroundMode && currentTheme === "stardust") {
             fallingStars.forEach((fs, i) => {
               fs.x -= fs.s * 0.4;
               fs.y += fs.s * 0.4;
@@ -4991,7 +5045,7 @@
               ctx.shadowBlur = 0;
             });
           }
-          if (currentTheme === "moony") {
+          if (!simpleBackgroundMode && currentTheme === "moony") {
             moonTreeTops.forEach((tree, i) => {
               let tx = (tree.x - camX * tree.parallax) % 2600;
               if (tx < -220) tx += 2600;
@@ -5025,7 +5079,7 @@
             ctx.fillStyle = mist;
             ctx.fillRect(0, 300, 800, 100);
           }
-          if (currentTheme === "toybox") {
+          if (!simpleBackgroundMode && currentTheme === "toybox") {
             fallingToys.forEach((toy, i) => {
               toy.y += toy.vy;
               toy.x += toy.drift + Math.sin((frameCount + i * 7) / 28) * 0.25;
@@ -5101,7 +5155,7 @@
               ctx.restore();
             });
           }
-          if (currentTheme === "cyber") {
+          if (!simpleBackgroundMode && currentTheme === "cyber") {
             ctx.fillStyle = "#ffffaa";
             ctx.beginPath();
             ctx.arc(200, 60, 25, 0, Math.PI * 2);
@@ -5145,7 +5199,7 @@
               ctx.fillRect(px + 2, 350, 11, 2);
             }
           }
-          if (currentTheme === "magma") {
+          if (!simpleBackgroundMode && currentTheme === "magma") {
             let vxBase = 500 - camX * 0.1;
             volcanoes.forEach((v) => {
               let vx = (v.x + vxBase) % 1600;
@@ -7757,6 +7811,7 @@
           musicMuted = false;
           sfxMuted = false;
           isRetro8bit = false;
+          simpleBackgroundMode = false;
           infiniteInvincibility = false;
           tutorialMode = false;
           showingPostTutorialSettings = false;
@@ -7771,6 +7826,7 @@
           document.getElementById("sfxValue").textContent = "50%";
           setTheme("classic");
           document.getElementById("retroToggleBtn").textContent = "8-bit: OFF";
+          document.getElementById("simpleBgToggleBtn").textContent = "Simple Background: OFF";
           document.getElementById("invincibleBtn").textContent = "Invincibility: OFF";
           mobileSupportEnabled = false;
           resetMobileButtonLayout();
@@ -8095,6 +8151,11 @@
           isRetro8bit = !isRetro8bit;
           document.getElementById("retroToggleBtn").textContent =
             "8-bit: " + (isRetro8bit ? "ON" : "OFF");
+        };
+        document.getElementById("simpleBgToggleBtn").onclick = () => {
+          simpleBackgroundMode = !simpleBackgroundMode;
+          document.getElementById("simpleBgToggleBtn").textContent =
+            "Simple Background: " + (simpleBackgroundMode ? "ON" : "OFF");
         };
         const fullscreenToggleBtn = document.getElementById("fullscreenToggleBtn");
 
