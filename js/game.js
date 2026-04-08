@@ -111,6 +111,53 @@
         const retroCtx = retroCanvas.getContext("2d");
         canvas.width = 800;
         canvas.height = 400;
+
+        // Module-level color/palette lookups for simple background mode.
+        // Defined once here to avoid per-frame allocations in the hot render path.
+        const SIMPLE_THEME_PLAYER_COLORS = {
+          sunny: "#ffd452",
+          moony: "#d8ddff",
+          toybox: "#ff6a6a",
+          deepsea: "#5fd9ff",
+          cyber: "#4ff5ff",
+          glitchworld: "#f564ff",
+          easter: "#ffa9d6",
+          tjtheme: "#ffd94d",
+          aprilfools: "#ff9cd6",
+          pirate: "#f0c37a",
+          jungle: "#86cd71",
+          neonrailyard: "#9dfbff",
+          crystalcavern: "#a7eaff",
+          clockworkskyforge: "#f4c27a",
+          classicrevamped: "#7fcf7f",
+          magma: "#ff8a4f",
+          stardust: "#a8ccff",
+          catmodel: "#ddb5ff",
+          zelda: "#a8dc7b",
+        };
+
+        const SIMPLE_BG_PALETTES = {
+          sunny: ["#8bd2ff", "#e8f8ff"],
+          moony: ["#0f1630", "#26325c"],
+          toybox: ["#ffe56a", "#ffd061"],
+          deepsea: ["#0a4171", "#031a33"],
+          cyber: ["#2a0a4a", "#5a1975"],
+          glitchworld: ["#060511", "#1b0d31"],
+          easter: ["#f8f2ff", "#fceccf"],
+          tjtheme: ["#d8bfe8", "#8f5ab9"],
+          aprilfools: ["#fff4fb", "#fff7de"],
+          pirate: ["#5d8caf", "#1f4f77"],
+          jungle: ["#17502a", "#11351d"],
+          neonrailyard: ["#061123", "#0d1f3a"],
+          crystalcavern: ["#101935", "#0a1228"],
+          clockworkskyforge: ["#3b2414", "#21140c"],
+          classicrevamped: ["#04140e", "#041008"],
+          magma: ["#3a1612", "#1f0c0a"],
+          stardust: ["#050713", "#1a2250"],
+          catmodel: ["#0c402f", "#0a2018"],
+          zelda: ["#1a2012", "#30471e"],
+        };
+
         let bestLevel = localStorage.getItem("core_best_v20") || 1;
         let speedRunBestLevel = localStorage.getItem("core_speedrun_best_level_v1") || 1;
         let speedRunBestTime = parseFloat(localStorage.getItem("core_speedrun_best_time_v1") || "0");
@@ -3286,28 +3333,7 @@
             ctx.fillRect(hX + 22, hY, 4, 10);
           }
           if (simpleBackgroundMode) {
-            const simpleThemePlayerColors = {
-              sunny: "#ffd452",
-              moony: "#d8ddff",
-              toybox: "#ff6a6a",
-              deepsea: "#5fd9ff",
-              cyber: "#4ff5ff",
-              glitchworld: "#f564ff",
-              easter: "#ffa9d6",
-              tjtheme: "#ffd94d",
-              aprilfools: "#ff9cd6",
-              pirate: "#f0c37a",
-              jungle: "#86cd71",
-              neonrailyard: "#9dfbff",
-              crystalcavern: "#a7eaff",
-              clockworkskyforge: "#f4c27a",
-              classicrevamped: "#7fcf7f",
-              magma: "#ff8a4f",
-              stardust: "#a8ccff",
-              catmodel: "#ddb5ff",
-              zelda: "#a8dc7b",
-            };
-            ctx.fillStyle = simpleThemePlayerColors[currentTheme] || c;
+            ctx.fillStyle = SIMPLE_THEME_PLAYER_COLORS[currentTheme] || c;
             ctx.fillRect(x, y, player.w, player.h);
             ctx.strokeStyle = "rgba(255,255,255,0.35)";
             ctx.lineWidth = 1.5;
@@ -4157,28 +4183,7 @@
         }
 
         function drawSimpleThemeBackground(themeName, theme, camX) {
-          const palettes = {
-            sunny: ["#8bd2ff", "#e8f8ff"],
-            moony: ["#0f1630", "#26325c"],
-            toybox: ["#ffe56a", "#ffd061"],
-            deepsea: ["#0a4171", "#031a33"],
-            cyber: ["#2a0a4a", "#5a1975"],
-            glitchworld: ["#060511", "#1b0d31"],
-            easter: ["#f8f2ff", "#fceccf"],
-            tjtheme: ["#d8bfe8", "#8f5ab9"],
-            aprilfools: ["#fff4fb", "#fff7de"],
-            pirate: ["#5d8caf", "#1f4f77"],
-            jungle: ["#17502a", "#11351d"],
-            neonrailyard: ["#061123", "#0d1f3a"],
-            crystalcavern: ["#101935", "#0a1228"],
-            clockworkskyforge: ["#3b2414", "#21140c"],
-            classicrevamped: ["#04140e", "#041008"],
-            magma: ["#3a1612", "#1f0c0a"],
-            stardust: ["#050713", "#1a2250"],
-            catmodel: ["#0c402f", "#0a2018"],
-            zelda: ["#1a2012", "#30471e"],
-          };
-          const pair = palettes[themeName] || [theme.bg || "#111", "#060606"];
+          const pair = SIMPLE_BG_PALETTES[themeName] || [theme.bg || "#111", "#060606"];
           const g = ctx.createLinearGradient(0, 0, 0, 400);
           g.addColorStop(0, pair[0]);
           g.addColorStop(1, pair[1]);
@@ -8246,8 +8251,8 @@
             toggleGameFullscreen();
           };
         }
-        document.addEventListener("fullscreenchange", updateFullscreenToggleUi);
-        document.addEventListener("webkitfullscreenchange", updateFullscreenToggleUi);
+        document.addEventListener("fullscreenchange", () => { updateFullscreenToggleUi(); updateScreenSizeUi(); });
+        document.addEventListener("webkitfullscreenchange", () => { updateFullscreenToggleUi(); updateScreenSizeUi(); });
         updateFullscreenToggleUi();
         document.getElementById("invincibleBtn").onclick = () => {
           infiniteInvincibility = !infiniteInvincibility;
@@ -8380,8 +8385,11 @@
         function updateScreenSizeUi() {
           document.getElementById("screenSizeValue").textContent =
             screenScale + "%";
+          // When fullscreen is active the browser controls #gameShell layout;
+          // applying a scale transform would shrink the game inside the
+          // fullscreen overlay, so we reset it and let the CSS handle sizing.
           document.getElementById("gameShell").style.transform =
-            `scale(${screenScale / 100})`;
+            isGameFullscreen() ? "none" : `scale(${screenScale / 100})`;
         }
 
         document.getElementById("mobileSupportToggleBtn").onclick = () => {
