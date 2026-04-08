@@ -817,6 +817,9 @@
       }
 
       #themePage {
+        width: min(760px, 94vw);
+        max-width: 94vw;
+        align-items: stretch;
         max-height: 100%;
         overflow: hidden;
       }
@@ -824,8 +827,8 @@
       .visual-settings-grid {
         width: 100%;
         display: grid;
-        grid-template-columns: 1.35fr 0.65fr;
-        gap: 12px;
+        grid-template-columns: minmax(0, 1.55fr) minmax(220px, 1fr);
+        gap: 16px;
         align-items: start;
       }
 
