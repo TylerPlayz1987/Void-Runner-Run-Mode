@@ -7120,10 +7120,13 @@
         const aprilFoolsThemeUnlockKey = "void_secret_theme_aprilfools_unlocked";
         const solThemeCode = "sol";
         const solThemeUnlockKey = "void_secret_theme_sol_unlocked";
+        const classicRevampedThemeCode = "classic_new";
+        const classicRevampedThemeUnlockKey = "void_secret_theme_classicrevamped_unlocked";
         let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
         let tjThemeUnlocked = localStorage.getItem(tjThemeUnlockKey) === "1";
         let aprilFoolsThemeUnlocked = localStorage.getItem(aprilFoolsThemeUnlockKey) === "1";
         let solThemeUnlocked = localStorage.getItem(solThemeUnlockKey) === "1";
+        let classicRevampedThemeUnlocked = localStorage.getItem(classicRevampedThemeUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
@@ -7159,6 +7162,18 @@
               theme: "tjtheme",
               label: "TJ's Theme",
               unlocked: tjThemeUnlocked,
+            },
+            {
+              container: document.getElementById("themeButtons"),
+              theme: "classicrevamped",
+              label: "Classic Revamped",
+              unlocked: classicRevampedThemeUnlocked,
+            },
+            {
+              container: document.getElementById("speedRunThemeButtons"),
+              theme: "classicrevamped",
+              label: "Classic Revamped",
+              unlocked: classicRevampedThemeUnlocked,
             },
             {
               container: document.getElementById("themeButtons"),
@@ -7205,6 +7220,17 @@
               }
             };
             themeBtn.style.display = spec.unlocked ? "" : "none";
+          }
+
+          const makerThemeSelect = document.getElementById("makerThemeSelect");
+          if (makerThemeSelect) {
+            const classicRevampedOption = makerThemeSelect.querySelector('option[value="classicrevamped"]');
+            if (classicRevampedOption) {
+              classicRevampedOption.style.display = classicRevampedThemeUnlocked ? "" : "none";
+              if (!classicRevampedThemeUnlocked && makerThemeSelect.value === "classicrevamped") {
+                makerThemeSelect.value = "classic";
+              }
+            }
           }
         }
 
@@ -7273,6 +7299,13 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("sol theme unlocked");
+          } else if (normalized === classicRevampedThemeCode) {
+            if (!classicRevampedThemeUnlocked) {
+              classicRevampedThemeUnlocked = true;
+              localStorage.setItem(classicRevampedThemeUnlockKey, "1");
+              updateSecretThemeButtonUi();
+            }
+            flashCodeMessage("classic revamped unlocked");
           } else {
             flashCodeMessage("invalid code");
             return;
@@ -7874,9 +7907,11 @@
           localStorage.removeItem("void_secret_theme_zelda_unlocked");
           localStorage.removeItem("void_secret_theme_tjtheme_unlocked");
           localStorage.removeItem("void_secret_theme_sol_unlocked");
+          localStorage.removeItem("void_secret_theme_classicrevamped_unlocked");
           secretThemeUnlocked = false;
           tjThemeUnlocked = false;
           solThemeUnlocked = false;
+          classicRevampedThemeUnlocked = false;
           updateSecretThemeButtonUi();
           setLevelDisplay();
           updateBestLevelUi();
