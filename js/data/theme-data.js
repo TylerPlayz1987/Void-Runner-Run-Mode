@@ -8,6 +8,18 @@ const themes = {
     hazards: "#f33",
     music: null,
   },
+  classicrevamped: {
+    bg: "#03110c",
+    plat: "#333",
+    player: "#fff",
+    hazards: "#f33",
+    glow: true,
+    playerImage: "story_assets/sprites/adam/adam-character-anim.svg",
+    playerFrameWidth: 96,
+    playerFrameHeight: 96,
+    playerFrameCount: 8,
+    music: "theme_bg/NewClassic.ogg",
+  },
   sunny: {
     bg: "#87CEEB",
     plat: "#fff",

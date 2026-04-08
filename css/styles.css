@@ -567,9 +567,9 @@
       }
 
       #storyModeBtn {
-        background: linear-gradient(180deg, #59ff7a 0%, #11a835 100%);
+        background: linear-gradient(180deg, #59ff7a 0%, #0f0 100%);
         color: #001206;
-        box-shadow: 0 0 14px rgba(89, 255, 122, 0.45);
+        box-shadow: 0 0 14px rgba(0, 255, 0, 0.9);
       }
       /* Story-mode inspired grid background for menu overlays */
       #startMenu,
