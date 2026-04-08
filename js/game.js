@@ -25,6 +25,7 @@
           musicMuted = false,
           sfxMuted = false,
           isRetro8bit = false,
+          simpleBackgroundMode = false,
           frameCount = 0,
           running = false,
           isPaused = false,
@@ -110,6 +111,53 @@
         const retroCtx = retroCanvas.getContext("2d");
         canvas.width = 800;
         canvas.height = 400;
+
+        // Module-level color/palette lookups for simple background mode.
+        // Defined once here to avoid per-frame allocations in the hot render path.
+        const SIMPLE_THEME_PLAYER_COLORS = {
+          sunny: "#ffd452",
+          moony: "#d8ddff",
+          toybox: "#ff6a6a",
+          deepsea: "#5fd9ff",
+          cyber: "#4ff5ff",
+          glitchworld: "#f564ff",
+          easter: "#ffa9d6",
+          tjtheme: "#ffd94d",
+          aprilfools: "#ff9cd6",
+          pirate: "#f0c37a",
+          jungle: "#86cd71",
+          neonrailyard: "#9dfbff",
+          crystalcavern: "#a7eaff",
+          clockworkskyforge: "#f4c27a",
+          classicrevamped: "#7fcf7f",
+          magma: "#ff8a4f",
+          stardust: "#a8ccff",
+          catmodel: "#ddb5ff",
+          zelda: "#a8dc7b",
+        };
+
+        const SIMPLE_BG_PALETTES = {
+          sunny: ["#8bd2ff", "#e8f8ff"],
+          moony: ["#0f1630", "#26325c"],
+          toybox: ["#ffe56a", "#ffd061"],
+          deepsea: ["#0a4171", "#031a33"],
+          cyber: ["#2a0a4a", "#5a1975"],
+          glitchworld: ["#060511", "#1b0d31"],
+          easter: ["#f8f2ff", "#fceccf"],
+          tjtheme: ["#d8bfe8", "#8f5ab9"],
+          aprilfools: ["#fff4fb", "#fff7de"],
+          pirate: ["#5d8caf", "#1f4f77"],
+          jungle: ["#17502a", "#11351d"],
+          neonrailyard: ["#061123", "#0d1f3a"],
+          crystalcavern: ["#101935", "#0a1228"],
+          clockworkskyforge: ["#3b2414", "#21140c"],
+          classicrevamped: ["#04140e", "#041008"],
+          magma: ["#3a1612", "#1f0c0a"],
+          stardust: ["#050713", "#1a2250"],
+          catmodel: ["#0c402f", "#0a2018"],
+          zelda: ["#1a2012", "#30471e"],
+        };
+
         let bestLevel = localStorage.getItem("core_best_v20") || 1;
         let speedRunBestLevel = localStorage.getItem("core_speedrun_best_level_v1") || 1;
         let speedRunBestTime = parseFloat(localStorage.getItem("core_speedrun_best_time_v1") || "0");
@@ -3284,7 +3332,15 @@
             ctx.fillRect(hX + 16, hY - 6, 4, 16);
             ctx.fillRect(hX + 22, hY, 4, 10);
           }
-          if (currentTheme === "moony") {
+          if (simpleBackgroundMode) {
+            ctx.fillStyle = SIMPLE_THEME_PLAYER_COLORS[currentTheme] || c;
+            ctx.fillRect(x, y, player.w, player.h);
+            ctx.strokeStyle = "rgba(255,255,255,0.35)";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(x + 0.75, y + 0.75, player.w - 1.5, player.h - 1.5);
+            ctx.fillStyle = "rgba(255,255,255,0.22)";
+            ctx.fillRect(x + 2, y + 2, player.w - 4, 3);
+          } else if (currentTheme === "moony") {
             ctx.fillStyle = "#fff";
             ctx.beginPath();
             ctx.arc(x + 10, y + 10, 10, 0, Math.PI * 2);
@@ -4126,6 +4182,33 @@
           ctx.fillText(`Name: ${level.name || "Untitled Level"}`, 18, 62);
         }
 
+        function drawSimpleThemeBackground(themeName, theme, camX) {
+          const pair = SIMPLE_BG_PALETTES[themeName] || [theme.bg || "#111", "#060606"];
+          const g = ctx.createLinearGradient(0, 0, 0, 400);
+          g.addColorStop(0, pair[0]);
+          g.addColorStop(1, pair[1]);
+          ctx.fillStyle = g;
+          ctx.fillRect(0, 0, 800, 400);
+
+          if (themeName === "classicrevamped") {
+            ctx.strokeStyle = "rgba(88,205,125,0.17)";
+            ctx.lineWidth = 1;
+            for (let x = -24; x <= 824; x += 24) {
+              const drawX = x - (camX * 0.15 % 24);
+              ctx.beginPath();
+              ctx.moveTo(drawX, 0);
+              ctx.lineTo(drawX, 400);
+              ctx.stroke();
+            }
+            for (let y = 0; y <= 400; y += 24) {
+              ctx.beginPath();
+              ctx.moveTo(0, y);
+              ctx.lineTo(800, y);
+              ctx.stroke();
+            }
+          }
+        }
+
         // Core world rendering in current theme
         function drawScene() {
           const t = themes[currentTheme];
@@ -4136,7 +4219,9 @@
               (Math.random() - 0.5) * shake,
             );
           const camX = player.x - 150;
-          if (t.aurora) {
+          if (simpleBackgroundMode) {
+            drawSimpleThemeBackground(currentTheme, t, camX);
+          } else if (t.aurora) {
             let s = Math.sin(frameCount / 100) * 20;
             let g = ctx.createLinearGradient(0, 0, 0, 400);
             g.addColorStop(0, "#000033");
@@ -4921,15 +5006,18 @@
             ctx.fillRect(0, 0, 800, 400);
           }
           if (
-            t.stars ||
-            currentTheme === "moony" ||
-            currentTheme === "stardust" ||
-            currentTheme === "deepsea" ||
-            currentTheme === "cyber" ||
-            currentTheme === "glitchworld" ||
-            currentTheme === "aprilfools" ||
-            currentTheme === "neonrailyard" ||
-            currentTheme === "crystalcavern"
+            !simpleBackgroundMode &&
+            (
+              t.stars ||
+              currentTheme === "moony" ||
+              currentTheme === "stardust" ||
+              currentTheme === "deepsea" ||
+              currentTheme === "cyber" ||
+              currentTheme === "glitchworld" ||
+              currentTheme === "aprilfools" ||
+              currentTheme === "neonrailyard" ||
+              currentTheme === "crystalcavern"
+            )
           ) {
             stars.forEach((s) => {
               if (currentTheme === "deepsea") {
@@ -4959,7 +5047,7 @@
               }
             });
           }
-          if (currentTheme === "stardust") {
+          if (!simpleBackgroundMode && currentTheme === "stardust") {
             fallingStars.forEach((fs, i) => {
               fs.x -= fs.s * 0.4;
               fs.y += fs.s * 0.4;
@@ -4991,7 +5079,7 @@
               ctx.shadowBlur = 0;
             });
           }
-          if (currentTheme === "moony") {
+          if (!simpleBackgroundMode && currentTheme === "moony") {
             moonTreeTops.forEach((tree, i) => {
               let tx = (tree.x - camX * tree.parallax) % 2600;
               if (tx < -220) tx += 2600;
@@ -5025,7 +5113,7 @@
             ctx.fillStyle = mist;
             ctx.fillRect(0, 300, 800, 100);
           }
-          if (currentTheme === "toybox") {
+          if (!simpleBackgroundMode && currentTheme === "toybox") {
             fallingToys.forEach((toy, i) => {
               toy.y += toy.vy;
               toy.x += toy.drift + Math.sin((frameCount + i * 7) / 28) * 0.25;
@@ -5101,7 +5189,7 @@
               ctx.restore();
             });
           }
-          if (currentTheme === "cyber") {
+          if (!simpleBackgroundMode && currentTheme === "cyber") {
             ctx.fillStyle = "#ffffaa";
             ctx.beginPath();
             ctx.arc(200, 60, 25, 0, Math.PI * 2);
@@ -5145,7 +5233,7 @@
               ctx.fillRect(px + 2, 350, 11, 2);
             }
           }
-          if (currentTheme === "magma") {
+          if (!simpleBackgroundMode && currentTheme === "magma") {
             let vxBase = 500 - camX * 0.1;
             volcanoes.forEach((v) => {
               let vx = (v.x + vxBase) % 1600;
@@ -5549,25 +5637,27 @@
             (goal.x + goal.y + goal.w) * 0.01,
           );
           const goalTheme =
-            currentTheme === "aprilfools"
-              ? [
-                  "classic",
-                  "sunny",
-                  "moony",
-                  "toybox",
-                  "deepsea",
-                  "magma",
-                  "cyber",
-                  "glitchworld",
-                  "easter",
-                  "stardust",
-                  "pirate",
-                  "jungle",
-                  "neonrailyard",
-                  "crystalcavern",
-                  "clockworkskyforge",
-                ][Math.floor(frameCount / 8) % 15]
-              : currentTheme;
+            simpleBackgroundMode
+              ? "classic"
+              : currentTheme === "aprilfools"
+                ? [
+                    "classic",
+                    "sunny",
+                    "moony",
+                    "toybox",
+                    "deepsea",
+                    "magma",
+                    "cyber",
+                    "glitchworld",
+                    "easter",
+                    "stardust",
+                    "pirate",
+                    "jungle",
+                    "neonrailyard",
+                    "crystalcavern",
+                    "clockworkskyforge",
+                  ][Math.floor(frameCount / 8) % 15]
+                : currentTheme;
           ctx.save();
           ctx.translate(goalOffset.x, goalOffset.y);
           ctx.save();
@@ -6619,10 +6709,25 @@
 
         function openPauseShortcut(pageId) {
           if (!running || speedRunMode || speedRunGameOverMode || makerMode) return;
+          const pauseMenu = document.getElementById("pauseMenu");
+          const pageEl = document.getElementById(pageId);
+          const samePageAlreadyOpen =
+            pauseMenu.style.display === "flex" && pageEl && pageEl.style.display === "flex";
+
+          if (samePageAlreadyOpen) {
+            isPaused = false;
+            pauseMenu.style.display = "none";
+            const m = document.getElementById("bgMusic");
+            if (m && themes[currentTheme] && themes[currentTheme].music) {
+              m.play().catch(() => {});
+            }
+            return;
+          }
+
           isPaused = true;
           const m = document.getElementById("bgMusic");
           if (m) m.pause();
-          document.getElementById("pauseMenu").style.display = "flex";
+          pauseMenu.style.display = "flex";
           showPauseMenuPage(pageId);
           document.getElementById("exitTutorialBtn").style.display =
             tutorialMode ? "block" : "none";
@@ -7757,6 +7862,7 @@
           musicMuted = false;
           sfxMuted = false;
           isRetro8bit = false;
+          simpleBackgroundMode = false;
           infiniteInvincibility = false;
           tutorialMode = false;
           showingPostTutorialSettings = false;
@@ -7771,6 +7877,7 @@
           document.getElementById("sfxValue").textContent = "50%";
           setTheme("classic");
           document.getElementById("retroToggleBtn").textContent = "8-bit: OFF";
+          document.getElementById("simpleBgToggleBtn").textContent = "Simple Background: OFF";
           document.getElementById("invincibleBtn").textContent = "Invincibility: OFF";
           mobileSupportEnabled = false;
           resetMobileButtonLayout();
@@ -8096,6 +8203,57 @@
           document.getElementById("retroToggleBtn").textContent =
             "8-bit: " + (isRetro8bit ? "ON" : "OFF");
         };
+        document.getElementById("simpleBgToggleBtn").onclick = () => {
+          simpleBackgroundMode = !simpleBackgroundMode;
+          document.getElementById("simpleBgToggleBtn").textContent =
+            "Simple Background: " + (simpleBackgroundMode ? "ON" : "OFF");
+        };
+        const fullscreenToggleBtn = document.getElementById("fullscreenToggleBtn");
+
+        function getFullscreenElement() {
+          return document.fullscreenElement || document.webkitFullscreenElement || null;
+        }
+
+        function isGameFullscreen() {
+          const shell = document.getElementById("gameShell");
+          if (!shell) return false;
+          return getFullscreenElement() === shell;
+        }
+
+        function updateFullscreenToggleUi() {
+          if (!fullscreenToggleBtn) return;
+          fullscreenToggleBtn.textContent = "Fullscreen: " + (isGameFullscreen() ? "ON" : "OFF");
+        }
+
+        async function toggleGameFullscreen() {
+          const shell = document.getElementById("gameShell");
+          if (!shell) return;
+          try {
+            if (isGameFullscreen()) {
+              if (document.exitFullscreen) {
+                await document.exitFullscreen();
+              } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+              }
+            } else if (shell.requestFullscreen) {
+              await shell.requestFullscreen();
+            } else if (shell.webkitRequestFullscreen) {
+              shell.webkitRequestFullscreen();
+            }
+          } catch (_err) {
+            // Ignore blocked fullscreen requests and keep UI in sync.
+          }
+          updateFullscreenToggleUi();
+        }
+
+        if (fullscreenToggleBtn) {
+          fullscreenToggleBtn.onclick = () => {
+            toggleGameFullscreen();
+          };
+        }
+        document.addEventListener("fullscreenchange", () => { updateFullscreenToggleUi(); updateScreenSizeUi(); });
+        document.addEventListener("webkitfullscreenchange", () => { updateFullscreenToggleUi(); updateScreenSizeUi(); });
+        updateFullscreenToggleUi();
         document.getElementById("invincibleBtn").onclick = () => {
           infiniteInvincibility = !infiniteInvincibility;
           document.getElementById("invincibleBtn").textContent =
@@ -8227,8 +8385,11 @@
         function updateScreenSizeUi() {
           document.getElementById("screenSizeValue").textContent =
             screenScale + "%";
+          // When fullscreen is active the browser controls #gameShell layout;
+          // applying a scale transform would shrink the game inside the
+          // fullscreen overlay, so we reset it and let the CSS handle sizing.
           document.getElementById("gameShell").style.transform =
-            `scale(${screenScale / 100})`;
+            isGameFullscreen() ? "none" : `scale(${screenScale / 100})`;
         }
 
         document.getElementById("mobileSupportToggleBtn").onclick = () => {
