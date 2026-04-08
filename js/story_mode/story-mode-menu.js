@@ -7,9 +7,9 @@
       title: "Into The Rift",
       description:
         "A strange force is tearing the void apart. Enter the rift and find the source.",
-      playable: true,
-      buttonText: "Play Chapter 1",
-      loadingText: "Chapter 1 loading soon",
+      playable: false,
+      buttonText: "Coming Soon",
+      loadingText: "Coming Soon",
     },
     {
       label: "Chapter 2",
