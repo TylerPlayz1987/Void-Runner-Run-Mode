@@ -6704,10 +6704,25 @@
 
         function openPauseShortcut(pageId) {
           if (!running || speedRunMode || speedRunGameOverMode || makerMode) return;
+          const pauseMenu = document.getElementById("pauseMenu");
+          const pageEl = document.getElementById(pageId);
+          const samePageAlreadyOpen =
+            pauseMenu.style.display === "flex" && pageEl && pageEl.style.display === "flex";
+
+          if (samePageAlreadyOpen) {
+            isPaused = false;
+            pauseMenu.style.display = "none";
+            const m = document.getElementById("bgMusic");
+            if (m && themes[currentTheme] && themes[currentTheme].music) {
+              m.play().catch(() => {});
+            }
+            return;
+          }
+
           isPaused = true;
           const m = document.getElementById("bgMusic");
           if (m) m.pause();
-          document.getElementById("pauseMenu").style.display = "flex";
+          pauseMenu.style.display = "flex";
           showPauseMenuPage(pageId);
           document.getElementById("exitTutorialBtn").style.display =
             tutorialMode ? "block" : "none";
