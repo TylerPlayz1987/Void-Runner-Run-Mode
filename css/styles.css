@@ -591,6 +591,64 @@
           linear-gradient(180deg, rgba(2, 16, 11, 0.96), rgba(0, 0, 0, 0.94));
       }
 
+      #tourExplain {
+        position: absolute;
+        top: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: min(92%, 690px);
+        pointer-events: none;
+        z-index: 260;
+        text-align: center;
+        color: #9ef;
+        border-color: #9ef;
+        background: rgba(0, 0, 0, 0.93);
+      }
+
+      #codeFlashMessage {
+        margin-top: 10px;
+        color: #fc3;
+        font-size: 18px;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        opacity: 0;
+        text-shadow: 0 0 12px #fc3;
+        pointer-events: none;
+      }
+
+      #startMenuVersionTag {
+        margin-top: -8px;
+        margin-bottom: 10px;
+        color: #fc3;
+        font-size: 14px;
+        font-weight: bold;
+        letter-spacing: 1px;
+        text-shadow: 0 0 10px rgba(255, 204, 51, 0.8);
+      }
+
+      #changelogContent {
+        width: 100%;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+      }
+
+      #codeFlashMessage.active {
+        animation: codeFlashPulse 1s ease-in-out 3;
+      }
+
+      .code-entry-box {
+        width: 320px;
+        max-width: 90%;
+        background: #111;
+        border: 2px solid #fc3;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        text-align: center;
+      }
+
       #codeEntryInput {
         width: 100%;
         box-sizing: border-box;

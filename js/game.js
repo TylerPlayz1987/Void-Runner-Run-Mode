@@ -986,6 +986,7 @@
           ctx.arc(x + 6.2, y + 6.1, 1.1, 0, Math.PI * 2);
           ctx.fill();
           ctx.restore();
+          ctx.restore();
         }
         function drawClassicRevampedLavaWall(x, y, w, h) {
           const depth = Math.max(8, Math.min(22, Math.round(w * 0.35)));

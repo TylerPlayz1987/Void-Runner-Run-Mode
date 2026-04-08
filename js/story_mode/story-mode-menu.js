@@ -117,14 +117,16 @@
 
   function flashStoryStatus(text) {
     const startBtn = getEl("storyStartBtn");
-    const chapter = chapters[currentChapterIndex];
     if (!startBtn) return;
 
+    const savedIndex = currentChapterIndex;
     const original = startBtn.textContent;
     startBtn.textContent = text;
     startBtn.disabled = true;
 
     window.setTimeout(function () {
+      if (currentChapterIndex !== savedIndex) return;
+      const chapter = chapters[currentChapterIndex];
       if (chapter && chapter.playable) {
         startBtn.textContent = original;
         startBtn.disabled = false;
