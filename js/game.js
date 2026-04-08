@@ -8096,6 +8096,52 @@
           document.getElementById("retroToggleBtn").textContent =
             "8-bit: " + (isRetro8bit ? "ON" : "OFF");
         };
+        const fullscreenToggleBtn = document.getElementById("fullscreenToggleBtn");
+
+        function getFullscreenElement() {
+          return document.fullscreenElement || document.webkitFullscreenElement || null;
+        }
+
+        function isGameFullscreen() {
+          const shell = document.getElementById("gameShell");
+          if (!shell) return false;
+          return getFullscreenElement() === shell;
+        }
+
+        function updateFullscreenToggleUi() {
+          if (!fullscreenToggleBtn) return;
+          fullscreenToggleBtn.textContent = "Fullscreen: " + (isGameFullscreen() ? "ON" : "OFF");
+        }
+
+        async function toggleGameFullscreen() {
+          const shell = document.getElementById("gameShell");
+          if (!shell) return;
+          try {
+            if (isGameFullscreen()) {
+              if (document.exitFullscreen) {
+                await document.exitFullscreen();
+              } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+              }
+            } else if (shell.requestFullscreen) {
+              await shell.requestFullscreen();
+            } else if (shell.webkitRequestFullscreen) {
+              shell.webkitRequestFullscreen();
+            }
+          } catch (_err) {
+            // Ignore blocked fullscreen requests and keep UI in sync.
+          }
+          updateFullscreenToggleUi();
+        }
+
+        if (fullscreenToggleBtn) {
+          fullscreenToggleBtn.onclick = () => {
+            toggleGameFullscreen();
+          };
+        }
+        document.addEventListener("fullscreenchange", updateFullscreenToggleUi);
+        document.addEventListener("webkitfullscreenchange", updateFullscreenToggleUi);
+        updateFullscreenToggleUi();
         document.getElementById("invincibleBtn").onclick = () => {
           infiniteInvincibility = !infiniteInvincibility;
           document.getElementById("invincibleBtn").textContent =
