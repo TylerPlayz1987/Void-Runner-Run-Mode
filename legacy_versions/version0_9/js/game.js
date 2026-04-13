@@ -164,8 +164,8 @@
         document.getElementById("best").textContent = bestLevel;
 
         const fallbackVersionData = {
-          currentVersion: "v1.0.0",
-          versions: [{ label: "v1.0.0 (Current)", path: "./", current: true }],
+          currentVersion: "v0.9.0",
+          versions: [{ label: "v0.9.0 (Current)", path: "./", current: true }],
         };
         const versionData = window.VR_VERSION_DATA || fallbackVersionData;
         const currentGameVersion =

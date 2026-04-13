@@ -4,8 +4,12 @@ window.VR_VERSION_DATA = {
   currentVersion: "v0.8.0",
   versions: [
     {
-      label: "v0.9.0",
+      label: "v1.0.0",
       path: "../../index.html",
+    },
+    {
+      label: "v0.9.0",
+      path: "../../legacy_versions/version0_9/version0_9.html",
     },
     {
       label: "v0.8.0 (Current)",
