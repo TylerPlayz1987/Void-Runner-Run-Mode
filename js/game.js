@@ -78,6 +78,7 @@
           currentCustomizingButton = null,
           customizeStartData = null,
           makerMode = false,
+          dialogueMakerMode = false,
           makerTesting = false,
           customLevelActive = false,
           playingSharedLevel = false,
@@ -91,6 +92,7 @@
           makerSelected = null,
           customLevelDraft = null,
           makerPanelDragState = null,
+          dialogueMakerPanelDragState = null,
           classicRevampedFacing = 1;
         let postTutorialTourTimers = [];
         const canvas = document.getElementById("canvas"),
@@ -261,9 +263,9 @@
         }
 
         function updateHudModeUi() {
-          const inMakerEditor = makerMode && !makerTesting;
-          document.getElementById("ui-left").style.display = inMakerEditor ? "none" : "flex";
-          document.getElementById("ui-right").style.display = inMakerEditor ? "none" : "flex";
+          const inEditorMode = (makerMode && !makerTesting) || dialogueMakerMode;
+          document.getElementById("ui-left").style.display = inEditorMode ? "none" : "flex";
+          document.getElementById("ui-right").style.display = inEditorMode ? "none" : "flex";
           document.getElementById("death-stat").style.display = speedRunMode ? "none" : "block";
           updateBestLevelUi();
         }
@@ -6636,8 +6638,10 @@
 
         function returnToStartMenu() {
           clearPostTutorialTour();
+          closeDialogueTestOverlay();
           tutorialMode = false;
           makerMode = false;
+          dialogueMakerMode = false;
           makerTesting = false;
           customLevelActive = false;
           playingSharedLevel = false;
@@ -6662,6 +6666,7 @@
           document.getElementById("modeMenu").style.display = "none";
           document.getElementById("sharedLevelModal").style.display = "none";
           document.getElementById("levelMakerPanel").style.display = "none";
+          document.getElementById("dialogueMakerPanel").style.display = "none";
           document.getElementById("changelogMenu").style.display = "none";
           document.getElementById("speedRunMenu").style.display = "none";
           document.getElementById("speedRunTimer").classList.remove("active");
@@ -6708,7 +6713,7 @@
         }
 
         function openPauseShortcut(pageId) {
-          if (!running || speedRunMode || speedRunGameOverMode || makerMode) return;
+          if (!running || speedRunMode || speedRunGameOverMode || makerMode || dialogueMakerMode) return;
           const pauseMenu = document.getElementById("pauseMenu");
           const pageEl = document.getElementById(pageId);
           const samePageAlreadyOpen =
@@ -6745,10 +6750,12 @@
           ensureAudioContext();
           clearPostTutorialTour();
           makerMode = false;
+          dialogueMakerMode = false;
           makerTesting = false;
           customLevelActive = false;
           playingSharedLevel = false;
           document.getElementById("levelMakerPanel").style.display = "none";
+          document.getElementById("dialogueMakerPanel").style.display = "none";
           tutorialMode = isTutorial;
           speedRunMode = false;
           updateHudModeUi();
@@ -6790,6 +6797,7 @@
           ensureAudioContext();
           clearPostTutorialTour();
           tutorialMode = false;
+          dialogueMakerMode = false;
           speedRunMode = false;
           speedRunGameOverMode = false;
           makerMode = !!fromMaker;
@@ -6813,6 +6821,7 @@
           document.getElementById("sharedLevelModal").style.display = "none";
           document.getElementById("speedRunMenu").style.display = "none";
           document.getElementById("levelMakerPanel").style.display = fromMaker ? "flex" : "none";
+          document.getElementById("dialogueMakerPanel").style.display = "none";
           setTopControlsVisible(false);
 
           running = true;
@@ -6832,6 +6841,7 @@
           ensureAudioContext();
           clearPostTutorialTour();
           tutorialMode = false;
+          dialogueMakerMode = false;
           speedRunMode = false;
           speedRunGameOverMode = false;
           makerMode = true;
@@ -6856,6 +6866,7 @@
           document.getElementById("modeMenu").style.display = "none";
           document.getElementById("sharedLevelModal").style.display = "none";
           document.getElementById("pauseMenu").style.display = "none";
+          document.getElementById("dialogueMakerPanel").style.display = "none";
           document.getElementById("levelMakerPanel").style.display = "flex";
           setTopControlsVisible(false);
           updateMakerUi();
@@ -6867,6 +6878,603 @@
               requestAnimationFrame(loop);
             })();
           }
+        }
+
+        const DIALOGUE_CHARACTERS = {
+          adam: {
+            label: "Adam",
+            sheetPath: "story_assets/sprites/adam/adam-dialogue-portraits.svg",
+            defaultExpression: "neutral",
+            frames: {
+              neutral: 0,
+              happy: 1,
+              excited: 2,
+              worried: 3,
+              angry: 4,
+              sad: 5,
+              blink_tired: 6,
+              surprised: 7,
+              determined: 8,
+              talking: 9,
+            },
+          },
+          moony: {
+            label: "Moony",
+            sheetPath: "story_assets/sprites/moony/moony-dialogue-portraits.svg",
+            defaultExpression: "neutral",
+            frames: {
+              neutral: 0,
+              happy: 1,
+              excited: 2,
+              worried: 3,
+              angry: 4,
+              sad: 5,
+              blink: 6,
+              surprised: 7,
+              determined: 8,
+              talking: 9,
+            },
+          },
+          sunny: {
+            label: "Sunny",
+            sheetPath: "story_assets/sprites/sunny/sunny-dialogue-portraits.svg",
+            defaultExpression: "neutral",
+            frames: {
+              neutral: 0,
+              happy_spin_1: 1,
+              happy_spin_2: 2,
+              happy_spin_3: 3,
+              worried: 4,
+              sad: 5,
+              blink: 6,
+              surprised: 7,
+              talking: 8,
+              talking_fast: 9,
+            },
+          },
+        };
+
+        const dialogueDraft = {
+          leftCharacter: "adam",
+          leftExpression: "neutral",
+          rightCharacter: "moony",
+          rightExpression: "neutral",
+          speaker: "left",
+          text: "",
+        };
+
+        const dialogueScenes = [];
+        let dialogueCurrentSceneIndex = 0;
+        let dialogueSceneDragIndex = -1;
+        let dialoguePreTestState = null;
+
+        const dialoguePortraitImages = {};
+        let dialogueTypeTimer = null;
+        let dialogueTestAdvanceTimer = null;
+
+        function stopDialogueTypewriter() {
+          if (dialogueTypeTimer) {
+            clearInterval(dialogueTypeTimer);
+            dialogueTypeTimer = null;
+          }
+        }
+
+        function stopDialogueTestAdvanceTimer() {
+          if (dialogueTestAdvanceTimer) {
+            clearTimeout(dialogueTestAdvanceTimer);
+            dialogueTestAdvanceTimer = null;
+          }
+        }
+
+        function createDialogueScene(overrides = {}) {
+          const hasOwn = Object.prototype.hasOwnProperty.call.bind(Object.prototype.hasOwnProperty);
+          return {
+            leftCharacter: hasOwn(overrides, "leftCharacter") ? overrides.leftCharacter : dialogueDraft.leftCharacter || "adam",
+            leftExpression: hasOwn(overrides, "leftExpression") ? overrides.leftExpression : dialogueDraft.leftExpression || "neutral",
+            rightCharacter: hasOwn(overrides, "rightCharacter") ? overrides.rightCharacter : dialogueDraft.rightCharacter || "moony",
+            rightExpression: hasOwn(overrides, "rightExpression") ? overrides.rightExpression : dialogueDraft.rightExpression || "neutral",
+            speaker: hasOwn(overrides, "speaker") ? overrides.speaker : dialogueDraft.speaker || "left",
+            text: hasOwn(overrides, "text") ? String(overrides.text ?? "") : String(dialogueDraft.text || ""),
+            title: hasOwn(overrides, "title") ? String(overrides.title ?? "") : "",
+          };
+        }
+
+        function normalizeDialogueScene(scene) {
+          const normalized = createDialogueScene(scene || {});
+          if (!Object.prototype.hasOwnProperty.call(DIALOGUE_CHARACTERS, normalized.leftCharacter)) {
+            normalized.leftCharacter = "adam";
+          }
+          if (!Object.prototype.hasOwnProperty.call(DIALOGUE_CHARACTERS, normalized.rightCharacter)) {
+            normalized.rightCharacter = "moony";
+          }
+          const leftExpressions = getDialogueExpressionKeys(normalized.leftCharacter);
+          if (!leftExpressions.includes(normalized.leftExpression)) {
+            normalized.leftExpression = getDialogueCharacterConfig(normalized.leftCharacter).defaultExpression;
+          }
+          const rightExpressions = getDialogueExpressionKeys(normalized.rightCharacter);
+          if (!rightExpressions.includes(normalized.rightExpression)) {
+            normalized.rightExpression = getDialogueCharacterConfig(normalized.rightCharacter).defaultExpression;
+          }
+          if (!["left", "right", "narrator"].includes(normalized.speaker)) {
+            normalized.speaker = "left";
+          }
+          normalized.text = String(normalized.text || "");
+          normalized.title = String(normalized.title || "").trim();
+          return normalized;
+        }
+
+        function syncCurrentDialogueSceneFromDraft() {
+          if (!dialogueScenes.length) {
+            dialogueScenes.push(createDialogueScene());
+            dialogueCurrentSceneIndex = 0;
+          }
+          dialogueScenes[dialogueCurrentSceneIndex] = normalizeDialogueScene(dialogueDraft);
+        }
+
+        function setDialogueCurrentSceneIndex(index, shouldLoad = true) {
+          if (!dialogueScenes.length) return;
+          const nextIndex = Math.max(0, Math.min(index, dialogueScenes.length - 1));
+          dialogueCurrentSceneIndex = nextIndex;
+          if (shouldLoad) {
+            const scene = normalizeDialogueScene(dialogueScenes[nextIndex]);
+            dialogueDraft.leftCharacter = scene.leftCharacter;
+            dialogueDraft.leftExpression = scene.leftExpression;
+            dialogueDraft.rightCharacter = scene.rightCharacter;
+            dialogueDraft.rightExpression = scene.rightExpression;
+            dialogueDraft.speaker = scene.speaker;
+            dialogueDraft.text = scene.text;
+            refreshDialogueMakerUi();
+          }
+        }
+
+        function loadDialogueScene(index) {
+          setDialogueCurrentSceneIndex(index, true);
+        }
+
+        function moveDialogueScene(fromIndex, toIndex) {
+          if (fromIndex === toIndex) return;
+          if (fromIndex < 0 || fromIndex >= dialogueScenes.length) return;
+          if (toIndex < 0 || toIndex >= dialogueScenes.length) return;
+
+          const [scene] = dialogueScenes.splice(fromIndex, 1);
+          if (!scene) return;
+
+          const adjustedToIndex = fromIndex < toIndex ? toIndex - 1 : toIndex;
+          dialogueScenes.splice(adjustedToIndex, 0, scene);
+
+          if (dialogueCurrentSceneIndex === fromIndex) {
+            dialogueCurrentSceneIndex = adjustedToIndex;
+          } else if (fromIndex < dialogueCurrentSceneIndex && adjustedToIndex >= dialogueCurrentSceneIndex) {
+            dialogueCurrentSceneIndex -= 1;
+          } else if (fromIndex > dialogueCurrentSceneIndex && adjustedToIndex <= dialogueCurrentSceneIndex) {
+            dialogueCurrentSceneIndex += 1;
+          }
+
+          dialogueCurrentSceneIndex = Math.max(0, Math.min(dialogueCurrentSceneIndex, dialogueScenes.length - 1));
+          const activeScene = normalizeDialogueScene(dialogueScenes[dialogueCurrentSceneIndex]);
+          dialogueDraft.leftCharacter = activeScene.leftCharacter;
+          dialogueDraft.leftExpression = activeScene.leftExpression;
+          dialogueDraft.rightCharacter = activeScene.rightCharacter;
+          dialogueDraft.rightExpression = activeScene.rightExpression;
+          dialogueDraft.speaker = activeScene.speaker;
+          dialogueDraft.text = activeScene.text;
+          refreshDialogueMakerUi();
+        }
+
+        function addDialogueScene() {
+          syncCurrentDialogueSceneFromDraft();
+          const nextScene = createDialogueScene({ text: "" });
+          dialogueScenes.push(normalizeDialogueScene(nextScene));
+          dialogueCurrentSceneIndex = dialogueScenes.length - 1;
+          loadDialogueScene(dialogueCurrentSceneIndex);
+          updateDialogueSceneListUi();
+        }
+
+        function updateDialogueSceneListUi() {
+          const sceneList = document.getElementById("dialogueSceneList");
+          if (!sceneList) return;
+          sceneList.innerHTML = "";
+          if (!dialogueScenes.length) {
+            const emptyState = document.createElement("div");
+            emptyState.className = "dialogue-scene-empty";
+            emptyState.textContent = "No scenes yet";
+            sceneList.appendChild(emptyState);
+            return;
+          }
+
+          dialogueScenes.forEach((scene, index) => {
+            const normalized = normalizeDialogueScene(scene);
+            dialogueScenes[index] = normalized;
+            const button = document.createElement("button");
+            button.type = "button";
+            button.draggable = true;
+            button.className = "dialogue-scene-btn" + (index === dialogueCurrentSceneIndex ? " active" : "");
+            button.dataset.sceneIndex = String(index);
+            const sceneLabel = normalized.title || normalized.text.trim().slice(0, 28) || "Untitled Scene";
+            button.textContent = `${index + 1}. ${sceneLabel}`;
+            button.title = "Click to select, double-click to edit, drag to reorder";
+            button.onclick = () => {
+              syncCurrentDialogueSceneFromDraft();
+              loadDialogueScene(index);
+            };
+            button.ondblclick = (ev) => {
+              ev.preventDefault();
+              syncCurrentDialogueSceneFromDraft();
+              loadDialogueScene(index);
+              const currentScene = normalizeDialogueScene(dialogueScenes[index]);
+              const renamed = prompt(
+                "Rename scene",
+                currentScene.title || currentScene.text.trim().slice(0, 28) || `Scene ${index + 1}`,
+              );
+              if (renamed === null) return;
+              dialogueScenes[index] = normalizeDialogueScene({
+                ...currentScene,
+                title: renamed.trim(),
+              });
+              refreshDialogueMakerUi();
+            };
+            button.ondragstart = (ev) => {
+              dialogueSceneDragIndex = index;
+              button.classList.add("dragging");
+              ev.dataTransfer.effectAllowed = "move";
+              ev.dataTransfer.setData("text/plain", String(index));
+            };
+            button.ondragend = () => {
+              dialogueSceneDragIndex = -1;
+              sceneList.querySelectorAll(".dialogue-scene-btn").forEach((btn) => {
+                btn.classList.remove("drag-over", "dragging");
+              });
+            };
+            button.ondragover = (ev) => {
+              if (dialogueSceneDragIndex < 0) return;
+              ev.preventDefault();
+              sceneList.querySelectorAll(".dialogue-scene-btn").forEach((btn) => btn.classList.remove("drag-over"));
+              button.classList.add("drag-over");
+            };
+            button.ondragleave = () => {
+              button.classList.remove("drag-over");
+            };
+            button.ondrop = (ev) => {
+              ev.preventDefault();
+              const fromIndex = dialogueSceneDragIndex;
+              const toIndex = index;
+              dialogueSceneDragIndex = -1;
+              sceneList.querySelectorAll(".dialogue-scene-btn").forEach((btn) => btn.classList.remove("drag-over", "dragging"));
+              moveDialogueScene(fromIndex, toIndex);
+            };
+            sceneList.appendChild(button);
+          });
+        }
+
+        function playDialogueTypewriter(text) {
+          const target = document.getElementById("dialogueTestText");
+          const fullText = String(text || "");
+          stopDialogueTypewriter();
+          target.textContent = "";
+          if (!fullText.length) {
+            target.textContent = "...";
+            return;
+          }
+          let i = 0;
+          dialogueTypeTimer = setInterval(() => {
+            i += 1;
+            target.textContent = fullText.slice(0, i);
+            if (i >= fullText.length) {
+              stopDialogueTypewriter();
+            }
+          }, 18);
+        }
+
+        function getDialogueCharacterConfig(characterId) {
+          return DIALOGUE_CHARACTERS[characterId] || DIALOGUE_CHARACTERS.adam;
+        }
+
+        function getDialogueExpressionKeys(characterId) {
+          const config = getDialogueCharacterConfig(characterId);
+          return Object.keys(config.frames);
+        }
+
+        function getDialoguePortraitImage(characterId) {
+          const config = getDialogueCharacterConfig(characterId);
+          if (!dialoguePortraitImages[characterId]) {
+            const img = new Image();
+            img.src = config.sheetPath;
+            dialoguePortraitImages[characterId] = img;
+          }
+          return dialoguePortraitImages[characterId];
+        }
+
+        function renderDialoguePortrait(imgEl, characterId, expressionKey) {
+          const config = getDialogueCharacterConfig(characterId);
+          const frameIndex = Object.prototype.hasOwnProperty.call(config.frames, expressionKey)
+            ? config.frames[expressionKey]
+            : config.frames[config.defaultExpression] || 0;
+          const source = getDialoguePortraitImage(characterId);
+
+          const drawFrame = () => {
+            const frameCanvas = document.createElement("canvas");
+            frameCanvas.width = 128;
+            frameCanvas.height = 128;
+            const frameCtx = frameCanvas.getContext("2d");
+            frameCtx.clearRect(0, 0, 128, 128);
+            frameCtx.drawImage(source, frameIndex * 128, 0, 128, 128, 0, 0, 128, 128);
+            imgEl.src = frameCanvas.toDataURL("image/png");
+          };
+
+          if (source.complete && source.naturalWidth > 0) {
+            drawFrame();
+            return;
+          }
+
+          source.onload = drawFrame;
+        }
+
+        function fillDialogueCharacterSelect(selectEl, selectedValue) {
+          selectEl.innerHTML = "";
+          for (const [key, config] of Object.entries(DIALOGUE_CHARACTERS)) {
+            const option = document.createElement("option");
+            option.value = key;
+            option.textContent = config.label;
+            selectEl.appendChild(option);
+          }
+          selectEl.value = Object.prototype.hasOwnProperty.call(DIALOGUE_CHARACTERS, selectedValue)
+            ? selectedValue
+            : "adam";
+        }
+
+        function fillDialogueExpressionSelect(selectEl, characterId, selectedExpression) {
+          const config = getDialogueCharacterConfig(characterId);
+          const expressions = getDialogueExpressionKeys(characterId);
+          selectEl.innerHTML = "";
+          for (const expression of expressions) {
+            const option = document.createElement("option");
+            option.value = expression;
+            option.textContent = expression.replace(/_/g, " ");
+            selectEl.appendChild(option);
+          }
+          selectEl.value = expressions.includes(selectedExpression)
+            ? selectedExpression
+            : config.defaultExpression;
+        }
+
+        function setDialoguePreviewSpeaker(speaker) {
+          const preview = document.getElementById("dialoguePreview");
+          preview.classList.remove("speaker-left", "speaker-right", "speaker-narrator");
+          preview.classList.add(`speaker-${speaker}`);
+        }
+
+        function getDialogueSpeakerLabel() {
+          if (dialogueDraft.speaker === "right") {
+            return getDialogueCharacterConfig(dialogueDraft.rightCharacter).label;
+          }
+          if (dialogueDraft.speaker === "narrator") {
+            return "Narrator";
+          }
+          return getDialogueCharacterConfig(dialogueDraft.leftCharacter).label;
+        }
+
+        function normalizeDialogueDraft() {
+          if (!Object.prototype.hasOwnProperty.call(DIALOGUE_CHARACTERS, dialogueDraft.leftCharacter)) {
+            dialogueDraft.leftCharacter = "adam";
+          }
+          if (!Object.prototype.hasOwnProperty.call(DIALOGUE_CHARACTERS, dialogueDraft.rightCharacter)) {
+            dialogueDraft.rightCharacter = "moony";
+          }
+          const leftExpressions = getDialogueExpressionKeys(dialogueDraft.leftCharacter);
+          if (!leftExpressions.includes(dialogueDraft.leftExpression)) {
+            dialogueDraft.leftExpression = getDialogueCharacterConfig(dialogueDraft.leftCharacter).defaultExpression;
+          }
+          const rightExpressions = getDialogueExpressionKeys(dialogueDraft.rightCharacter);
+          if (!rightExpressions.includes(dialogueDraft.rightExpression)) {
+            dialogueDraft.rightExpression = getDialogueCharacterConfig(dialogueDraft.rightCharacter).defaultExpression;
+          }
+          if (!["left", "right", "narrator"].includes(dialogueDraft.speaker)) {
+            dialogueDraft.speaker = "left";
+          }
+          dialogueDraft.text = String(dialogueDraft.text || "");
+        }
+
+        function refreshDialogueMakerUi() {
+          normalizeDialogueDraft();
+          syncCurrentDialogueSceneFromDraft();
+          const leftCharacterSelect = document.getElementById("dialogueLeftCharacterSelect");
+          const rightCharacterSelect = document.getElementById("dialogueRightCharacterSelect");
+          const leftExpressionSelect = document.getElementById("dialogueLeftExpressionSelect");
+          const rightExpressionSelect = document.getElementById("dialogueRightExpressionSelect");
+          const speakerSelect = document.getElementById("dialogueSpeakerSelect");
+          const textInput = document.getElementById("dialogueTextInput");
+
+          fillDialogueCharacterSelect(leftCharacterSelect, dialogueDraft.leftCharacter);
+          fillDialogueCharacterSelect(rightCharacterSelect, dialogueDraft.rightCharacter);
+          fillDialogueExpressionSelect(leftExpressionSelect, dialogueDraft.leftCharacter, dialogueDraft.leftExpression);
+          fillDialogueExpressionSelect(rightExpressionSelect, dialogueDraft.rightCharacter, dialogueDraft.rightExpression);
+          speakerSelect.value = dialogueDraft.speaker;
+          textInput.value = dialogueDraft.text;
+
+          document.getElementById("dialogueLeftName").textContent =
+            getDialogueCharacterConfig(dialogueDraft.leftCharacter).label;
+          document.getElementById("dialogueRightName").textContent =
+            getDialogueCharacterConfig(dialogueDraft.rightCharacter).label;
+          document.getElementById("dialogueSpeakerBadge").textContent = getDialogueSpeakerLabel();
+          document.getElementById("dialoguePreviewText").textContent =
+            dialogueDraft.text.trim() || "Your dialogue text appears here.";
+          setDialoguePreviewSpeaker(dialogueDraft.speaker);
+
+          renderDialoguePortrait(
+            document.getElementById("dialogueLeftPortrait"),
+            dialogueDraft.leftCharacter,
+            dialogueDraft.leftExpression,
+          );
+          renderDialoguePortrait(
+            document.getElementById("dialogueRightPortrait"),
+            dialogueDraft.rightCharacter,
+            dialogueDraft.rightExpression,
+          );
+
+          updateDialogueSceneListUi();
+
+          // Keep editor refresh independent from test playback state.
+        }
+
+        function refreshDialogueTestUi(scene, replayText) {
+          const activeScene = normalizeDialogueScene(scene || dialogueDraft);
+          const stage = document.getElementById("dialogueTestStage");
+          stage.classList.remove("speaker-left", "speaker-right", "speaker-narrator");
+          stage.classList.add(`speaker-${activeScene.speaker}`);
+
+          document.getElementById("dialogueTestLeftName").textContent =
+            getDialogueCharacterConfig(activeScene.leftCharacter).label;
+          document.getElementById("dialogueTestRightName").textContent =
+            getDialogueCharacterConfig(activeScene.rightCharacter).label;
+          if (activeScene.speaker === "right") {
+            document.getElementById("dialogueTestSpeakerBadge").textContent =
+              getDialogueCharacterConfig(activeScene.rightCharacter).label;
+          } else if (activeScene.speaker === "narrator") {
+            document.getElementById("dialogueTestSpeakerBadge").textContent = "Narrator";
+          } else {
+            document.getElementById("dialogueTestSpeakerBadge").textContent =
+              getDialogueCharacterConfig(activeScene.leftCharacter).label;
+          }
+
+          renderDialoguePortrait(
+            document.getElementById("dialogueTestLeftPortrait"),
+            activeScene.leftCharacter,
+            activeScene.leftExpression,
+          );
+          renderDialoguePortrait(
+            document.getElementById("dialogueTestRightPortrait"),
+            activeScene.rightCharacter,
+            activeScene.rightExpression,
+          );
+
+          if (replayText) {
+            playDialogueTypewriter(activeScene.text.trim());
+          } else {
+            stopDialogueTypewriter();
+            document.getElementById("dialogueTestText").textContent = activeScene.text.trim() || "...";
+          }
+        }
+
+        function playDialogueCutsceneScenes(sceneIndex = 0) {
+          stopDialogueTestAdvanceTimer();
+          if (!dialogueScenes.length) {
+            refreshDialogueTestUi(normalizeDialogueScene(dialogueDraft), true);
+            return;
+          }
+
+          const safeIndex = Math.max(0, Math.min(sceneIndex, dialogueScenes.length - 1));
+          const scene = normalizeDialogueScene(dialogueScenes[safeIndex]);
+          refreshDialogueTestUi(scene, true);
+
+          const estimatedDuration = Math.max(900, scene.text.trim().length * 35 + 700);
+          dialogueTestAdvanceTimer = window.setTimeout(() => {
+            if (document.getElementById("dialogueTestOverlay").style.display !== "flex") return;
+            if (safeIndex >= dialogueScenes.length - 1) return;
+            playDialogueCutsceneScenes(safeIndex + 1);
+          }, estimatedDuration);
+        }
+
+        function openDialogueTestOverlay() {
+          syncCurrentDialogueSceneFromDraft();
+          dialoguePreTestState = {
+            sceneIndex: dialogueCurrentSceneIndex,
+            draft: { ...dialogueDraft },
+          };
+          document.getElementById("dialogueMakerPanel").style.display = "none";
+          document.getElementById("dialogueTestOverlay").style.display = "flex";
+          playDialogueCutsceneScenes(0);
+        }
+
+        function closeDialogueTestOverlay() {
+          stopDialogueTypewriter();
+          stopDialogueTestAdvanceTimer();
+          document.getElementById("dialogueTestOverlay").style.display = "none";
+          if (dialogueMakerMode) {
+            document.getElementById("dialogueMakerPanel").style.display = "flex";
+            if (dialoguePreTestState) {
+              dialogueCurrentSceneIndex = Math.max(
+                0,
+                Math.min(dialoguePreTestState.sceneIndex, Math.max(0, dialogueScenes.length - 1)),
+              );
+              dialogueDraft.leftCharacter = dialoguePreTestState.draft.leftCharacter;
+              dialogueDraft.leftExpression = dialoguePreTestState.draft.leftExpression;
+              dialogueDraft.rightCharacter = dialoguePreTestState.draft.rightCharacter;
+              dialogueDraft.rightExpression = dialoguePreTestState.draft.rightExpression;
+              dialogueDraft.speaker = dialoguePreTestState.draft.speaker;
+              dialogueDraft.text = dialoguePreTestState.draft.text;
+            }
+            refreshDialogueMakerUi();
+          }
+          dialoguePreTestState = null;
+        }
+
+        function buildDialogueCode() {
+          syncCurrentDialogueSceneFromDraft();
+          return JSON.stringify(dialogueScenes.map((scene) => normalizeDialogueScene(scene)), null, 2);
+        }
+
+        function buildStoryDialogueSnippet() {
+          syncCurrentDialogueSceneFromDraft();
+          const scenes = dialogueScenes.map((scene) => {
+            const normalized = normalizeDialogueScene(scene);
+            return {
+              type: "dialogue",
+              title: normalized.title,
+              left: {
+                character: normalized.leftCharacter,
+                expression: normalized.leftExpression,
+              },
+              right: {
+                character: normalized.rightCharacter,
+                expression: normalized.rightExpression,
+              },
+              speaker: normalized.speaker,
+              text: normalized.text,
+            };
+          });
+          return `const cutsceneScenes = ${JSON.stringify(scenes, null, 2)};`;
+        }
+
+        function closeDialogueMakerToModeMenu() {
+          dialogueMakerMode = false;
+          closeDialogueTestOverlay();
+          document.getElementById("dialogueMakerPanel").style.display = "none";
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "flex";
+          canvas.style.cursor = "default";
+          updateHudModeUi();
+        }
+
+        function enterDialogueMakerMode() {
+          ensureAudioContext();
+          clearPostTutorialTour();
+          tutorialMode = false;
+          makerMode = false;
+          makerTesting = false;
+          dialogueMakerMode = true;
+          customLevelActive = false;
+          playingSharedLevel = false;
+          speedRunMode = false;
+          speedRunGameOverMode = false;
+          showingPostTutorialSettings = false;
+          setTutorialUiVisible(false);
+          running = false;
+          isPaused = false;
+          setTopControlsVisible(false);
+          document.getElementById("pauseMenu").style.display = "none";
+          document.getElementById("speedRunMenu").style.display = "none";
+          document.getElementById("sharedLevelModal").style.display = "none";
+          document.getElementById("levelMakerPanel").style.display = "none";
+          document.getElementById("startMenu").style.display = "none";
+          document.getElementById("modeMenu").style.display = "none";
+          document.getElementById("dialogueMakerPanel").style.display = "flex";
+          document.getElementById("dialogueTestOverlay").style.display = "none";
+          if (!dialogueScenes.length) {
+            dialogueScenes.push(createDialogueScene());
+          }
+          loadDialogueScene(Math.max(0, Math.min(dialogueCurrentSceneIndex, dialogueScenes.length - 1)));
+          updateHudModeUi();
+          refreshDialogueMakerUi();
         }
 
         function clampMakerCamera() {
@@ -7121,6 +7729,185 @@
         };
         window.addEventListener("pointerup", clearMakerPanelDrag);
         window.addEventListener("pointercancel", clearMakerPanelDrag);
+
+        const dialoguePanel = document.getElementById("dialogueMakerPanel");
+        const dialogueHeader = document.getElementById("dialogueMakerHeader");
+        if (dialoguePanel && dialoguePanel.parentElement !== document.body) {
+          document.body.appendChild(dialoguePanel);
+        }
+        dialogueHeader.addEventListener("pointerdown", (ev) => {
+          if (!dialogueMakerMode) return;
+          const panelRect = dialoguePanel.getBoundingClientRect();
+          dialogueMakerPanelDragState = {
+            pointerId: ev.pointerId,
+            offsetX: ev.clientX - panelRect.left,
+            offsetY: ev.clientY - panelRect.top,
+          };
+          dialogueHeader.setPointerCapture(ev.pointerId);
+          ev.preventDefault();
+        });
+
+        window.addEventListener("pointermove", (ev) => {
+          if (!dialogueMakerPanelDragState || !dialogueMakerMode) return;
+          if (ev.pointerId !== dialogueMakerPanelDragState.pointerId) return;
+          const panelRect = dialoguePanel.getBoundingClientRect();
+          let left = ev.clientX - dialogueMakerPanelDragState.offsetX;
+          let top = ev.clientY - dialogueMakerPanelDragState.offsetY;
+          left = clamp(left, 0, window.innerWidth - panelRect.width);
+          top = clamp(top, 0, window.innerHeight - panelRect.height);
+          dialoguePanel.style.left = `${left}px`;
+          dialoguePanel.style.top = `${top}px`;
+          dialoguePanel.style.right = "auto";
+          dialoguePanel.style.bottom = "auto";
+        });
+
+        const clearDialoguePanelDrag = () => {
+          dialogueMakerPanelDragState = null;
+        };
+        window.addEventListener("pointerup", clearDialoguePanelDrag);
+        window.addEventListener("pointercancel", clearDialoguePanelDrag);
+
+        document.getElementById("dialogueLeftCharacterSelect").addEventListener("change", (ev) => {
+          dialogueDraft.leftCharacter = String(ev.target.value || "adam");
+          const leftConfig = getDialogueCharacterConfig(dialogueDraft.leftCharacter);
+          if (!Object.prototype.hasOwnProperty.call(leftConfig.frames, dialogueDraft.leftExpression)) {
+            dialogueDraft.leftExpression = leftConfig.defaultExpression;
+          }
+          refreshDialogueMakerUi();
+        });
+
+        document.getElementById("dialogueLeftExpressionSelect").addEventListener("change", (ev) => {
+          dialogueDraft.leftExpression = String(ev.target.value || "neutral");
+          refreshDialogueMakerUi();
+        });
+
+        document.getElementById("dialogueRightCharacterSelect").addEventListener("change", (ev) => {
+          dialogueDraft.rightCharacter = String(ev.target.value || "moony");
+          const rightConfig = getDialogueCharacterConfig(dialogueDraft.rightCharacter);
+          if (!Object.prototype.hasOwnProperty.call(rightConfig.frames, dialogueDraft.rightExpression)) {
+            dialogueDraft.rightExpression = rightConfig.defaultExpression;
+          }
+          refreshDialogueMakerUi();
+        });
+
+        document.getElementById("dialogueRightExpressionSelect").addEventListener("change", (ev) => {
+          dialogueDraft.rightExpression = String(ev.target.value || "neutral");
+          refreshDialogueMakerUi();
+        });
+
+        document.getElementById("dialogueSpeakerSelect").addEventListener("change", (ev) => {
+          dialogueDraft.speaker = String(ev.target.value || "left");
+          refreshDialogueMakerUi();
+        });
+
+        document.getElementById("dialogueTextInput").addEventListener("input", (ev) => {
+          dialogueDraft.text = String(ev.target.value || "");
+          refreshDialogueMakerUi();
+        });
+
+        document.getElementById("dialogueNewSceneBtn").onclick = () => {
+          addDialogueScene();
+        };
+
+        document.getElementById("dialogueTestBtn").onclick = () => {
+          openDialogueTestOverlay();
+        };
+
+        document.getElementById("dialogueGenerateBtn").onclick = async () => {
+          try {
+            const code = buildDialogueCode();
+            const output = document.getElementById("dialogueCodeOutput");
+            output.value = code;
+            output.focus();
+            output.select();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(code);
+              flashCodeMessage("dialogue code copied");
+            } else {
+              flashCodeMessage("dialogue code generated");
+            }
+          } catch (_err) {
+            flashCodeMessage("failed to generate dialogue code");
+          }
+        };
+
+        document.getElementById("dialogueGenerateStoryBtn").onclick = async () => {
+          try {
+            const code = buildStoryDialogueSnippet();
+            const output = document.getElementById("dialogueCodeOutput");
+            output.value = code;
+            output.focus();
+            output.select();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(code);
+              flashCodeMessage("story snippet copied");
+            } else {
+              flashCodeMessage("story snippet generated");
+            }
+          } catch (_err) {
+            flashCodeMessage("failed to generate story snippet");
+          }
+        };
+
+        document.getElementById("dialogueLoadBtn").onclick = () => {
+          const raw = prompt("Paste dialogue JSON");
+          if (!raw) return;
+          try {
+            const parsed = JSON.parse(raw);
+            const incomingScenes = Array.isArray(parsed)
+              ? parsed
+              : parsed && typeof parsed === "object" && Array.isArray(parsed.scenes)
+                ? parsed.scenes
+                : [parsed];
+            const nextScenes = incomingScenes
+              .filter((scene) => scene && typeof scene === "object")
+              .map((scene) => normalizeDialogueScene({
+                leftCharacter: scene.left?.character || scene.leftCharacter,
+                leftExpression: scene.left?.expression || scene.leftExpression,
+                rightCharacter: scene.right?.character || scene.rightCharacter,
+                rightExpression: scene.right?.expression || scene.rightExpression,
+                speaker: scene.speaker,
+                text: scene.text,
+                title: scene.title || scene.name || scene.sceneName,
+              }));
+            dialogueScenes.length = 0;
+            dialogueScenes.push(...(nextScenes.length ? nextScenes : [createDialogueScene()]));
+            dialogueCurrentSceneIndex = 0;
+            const activeScene = dialogueScenes[0];
+            dialogueDraft.leftCharacter = activeScene.leftCharacter;
+            dialogueDraft.leftExpression = activeScene.leftExpression;
+            dialogueDraft.rightCharacter = activeScene.rightCharacter;
+            dialogueDraft.rightExpression = activeScene.rightExpression;
+            dialogueDraft.speaker = activeScene.speaker;
+            dialogueDraft.text = activeScene.text;
+            refreshDialogueMakerUi();
+            flashCodeMessage("dialogue loaded");
+          } catch (_err) {
+            flashCodeMessage("invalid dialogue code");
+          }
+        };
+
+        document.getElementById("dialogueClearBtn").onclick = () => {
+          dialogueScenes.length = 0;
+          dialogueCurrentSceneIndex = 0;
+          dialogueDraft.text = "";
+          document.getElementById("dialogueCodeOutput").value = "";
+          dialogueScenes.push(createDialogueScene());
+          loadDialogueScene(0);
+          refreshDialogueMakerUi();
+        };
+
+        document.getElementById("dialogueCloseBtn").onclick = () => {
+          closeDialogueMakerToModeMenu();
+        };
+
+        document.getElementById("dialogueTestReplayBtn").onclick = () => {
+          playDialogueCutsceneScenes(0);
+        };
+
+        document.getElementById("dialogueTestCloseBtn").onclick = () => {
+          closeDialogueTestOverlay();
+        };
 
         document.getElementById("makerApplyLengthBtn").onclick = () => {
           const level = ensureCustomLevelDraft();
@@ -7527,8 +8314,10 @@
           document.getElementById("storyModeMenu").style.display = "flex";
         };
         document.getElementById("levelMakerModeBtn").onclick = () => enterLevelMakerMode();
+        document.getElementById("dialogueMakerModeBtn").onclick = () => enterDialogueMakerMode();
         document.getElementById("speedRunBackBtn").onclick = () => hideSpeedRunMenu();
         document.getElementById("speedRunStartBtn").onclick = () => startSpeedRunMode();
+        refreshDialogueMakerUi();
 
         // Speed Running Mode: Initialize and start a new speed run attempt
         // Sets all vars to level 1, records start time, fully resets game state, begins main loop
@@ -8673,6 +9462,11 @@
             return;
           }
 
+          if (e.code === "KeyP" && dialogueMakerMode) {
+            e.preventDefault();
+            return;
+          }
+
           const isPauseShortcut = e.code === "KeyP" || e.code === "Escape";
           if (isPauseShortcut) {
             if (codeEntryModal.style.display === "flex") {
@@ -8706,6 +9500,12 @@
               return;
             }
 
+            if (document.getElementById("dialogueTestOverlay").style.display === "flex") {
+              e.preventDefault();
+              closeDialogueTestOverlay();
+              return;
+            }
+
             if (document.getElementById("fullRestartConfirm").style.display === "flex") {
               e.preventDefault();
               hideFullRestartPrompt();
@@ -8722,6 +9522,12 @@
               returnToStartMenu();
               document.getElementById("startMenu").style.display = "none";
               document.getElementById("modeMenu").style.display = "flex";
+              return;
+            }
+
+            if (dialogueMakerMode) {
+              e.preventDefault();
+              closeDialogueMakerToModeMenu();
               return;
             }
 

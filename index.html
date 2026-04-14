@@ -150,6 +150,9 @@
           <button id="levelMakerModeBtn" style="width: 220px; margin-bottom: 8px; background: #3ad; color: #03131d">
             Level Maker(PC)
           </button>
+          <button id="dialogueMakerModeBtn" style="width: 220px; margin-bottom: 8px; background: #f6b26b; color: #241608">
+            Dialogue Maker
+          </button>
           <button id="modeBackBtn" class="small-btn" style="width: 220px">
             Back
           </button>
@@ -514,6 +517,88 @@
           </div>
           <textarea id="makerCodeOutput" class="shared-level-input" readonly placeholder="Generated code appears here"></textarea>
           <div id="makerHint">Drag the header to move anywhere on screen. Drag panel corner/edge to resize. Use Platform/Obstacle dropdowns for run-mode variants. Hold Shift while dragging in canvas to pan.</div>
+        </div>
+        <div id="dialogueMakerPanel" style="display: none" aria-label="Dialogue maker controls">
+          <div id="dialogueMakerHeader">
+            <span id="dialogueMakerHeaderTitle">DIALOGUE MAKER</span>
+            <span id="dialogueMakerHeaderDragText">Drag</span>
+          </div>
+          <div class="maker-inline-row">
+            <label for="dialogueLeftCharacterSelect">Left</label>
+            <select id="dialogueLeftCharacterSelect"></select>
+          </div>
+          <div class="maker-inline-row">
+            <label for="dialogueLeftExpressionSelect">Left Face</label>
+            <select id="dialogueLeftExpressionSelect"></select>
+          </div>
+          <div class="maker-inline-row">
+            <label for="dialogueRightCharacterSelect">Right</label>
+            <select id="dialogueRightCharacterSelect"></select>
+          </div>
+          <div class="maker-inline-row">
+            <label for="dialogueRightExpressionSelect">Right Face</label>
+            <select id="dialogueRightExpressionSelect"></select>
+          </div>
+          <div class="maker-inline-row">
+            <label for="dialogueSpeakerSelect">Talking</label>
+            <select id="dialogueSpeakerSelect">
+              <option value="left">Left Character</option>
+              <option value="right">Right Character</option>
+              <option value="narrator">Narrator</option>
+            </select>
+          </div>
+          <div class="dialogue-scene-toolbar">
+            <button id="dialogueNewSceneBtn" class="small-btn" style="background: #6ce5ff; color: #03131d">New Scene</button>
+            <div id="dialogueSceneList" aria-label="Dialogue scenes"></div>
+          </div>
+          <textarea id="dialogueTextInput" class="shared-level-input" placeholder="Write dialogue text here"></textarea>
+          <div id="dialoguePreview" aria-live="polite">
+            <div class="dialogue-portrait" data-side="left">
+              <img id="dialogueLeftPortrait" alt="Left character portrait" />
+              <div id="dialogueLeftName" class="dialogue-portrait-name">Left</div>
+            </div>
+            <div id="dialogueBubbleWrap">
+              <div id="dialogueSpeakerBadge">Left</div>
+              <div id="dialoguePreviewText">Your dialogue text appears here.</div>
+            </div>
+            <div class="dialogue-portrait" data-side="right">
+              <img id="dialogueRightPortrait" alt="Right character portrait" />
+              <div id="dialogueRightName" class="dialogue-portrait-name">Right</div>
+            </div>
+          </div>
+          <div class="maker-inline-row">
+            <button id="dialogueTestBtn" style="background: #8ed1fc; color: #062033">Test</button>
+            <button id="dialogueGenerateBtn" style="background: #fc3; color: #111">Generate Code</button>
+            <button id="dialogueGenerateStoryBtn" class="small-btn" style="background: #f6b26b; color: #241608">Story Snippet</button>
+            <button id="dialogueLoadBtn" class="small-btn">Load Code</button>
+            <button id="dialogueClearBtn" class="small-btn">Clear</button>
+            <button id="dialogueCloseBtn" class="small-btn">Close</button>
+          </div>
+          <textarea id="dialogueCodeOutput" class="shared-level-input" readonly placeholder="Generated dialogue JSON appears here"></textarea>
+          <div id="dialogueMakerHint">Pick left and right characters from story assets, choose who is talking, then write text and generate code.</div>
+        </div>
+        <div id="dialogueTestOverlay" class="overlay" style="display: none" role="dialog" aria-modal="true" aria-labelledby="dialogueTestTitle">
+          <div class="dialogue-test-box">
+            <h1 id="dialogueTestTitle">DIALOGUE TEST</h1>
+            <div id="dialogueTestStage">
+              <div class="dialogue-test-portrait" data-side="left">
+                <img id="dialogueTestLeftPortrait" alt="Left test portrait" />
+                <div id="dialogueTestLeftName" class="dialogue-test-name">Left</div>
+              </div>
+              <div id="dialogueTestBubbleWrap">
+                <div id="dialogueTestSpeakerBadge">Speaker</div>
+                <div id="dialogueTestText">Dialogue test text appears here.</div>
+              </div>
+              <div class="dialogue-test-portrait" data-side="right">
+                <img id="dialogueTestRightPortrait" alt="Right test portrait" />
+                <div id="dialogueTestRightName" class="dialogue-test-name">Right</div>
+              </div>
+            </div>
+            <div class="dialogue-test-actions">
+              <button id="dialogueTestReplayBtn" style="background: #8ed1fc; color: #062033">Replay</button>
+              <button id="dialogueTestCloseBtn" class="small-btn">Back to Maker</button>
+            </div>
+          </div>
         </div>
         <button id="versionPickerBtn" aria-haspopup="dialog" aria-expanded="false" title="Choose game version">v1.0.0</button>
         <div id="versionPickerMenu" aria-label="Game versions" role="dialog">

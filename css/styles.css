@@ -1142,3 +1142,307 @@
           overflow-y: auto;
         }
       }
+
+      #dialogueMakerPanel {
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        width: 420px;
+        max-width: calc(100vw - 16px);
+        min-width: 280px;
+        min-height: 240px;
+        max-height: calc(100vh - 16px);
+        z-index: 281;
+        background: rgba(24, 14, 10, 0.95);
+        border: 1px solid #f6b26b;
+        box-shadow: 0 0 18px rgba(246, 178, 107, 0.28);
+        padding: 10px;
+        color: #ffe8cf;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        resize: both;
+        overflow: auto;
+      }
+
+      #dialogueMakerHeader {
+        font-size: 14px;
+        letter-spacing: 1px;
+        color: #ffd39f;
+        font-weight: bold;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 2px 2px 6px;
+        cursor: move;
+        user-select: none;
+        touch-action: none;
+        border-bottom: 1px solid rgba(255, 211, 159, 0.25);
+      }
+
+      #dialogueMakerHeaderDragText {
+        font-size: 11px;
+        letter-spacing: 0;
+        color: #d3af86;
+        font-weight: normal;
+      }
+
+      #dialogueMakerPanel select,
+      #dialogueMakerPanel textarea {
+        background: #1c110d;
+        color: #ffe8cf;
+        border: 1px solid #f6b26b;
+      }
+
+      .dialogue-scene-toolbar {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      #dialogueSceneList {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+
+      .dialogue-scene-btn {
+        padding: 6px 8px;
+        font-size: 12px;
+        background: #2a1a14;
+        color: #ffd7b5;
+        border: 1px solid #b77746;
+        border-radius: 999px;
+        cursor: grab;
+      }
+
+      .dialogue-scene-btn.active {
+        background: #f6b26b;
+        color: #241608;
+      }
+
+      .dialogue-scene-btn.dragging {
+        opacity: 0.55;
+        cursor: grabbing;
+      }
+
+      .dialogue-scene-btn.drag-over {
+        outline: 2px solid #8ed1fc;
+        outline-offset: 1px;
+      }
+
+      .dialogue-scene-empty {
+        font-size: 12px;
+        color: #d3af86;
+        padding: 4px 0;
+      }
+
+      #dialoguePreview {
+        display: grid;
+        grid-template-columns: 88px 1fr 88px;
+        gap: 8px;
+        align-items: end;
+        padding: 8px;
+        border: 1px solid #7a4c2a;
+        border-radius: 7px;
+        background: linear-gradient(180deg, rgba(39, 24, 18, 0.95), rgba(25, 15, 11, 0.95));
+      }
+
+      .dialogue-portrait {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        opacity: 0.55;
+        transform: scale(0.96);
+        transition: opacity 0.15s ease, transform 0.15s ease;
+      }
+
+      .dialogue-portrait img {
+        width: 80px;
+        height: 80px;
+        border: 1px solid #9a6a45;
+        border-radius: 7px;
+        background: #140c09;
+        image-rendering: pixelated;
+      }
+
+      .dialogue-portrait-name {
+        font-size: 11px;
+        color: #eec9a3;
+        text-align: center;
+      }
+
+      #dialogueBubbleWrap {
+        min-height: 96px;
+        border: 1px solid #9a6a45;
+        border-radius: 7px;
+        padding: 8px;
+        background: rgba(15, 10, 8, 0.92);
+      }
+
+      #dialogueSpeakerBadge {
+        display: inline-block;
+        font-size: 11px;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border-radius: 999px;
+        background: #f6b26b;
+        color: #241608;
+        margin-bottom: 6px;
+      }
+
+      #dialoguePreviewText {
+        font-size: 12px;
+        color: #ffe8cf;
+        line-height: 1.4;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      #dialoguePreview.speaker-left .dialogue-portrait[data-side="left"],
+      #dialoguePreview.speaker-right .dialogue-portrait[data-side="right"] {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      #dialoguePreview.speaker-narrator .dialogue-portrait {
+        opacity: 0.45;
+      }
+
+      #dialogueMakerHint {
+        font-size: 11px;
+        color: #e4b98f;
+        line-height: 1.35;
+      }
+
+      @media (max-width: 900px) {
+        #dialogueMakerPanel {
+          width: 340px;
+          top: auto;
+          left: 10px;
+          bottom: 10px;
+          max-height: 86%;
+        }
+
+        #dialoguePreview {
+          grid-template-columns: 1fr;
+        }
+
+        .dialogue-portrait {
+          flex-direction: row;
+          justify-content: flex-start;
+        }
+      }
+
+      .dialogue-test-box {
+        width: min(900px, calc(100vw - 24px));
+        border: 1px solid #f6b26b;
+        border-radius: 10px;
+        background: linear-gradient(180deg, rgba(20, 11, 8, 0.96), rgba(12, 7, 5, 0.96));
+        box-shadow: 0 0 24px rgba(246, 178, 107, 0.3);
+        padding: 14px;
+      }
+
+      #dialogueTestStage {
+        display: grid;
+        grid-template-columns: 180px 1fr 180px;
+        gap: 10px;
+        align-items: end;
+        margin-top: 8px;
+      }
+
+      .dialogue-test-portrait {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 6px;
+        opacity: 0.55;
+        transform: scale(0.96);
+        transition: opacity 0.18s ease, transform 0.18s ease;
+      }
+
+      .dialogue-test-portrait img {
+        width: 160px;
+        height: 160px;
+        border-radius: 10px;
+        border: 1px solid #8f5a32;
+        background: #120b08;
+        image-rendering: pixelated;
+      }
+
+      .dialogue-test-name {
+        color: #ffd7b5;
+        font-size: 13px;
+        letter-spacing: 0.3px;
+      }
+
+      #dialogueTestBubbleWrap {
+        min-height: 190px;
+        border: 1px solid #8f5a32;
+        border-radius: 10px;
+        padding: 12px;
+        background: rgba(11, 7, 5, 0.93);
+      }
+
+      #dialogueTestSpeakerBadge {
+        display: inline-block;
+        background: #f6b26b;
+        color: #2a190d;
+        font-size: 12px;
+        text-transform: uppercase;
+        border-radius: 999px;
+        padding: 3px 8px;
+        margin-bottom: 8px;
+        letter-spacing: 0.5px;
+      }
+
+      #dialogueTestText {
+        color: #ffe8cf;
+        font-size: 18px;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        word-break: break-word;
+        min-height: 6em;
+      }
+
+      #dialogueTestStage.speaker-left .dialogue-test-portrait[data-side="left"],
+      #dialogueTestStage.speaker-right .dialogue-test-portrait[data-side="right"] {
+        opacity: 1;
+        transform: scale(1);
+      }
+
+      #dialogueTestStage.speaker-narrator .dialogue-test-portrait {
+        opacity: 0.4;
+      }
+
+      .dialogue-test-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .dialogue-test-actions button {
+        flex: 1;
+      }
+
+      @media (max-width: 900px) {
+        #dialogueTestStage {
+          grid-template-columns: 1fr;
+        }
+
+        .dialogue-test-portrait {
+          flex-direction: row;
+          justify-content: flex-start;
+        }
+
+        .dialogue-test-portrait img {
+          width: 96px;
+          height: 96px;
+        }
+
+        #dialogueTestText {
+          font-size: 15px;
+        }
+      }
