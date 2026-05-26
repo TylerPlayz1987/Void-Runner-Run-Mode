@@ -584,7 +584,7 @@
         opacity: 0;
         z-index: 0;
         background:
-          radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0 14%, rgba(110, 34, 190, 0.22) 24%, rgba(55, 0, 92, 0.35) 35%, rgba(0, 0, 0, 0.16) 56%, rgba(0, 0, 0, 0.22) 74%),
+          radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0 18%, rgba(110, 34, 190, 0.2) 26%, rgba(55, 0, 92, 0.28) 38%, rgba(0, 0, 0, 0) 60%),
           repeating-linear-gradient(
             90deg,
             rgba(35, 255, 120, 0.18) 0,
@@ -615,7 +615,7 @@
         opacity: 0;
         z-index: 0;
         background:
-          radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0 10%, rgba(190, 118, 255, 0.48) 14%, rgba(86, 0, 134, 0.58) 24%, rgba(13, 0, 22, 0.75) 40%, rgba(0, 0, 0, 0.1) 66%),
+          radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0 12%, rgba(190, 118, 255, 0.42) 16%, rgba(86, 0, 134, 0.5) 26%, rgba(13, 0, 22, 0.34) 42%, rgba(0, 0, 0, 0) 68%),
           radial-gradient(circle at 50% 50%, rgba(228, 194, 255, 0.42) 0 2.2%, rgba(0, 0, 0, 0) 3.2%),
           radial-gradient(circle at 50% 50%, rgba(132, 34, 255, 0.14) 0 24%, rgba(0, 0, 0, 0) 25%);
         transform: scale(0.68) rotate(0deg);
@@ -634,20 +634,22 @@
       }
 
       #modeMenu.story-transitioning #modeMenuVortex {
-        opacity: 0.72;
+        opacity: 0.5;
         animation: modeMenuVortexSpin 2.15s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
       }
 
       #modeMenu.story-transitioning::before {
-        opacity: 0.72;
+        opacity: 0.45;
         animation: modeMenuGridSuck 2.15s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
       }
 
       #modeMenu.story-transitioning {
-        transform: scale(0.9);
-        opacity: 0.35;
-        clip-path: circle(10% at 50% 48%);
-        filter: blur(0.2px) brightness(0.95) contrast(1.02);
+        transform: scale(0.95);
+        opacity: 0.2;
+        clip-path: circle(18% at 50% 48%);
+        filter: blur(0.12px) brightness(1) contrast(1.01);
+        background-color: transparent !important;
+        background-image: none !important;
       }
 
       #modeMenu.story-transitioning > h1 {
