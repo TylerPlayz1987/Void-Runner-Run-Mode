@@ -569,6 +569,11 @@
       #modeMenu {
         overflow: hidden;
         transform-origin: 50% 50%;
+        transition:
+          transform 1.6s cubic-bezier(0.12, 0.75, 0.18, 1),
+          opacity 1.4s ease,
+          clip-path 1.6s cubic-bezier(0.12, 0.75, 0.18, 1),
+          filter 1.6s ease;
       }
 
       #modeMenu::before {
@@ -600,30 +605,7 @@
       }
 
       #modeMenu::after {
-        content: "";
-        position: absolute;
-        inset: -26%;
-        pointer-events: none;
-        opacity: 0;
-        z-index: 0;
-        background:
-          repeating-linear-gradient(
-            90deg,
-            rgba(75, 255, 126, 0.26) 0,
-            rgba(75, 255, 126, 0.26) 3px,
-            rgba(0, 0, 0, 0) 3px,
-            rgba(0, 0, 0, 0) 18px
-          ),
-          repeating-linear-gradient(
-            0deg,
-            rgba(75, 255, 126, 0.18) 0,
-            rgba(75, 255, 126, 0.18) 3px,
-            rgba(0, 0, 0, 0) 3px,
-            rgba(0, 0, 0, 0) 18px
-          );
-        transform: scale(1.08) rotate(0deg);
-        filter: blur(0.25px);
-        clip-path: inset(0 0 0 0);
+        content: none;
       }
 
       #modeMenuVortex {
@@ -661,49 +643,51 @@
         animation: modeMenuGridSuck 2.15s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
       }
 
-      #modeMenu.story-transitioning::after {
-        opacity: 1;
-        animation: modeMenuGridDebris 2.15s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
+      #modeMenu.story-transitioning {
+        transform: scale(0.84);
+        opacity: 0.98;
+        clip-path: circle(6% at 50% 48%);
+        filter: blur(0.4px) brightness(0.88) contrast(1.05);
       }
 
       #modeMenu.story-transitioning > h1 {
-        transform: translateY(-26px) scale(0.66);
-        opacity: 0.06;
-        filter: blur(4px);
+        transform: translateY(-30px) scale(0.58);
+        opacity: 0.03;
+        filter: blur(5px);
       }
 
       #modeMenu.story-transitioning > button {
         opacity: 0;
-        filter: blur(9px);
-        transform: scale(0.04) translateY(42px) rotate(18deg);
+        filter: blur(10px);
+        transform: scale(0.02) translateY(56px) rotate(22deg);
       }
 
       #modeMenu.story-transitioning > button:nth-of-type(1) {
-        transition-delay: 0.16s;
+        transition-delay: 0.28s;
       }
 
       #modeMenu.story-transitioning > button:nth-of-type(2) {
-        transition-delay: 0.26s;
+        transition-delay: 0.4s;
       }
 
       #modeMenu.story-transitioning > button:nth-of-type(3) {
-        transition-delay: 0.36s;
+        transition-delay: 0.52s;
       }
 
       #modeMenu.story-transitioning > button:nth-of-type(4) {
-        transition-delay: 0.46s;
+        transition-delay: 0.64s;
       }
 
       #modeMenu.story-transitioning > button:nth-of-type(5) {
-        transition-delay: 0.56s;
+        transition-delay: 0.76s;
       }
 
       #modeMenu.story-transitioning > button:nth-of-type(6) {
-        transition-delay: 0.66s;
+        transition-delay: 0.88s;
       }
 
       #modeMenu.story-transitioning > button:nth-of-type(7) {
-        transition-delay: 0.76s;
+        transition-delay: 1s;
       }
 
       @keyframes modeMenuVortexSpin {
@@ -747,34 +731,47 @@
         }
       }
 
-      @keyframes modeMenuGridDebris {
-        0% {
-          opacity: 0;
-          clip-path: inset(0 0 0 0);
-          transform: scale(1.08) rotate(0deg);
-        }
-        20% {
-          opacity: 0.95;
-          clip-path: inset(0 0 0 0);
-          transform: scale(1.02) rotate(8deg);
-        }
-        45% {
-          opacity: 0.7;
-          clip-path: inset(10% 6% 12% 7%);
-          transform: scale(0.74) rotate(64deg);
-        }
-        70% {
-          opacity: 0.42;
-          clip-path: inset(24% 18% 26% 18%);
-          transform: scale(0.4) rotate(176deg);
-          filter: blur(0.75px);
-        }
-        100% {
-          opacity: 0;
-          clip-path: inset(48% 44% 48% 44%);
-          transform: scale(0.08) rotate(360deg);
-          filter: blur(2px);
-        }
+      #gameShell {
+        transition:
+          transform 1.7s cubic-bezier(0.12, 0.75, 0.18, 1),
+          opacity 1.4s ease,
+          filter 1.7s ease;
+      }
+
+      #gameShell.story-transitioning {
+        transform: scale(0.96);
+        opacity: 0.97;
+        filter: brightness(0.9) blur(0.2px);
+      }
+
+      #container {
+        transition:
+          transform 1.7s cubic-bezier(0.12, 0.75, 0.18, 1),
+          opacity 1.4s ease,
+          border-color 1.7s ease,
+          box-shadow 1.7s ease,
+          filter 1.7s ease;
+      }
+
+      #container.story-transitioning {
+        transform: scale(0.93);
+        opacity: 0.96;
+        border-color: rgba(0, 0, 0, 0.92);
+        box-shadow: 0 0 26px rgba(128, 48, 255, 0.22);
+        filter: blur(0.15px) brightness(0.92);
+      }
+
+      #startMenuVersionTag {
+        transition:
+          transform 1.2s ease,
+          opacity 1.2s ease,
+          filter 1.2s ease;
+      }
+
+      #startMenuVersionTag.story-transitioning {
+        transform: translateY(-8px) scale(0.5);
+        opacity: 0;
+        filter: blur(2px);
       }
 
       #storyModeBtn {

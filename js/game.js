@@ -8353,13 +8353,22 @@
           const storyMenuApi = window.VRStoryModeMenu;
           if (storyMenuApi && typeof storyMenuApi.open === "function") {
             const modeMenu = document.getElementById("modeMenu");
-            const transitionDurationMs = 2150;
+            const gameShell = document.getElementById("gameShell");
+            const container = document.getElementById("container");
+            const versionTag = document.getElementById("startMenuVersionTag");
+            const transitionDurationMs = 2400;
             if (modeMenu) {
               modeMenu.classList.add("story-transitioning");
+              if (gameShell) gameShell.classList.add("story-transitioning");
+              if (container) container.classList.add("story-transitioning");
+              if (versionTag) versionTag.classList.add("story-transitioning");
               modeMenu.style.pointerEvents = "none";
               void modeMenu.offsetWidth;
               window.setTimeout(() => {
                 modeMenu.classList.remove("story-transitioning");
+                if (gameShell) gameShell.classList.remove("story-transitioning");
+                if (container) container.classList.remove("story-transitioning");
+                if (versionTag) versionTag.classList.remove("story-transitioning");
                 modeMenu.style.pointerEvents = "";
                 storyMenuApi.open();
               }, transitionDurationMs);
