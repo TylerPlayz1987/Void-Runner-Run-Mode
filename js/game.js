@@ -8358,7 +8358,7 @@
             const uiLeft = document.getElementById("ui-left");
             const uiRight = document.getElementById("ui-right");
             const versionTag = document.getElementById("startMenuVersionTag");
-            const transitionDurationMs = 2400;
+            const transitionDurationMs = 3200;
             if (modeMenu) {
               modeMenu.classList.add("story-transitioning");
               if (gameShell) gameShell.classList.add("story-transitioning");
