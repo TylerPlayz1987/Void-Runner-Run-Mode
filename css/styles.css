@@ -634,7 +634,7 @@
       }
 
       #codeFlashMessage.active {
-        animation: codeFlashPulse 1s ease-in-out 3;
+        animation: codeFlashPulse 0.65s ease-in-out 1;
       }
 
       .code-entry-box {
