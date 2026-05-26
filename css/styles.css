@@ -584,23 +584,23 @@
         opacity: 0;
         z-index: 0;
         background:
-          radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0 10%, rgba(0, 0, 0, 0.82) 30%, rgba(0, 0, 0, 0.98) 52%, rgba(0, 0, 0, 1) 72%),
+          radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0 14%, rgba(110, 34, 190, 0.22) 24%, rgba(55, 0, 92, 0.35) 35%, rgba(0, 0, 0, 0.16) 56%, rgba(0, 0, 0, 0.22) 74%),
           repeating-linear-gradient(
             90deg,
-            rgba(35, 255, 120, 0.24) 0,
-            rgba(35, 255, 120, 0.24) 2px,
+            rgba(35, 255, 120, 0.18) 0,
+            rgba(35, 255, 120, 0.18) 2px,
             rgba(0, 0, 0, 0) 2px,
             rgba(0, 0, 0, 0) 20px
           ),
           repeating-linear-gradient(
             0deg,
-            rgba(35, 255, 120, 0.14) 0,
-            rgba(35, 255, 120, 0.14) 2px,
+            rgba(35, 255, 120, 0.1) 0,
+            rgba(35, 255, 120, 0.1) 2px,
             rgba(0, 0, 0, 0) 2px,
             rgba(0, 0, 0, 0) 20px
           );
-        transform: scale(1.08) rotate(0deg);
-        filter: blur(0.45px) saturate(1.3);
+        transform: scale(1.06) rotate(0deg);
+        filter: blur(0.35px) saturate(1.15);
         mix-blend-mode: screen;
       }
 
@@ -615,11 +615,11 @@
         opacity: 0;
         z-index: 0;
         background:
-          radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0 9%, rgba(190, 118, 255, 0.55) 13%, rgba(86, 0, 134, 0.7) 22%, rgba(13, 0, 22, 0.96) 44%, rgba(0, 0, 0, 1) 67%),
-          radial-gradient(circle at 50% 50%, rgba(228, 194, 255, 0.34) 0 2.2%, rgba(0, 0, 0, 0) 3.2%),
-          radial-gradient(circle at 50% 50%, rgba(132, 34, 255, 0.12) 0 22%, rgba(0, 0, 0, 0) 23%);
+          radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0 10%, rgba(190, 118, 255, 0.48) 14%, rgba(86, 0, 134, 0.58) 24%, rgba(13, 0, 22, 0.75) 40%, rgba(0, 0, 0, 0.1) 66%),
+          radial-gradient(circle at 50% 50%, rgba(228, 194, 255, 0.42) 0 2.2%, rgba(0, 0, 0, 0) 3.2%),
+          radial-gradient(circle at 50% 50%, rgba(132, 34, 255, 0.14) 0 24%, rgba(0, 0, 0, 0) 25%);
         transform: scale(0.68) rotate(0deg);
-        filter: blur(1.4px) saturate(1.3);
+        filter: blur(1.1px) saturate(1.2);
       }
 
       #modeMenu > :not(#modeMenuVortex) {
@@ -634,20 +634,20 @@
       }
 
       #modeMenu.story-transitioning #modeMenuVortex {
-        opacity: 1;
+        opacity: 0.72;
         animation: modeMenuVortexSpin 2.15s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
       }
 
       #modeMenu.story-transitioning::before {
-        opacity: 1;
+        opacity: 0.72;
         animation: modeMenuGridSuck 2.15s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
       }
 
       #modeMenu.story-transitioning {
-        transform: scale(0.84);
-        opacity: 0.98;
-        clip-path: circle(6% at 50% 48%);
-        filter: blur(0.4px) brightness(0.88) contrast(1.05);
+        transform: scale(0.9);
+        opacity: 0.35;
+        clip-path: circle(10% at 50% 48%);
+        filter: blur(0.2px) brightness(0.95) contrast(1.02);
       }
 
       #modeMenu.story-transitioning > h1 {
