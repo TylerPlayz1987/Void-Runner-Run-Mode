@@ -8015,11 +8015,14 @@
         const solThemeUnlockKey = "void_secret_theme_sol_unlocked";
         const classicRevampedThemeCode = "classic_new";
         const classicRevampedThemeUnlockKey = "void_secret_theme_classicrevamped_unlocked";
+        const dialogueMakerUnlockCode = "storydielog20";
+        const dialogueMakerUnlockKey = "void_dialogue_maker_unlocked";
         let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
         let tjThemeUnlocked = localStorage.getItem(tjThemeUnlockKey) === "1";
         let aprilFoolsThemeUnlocked = localStorage.getItem(aprilFoolsThemeUnlockKey) === "1";
         let solThemeUnlocked = localStorage.getItem(solThemeUnlockKey) === "1";
         let classicRevampedThemeUnlocked = localStorage.getItem(classicRevampedThemeUnlockKey) === "1";
+        let dialogueMakerUnlocked = localStorage.getItem(dialogueMakerUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
@@ -8035,6 +8038,7 @@
         const aprilFoolsWarningModal = document.getElementById("aprilFoolsWarningModal");
         const aprilFoolsConfirmBtn = document.getElementById("aprilFoolsConfirmBtn");
         const aprilFoolsBackBtn = document.getElementById("aprilFoolsBackBtn");
+        const dialogueMakerModeBtn = document.getElementById("dialogueMakerModeBtn");
 
         function updateSecretThemeButtonUi() {
           const buttonSpecs = [
@@ -8127,6 +8131,11 @@
           }
         }
 
+        function updateDialogueMakerButtonUi() {
+          if (!dialogueMakerModeBtn) return;
+          dialogueMakerModeBtn.style.display = dialogueMakerUnlocked ? "" : "none";
+        }
+
         function closeCodeEntryModal() {
           codeEntryModal.style.display = "none";
           codeEntryInput.value = "";
@@ -8199,6 +8208,13 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("classic revamped unlocked");
+          } else if (normalized === dialogueMakerUnlockCode) {
+            if (!dialogueMakerUnlocked) {
+              dialogueMakerUnlocked = true;
+              localStorage.setItem(dialogueMakerUnlockKey, "1");
+              updateDialogueMakerButtonUi();
+            }
+            flashCodeMessage("dialogue maker unlocked");
           } else {
             flashCodeMessage("invalid code");
             return;
@@ -8318,6 +8334,7 @@
         document.getElementById("speedRunBackBtn").onclick = () => hideSpeedRunMenu();
         document.getElementById("speedRunStartBtn").onclick = () => startSpeedRunMode();
         refreshDialogueMakerUi();
+        updateDialogueMakerButtonUi();
 
         // Speed Running Mode: Initialize and start a new speed run attempt
         // Sets all vars to level 1, records start time, fully resets game state, begins main loop
@@ -8805,11 +8822,14 @@
           localStorage.removeItem("void_secret_theme_tjtheme_unlocked");
           localStorage.removeItem("void_secret_theme_sol_unlocked");
           localStorage.removeItem("void_secret_theme_classicrevamped_unlocked");
+          localStorage.removeItem(dialogueMakerUnlockKey);
           secretThemeUnlocked = false;
           tjThemeUnlocked = false;
           solThemeUnlocked = false;
           classicRevampedThemeUnlocked = false;
+          dialogueMakerUnlocked = false;
           updateSecretThemeButtonUi();
+          updateDialogueMakerButtonUi();
           setLevelDisplay();
           updateBestLevelUi();
           applyDefaults();
