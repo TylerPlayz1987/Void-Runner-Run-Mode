@@ -1106,9 +1106,12 @@
       #gameShell:fullscreen #pauseMenu,
       #gameShell:-webkit-full-screen #pauseMenu {
         position: fixed;
-        inset: 0;
+        top: 44px;
+        left: 0;
+        right: 0;
+        bottom: 0;
         width: 100vw;
-        height: 100vh;
+        height: calc(100vh - 44px);
         box-sizing: border-box;
       }
 
