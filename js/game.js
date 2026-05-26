@@ -8026,6 +8026,7 @@
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
         const codeEntrySubmitBtn = document.getElementById("codeEntrySubmitBtn");
+        const codeEntryResetBtn = document.getElementById("codeEntryResetBtn");
         const codeEntryCancelBtn = document.getElementById("codeEntryCancelBtn");
         const levelNameModal = document.getElementById("levelNameModal");
         const levelNameInput = document.getElementById("levelNameInput");
@@ -8164,6 +8165,33 @@
           aprilFoolsWarningModal.style.display = "none";
         }
 
+        function resetAllCodeUnlocks() {
+          const unlockKeys = [
+            secretThemeUnlockKey,
+            tjThemeUnlockKey,
+            aprilFoolsThemeUnlockKey,
+            solThemeUnlockKey,
+            classicRevampedThemeUnlockKey,
+            dialogueMakerUnlockKey,
+          ];
+
+          for (const key of unlockKeys) {
+            localStorage.removeItem(key);
+          }
+
+          secretThemeUnlocked = false;
+          tjThemeUnlocked = false;
+          aprilFoolsThemeUnlocked = false;
+          solThemeUnlocked = false;
+          classicRevampedThemeUnlocked = false;
+          dialogueMakerUnlocked = false;
+
+          updateSecretThemeButtonUi();
+          updateDialogueMakerButtonUi();
+          flashCodeMessage("codes reset");
+          closeCodeEntryModal();
+        }
+
         function submitCodeEntry() {
           const entered = codeEntryInput.value;
           if (!entered) {
@@ -8264,6 +8292,7 @@
           openSharedLevelModal();
         };
         codeEntrySubmitBtn.onclick = submitCodeEntry;
+        codeEntryResetBtn.onclick = resetAllCodeUnlocks;
         codeEntryCancelBtn.onclick = closeCodeEntryModal;
         levelNameSubmitBtn.onclick = () => {
           if (typeof levelNameSubmitAction === "function") {
