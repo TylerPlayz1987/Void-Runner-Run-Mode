@@ -8352,6 +8352,19 @@
         document.getElementById("storyModeBtn").onclick = () => {
           const storyMenuApi = window.VRStoryModeMenu;
           if (storyMenuApi && typeof storyMenuApi.open === "function") {
+            const modeMenu = document.getElementById("modeMenu");
+            const transitionDurationMs = 700;
+            if (modeMenu) {
+              modeMenu.classList.add("story-transitioning");
+              modeMenu.style.pointerEvents = "none";
+              void modeMenu.offsetWidth;
+              window.setTimeout(() => {
+                modeMenu.classList.remove("story-transitioning");
+                modeMenu.style.pointerEvents = "";
+                storyMenuApi.open();
+              }, transitionDurationMs);
+              return;
+            }
             storyMenuApi.open();
             return;
           }
