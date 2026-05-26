@@ -739,9 +739,9 @@
       }
 
       #gameShell.story-transitioning {
-        transform: scale(0.96);
-        opacity: 0.97;
-        filter: brightness(0.9) blur(0.2px);
+        transform: scale(0.92);
+        opacity: 0;
+        filter: brightness(0.8) blur(0.3px);
       }
 
       #container {
@@ -754,11 +754,25 @@
       }
 
       #container.story-transitioning {
-        transform: scale(0.93);
-        opacity: 0.96;
-        border-color: rgba(0, 0, 0, 0.92);
-        box-shadow: 0 0 26px rgba(128, 48, 255, 0.22);
-        filter: blur(0.15px) brightness(0.92);
+        transform: scale(0.76);
+        opacity: 0;
+        border-color: rgba(0, 0, 0, 0);
+        box-shadow: none;
+        filter: blur(1px) brightness(0.72);
+        clip-path: circle(3% at 50% 48%);
+      }
+
+      #ui-left.story-transitioning,
+      #ui-right.story-transitioning {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.35);
+        filter: blur(4px);
+      }
+
+      #startMenuVersionTag.story-transitioning {
+        opacity: 0;
+        transform: translateY(-18px) scale(0.35);
+        filter: blur(3px);
       }
 
       #startMenuVersionTag {

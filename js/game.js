@@ -8355,12 +8355,16 @@
             const modeMenu = document.getElementById("modeMenu");
             const gameShell = document.getElementById("gameShell");
             const container = document.getElementById("container");
+            const uiLeft = document.getElementById("ui-left");
+            const uiRight = document.getElementById("ui-right");
             const versionTag = document.getElementById("startMenuVersionTag");
             const transitionDurationMs = 2400;
             if (modeMenu) {
               modeMenu.classList.add("story-transitioning");
               if (gameShell) gameShell.classList.add("story-transitioning");
               if (container) container.classList.add("story-transitioning");
+              if (uiLeft) uiLeft.classList.add("story-transitioning");
+              if (uiRight) uiRight.classList.add("story-transitioning");
               if (versionTag) versionTag.classList.add("story-transitioning");
               modeMenu.style.pointerEvents = "none";
               void modeMenu.offsetWidth;
@@ -8368,6 +8372,8 @@
                 modeMenu.classList.remove("story-transitioning");
                 if (gameShell) gameShell.classList.remove("story-transitioning");
                 if (container) container.classList.remove("story-transitioning");
+                if (uiLeft) uiLeft.classList.remove("story-transitioning");
+                if (uiRight) uiRight.classList.remove("story-transitioning");
                 if (versionTag) versionTag.classList.remove("story-transitioning");
                 modeMenu.style.pointerEvents = "";
                 storyMenuApi.open();
