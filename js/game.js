@@ -8353,7 +8353,7 @@
           const storyMenuApi = window.VRStoryModeMenu;
           if (storyMenuApi && typeof storyMenuApi.open === "function") {
             const modeMenu = document.getElementById("modeMenu");
-            const transitionDurationMs = 1350;
+            const transitionDurationMs = 2150;
             if (modeMenu) {
               modeMenu.classList.add("story-transitioning");
               modeMenu.style.pointerEvents = "none";

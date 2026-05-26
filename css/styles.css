@@ -568,34 +568,62 @@
 
       #modeMenu {
         overflow: hidden;
+        transform-origin: 50% 50%;
       }
 
       #modeMenu::before {
         content: "";
         position: absolute;
-        inset: -18%;
+        inset: -22%;
         pointer-events: none;
         opacity: 0;
         z-index: 0;
         background:
-          radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0 12%, rgba(0, 0, 0, 0.72) 34%, rgba(0, 0, 0, 0.98) 56%, rgba(0, 0, 0, 1) 72%),
+          radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 0 10%, rgba(0, 0, 0, 0.82) 30%, rgba(0, 0, 0, 0.98) 52%, rgba(0, 0, 0, 1) 72%),
           repeating-linear-gradient(
             90deg,
-            rgba(35, 255, 120, 0.2) 0,
-            rgba(35, 255, 120, 0.2) 2px,
+            rgba(35, 255, 120, 0.24) 0,
+            rgba(35, 255, 120, 0.24) 2px,
             rgba(0, 0, 0, 0) 2px,
-            rgba(0, 0, 0, 0) 28px
+            rgba(0, 0, 0, 0) 20px
           ),
           repeating-linear-gradient(
             0deg,
-            rgba(35, 255, 120, 0.12) 0,
-            rgba(35, 255, 120, 0.12) 2px,
+            rgba(35, 255, 120, 0.14) 0,
+            rgba(35, 255, 120, 0.14) 2px,
             rgba(0, 0, 0, 0) 2px,
-            rgba(0, 0, 0, 0) 28px
+            rgba(0, 0, 0, 0) 20px
           );
-        transform: scale(1.04) rotate(0deg);
-        filter: blur(0.5px) saturate(1.2);
+        transform: scale(1.08) rotate(0deg);
+        filter: blur(0.45px) saturate(1.3);
         mix-blend-mode: screen;
+      }
+
+      #modeMenu::after {
+        content: "";
+        position: absolute;
+        inset: -26%;
+        pointer-events: none;
+        opacity: 0;
+        z-index: 0;
+        background:
+          repeating-linear-gradient(
+            90deg,
+            rgba(75, 255, 126, 0.26) 0,
+            rgba(75, 255, 126, 0.26) 3px,
+            rgba(0, 0, 0, 0) 3px,
+            rgba(0, 0, 0, 0) 18px
+          ),
+          repeating-linear-gradient(
+            0deg,
+            rgba(75, 255, 126, 0.18) 0,
+            rgba(75, 255, 126, 0.18) 3px,
+            rgba(0, 0, 0, 0) 3px,
+            rgba(0, 0, 0, 0) 18px
+          );
+        transform: scale(1.08) rotate(0deg);
+        filter: blur(0.25px);
+        clip-path: inset(0 0 0 0);
       }
 
       #modeMenuVortex {
@@ -617,87 +645,135 @@
         z-index: 1;
         transform-origin: 50% 50%;
         transition:
-          transform 0.6s cubic-bezier(0.2, 0.9, 0.2, 1),
-          opacity 0.45s ease,
-          filter 0.45s ease;
+          transform 0.95s cubic-bezier(0.12, 0.75, 0.2, 1),
+          opacity 0.75s ease,
+          filter 0.75s ease;
         will-change: transform, opacity, filter;
       }
 
       #modeMenu.story-transitioning #modeMenuVortex {
         opacity: 1;
-        animation: modeMenuVortexSpin 1.35s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
+        animation: modeMenuVortexSpin 2.15s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
       }
 
       #modeMenu.story-transitioning::before {
         opacity: 1;
-        animation: modeMenuGridSuck 1.35s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
+        animation: modeMenuGridSuck 2.15s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
+      }
+
+      #modeMenu.story-transitioning::after {
+        opacity: 1;
+        animation: modeMenuGridDebris 2.15s cubic-bezier(0.12, 0.8, 0.18, 1) forwards;
       }
 
       #modeMenu.story-transitioning > h1 {
-        transform: translateY(-18px) scale(0.76);
-        opacity: 0.12;
-        filter: blur(2.5px);
+        transform: translateY(-26px) scale(0.66);
+        opacity: 0.06;
+        filter: blur(4px);
       }
 
       #modeMenu.story-transitioning > button {
         opacity: 0;
-        filter: blur(7px);
-        transform: scale(0.08) translateY(30px) rotate(14deg);
+        filter: blur(9px);
+        transform: scale(0.04) translateY(42px) rotate(18deg);
       }
 
       #modeMenu.story-transitioning > button:nth-of-type(1) {
-        transition-delay: 0.06s;
-      }
-
-      #modeMenu.story-transitioning > button:nth-of-type(2) {
-        transition-delay: 0.11s;
-      }
-
-      #modeMenu.story-transitioning > button:nth-of-type(3) {
         transition-delay: 0.16s;
       }
 
-      #modeMenu.story-transitioning > button:nth-of-type(4) {
-        transition-delay: 0.21s;
-      }
-
-      #modeMenu.story-transitioning > button:nth-of-type(5) {
+      #modeMenu.story-transitioning > button:nth-of-type(2) {
         transition-delay: 0.26s;
       }
 
+      #modeMenu.story-transitioning > button:nth-of-type(3) {
+        transition-delay: 0.36s;
+      }
+
+      #modeMenu.story-transitioning > button:nth-of-type(4) {
+        transition-delay: 0.46s;
+      }
+
+      #modeMenu.story-transitioning > button:nth-of-type(5) {
+        transition-delay: 0.56s;
+      }
+
       #modeMenu.story-transitioning > button:nth-of-type(6) {
-        transition-delay: 0.31s;
+        transition-delay: 0.66s;
       }
 
       #modeMenu.story-transitioning > button:nth-of-type(7) {
-        transition-delay: 0.36s;
+        transition-delay: 0.76s;
       }
 
       @keyframes modeMenuVortexSpin {
         0% {
-          transform: scale(0.68) rotate(0deg);
+          transform: scale(0.6) rotate(0deg);
         }
-        45% {
-          transform: scale(0.94) rotate(150deg);
+        35% {
+          transform: scale(0.78) rotate(120deg);
+        }
+        70% {
+          transform: scale(1.04) rotate(280deg);
         }
         100% {
-          transform: scale(1.32) rotate(420deg);
+          transform: scale(1.52) rotate(560deg);
         }
       }
 
       @keyframes modeMenuGridSuck {
         0% {
           opacity: 0;
-          transform: scale(1.04) rotate(0deg);
-          filter: blur(0.5px) saturate(1.2);
+          transform: scale(1.08) rotate(0deg);
+          filter: blur(0.45px) saturate(1.3);
         }
-        30% {
-          opacity: 0.88;
+        18% {
+          opacity: 0.9;
+          transform: scale(1.02) rotate(12deg);
+        }
+        48% {
+          opacity: 0.7;
+          transform: scale(0.78) rotate(82deg);
+        }
+        74% {
+          opacity: 0.35;
+          transform: scale(0.38) rotate(210deg);
+          filter: blur(1.2px) saturate(1.5);
         }
         100% {
           opacity: 0;
-          transform: scale(0.14) rotate(130deg);
-          filter: blur(2.5px) saturate(1.55);
+          transform: scale(0.02) rotate(360deg);
+          filter: blur(3.25px) saturate(1.65);
+        }
+      }
+
+      @keyframes modeMenuGridDebris {
+        0% {
+          opacity: 0;
+          clip-path: inset(0 0 0 0);
+          transform: scale(1.08) rotate(0deg);
+        }
+        20% {
+          opacity: 0.95;
+          clip-path: inset(0 0 0 0);
+          transform: scale(1.02) rotate(8deg);
+        }
+        45% {
+          opacity: 0.7;
+          clip-path: inset(10% 6% 12% 7%);
+          transform: scale(0.74) rotate(64deg);
+        }
+        70% {
+          opacity: 0.42;
+          clip-path: inset(24% 18% 26% 18%);
+          transform: scale(0.4) rotate(176deg);
+          filter: blur(0.75px);
+        }
+        100% {
+          opacity: 0;
+          clip-path: inset(48% 44% 48% 44%);
+          transform: scale(0.08) rotate(360deg);
+          filter: blur(2px);
         }
       }
 
