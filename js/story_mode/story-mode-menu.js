@@ -34,6 +34,49 @@
     return document.getElementById(id);
   }
 
+  function getGameShell() {
+    return getEl("gameShell");
+  }
+
+  function getFullscreenElement() {
+    return document.fullscreenElement || document.webkitFullscreenElement || null;
+  }
+
+  function isGameFullscreen() {
+    const shell = getGameShell();
+    if (!shell) return false;
+    return getFullscreenElement() === shell;
+  }
+
+  async function enterGameFullscreen() {
+    const shell = getGameShell();
+    if (!shell || isGameFullscreen()) return;
+
+    try {
+      if (shell.requestFullscreen) {
+        await shell.requestFullscreen();
+      } else if (shell.webkitRequestFullscreen) {
+        shell.webkitRequestFullscreen();
+      }
+    } catch (err) {
+      // Ignore blocked fullscreen requests and keep the menu usable.
+    }
+  }
+
+  async function exitGameFullscreen() {
+    if (!isGameFullscreen()) return;
+
+    try {
+      if (document.exitFullscreen) {
+        await document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      }
+    } catch (err) {
+      // Ignore blocked fullscreen exits and continue the transition.
+    }
+  }
+
   function updateChapterUi() {
     const chapter = chapters[currentChapterIndex];
     const labelEl = getEl("storyChapterLabel");
@@ -93,18 +136,19 @@
     }
   }
 
-  function open() {
+  async function open() {
     const storyMenu = getEl("storyModeMenu");
     const modeMenu = getEl("modeMenu");
     if (!storyMenu || !modeMenu) return;
 
+    await enterGameFullscreen();
     hideHudForStoryMenu();
     modeMenu.style.display = "none";
     storyMenu.style.display = "flex";
     storyMenu.setAttribute("aria-hidden", "false");
   }
 
-  function close() {
+  async function close() {
     const storyMenu = getEl("storyModeMenu");
     const modeMenu = getEl("modeMenu");
     if (!storyMenu || !modeMenu) return;
@@ -112,6 +156,7 @@
     storyMenu.style.display = "none";
     storyMenu.setAttribute("aria-hidden", "true");
     restoreHudAfterStoryMenu();
+    await exitGameFullscreen();
     modeMenu.style.display = "flex";
   }
 

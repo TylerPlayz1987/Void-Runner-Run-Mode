@@ -8358,8 +8358,20 @@
             const uiLeft = document.getElementById("ui-left");
             const uiRight = document.getElementById("ui-right");
             const versionTag = document.getElementById("startMenuVersionTag");
+            const fullscreenShell = document.getElementById("gameShell");
             const transitionDurationMs = 3200;
             if (modeMenu) {
+              if (fullscreenShell && !document.fullscreenElement && !document.webkitFullscreenElement) {
+                try {
+                  if (fullscreenShell.requestFullscreen) {
+                    fullscreenShell.requestFullscreen();
+                  } else if (fullscreenShell.webkitRequestFullscreen) {
+                    fullscreenShell.webkitRequestFullscreen();
+                  }
+                } catch (err) {
+                  // Ignore blocked fullscreen requests and continue the transition.
+                }
+              }
               modeMenu.classList.add("story-transitioning");
               if (gameShell) gameShell.classList.add("story-transitioning");
               if (container) container.classList.add("story-transitioning");
