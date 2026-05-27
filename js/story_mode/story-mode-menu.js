@@ -1,6 +1,43 @@
 (function () {
   const hiddenHudIds = ["ui-left", "ui-right", "speedRunTimer"];
   const hudDisplayCache = {};
+  const chapters = [
+    {
+      label: "Chapter 1",
+      title: "Into The Rift",
+      description: "A strange force is tearing the void apart. Enter the rift and find the source.",
+      buttonText: "Start Chapter 1",
+      playable: true,
+    },
+    {
+      label: "Chapter 2",
+      title: "???",
+      description: "???",
+      buttonText: "Coming Soon",
+      playable: false,
+    },
+    {
+      label: "Chapter 3",
+      title: "???",
+      description: "???",
+      buttonText: "Coming Soon",
+      playable: false,
+    },
+    {
+      label: "Chapter 4",
+      title: "???",
+      description: "???",
+      buttonText: "Coming Soon",
+      playable: false,
+    },
+    {
+      label: "Chapter 5",
+      title: "???",
+      description: "???",
+      buttonText: "Coming Soon",
+      playable: false,
+    },
+  ];
   const storyStateStorageKey = "vr_story_mode_map_state_v1";
   const worlds = [
     createWorld("World 1", "Rift Plains", "A torn open frontier built for the opening run.", "#55ff86", 12),
@@ -9,6 +46,8 @@
     createWorld("World 4", "Moonfall Wilds", "Moonlit caves and longer routes through the dark.", "#c18dff", 11),
     createWorld("World 5", "Final Spiral", "The last stretch before the chapter one finale.", "#ff7b6b", 15),
   ];
+  let currentView = "chapter";
+  let currentChapterIndex = 0;
   let currentWorldIndex = 0;
   let currentLevelIndex = 0;
   let statusResetTimer = null;
@@ -136,6 +175,36 @@
     setSelectionStatus(`Selected: ${levelLabel}`);
   }
 
+  function getCurrentChapter() {
+    return chapters[currentChapterIndex] || chapters[0] || null;
+  }
+
+  function updateChapterUi() {
+    const chapter = getCurrentChapter();
+    const labelEl = getEl("storyChapterLabel");
+    const titleEl = getEl("storyChapterTitle");
+    const descEl = getEl("storyChapterDesc");
+    const startBtn = getEl("storyChapterStartBtn");
+    const prevBtn = getEl("storyChapterPrevBtn");
+    const nextBtn = getEl("storyChapterNextBtn");
+    const chapterMetaEl = getEl("storyChapterMeta");
+    if (!chapter || !labelEl || !titleEl || !descEl || !startBtn || !prevBtn || !nextBtn) {
+      return;
+    }
+
+    labelEl.textContent = chapter.label;
+    titleEl.textContent = chapter.title;
+    descEl.textContent = chapter.description;
+    startBtn.textContent = chapter.buttonText;
+    startBtn.disabled = !chapter.playable;
+    prevBtn.disabled = currentChapterIndex <= 0;
+    nextBtn.disabled = currentChapterIndex >= chapters.length - 1;
+
+    if (chapterMetaEl) {
+      chapterMetaEl.textContent = chapter.playable ? "Available now" : "Coming soon";
+    }
+  }
+
   function flashStoryStatus(text) {
     const statusEl = getEl("storySelectionStatus");
     if (!statusEl) return;
@@ -205,13 +274,13 @@
 
   function renderWorldSummary() {
     const world = getCurrentWorld();
-    const labelEl = getEl("storyChapterLabel");
-    const titleEl = getEl("storyChapterTitle");
-    const descEl = getEl("storyChapterDesc");
+    const labelEl = getEl("storyWorldLabel");
+    const titleEl = getEl("storyWorldTitle");
+    const descEl = getEl("storyWorldDesc");
     const countEl = getEl("storyWorldCount");
-    const startBtn = getEl("storyStartBtn");
-    const prevBtn = getEl("storyPrevChapterBtn");
-    const nextBtn = getEl("storyNextChapterBtn");
+    const startBtn = getEl("storyWorldStartBtn");
+    const prevBtn = getEl("storyWorldPrevBtn");
+    const nextBtn = getEl("storyWorldNextBtn");
     if (!world || !labelEl || !titleEl || !descEl || !countEl || !startBtn || !prevBtn || !nextBtn) {
       return;
     }
@@ -224,7 +293,7 @@
     prevBtn.disabled = currentWorldIndex <= 0;
     nextBtn.disabled = currentWorldIndex >= worlds.length - 1;
 
-    const menu = getEl("storyModeMenu");
+    const menu = getEl("storyWorldMenu");
     if (menu) {
       menu.style.setProperty("--story-accent", world.accent);
     }
@@ -339,6 +408,24 @@
     refreshSelectionStatus();
   }
 
+  function showChapterMenu() {
+    currentView = "chapter";
+    const chapterMenu = getEl("storyChapterMenu");
+    const worldMenu = getEl("storyWorldMenu");
+    if (chapterMenu) chapterMenu.style.display = "flex";
+    if (worldMenu) worldMenu.style.display = "none";
+    updateChapterUi();
+  }
+
+  function showWorldMenu() {
+    currentView = "world";
+    const chapterMenu = getEl("storyChapterMenu");
+    const worldMenu = getEl("storyWorldMenu");
+    if (chapterMenu) chapterMenu.style.display = "none";
+    if (worldMenu) worldMenu.style.display = "flex";
+    updateMapUi();
+  }
+
   function selectWorld(index) {
     if (index < 0 || index >= worlds.length || index === currentWorldIndex) return;
     currentWorldIndex = index;
@@ -404,6 +491,7 @@
     modeMenu.style.display = "none";
     storyMenu.style.display = "flex";
     storyMenu.setAttribute("aria-hidden", "false");
+    showChapterMenu();
   }
 
   async function close() {
@@ -419,28 +507,62 @@
   }
 
   function init() {
-    const backBtn = getEl("storyBackBtn");
-    const startBtn = getEl("storyStartBtn");
-    const prevBtn = getEl("storyPrevChapterBtn");
-    const nextBtn = getEl("storyNextChapterBtn");
-    if (!backBtn || !startBtn || !prevBtn || !nextBtn) return;
+    const chapterBackBtn = getEl("storyChapterBackBtn");
+    const chapterStartBtn = getEl("storyChapterStartBtn");
+    const chapterPrevBtn = getEl("storyChapterPrevBtn");
+    const chapterNextBtn = getEl("storyChapterNextBtn");
+    const worldBackBtn = getEl("storyWorldBackBtn");
+    const worldPrevBtn = getEl("storyWorldPrevBtn");
+    const worldNextBtn = getEl("storyWorldNextBtn");
+    const worldStartBtn = getEl("storyWorldStartBtn");
+    if (!chapterBackBtn || !chapterStartBtn || !chapterPrevBtn || !chapterNextBtn || !worldBackBtn || !worldPrevBtn || !worldNextBtn || !worldStartBtn) return;
 
     loadStoryState();
-    updateMapUi();
+    showChapterMenu();
 
-    backBtn.onclick = function () {
+    chapterBackBtn.onclick = function () {
       close();
     };
 
-    prevBtn.onclick = function () {
+    worldBackBtn.onclick = function () {
+      showChapterMenu();
+    };
+
+    chapterPrevBtn.onclick = function () {
+      if (currentView !== "chapter") return;
+      if (currentChapterIndex <= 0) return;
+      currentChapterIndex -= 1;
+      updateChapterUi();
+    };
+
+    chapterNextBtn.onclick = function () {
+      if (currentView !== "chapter") return;
+      if (currentChapterIndex >= chapters.length - 1) return;
+      currentChapterIndex += 1;
+      updateChapterUi();
+    };
+
+    worldPrevBtn.onclick = function () {
+      if (currentView !== "world") return;
       goToPreviousWorld();
     };
 
-    nextBtn.onclick = function () {
+    worldNextBtn.onclick = function () {
+      if (currentView !== "world") return;
       goToNextWorld();
     };
 
-    startBtn.onclick = function () {
+    chapterStartBtn.onclick = function () {
+      const chapter = getCurrentChapter();
+      if (!chapter || !chapter.playable) return;
+      if (currentChapterIndex === 0) {
+        showWorldMenu();
+        return;
+      }
+      flashStoryStatus(`${chapter.label} is coming soon.`);
+    };
+
+    worldStartBtn.onclick = function () {
       const label = getCurrentLevelLabel();
       if (!label) return;
       flashStoryStatus(`Preview only: ${label}`);

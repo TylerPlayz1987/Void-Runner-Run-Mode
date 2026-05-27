@@ -161,38 +161,63 @@
         </div>
         <div id="storyModeMenu" class="overlay" style="display: none" aria-hidden="true">
           <div class="story-menu-page">
-            <div class="story-kicker">Void Runner</div>
-            <h1>Story Mode</h1>
-            <div class="story-mode-subtitle">Chapter 1 is now a map. Pick a world and then choose a level on the route.</div>
-            <div class="story-chapter-row">
-              <button id="storyPrevChapterBtn" class="story-nav-btn" aria-label="Previous world">◀</button>
-              <div class="story-world-card">
-                <div class="story-world-card-top">
-                  <div>
-                    <div id="storyChapterLabel" class="story-world-label">World 1</div>
-                    <div id="storyChapterTitle" class="story-world-title">Rift Plains</div>
+            <div id="storyChapterMenu" class="story-menu-screen">
+              <div class="story-kicker">Void Runner</div>
+              <h1>Story Mode</h1>
+              <div class="story-mode-subtitle">Pick a chapter. Chapter 1 opens the world map.</div>
+              <div class="story-chapter-row">
+                <button id="storyChapterPrevBtn" class="story-nav-btn" aria-label="Previous chapter">◀</button>
+                <div class="story-world-card">
+                  <div class="story-world-card-top">
+                    <div>
+                      <div id="storyChapterLabel" class="story-world-label">Chapter 1</div>
+                      <div id="storyChapterTitle" class="story-world-title">Into The Rift</div>
+                    </div>
+                    <div id="storyChapterMeta" class="story-world-count">Available now</div>
                   </div>
-                  <div id="storyWorldCount" class="story-world-count">12 levels</div>
+                  <div id="storyChapterDesc" class="story-world-desc">
+                    A strange force is tearing the void apart. Enter the rift and find the source.
+                  </div>
                 </div>
-                <div id="storyChapterDesc" class="story-world-desc">
-                  A torn open frontier built for the opening run.
+                <button id="storyChapterNextBtn" class="story-nav-btn" aria-label="Next chapter">▶</button>
+              </div>
+              <button id="storyChapterStartBtn" class="story-primary-btn">Start Chapter 1</button>
+              <button id="storyChapterBackBtn" class="small-btn" style="width: 240px">Back</button>
+            </div>
+            <div id="storyWorldMenu" class="story-menu-screen" style="display: none;">
+              <div class="story-kicker">Void Runner</div>
+              <h1>Chapter 1 Map</h1>
+              <div class="story-mode-subtitle">Select a world, then pick a level on the route.</div>
+              <div class="story-chapter-row">
+                <button id="storyWorldPrevBtn" class="story-nav-btn" aria-label="Previous world">◀</button>
+                <div class="story-world-card">
+                  <div class="story-world-card-top">
+                    <div>
+                      <div id="storyWorldLabel" class="story-world-label">World 1</div>
+                      <div id="storyWorldTitle" class="story-world-title">Rift Plains</div>
+                    </div>
+                    <div id="storyWorldCount" class="story-world-count">12 levels</div>
+                  </div>
+                  <div id="storyWorldDesc" class="story-world-desc">
+                    A torn open frontier built for the opening run.
+                  </div>
+                </div>
+                <button id="storyWorldNextBtn" class="story-nav-btn" aria-label="Next world">▶</button>
+              </div>
+              <div class="story-map-shell">
+                <div class="story-map-board" aria-label="Story world map">
+                  <svg id="storyMapPath" class="story-map-path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
+                  <div id="storyMapNodes" class="story-map-nodes"></div>
+                </div>
+                <div class="story-map-panel">
+                  <div class="story-map-panel-heading">Selected Stage</div>
+                  <div id="storySelectionStatus" class="story-selection-status">Choose a level on the map.</div>
+                  <div id="storyLevelInfo" class="story-level-info"></div>
+                  <button id="storyWorldStartBtn" class="story-primary-btn">Preview Selected Level</button>
                 </div>
               </div>
-              <button id="storyNextChapterBtn" class="story-nav-btn" aria-label="Next world">▶</button>
+              <button id="storyWorldBackBtn" class="small-btn" style="width: 240px">Back to Chapters</button>
             </div>
-            <div class="story-map-shell">
-              <div class="story-map-board" aria-label="Story world map">
-                <svg id="storyMapPath" class="story-map-path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-                <div id="storyMapNodes" class="story-map-nodes"></div>
-              </div>
-              <div class="story-map-panel">
-                <div class="story-map-panel-heading">Selected Stage</div>
-                <div id="storySelectionStatus" class="story-selection-status">Choose a level on the map.</div>
-                <div id="storyLevelInfo" class="story-level-info"></div>
-                <button id="storyStartBtn" class="story-primary-btn">Preview Selected Level</button>
-              </div>
-            </div>
-            <button id="storyBackBtn" class="small-btn" style="width: 240px">Back</button>
           </div>
         </div>
         <div id="speedRunMenu" class="overlay" style="display: none">
