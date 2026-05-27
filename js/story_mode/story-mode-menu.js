@@ -405,9 +405,9 @@
       // create pole + sign element (visual only, no pointer events)
       const poleWrapper = document.createElement('div');
       poleWrapper.className = 'story-map-pole';
-      // place slightly below the node so the node reads as the sign face
+      // place the pole on the path's y coordinate so the sign appears attached to the pathway
       poleWrapper.style.left = `${point.x}%`;
-      poleWrapper.style.top = `${point.y + 6}%`;
+      poleWrapper.style.top = `${point.y}%`;
       poleWrapper.dataset.index = String(index);
       poleWrapper.innerHTML = `
         <div class="story-map-sign" style="border-color: ${world.accent};">

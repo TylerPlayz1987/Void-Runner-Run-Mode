@@ -221,7 +221,7 @@
   position: absolute;
   transform: translate(-50%, -100%) rotateX(14deg);
   transform-origin: center bottom;
-  top: -12px;
+  top: -8px;
   left: 50%;
   min-width: 84px;
   max-width: 160px;
