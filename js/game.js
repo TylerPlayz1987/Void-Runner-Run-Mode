@@ -8020,6 +8020,8 @@
         const solThemeUnlockKey = "void_secret_theme_sol_unlocked";
         const classicRevampedThemeCode = "classic_new";
         const classicRevampedThemeUnlockKey = "void_secret_theme_classicrevamped_unlocked";
+        const cheatsUnlockCode = "cheats10172009";
+        const cheatsUnlockKey = "void_cheats_unlocked_cheats10172009";
         const dialogueMakerUnlockCode = "storydielog20";
         const dialogueMakerUnlockKey = "void_dialogue_maker_unlocked";
         let secretThemeUnlocked = localStorage.getItem(secretThemeUnlockKey) === "1";
@@ -8027,6 +8029,7 @@
         let aprilFoolsThemeUnlocked = localStorage.getItem(aprilFoolsThemeUnlockKey) === "1";
         let solThemeUnlocked = localStorage.getItem(solThemeUnlockKey) === "1";
         let classicRevampedThemeUnlocked = localStorage.getItem(classicRevampedThemeUnlockKey) === "1";
+        let cheatsUnlocked = localStorage.getItem(cheatsUnlockKey) === "1";
         let dialogueMakerUnlocked = localStorage.getItem(dialogueMakerUnlockKey) === "1";
         const codeEntryModal = document.getElementById("codeEntryModal");
         const codeEntryInput = document.getElementById("codeEntryInput");
@@ -8142,6 +8145,22 @@
           dialogueMakerModeBtn.style.display = dialogueMakerUnlocked ? "" : "none";
         }
 
+        function updateCheatsButtonUi() {
+          const topCheatsBtn = document.getElementById("topCheatsBtn");
+          const cheatsBtn = document.getElementById("cheatsBtn");
+          const cheatsPage = document.getElementById("cheatsPage");
+
+          if (topCheatsBtn) {
+            topCheatsBtn.style.display = cheatsUnlocked ? "" : "none";
+          }
+          if (cheatsBtn) {
+            cheatsBtn.style.display = cheatsUnlocked ? "" : "none";
+          }
+          if (cheatsPage && !cheatsUnlocked) {
+            cheatsPage.style.display = "none";
+          }
+        }
+
         function closeCodeEntryModal() {
           codeEntryModal.style.display = "none";
           codeEntryInput.value = "";
@@ -8189,9 +8208,11 @@
           aprilFoolsThemeUnlocked = false;
           solThemeUnlocked = false;
           classicRevampedThemeUnlocked = false;
+          cheatsUnlocked = false;
           dialogueMakerUnlocked = false;
 
           updateSecretThemeButtonUi();
+          updateCheatsButtonUi();
           updateDialogueMakerButtonUi();
           flashCodeMessage("codes reset");
           closeCodeEntryModal();
@@ -8241,6 +8262,13 @@
               updateSecretThemeButtonUi();
             }
             flashCodeMessage("classic revamped unlocked");
+          } else if (normalized === cheatsUnlockCode) {
+            if (!cheatsUnlocked) {
+              cheatsUnlocked = true;
+              localStorage.setItem(cheatsUnlockKey, "1");
+              updateCheatsButtonUi();
+            }
+            flashCodeMessage("cheats unlocked");
           } else if (normalized === dialogueMakerUnlockCode) {
             if (!dialogueMakerUnlocked) {
               dialogueMakerUnlocked = true;
@@ -8409,6 +8437,7 @@
         document.getElementById("speedRunStartBtn").onclick = () => startSpeedRunMode();
         refreshDialogueMakerUi();
         updateDialogueMakerButtonUi();
+        updateCheatsButtonUi();
 
         // Speed Running Mode: Initialize and start a new speed run attempt
         // Sets all vars to level 1, records start time, fully resets game state, begins main loop
@@ -8555,6 +8584,7 @@
           openPauseShortcut("themePage");
         };
         document.getElementById("topCheatsBtn").onclick = () => {
+          if (!cheatsUnlocked) return;
           openPauseShortcut("cheatsPage");
         };
         document.getElementById("resumeBtn").onclick = toggle;
@@ -8635,6 +8665,7 @@
           document.getElementById("settingsPage").style.display = "flex";
         };
         const openCheatsPage = () => {
+          if (!cheatsUnlocked) return;
           showPauseMenuPage("cheatsPage");
         };
         document.getElementById("cheatsBtn").onclick = () => {
