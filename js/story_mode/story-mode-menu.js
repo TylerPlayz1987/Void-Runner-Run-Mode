@@ -388,10 +388,34 @@
     defs.appendChild(filter);
     pathEl.appendChild(defs);
 
+    // create a container for poles/signs (behind the node buttons)
+    let polesContainer = nodesEl.parentNode.querySelector('.story-map-poles');
+    if (!polesContainer) {
+      polesContainer = document.createElement('div');
+      polesContainer.className = 'story-map-poles';
+      nodesEl.parentNode.insertBefore(polesContainer, nodesEl);
+    }
+    polesContainer.innerHTML = '';
+
     for (let index = 0; index < world.levels.length; index += 1) {
       const level = world.levels[index];
       const point = points[index];
       if (!level || !point) continue;
+
+      // create pole + sign element (visual only, no pointer events)
+      const poleWrapper = document.createElement('div');
+      poleWrapper.className = 'story-map-pole';
+      // place slightly below the node so the node reads as the sign face
+      poleWrapper.style.left = `${point.x}%`;
+      poleWrapper.style.top = `${point.y + 6}%`;
+      poleWrapper.dataset.index = String(index);
+      poleWrapper.innerHTML = `
+        <div class="story-map-sign" style="border-color: ${world.accent};">
+          <div class="story-map-sign-number">${index + 1}</div>
+          <div class="story-map-sign-caption">${level.title}</div>
+        </div>
+      `;
+      polesContainer.appendChild(poleWrapper);
 
       const nodeBtn = document.createElement("button");
       nodeBtn.type = "button";
