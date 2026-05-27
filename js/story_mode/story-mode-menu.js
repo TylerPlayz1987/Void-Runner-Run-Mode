@@ -405,9 +405,9 @@
       // create pole + sign element (visual only, no pointer events)
       const poleWrapper = document.createElement('div');
       poleWrapper.className = 'story-map-pole';
-      // place the pole on the path's y coordinate so the sign appears attached to the pathway
+      // place the pole slightly lower so the sign overlaps the pathway instead of floating above it
       poleWrapper.style.left = `${point.x}%`;
-      poleWrapper.style.top = `${point.y}%`;
+      poleWrapper.style.top = `calc(${point.y}% + 40px)`;
       poleWrapper.dataset.index = String(index);
       poleWrapper.innerHTML = `
         <div class="story-map-sign" style="border-color: ${world.accent};">
@@ -444,13 +444,14 @@
 
         signEl.addEventListener('click', function (e) {
           e.stopPropagation();
-          // brief spin animation when clicked
+          // brief spin animation when clicked; select after the spin finishes so the rerender does not cancel it
+          signEl.classList.remove('spin');
+          void signEl.offsetWidth;
           signEl.classList.add('spin');
           signEl.addEventListener('animationend', function onAnim() {
             signEl.classList.remove('spin');
-            signEl.removeEventListener('animationend', onAnim);
-          });
-          selectLevel(index);
+            selectLevel(index);
+          }, { once: true });
         });
 
         signEl.addEventListener('keydown', function (ev) {
