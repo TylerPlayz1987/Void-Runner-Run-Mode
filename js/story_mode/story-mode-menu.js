@@ -417,40 +417,49 @@
       `;
       polesContainer.appendChild(poleWrapper);
 
-      const nodeBtn = document.createElement("button");
-      nodeBtn.type = "button";
-      nodeBtn.className = "story-map-node";
-      nodeBtn.style.left = `${point.x}%`;
-      nodeBtn.style.top = `${point.y}%`;
-      nodeBtn.style.borderColor = world.accent;
-      nodeBtn.dataset.index = String(index);
-      nodeBtn.dataset.kind = level.kind;
-      nodeBtn.setAttribute("aria-label", `${world.label}, ${level.label}: ${level.title}`);
-      // keep node as click target only; visuals moved to signboard
-      nodeBtn.innerHTML = '';
-      nodeBtn.classList.add('story-map-node-plate-hidden');
+      // make the sign itself interactive: clicks/keyboard select the level
+      const signEl = poleWrapper.querySelector('.story-map-sign');
+      if (signEl) {
+        signEl.setAttribute('role', 'button');
+        signEl.tabIndex = 0;
+        signEl.dataset.index = String(index);
+        signEl.dataset.kind = level.kind;
+        signEl.setAttribute('aria-label', `${world.label}, ${level.label}: ${level.title}`);
 
-      if (level.kind === "start") {
-        nodeBtn.classList.add("is-start");
-      }
-      if (level.kind === "finale") {
-        nodeBtn.classList.add("is-finale");
-      }
-      if (level.kind === "checkpoint") {
-        nodeBtn.classList.add("is-checkpoint");
-      }
-      if (index === currentLevelIndex) {
-        nodeBtn.classList.add("is-selected");
-      }
-      if (currentWorldIndex === 0 && index === 0) {
-        nodeBtn.classList.add("is-playable");
-      }
+        if (level.kind === "start") {
+          signEl.classList.add("is-start");
+        }
+        if (level.kind === "finale") {
+          signEl.classList.add("is-finale");
+        }
+        if (level.kind === "checkpoint") {
+          signEl.classList.add("is-checkpoint");
+        }
+        if (index === currentLevelIndex) {
+          signEl.classList.add("is-selected");
+        }
+        if (currentWorldIndex === 0 && index === 0) {
+          signEl.classList.add("is-playable");
+        }
 
-      nodeBtn.onclick = function () {
-        selectLevel(index);
-      };
+        signEl.addEventListener('click', function (e) {
+          e.stopPropagation();
+          // brief spin animation when clicked
+          signEl.classList.add('spin');
+          signEl.addEventListener('animationend', function onAnim() {
+            signEl.classList.remove('spin');
+            signEl.removeEventListener('animationend', onAnim);
+          });
+          selectLevel(index);
+        });
 
-      nodesEl.appendChild(nodeBtn);
+        signEl.addEventListener('keydown', function (ev) {
+          if (ev.key === 'Enter' || ev.key === ' ') {
+            ev.preventDefault();
+            signEl.click();
+          }
+        });
+      }
     }
 
     const level = getCurrentLevel();

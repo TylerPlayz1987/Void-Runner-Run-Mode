@@ -185,7 +185,7 @@
   position: absolute;
   inset: 0;
   z-index: 4; /* place signs above nodes visually */
-  pointer-events: none;
+  pointer-events: none; /* allow sign child to re-enable pointer events */
 }
 
 .story-map-nodes {
@@ -232,7 +232,8 @@
   box-shadow: 0 6px 24px rgba(0,0,0,0.6), 0 0 22px rgba(126,0,135,0.14);
   color: #eafbe6;
   text-align: center;
-  pointer-events: none;
+  pointer-events: auto; /* make sign clickable */
+  cursor: pointer;
 }
 
 .story-map-sign-number {
@@ -246,6 +247,16 @@
   opacity: 0.9;
   text-transform: uppercase;
   margin-top: 4px;
+}
+
+/* click spin animation */
+@keyframes story-sign-spin {
+  0% { transform: translate(-50%, -100%) rotateX(14deg) rotateY(0deg); }
+  100% { transform: translate(-50%, -100%) rotateX(14deg) rotateY(360deg); }
+}
+
+.story-map-sign.spin {
+  animation: story-sign-spin 0.6s ease-in-out;
 }
 
 .story-map-node {
