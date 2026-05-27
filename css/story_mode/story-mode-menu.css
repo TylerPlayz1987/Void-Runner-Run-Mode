@@ -1,4 +1,5 @@
 #storyModeMenu {
+  --story-accent: #55ff86;
   background:
     radial-gradient(circle at 50% 28%, rgba(133, 255, 165, 0.12) 0%, rgba(25, 85, 36, 0.2) 34%, rgba(0, 0, 0, 0.94) 72%, rgba(0, 0, 0, 0.98) 100%),
     repeating-linear-gradient(90deg, rgba(72, 255, 136, 0.08) 0 2px, transparent 2px 16px);
@@ -8,13 +9,13 @@
 .story-menu-page {
   width: 100%;
   height: 100%;
-  max-width: none;
+  max-width: 1240px;
   box-sizing: border-box;
-  padding: 28px 24px;
+  padding: 24px 20px 18px;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 10px;
+  align-items: stretch;
+  gap: 12px;
   text-align: center;
   justify-content: center;
 }
@@ -27,8 +28,14 @@
   opacity: 0.9;
 }
 
+.story-mode-subtitle {
+  color: #b7ffd0;
+  font-size: 14px;
+  opacity: 0.92;
+}
+
 #storyModeMenu h1 {
-  margin: 0 0 4px;
+  margin: 0;
   color: #52ff79;
   text-shadow: 0 0 14px rgba(82, 255, 121, 0.45);
 }
@@ -42,12 +49,35 @@
 
 .story-world-card {
   width: 100%;
-  background: rgba(8, 25, 12, 0.9);
-  border: 2px solid #2bce56;
-  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(8, 25, 12, 0.96), rgba(4, 14, 8, 0.94));
+  border: 2px solid rgba(43, 206, 86, 0.9);
+  border-radius: 14px;
   padding: 14px 16px;
   box-sizing: border-box;
-  box-shadow: 0 0 18px rgba(62, 222, 102, 0.25);
+  box-shadow: 0 0 18px rgba(62, 222, 102, 0.22);
+  text-align: left;
+}
+
+.story-world-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.story-world-count {
+  align-self: center;
+  min-width: 92px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(154, 255, 176, 0.35);
+  background: rgba(1, 13, 7, 0.8);
+  color: #9affb0;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .story-nav-btn {
@@ -88,6 +118,191 @@
   font-size: 14px;
 }
 
+.story-map-shell {
+  width: 100%;
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.story-map-board {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 480px;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 2px solid rgba(90, 255, 141, 0.24);
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.08), transparent 34%),
+    radial-gradient(circle at 80% 78%, rgba(82, 255, 121, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(2, 14, 8, 0.96), rgba(1, 8, 5, 0.98));
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.42), 0 0 24px rgba(61, 217, 104, 0.12);
+}
+
+.story-map-board::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(154, 255, 176, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(154, 255, 176, 0.05) 1px, transparent 1px);
+  background-size: 100% 24px, 28px 100%;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.story-map-path,
+.story-map-nodes {
+  position: absolute;
+  inset: 0;
+}
+
+.story-map-path {
+  z-index: 1;
+}
+
+.story-map-nodes {
+  z-index: 2;
+}
+
+.story-map-node {
+  position: absolute;
+  width: 76px;
+  height: 58px;
+  padding: 6px 6px 4px;
+  border-radius: 15px;
+  border: 2px solid var(--story-accent);
+  background: linear-gradient(180deg, rgba(12, 31, 20, 0.98), rgba(5, 14, 9, 0.96));
+  color: #dcffe5;
+  box-shadow:
+    0 0 0 2px rgba(1, 8, 5, 0.8),
+    0 0 16px rgba(85, 255, 134, 0.22);
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.story-map-node::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.story-map-node:hover,
+.story-map-node:focus-visible {
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow:
+    0 0 0 2px rgba(1, 8, 5, 0.8),
+    0 0 18px rgba(85, 255, 134, 0.45);
+}
+
+.story-map-node.is-selected {
+  background: linear-gradient(180deg, rgba(85, 255, 134, 0.22), rgba(7, 24, 13, 0.98));
+  box-shadow:
+    0 0 0 2px rgba(1, 8, 5, 0.8),
+    0 0 22px rgba(85, 255, 134, 0.52);
+}
+
+.story-map-node.is-start {
+  border-style: solid;
+}
+
+.story-map-node.is-checkpoint {
+  border-style: dashed;
+}
+
+.story-map-node.is-finale {
+  border-color: #ff7b6b;
+  box-shadow:
+    0 0 0 2px rgba(1, 8, 5, 0.8),
+    0 0 18px rgba(255, 123, 107, 0.42);
+}
+
+.story-map-node-number {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.story-map-node-caption {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.82;
+}
+
+.story-map-panel {
+  width: 290px;
+  flex: 0 0 290px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  padding: 16px;
+  border-radius: 18px;
+  border: 2px solid rgba(90, 255, 141, 0.24);
+  background: linear-gradient(180deg, rgba(7, 19, 12, 0.96), rgba(3, 10, 7, 0.96));
+  box-shadow: 0 0 18px rgba(61, 217, 104, 0.14);
+}
+
+.story-map-panel-heading {
+  color: #9affb0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.story-selection-status {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(154, 255, 176, 0.35);
+  background: rgba(1, 13, 7, 0.82);
+  color: #dcffe5;
+  line-height: 1.4;
+  min-height: 48px;
+}
+
+.story-level-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(154, 255, 176, 0.18);
+  background: rgba(1, 13, 7, 0.56);
+}
+
+.story-level-info-label {
+  color: #9affb0;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.story-level-info-title {
+  color: #f3fff6;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.story-level-info-desc {
+  color: #b5ffd0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .story-primary-btn {
   width: 240px;
   background: linear-gradient(180deg, #58ff7f 0%, #139835 100%);
@@ -102,7 +317,7 @@
 
 @media (max-width: 560px) {
   .story-menu-page {
-    padding: 20px 14px;
+    padding: 18px 12px 14px;
   }
 
   .story-chapter-row {
@@ -122,5 +337,33 @@
 
   .story-world-desc {
     font-size: 13px;
+  }
+
+  .story-map-shell {
+    flex-direction: column;
+  }
+
+  .story-map-board {
+    min-height: 360px;
+  }
+
+  .story-map-panel {
+    width: 100%;
+    flex-basis: auto;
+    box-sizing: border-box;
+  }
+
+  .story-map-node {
+    width: 68px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .story-map-node-number {
+    font-size: 16px;
+  }
+
+  .story-map-node-caption {
+    font-size: 9px;
   }
 }
