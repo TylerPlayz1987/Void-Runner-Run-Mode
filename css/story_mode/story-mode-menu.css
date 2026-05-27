@@ -184,12 +184,12 @@
 .story-map-poles {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 4; /* place signs above nodes visually */
   pointer-events: none;
 }
 
 .story-map-nodes {
-  z-index: 3;
+  z-index: 3; /* click targets sit under visual signs */
 }
 
 /* Pole shaft */
@@ -267,6 +267,21 @@
   justify-content: center;
   gap: 3px;
   text-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+/* Hidden plate style: keep button for clicks but remove square visuals */
+.story-map-node.story-map-node-plate-hidden {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  transform: translate(-50%, -50%);
+}
+
+.story-map-node.story-map-node-plate-hidden:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.06);
 }
 
 .story-map-node::after {

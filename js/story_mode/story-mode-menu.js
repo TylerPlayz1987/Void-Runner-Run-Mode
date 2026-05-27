@@ -426,10 +426,9 @@
       nodeBtn.dataset.index = String(index);
       nodeBtn.dataset.kind = level.kind;
       nodeBtn.setAttribute("aria-label", `${world.label}, ${level.label}: ${level.title}`);
-      nodeBtn.innerHTML = `
-        <span class="story-map-node-number">${index + 1}</span>
-        <span class="story-map-node-caption">${level.title}</span>
-      `;
+      // keep node as click target only; visuals moved to signboard
+      nodeBtn.innerHTML = '';
+      nodeBtn.classList.add('story-map-node-plate-hidden');
 
       if (level.kind === "start") {
         nodeBtn.classList.add("is-start");
