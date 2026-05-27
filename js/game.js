@@ -6857,6 +6857,11 @@
           const level = ensureCustomLevelDraft();
           setTheme(level.theme || "classic");
           makerCameraX = Math.max(0, Math.min(makerCameraX, level.width - 800));
+
+        window.VRStoryModeRuntime = {
+          decodeCustomLevel,
+          startCustomLevelPlay,
+        };
           setTutorialUiVisible(false);
           updateHudModeUi();
           currentLevel = 1;

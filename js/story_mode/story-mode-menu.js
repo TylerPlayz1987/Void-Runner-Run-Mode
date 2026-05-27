@@ -1,6 +1,7 @@
 (function () {
   const hiddenHudIds = ["ui-left", "ui-right", "speedRunTimer"];
   const hudDisplayCache = {};
+  const chapterOneLevelCode = "eyJ0YWciOiJ2b2lkLXJ1bm5lci1jdXN0b20tbGV2ZWwiLCJ2IjoxLCJkYXRhIjp7Im5hbWUiOiIxLTEiLCJ0aGVtZSI6ImNsYXNzaWNyZXZhbXBlZCIsIndpZHRoIjoyNjAwLCJzcGF3biI6eyJ4Ijo2MCwieSI6MzAwfSwiZ29hbCI6eyJ4IjoyMzgwLCJ5IjoyNjAsInciOjQwLCJoIjo0MH0sInBsYXRmb3JtcyI6W3sieCI6MCwieSI6MzUwLCJ3Ijo0ODAsImgiOjUwLCJraW5kIjoibm9ybWFsIiwiaXNQaGFzZSI6ZmFsc2UsImlzU2lua2luZyI6ZmFsc2UsIm1vdmVSYW5nZSI6MCwibW92ZVNwZWVkIjoxLjcsImhhc1NwZWVkWm9uZSI6ZmFsc2UsInNwZWVkWm9uZVR5cGUiOiJib29zdCIsInNwZWVkWm9uZVgiOjIwLCJzcGVlZFpvbmVXIjo5MCwic3BlZWRab25lRHVyYXRpb24iOjYwMCwic3BlZWRab25lTXVsIjoxLjUsImhhc0Zha2VIYXphcmQiOmZhbHNlLCJmYWtlVHlwZSI6Imdob3N0U3Bpa2UiLCJmYWtlVyI6MjQsImZha2VIIjoxNCwiZmFrZVgiOjB9LHsieCI6MjI5MCwieSI6MzEwLCJ3IjoxNDAsImgiOjE4LCJraW5kIjoibm9ybWFsIiwiaXNQaGFzZSI6ZmFsc2UsImlzU2lua2luZyI6ZmFsc2UsIm1vdmVSYW5nZSI6MCwibW92ZVNwZWVkIjoxLjcsImhhc1NwZWVkWm9uZSI6ZmFsc2UsInNwZWVkWm9uZVR5cGUiOiJib29zdCIsInNwZWVkWm9uZVgiOjIwLCJzcGVlZFpvbmVXIjo5MCwic3BlZWRab25lRHVyYXRpb24iOjYwMCwic3BlZWRab25lTXVsIjoxLjYsImhhc0Zha2VIYXphcmQiOmZhbHNlLCJmYWtlVHlwZSI6Imdob3N0U3Bpa2UiLCJmYWtlVyI6MjQsImZha2VIIjoxNCwiZmFrZVgiOjMwfSx7IngiOjIxNzAsInkiOjI2MCwidyI6MTQwLCJoIjoxOCwia2luZCI6Im5vcm1hbCIsImlzUGhhc2UiOmZhbHNlLCJpc1NpbmtpbmciOmZhbHNlLCJtb3ZlUmFuZ2UiOjAsIm1vdmVTcGVlZCI6MS43LCJoYXNTcGVlZFpvbmUiOmZhbHNlLCJzcGVlZFpvbmVUeXBlIjoiYm9vc3QiLCJzcGVlZFpvbmVYIjoyMCwic3BlZWRab25lVyI6OTAsInNwZWVkWm9uZUR1cmF0aW9uIjo2MDAsInNwZWVkWm9uZU11bCI6MS42LCJoYXNGYWtlSGF6YXJkIjpmYWxzZSwiZmFrZVR5cGUiOiJnaG9zdFNwaWtlIiwiZmFrZVciOjI0LCJmYWtlSCI6MTQsImZha2VYIjozMH0seyJ4IjoxODgwLCJ5IjoyMzAsInciOjE0MCwiaCI6MTgsImtpbmQiOiJub3JtYWwiLCJpc1BoYXNlIjpmYWxzZSwiaXNTaW5raW5nIjpmYWxzZSwibW92ZVJhbmdlIjowLCJtb3ZlU3BlZWQiOjEuNywiaGFzU3BlZWRab25lIjpmYWxzZSwic3BlZWRab25lVHlwZSI6ImJvb3N0Iiwic3BlZWRab25lWCI6MjAsInNwZWVkWm9uZVciOjkwLCJzcGVlZFpvbmVEdXJhdGlvbiI6NjAwLCJzcGVlZFpvbmVNdWwiOjEuNiwiaGFzRmFrZUhhemFyZCI6ZmFsc2UsImZha2VUeXBlIjoiZ2hvc3RTcGlrZSIsImZha2VXIjoyNCwiZmFrZUgiOjE0LCJmYWtlWCI6MzB9LHsieCI6MTU0MCwieSI6MzAwLCJ3IjoxNDAsImgiOjE4LCJraW5kIjoibm9ybWFsIiwiaXNQaGFzZSI6ZmFsc2UsImlzU2lua2luZyI6ZmFsc2UsIm1vdmVSYW5nZSI6MCwibW92ZVNwZWVkIjoxLjcsImhhc1NwZWVkWm9uZSI6ZmFsc2UsInNwZWVkWm9uZVR5cGUiOiJib29zdCIsInNwZWVkWm9uZVgiOjIwLCJzcGVlZFpvbmVXIjo5MCwic3BlZWRab25lRHVyYXRpb24iOjYwMCwic3BlZWRab25lTXVsIjoxLjYsImhhc0Zha2VIYXphcmQiOmZhbHNlLCJmYWtlVHlwZSI6Imdob3N0U3Bpa2UiLCJmYWtlVyI6MjQsImZha2VIIjoxNCwiZmFrZVgiOjMwfSx7IngiOjExMDAsInkiOjIyMCwidyI6MTQwLCJoIjoxOCwia2luZCI6Im5vcm1hbCIsImlzUGhhc2UiOmZhbHNlLCJpc1NpbmtpbmciOmZhbHNlLCJtb3ZlUmFuZ2UiOjAsIm1vdmVTcGVlZCI6MS43LCJoYXNTcGVlZFpvbmUiOmZhbHNlLCJzcGVlZFpvbmVUeXBlIjoiYm9vc3QiLCJzcGVlZFpvbmVYIjoyMCwic3BlZWRab25lVyI6OTAsInNwZWVkWm9uZUR1cmF0aW9uIjo2MDAsInNwZWVkWm9uZU11bCI6MS42LCJoYXNGYWtlSGF6YXJkIjpmYWxzZSwiZmFrZVR5cGUiOiJnaG9zdFNwaWtlIiwiZmFrZVciOjI0LCJmYWtlSCI6MTQsImZha2VYIjozMH0seyJ4Ijo3NzAsInkiOjMwMCwidyI6MTQwLCJoIjoxOCwia2luZCI6Im5vcm1hbCIsImlzUGhhc2UiOmZhbHNlLCJpc1NpbmtpbmciOmZhbHNlLCJtb3ZlUmFuZ2UiOjAsIm1vdmVTcGVlZCI6MS43LCJoYXNTcGVlZFpvbmUiOmZhbHNlLCJzcGVlZFpvbmVUeXBlIjoiYm9vc3QiLCJzcGVlZFpvbmVYIjoyMCwic3BlZWRab25lVyI6OTAsInNwZWVkWm9uZUR1cmF0aW9uIjo2MDAsInNwZWVkWm9uZU11bCI6MS42LCJoYXNGYWtlSGF6YXJkIjpmYWxzZSwiZmFrZVR5cGUiOiJnaG9zdFNwaWtlIiwiZmFrZVciOjI0LCJmYWtlSCI6MTQsImZha2VYIjozMH0seyJ4Ijo1MTAsInkiOjM0MCwidyI6MTQwLCJoIjoxOCwia2luZCI6Im5vcm1hbCIsImlzUGhhc2UiOmZhbHNlLCJpc1NpbmtpbmciOmZhbHNlLCJtb3ZlUmFuZ2UiOjAsIm1vdmVTcGVlZCI6MS43LCJoYXNTcGVlZFpvbmUiOmZhbHNlLCJzcGVlZFpvbmVUeXBlIjoiYm9vc3QiLCJzcGVlZFpvbmVYIjoyMCwic3BlZWRab25lVyI6OTAsInNwZWVkWm9uZUR1cmF0aW9uIjo2MDAsInNwZWVkWm9uZU11bCI6MS42LCJoYXNGYWtlSGF6YXJkIjpmYWxzZSwiZmFrZVR5cGUiOiJnaG9zdFNwaWtlIiwiZmFrZVciOjI0LCJmYWtlSCI6MTQsImZha2VYIjozMH1dLCJvYnN0YWNsZXMiOlt7InR5cGUiOiJzcGlrZSIsIngiOjc5MCwieSI6MjkwLCJ3IjoyNCwiaCI6MTIsInNoYXBlIjoidHJpYW5nbGUifSx7InR5cGUiOiJzcGlrZSIsIngiOjg5MCwieSI6MjkwLCJ3IjoyNCwiaCI6MTIsInNoYXBlIjoidHJpYW5nbGUifSx7InR5cGUiOiJsYXZhV2FsbCIsIngiOjExNjAsInciOjMwLCJoIjoxOTAsInNwZWVkIjoyLCJob2xkTWF4Ijo1MH0seyJ0eXBlIjoic2Vla2VyIiwieCI6MTU3MCwieSI6MjkwLCJ3IjoyMCwiaCI6MTQsInJhbmdlIjo0NSwic3BlZWQiOjIuMiwic2hhcGUiOiJzcGxpdCJ9LHsidHlwZSI6IndlbGwiLCJ4IjoyMTMwLCJ5IjoxMzAsInIiOjc1LCJjb3JlIjoxMH1dLCJwb3dlcnVwcyI6W119fQ";
   const chapters = [
     {
       label: "Chapter 1",
@@ -62,9 +63,11 @@
 
       levels.push({
         label: `${label.replace(/[^0-9]/g, "")}-${levelNumber}`,
-        title: isFirst ? "Opening Route" : isLast ? "World Gate" : `Stage ${levelNumber}`,
-        description: isFirst
-          ? "Placeholder slot for the first stage and opening cutscene."
+        title: label === "World 1" && isFirst ? "1-1" : isFirst ? "Opening Route" : isLast ? "World Gate" : `Stage ${levelNumber}`,
+        description: label === "World 1" && isFirst
+          ? "Your custom 1-1 level is ready to play."
+          : isFirst
+            ? "Placeholder slot for the first stage and opening cutscene."
           : isLast
             ? "Placeholder slot for the world finale and boss exit."
             : "Placeholder stage slot ready for your level layout and cutscene notes.",
@@ -173,6 +176,36 @@
     const levelLabel = getCurrentLevelLabel();
     if (!levelLabel) return;
     setSelectionStatus(`Selected: ${levelLabel}`);
+  }
+
+  function getStoryRuntime() {
+    return window.VRStoryModeRuntime || null;
+  }
+
+  function loadChapterOneLevelData() {
+    const runtime = getStoryRuntime();
+    if (!runtime || typeof runtime.decodeCustomLevel !== "function") return null;
+    try {
+      return runtime.decodeCustomLevel(chapterOneLevelCode);
+    } catch (err) {
+      return null;
+    }
+  }
+
+  function startSelectedChapterOneLevel() {
+    const runtime = getStoryRuntime();
+    if (!runtime || typeof runtime.startCustomLevelPlay !== "function") {
+      flashStoryStatus("Story level loader is unavailable.");
+      return;
+    }
+
+    const levelData = loadChapterOneLevelData();
+    if (!levelData) {
+      flashStoryStatus("Unable to load Chapter 1-1.");
+      return;
+    }
+
+    runtime.startCustomLevelPlay(levelData, false);
   }
 
   function getCurrentChapter() {
@@ -289,7 +322,9 @@
     titleEl.textContent = world.title;
     descEl.textContent = world.description;
     countEl.textContent = `${world.levels.length} levels`;
-    startBtn.textContent = "Preview Selected Level";
+    const isChapterOneLevel = currentWorldIndex === 0 && currentLevelIndex === 0;
+    startBtn.textContent = isChapterOneLevel ? "Start 1-1" : "Coming Soon";
+    startBtn.disabled = !isChapterOneLevel;
     prevBtn.disabled = currentWorldIndex <= 0;
     nextBtn.disabled = currentWorldIndex >= worlds.length - 1;
 
@@ -383,6 +418,9 @@
       }
       if (index === currentLevelIndex) {
         nodeBtn.classList.add("is-selected");
+      }
+      if (currentWorldIndex === 0 && index === 0) {
+        nodeBtn.classList.add("is-playable");
       }
 
       nodeBtn.onclick = function () {
@@ -563,9 +601,11 @@
     };
 
     worldStartBtn.onclick = function () {
-      const label = getCurrentLevelLabel();
-      if (!label) return;
-      flashStoryStatus(`Preview only: ${label}`);
+      if (currentWorldIndex === 0 && currentLevelIndex === 0) {
+        startSelectedChapterOneLevel();
+        return;
+      }
+      flashStoryStatus("That level is coming soon.");
     };
   }
 
