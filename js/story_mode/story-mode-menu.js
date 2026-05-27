@@ -41,7 +41,7 @@
   ];
   const storyStateStorageKey = "vr_story_mode_map_state_v1";
   const worlds = [
-    createWorld("World 1", "Rift Plains", "A torn open frontier built for the opening run.", "#55ff86", 12),
+    createWorld("World 1", "The Fractured Lands", "Explore the tear in the fabric of reality.", "#7e0087", 12),
     createWorld("World 2", "Neon Tide", "City lights, moving platforms, and brighter hazards.", "#53c8ff", 10),
     createWorld("World 3", "Clockwork Summit", "Tight timing, shifting gears, and layered routes.", "#ffd166", 13),
     createWorld("World 4", "Moonfall Wilds", "Moonlit caves and longer routes through the dark.", "#c18dff", 11),
