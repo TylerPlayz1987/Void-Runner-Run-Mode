@@ -270,20 +270,34 @@
   function hideGameplayLayerForStoryMenu() {
     const container = getEl("container");
     if (!container) return;
-    if (!('container' in gameplayLayerDisplayCache)) {
-      gameplayLayerDisplayCache.container = container.style.display;
+    if (!('containerDisplay' in gameplayLayerDisplayCache)) {
+      gameplayLayerDisplayCache.containerDisplay = container.style.display;
+      gameplayLayerDisplayCache.containerVisibility = container.style.visibility;
+      gameplayLayerDisplayCache.containerOpacity = container.style.opacity;
+      gameplayLayerDisplayCache.containerPointerEvents = container.style.pointerEvents;
     }
-    container.style.display = 'none';
+    container.style.visibility = 'hidden';
+    container.style.opacity = '0';
+    container.style.pointerEvents = 'none';
   }
 
   function restoreGameplayLayerAfterStoryMenu() {
     const container = getEl("container");
     if (!container) return;
-    if ('container' in gameplayLayerDisplayCache) {
-      container.style.display = gameplayLayerDisplayCache.container;
-      delete gameplayLayerDisplayCache.container;
+    if ('containerDisplay' in gameplayLayerDisplayCache) {
+      container.style.display = gameplayLayerDisplayCache.containerDisplay;
+      container.style.visibility = gameplayLayerDisplayCache.containerVisibility;
+      container.style.opacity = gameplayLayerDisplayCache.containerOpacity;
+      container.style.pointerEvents = gameplayLayerDisplayCache.containerPointerEvents;
+      delete gameplayLayerDisplayCache.containerDisplay;
+      delete gameplayLayerDisplayCache.containerVisibility;
+      delete gameplayLayerDisplayCache.containerOpacity;
+      delete gameplayLayerDisplayCache.containerPointerEvents;
     } else {
       container.style.display = '';
+      container.style.visibility = '';
+      container.style.opacity = '';
+      container.style.pointerEvents = '';
     }
   }
 
