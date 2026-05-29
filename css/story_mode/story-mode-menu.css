@@ -1,4 +1,7 @@
 #storyModeMenu {
+  position: fixed;
+  inset: 0;
+  --story-accent: #55ff86;
   background:
     radial-gradient(circle at 50% 28%, rgba(133, 255, 165, 0.12) 0%, rgba(25, 85, 36, 0.2) 34%, rgba(0, 0, 0, 0.94) 72%, rgba(0, 0, 0, 0.98) 100%),
     repeating-linear-gradient(90deg, rgba(72, 255, 136, 0.08) 0 2px, transparent 2px 16px);
@@ -6,12 +9,25 @@
 }
 
 .story-menu-page {
-  width: min(520px, 92%);
+  width: 100%;
+  height: 100%;
+  max-width: 1240px;
+  box-sizing: border-box;
+  padding: 24px 20px 18px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  text-align: center;
+  justify-content: center;
+}
+
+.story-menu-screen {
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
-  text-align: center;
+  gap: 12px;
 }
 
 .story-kicker {
@@ -22,8 +38,24 @@
   opacity: 0.9;
 }
 
+.story-mode-subtitle {
+  color: #b7ffd0;
+  font-size: 14px;
+  opacity: 0.92;
+}
+
+.story-world-topbar {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.story-world-back-btn {
+  width: 240px;
+}
+
 #storyModeMenu h1 {
-  margin: 0 0 4px;
+  margin: 0;
   color: #52ff79;
   text-shadow: 0 0 14px rgba(82, 255, 121, 0.45);
 }
@@ -37,12 +69,35 @@
 
 .story-world-card {
   width: 100%;
-  background: rgba(8, 25, 12, 0.9);
-  border: 2px solid #2bce56;
-  border-radius: 8px;
+  background: linear-gradient(180deg, rgba(8, 25, 12, 0.96), rgba(4, 14, 8, 0.94));
+  border: 2px solid rgba(43, 206, 86, 0.9);
+  border-radius: 14px;
   padding: 14px 16px;
   box-sizing: border-box;
-  box-shadow: 0 0 18px rgba(62, 222, 102, 0.25);
+  box-shadow: 0 0 18px rgba(62, 222, 102, 0.22);
+  text-align: left;
+}
+
+.story-world-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.story-world-count {
+  align-self: center;
+  min-width: 92px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(154, 255, 176, 0.35);
+  background: rgba(1, 13, 7, 0.8);
+  color: #9affb0;
+  font-size: 12px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-align: center;
 }
 
 .story-nav-btn {
@@ -83,6 +138,282 @@
   font-size: 14px;
 }
 
+.story-map-shell {
+  width: 100%;
+  display: flex;
+  gap: 14px;
+  align-items: stretch;
+}
+
+.story-map-board {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 480px;
+  overflow: hidden;
+  border-radius: 18px;
+  border: 2px solid rgba(90, 255, 141, 0.24);
+  background:
+    radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.08), transparent 34%),
+    radial-gradient(circle at 80% 78%, rgba(82, 255, 121, 0.12), transparent 30%),
+    linear-gradient(180deg, rgba(2, 14, 8, 0.96), rgba(1, 8, 5, 0.98));
+  box-shadow: inset 0 0 24px rgba(0, 0, 0, 0.42), 0 0 24px rgba(61, 217, 104, 0.12);
+  /* perspective for 3D sign effect */
+  perspective: 900px;
+}
+
+.story-map-board::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(154, 255, 176, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(154, 255, 176, 0.05) 1px, transparent 1px);
+  background-size: 100% 24px, 28px 100%;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.story-map-path,
+.story-map-nodes {
+  position: absolute;
+  inset: 0;
+}
+
+.story-map-path {
+  z-index: 1;
+}
+
+.story-map-poles {
+  position: absolute;
+  inset: 0;
+  z-index: 4; /* place signs above nodes visually */
+  pointer-events: none; /* allow sign child to re-enable pointer events */
+}
+
+.story-map-nodes {
+  z-index: 3; /* click targets sit under visual signs */
+}
+
+/* Pole shaft */
+.story-map-pole {
+  position: absolute;
+  width: 8px;
+  height: 96px;
+  transform: translate(-50%, 0);
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.story-map-pole::before {
+  content: "";
+  display: block;
+  width: 8px;
+  height: 100%;
+  border-radius: 4px;
+  background: linear-gradient(180deg, #111 0%, rgba(40,40,40,0.9) 40%, rgba(20,20,20,0.8) 100%);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.6), 0 0 20px rgba(0,0,0,0.25) inset;
+  transform-origin: center top;
+  transform: rotateX(12deg);
+}
+
+/* Sign board */
+.story-map-sign {
+  position: absolute;
+  transform: translate(-50%, -100%) rotateX(14deg);
+  transform-origin: center bottom;
+  top: -8px;
+  left: 50%;
+  min-width: 84px;
+  max-width: 160px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(8,12,10,0.98), rgba(4,8,6,0.96));
+  border: 2px solid var(--story-accent);
+  box-shadow: 0 6px 24px rgba(0,0,0,0.6), 0 0 22px rgba(126,0,135,0.14);
+  color: #eafbe6;
+  text-align: center;
+  pointer-events: auto; /* make sign clickable */
+  cursor: pointer;
+}
+
+.story-map-sign-number {
+  font-weight: 800;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.story-map-sign-caption {
+  font-size: 10px;
+  opacity: 0.9;
+  text-transform: uppercase;
+  margin-top: 4px;
+}
+
+/* click spin animation */
+@keyframes story-sign-spin {
+  0% { transform: translate(-50%, -100%) rotateX(14deg) rotateY(0deg); }
+  100% { transform: translate(-50%, -100%) rotateX(14deg) rotateY(360deg); }
+}
+
+.story-map-sign.spin {
+  animation: story-sign-spin 0.6s ease-in-out;
+}
+
+.story-map-node {
+  position: absolute;
+  width: 76px;
+  height: 58px;
+  padding: 6px 6px 4px;
+  border-radius: 15px;
+  border: 2px solid var(--story-accent);
+  background: linear-gradient(180deg, rgba(12, 31, 20, 0.98), rgba(5, 14, 9, 0.96));
+  color: #dcffe5;
+  box-shadow:
+    0 0 0 2px rgba(1, 8, 5, 0.8),
+    0 0 16px rgba(85, 255, 134, 0.22);
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+/* Hidden plate style: keep button for clicks but remove square visuals */
+.story-map-node.story-map-node-plate-hidden {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  transform: translate(-50%, -50%);
+}
+
+.story-map-node.story-map-node-plate-hidden:focus-visible {
+  outline: 2px solid rgba(255,255,255,0.06);
+}
+
+.story-map-node::after {
+  content: "";
+  position: absolute;
+  inset: 8px;
+  border-radius: 11px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.story-map-node:hover,
+.story-map-node:focus-visible {
+  transform: translate(-50%, -50%) scale(1.05);
+  box-shadow:
+    0 0 0 2px rgba(1, 8, 5, 0.8),
+    0 0 18px rgba(85, 255, 134, 0.45);
+}
+
+.story-map-node.is-selected {
+  background: linear-gradient(180deg, rgba(85, 255, 134, 0.22), rgba(7, 24, 13, 0.98));
+  box-shadow:
+    0 0 0 2px rgba(1, 8, 5, 0.8),
+    0 0 22px rgba(85, 255, 134, 0.52);
+}
+
+.story-map-node.is-start {
+  border-style: solid;
+}
+
+.story-map-node.is-checkpoint {
+  border-style: dashed;
+}
+
+.story-map-node.is-finale {
+  border-color: #ff7b6b;
+  box-shadow:
+    0 0 0 2px rgba(1, 8, 5, 0.8),
+    0 0 18px rgba(255, 123, 107, 0.42);
+}
+
+.story-map-node-number {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.story-map-node-caption {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.82;
+}
+
+.story-map-panel {
+  width: 290px;
+  flex: 0 0 290px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: left;
+  padding: 16px;
+  border-radius: 18px;
+  border: 2px solid rgba(90, 255, 141, 0.24);
+  background: linear-gradient(180deg, rgba(7, 19, 12, 0.96), rgba(3, 10, 7, 0.96));
+  box-shadow: 0 0 18px rgba(61, 217, 104, 0.14);
+}
+
+.story-map-panel-heading {
+  color: #9affb0;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.story-selection-status {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(154, 255, 176, 0.35);
+  background: rgba(1, 13, 7, 0.82);
+  color: #dcffe5;
+  line-height: 1.4;
+  min-height: 48px;
+}
+
+.story-level-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(154, 255, 176, 0.18);
+  background: rgba(1, 13, 7, 0.56);
+}
+
+.story-level-info-label {
+  color: #9affb0;
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.story-level-info-title {
+  color: #f3fff6;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.story-level-info-desc {
+  color: #b5ffd0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .story-primary-btn {
   width: 240px;
   background: linear-gradient(180deg, #58ff7f 0%, #139835 100%);
@@ -96,6 +427,10 @@
 }
 
 @media (max-width: 560px) {
+  .story-menu-page {
+    padding: 18px 12px 14px;
+  }
+
   .story-chapter-row {
     gap: 8px;
   }
@@ -113,5 +448,33 @@
 
   .story-world-desc {
     font-size: 13px;
+  }
+
+  .story-map-shell {
+    flex-direction: column;
+  }
+
+  .story-map-board {
+    min-height: 360px;
+  }
+
+  .story-map-panel {
+    width: 100%;
+    flex-basis: auto;
+    box-sizing: border-box;
+  }
+
+  .story-map-node {
+    width: 68px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .story-map-node-number {
+    font-size: 16px;
+  }
+
+  .story-map-node-caption {
+    font-size: 9px;
   }
 }

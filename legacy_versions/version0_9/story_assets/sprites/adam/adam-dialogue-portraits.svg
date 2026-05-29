@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="128" viewBox="0 0 1280 128" role="img" aria-label="Adam close-up portrait sprite sheet with 10 expressions">
+  <defs>
+    <g id="portraitBase">
+      <circle cx="0" cy="0" r="36" fill="#ffffff" stroke="#d8d8d8" stroke-width="2"/>
+      <ellipse cx="0" cy="44" rx="30" ry="19" fill="#f5f5f5" stroke="#d2d2d2" stroke-width="1.6"/>
+      <line x1="-22" y1="36" x2="-38" y2="58" stroke="#ececec" stroke-width="7" stroke-linecap="round"/>
+      <line x1="22" y1="36" x2="38" y2="58" stroke="#ececec" stroke-width="7" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprNeutral">
+      <circle cx="-12" cy="-7" r="4" fill="#101010"/>
+      <circle cx="12" cy="-7" r="4" fill="#101010"/>
+      <line x1="-8" y1="12" x2="8" y2="12" stroke="#101010" stroke-width="2.6" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprHappy">
+      <circle cx="-12" cy="-7" r="4" fill="#101010"/>
+      <circle cx="12" cy="-7" r="4" fill="#101010"/>
+      <path d="M -12 11 Q 0 23 12 11" fill="none" stroke="#101010" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprExcited">
+      <circle cx="-12" cy="-7" r="4.5" fill="#101010"/>
+      <circle cx="12" cy="-7" r="4.5" fill="#101010"/>
+      <ellipse cx="0" cy="14" rx="8.5" ry="6.3" fill="none" stroke="#101010" stroke-width="2.7"/>
+    </g>
+
+    <g id="exprWorried">
+      <ellipse cx="-12" cy="-7" rx="4.4" ry="3.5" fill="#101010"/>
+      <ellipse cx="12" cy="-7" rx="4.4" ry="3.5" fill="#101010"/>
+      <path d="M -10 15 Q 0 5 10 15" fill="none" stroke="#101010" stroke-width="2.8" stroke-linecap="round"/>
+      <line x1="-19" y1="-14" x2="-7" y2="-17" stroke="#101010" stroke-width="2" stroke-linecap="round"/>
+      <line x1="7" y1="-17" x2="19" y2="-14" stroke="#101010" stroke-width="2" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprAngry">
+      <circle cx="-12" cy="-7" r="4" fill="#101010"/>
+      <circle cx="12" cy="-7" r="4" fill="#101010"/>
+      <line x1="-20" y1="-14" x2="-7" y2="-9" stroke="#101010" stroke-width="2.6" stroke-linecap="round"/>
+      <line x1="20" y1="-14" x2="7" y2="-9" stroke="#101010" stroke-width="2.6" stroke-linecap="round"/>
+      <line x1="-8" y1="13" x2="8" y2="13" stroke="#101010" stroke-width="3.2" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprSad">
+      <circle cx="-12" cy="-7" r="4" fill="#101010"/>
+      <circle cx="12" cy="-7" r="4" fill="#101010"/>
+      <path d="M -12 17 Q 0 3 12 17" fill="none" stroke="#101010" stroke-width="2.8" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprBlinkTired">
+      <line x1="-18" y1="-7" x2="-7" y2="-7" stroke="#101010" stroke-width="3" stroke-linecap="round"/>
+      <line x1="7" y1="-7" x2="18" y2="-7" stroke="#101010" stroke-width="3" stroke-linecap="round"/>
+      <line x1="-6" y1="12" x2="6" y2="12" stroke="#101010" stroke-width="2.4" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprSurprised">
+      <circle cx="-12" cy="-7" r="4.6" fill="#101010"/>
+      <circle cx="12" cy="-7" r="4.6" fill="#101010"/>
+      <circle cx="0" cy="14" r="6" fill="none" stroke="#101010" stroke-width="2.6"/>
+    </g>
+
+    <g id="exprDetermined">
+      <ellipse cx="-12" cy="-7" rx="4.1" ry="3.2" fill="#101010"/>
+      <ellipse cx="12" cy="-7" rx="4.1" ry="3.2" fill="#101010"/>
+      <line x1="-19" y1="-14" x2="-7" y2="-15.7" stroke="#101010" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="7" y1="-15.7" x2="19" y2="-14" stroke="#101010" stroke-width="2.2" stroke-linecap="round"/>
+      <line x1="-8" y1="13" x2="8" y2="13" stroke="#101010" stroke-width="2.8" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprTalking">
+      <circle cx="-12" cy="-7" r="4" fill="#101010"/>
+      <circle cx="12" cy="-7" r="4" fill="#101010"/>
+      <ellipse cx="0" cy="14" rx="7.5" ry="4.8" fill="#101010"/>
+    </g>
+  </defs>
+
+  <g transform="translate(64,64)">
+    <use href="#portraitBase"/>
+    <use href="#exprNeutral"/>
+  </g>
+
+  <g transform="translate(192,64)">
+    <use href="#portraitBase"/>
+    <use href="#exprHappy"/>
+  </g>
+
+  <g transform="translate(320,64)">
+    <use href="#portraitBase"/>
+    <use href="#exprExcited"/>
+  </g>
+
+  <g transform="translate(448,64)">
+    <use href="#portraitBase"/>
+    <use href="#exprWorried"/>
+  </g>
+
+  <g transform="translate(576,64)">
+    <use href="#portraitBase"/>
+    <use href="#exprAngry"/>
+  </g>
+
+  <g transform="translate(704,64)">
+    <use href="#portraitBase"/>
+    <use href="#exprSad"/>
+  </g>
+
+  <g transform="translate(832,64)">
+    <use href="#portraitBase"/>
+    <use href="#exprBlinkTired"/>
+  </g>
+
+  <g transform="translate(960,64)">
+    <use href="#portraitBase"/>
+    <use href="#exprSurprised"/>
+  </g>
+
+  <g transform="translate(1088,64)">
+    <use href="#portraitBase"/>
+    <use href="#exprDetermined"/>
+  </g>
+
+  <g transform="translate(1216,64)">
+    <use href="#portraitBase"/>
+    <use href="#exprTalking"/>
+  </g>
+</svg>

@@ -12,7 +12,7 @@
         <button id="topAchBtn" class="top-control-btn">Achievements</button>
         <button id="topMobileBtn" class="top-control-btn">Mobile</button>
         <button id="topThemeBtn" class="top-control-btn">Visuals</button>
-        <button id="topCheatsBtn" class="top-control-btn" style="display: none">Cheats</button>
+        <button id="topCheatsBtn" class="top-control-btn">Cheats</button>
       </div>
       <div id="container">
         <div id="ui-left">
@@ -71,7 +71,7 @@
 
         <div id="startMenu" class="overlay">
           <h1>Void Runner</h1>
-          <div id="startMenuVersionTag">v1.0 - Story Mode!</div>
+          <div id="startMenuVersionTag">v0.9 - Level Maker!</div>
           <button id="startBtn" style="width: 200px">Start</button>
           <button id="menuCodesBtn" style="width: 200px; margin-top: 8px; background: #fc3; color: #111">Codes</button>
           <button id="playSharedLevelBtn" style="width: 200px; margin-top: 8px; background: #3ad; color: #03131d">Play Custom Level</button>
@@ -104,7 +104,6 @@
             <input id="codeEntryInput" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="Type code" aria-label="Enter code" />
             <div class="code-entry-actions">
               <button id="codeEntrySubmitBtn" style="background: #fc3; color: #111">Submit</button>
-              <button id="codeEntryResetBtn" class="small-btn">Reset Codes</button>
               <button id="codeEntryCancelBtn" class="small-btn">Cancel</button>
             </div>
           </div>
@@ -128,10 +127,6 @@
             <div id="changelogContent" class="stat" style="text-align: left; line-height: 1.45; max-width: 320px; max-height: 240px; overflow-y: auto;">
               <ul>
                 <li>Added Level Maker</li>
-                <li>Added a Custom Level Player</li>
-                <li>Added 3 new themes</li>
-                <li>Added Story Mode Menu</li>
-                <li>Added Full Screen Mode</li>
                 <li>Bug fixes</li>
               </ul>
             </div>
@@ -140,7 +135,6 @@
         </div>
         <div id="modeMenu" class="overlay" style="display: none">
           <h1>Select Mode</h1>
-          <div id="modeMenuVortex" aria-hidden="true"></div>
           <button id="runModeBtn" style="width: 220px; margin-bottom: 8px">
             Run Mode
           </button>
@@ -156,74 +150,28 @@
           <button id="levelMakerModeBtn" style="width: 220px; margin-bottom: 8px; background: #3ad; color: #03131d">
             Level Maker(PC)
           </button>
-          <button id="dialogueMakerModeBtn" style="width: 220px; margin-bottom: 8px; background: #f6b26b; color: #241608; display: none;">
-            Dialogue Maker
-          </button>
           <button id="modeBackBtn" class="small-btn" style="width: 220px">
             Back
           </button>
         </div>
         <div id="storyModeMenu" class="overlay" style="display: none" aria-hidden="true">
           <div class="story-menu-page">
-            <div id="storyChapterMenu" class="story-menu-screen">
-              <div class="story-kicker">Void Runner</div>
-              <h1>Story Mode</h1>
-              <div class="story-mode-subtitle">Pick a chapter. Chapter 1 is out!</div>
-              <div class="story-chapter-row">
-                <button id="storyChapterPrevBtn" class="story-nav-btn" aria-label="Previous chapter">◀</button>
-                <div class="story-world-card">
-                  <div class="story-world-card-top">
-                    <div>
-                      <div id="storyChapterLabel" class="story-world-label">Chapter 1</div>
-                      <div id="storyChapterTitle" class="story-world-title">Into The Rift</div>
-                    </div>
-                    <div id="storyChapterMeta" class="story-world-count">Available now</div>
-                  </div>
-                  <div id="storyChapterDesc" class="story-world-desc">
-                    A strange force is tearing the void apart. Enter the rift and find the source.
-                  </div>
+            <div class="story-kicker">Void Runner</div>
+            <h1>Story Mode</h1>
+            <div class="story-chapter-row">
+              <button id="storyPrevChapterBtn" class="story-nav-btn" aria-label="Previous chapter">◀</button>
+              <div class="story-world-card">
+                <div id="storyChapterLabel" class="story-world-label">Chapter 1</div>
+                <div id="storyChapterTitle" class="story-world-title">Into The Rift</div>
+                <div id="storyChapterDesc" class="story-world-desc">
+                  A strange force is tearing the void apart. Enter the rift and find
+                  the source.
                 </div>
-                <button id="storyChapterNextBtn" class="story-nav-btn" aria-label="Next chapter">▶</button>
               </div>
-              <button id="storyChapterStartBtn" class="story-primary-btn">Start Chapter 1</button>
-              <button id="storyChapterBackBtn" class="small-btn" style="width: 240px">Back</button>
+              <button id="storyNextChapterBtn" class="story-nav-btn" aria-label="Next chapter">▶</button>
             </div>
-            <div id="storyWorldMenu" class="story-menu-screen" style="display: none;">
-              <div class="story-kicker">Void Runner</div>
-              <h1>Chapter 1 Map</h1>
-              <div class="story-mode-subtitle">Select a world, then pick a level on the route.</div>
-              <div class="story-world-topbar">
-                <button id="storyWorldBackBtn" class="small-btn story-world-back-btn">Back to Chapters</button>
-              </div>
-              <div class="story-chapter-row">
-                <button id="storyWorldPrevBtn" class="story-nav-btn" aria-label="Previous world">◀</button>
-                <div class="story-world-card">
-                  <div class="story-world-card-top">
-                    <div>
-                      <div id="storyWorldLabel" class="story-world-label">World 1</div>
-                      <div id="storyWorldTitle" class="story-world-title">The Fractured Lands</div>
-                    </div>
-                    <div id="storyWorldCount" class="story-world-count">12 levels</div>
-                  </div>
-                  <div id="storyWorldDesc" class="story-world-desc">
-                    Explore the tear in the fabric of reality.
-                  </div>
-                </div>
-                <button id="storyWorldNextBtn" class="story-nav-btn" aria-label="Next world">▶</button>
-              </div>
-              <div class="story-map-shell">
-                <div class="story-map-board" aria-label="Story world map">
-                  <svg id="storyMapPath" class="story-map-path" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"></svg>
-                  <div id="storyMapNodes" class="story-map-nodes"></div>
-                </div>
-                <div class="story-map-panel">
-                  <div class="story-map-panel-heading">Selected Stage</div>
-                  <div id="storySelectionStatus" class="story-selection-status">Choose a level on the map.</div>
-                  <div id="storyLevelInfo" class="story-level-info"></div>
-                  <button id="storyWorldStartBtn" class="story-primary-btn">Preview Selected Level</button>
-                </div>
-              </div>
-            </div>
+            <button id="storyStartBtn" class="story-primary-btn">Play Chapter 1</button>
+            <button id="storyBackBtn" class="small-btn" style="width: 240px">Back</button>
           </div>
         </div>
         <div id="speedRunMenu" class="overlay" style="display: none">
@@ -289,7 +237,7 @@
             <button id="resumeBtn">Resume</button
             ><button id="settingsBtn">Settings</button
             ><button id="achievementsBtn">Achievements</button
-            ><button id="cheatsBtn" style="background: #fa0; display: none">
+            ><button id="cheatsBtn" style="background: #fa0">
               Cheats/Debug</button
             ><button
               id="exitTutorialBtn"
@@ -567,89 +515,7 @@
           <textarea id="makerCodeOutput" class="shared-level-input" readonly placeholder="Generated code appears here"></textarea>
           <div id="makerHint">Drag the header to move anywhere on screen. Drag panel corner/edge to resize. Use Platform/Obstacle dropdowns for run-mode variants. Hold Shift while dragging in canvas to pan.</div>
         </div>
-        <div id="dialogueMakerPanel" style="display: none" aria-label="Dialogue maker controls">
-          <div id="dialogueMakerHeader">
-            <span id="dialogueMakerHeaderTitle">DIALOGUE MAKER</span>
-            <span id="dialogueMakerHeaderDragText">Drag</span>
-          </div>
-          <div class="maker-inline-row">
-            <label for="dialogueLeftCharacterSelect">Left</label>
-            <select id="dialogueLeftCharacterSelect"></select>
-          </div>
-          <div class="maker-inline-row">
-            <label for="dialogueLeftExpressionSelect">Left Face</label>
-            <select id="dialogueLeftExpressionSelect"></select>
-          </div>
-          <div class="maker-inline-row">
-            <label for="dialogueRightCharacterSelect">Right</label>
-            <select id="dialogueRightCharacterSelect"></select>
-          </div>
-          <div class="maker-inline-row">
-            <label for="dialogueRightExpressionSelect">Right Face</label>
-            <select id="dialogueRightExpressionSelect"></select>
-          </div>
-          <div class="maker-inline-row">
-            <label for="dialogueSpeakerSelect">Talking</label>
-            <select id="dialogueSpeakerSelect">
-              <option value="left">Left Character</option>
-              <option value="right">Right Character</option>
-              <option value="narrator">Narrator</option>
-            </select>
-          </div>
-          <div class="dialogue-scene-toolbar">
-            <button id="dialogueNewSceneBtn" class="small-btn" style="background: #6ce5ff; color: #03131d">New Scene</button>
-            <div id="dialogueSceneList" aria-label="Dialogue scenes"></div>
-          </div>
-          <textarea id="dialogueTextInput" class="shared-level-input" placeholder="Write dialogue text here"></textarea>
-          <div id="dialoguePreview" aria-live="polite">
-            <div class="dialogue-portrait" data-side="left">
-              <img id="dialogueLeftPortrait" alt="Left character portrait" />
-              <div id="dialogueLeftName" class="dialogue-portrait-name">Left</div>
-            </div>
-            <div id="dialogueBubbleWrap">
-              <div id="dialogueSpeakerBadge">Left</div>
-              <div id="dialoguePreviewText">Your dialogue text appears here.</div>
-            </div>
-            <div class="dialogue-portrait" data-side="right">
-              <img id="dialogueRightPortrait" alt="Right character portrait" />
-              <div id="dialogueRightName" class="dialogue-portrait-name">Right</div>
-            </div>
-          </div>
-          <div class="maker-inline-row">
-            <button id="dialogueTestBtn" style="background: #8ed1fc; color: #062033">Test</button>
-            <button id="dialogueGenerateBtn" style="background: #fc3; color: #111">Generate Code</button>
-            <button id="dialogueGenerateStoryBtn" class="small-btn" style="background: #f6b26b; color: #241608">Story Snippet</button>
-            <button id="dialogueLoadBtn" class="small-btn">Load Code</button>
-            <button id="dialogueClearBtn" class="small-btn">Clear</button>
-            <button id="dialogueCloseBtn" class="small-btn">Close</button>
-          </div>
-          <textarea id="dialogueCodeOutput" class="shared-level-input" readonly placeholder="Generated dialogue JSON appears here"></textarea>
-          <div id="dialogueMakerHint">Pick left and right characters from story assets, choose who is talking, then write text and generate code.</div>
-        </div>
-        <div id="dialogueTestOverlay" class="overlay" style="display: none" role="dialog" aria-modal="true" aria-labelledby="dialogueTestTitle">
-          <div class="dialogue-test-box">
-            <h1 id="dialogueTestTitle">DIALOGUE TEST</h1>
-            <div id="dialogueTestStage">
-              <div class="dialogue-test-portrait" data-side="left">
-                <img id="dialogueTestLeftPortrait" alt="Left test portrait" />
-                <div id="dialogueTestLeftName" class="dialogue-test-name">Left</div>
-              </div>
-              <div id="dialogueTestBubbleWrap">
-                <div id="dialogueTestSpeakerBadge">Speaker</div>
-                <div id="dialogueTestText">Dialogue test text appears here.</div>
-              </div>
-              <div class="dialogue-test-portrait" data-side="right">
-                <img id="dialogueTestRightPortrait" alt="Right test portrait" />
-                <div id="dialogueTestRightName" class="dialogue-test-name">Right</div>
-              </div>
-            </div>
-            <div class="dialogue-test-actions">
-              <button id="dialogueTestReplayBtn" style="background: #8ed1fc; color: #062033">Replay</button>
-              <button id="dialogueTestCloseBtn" class="small-btn">Back to Maker</button>
-            </div>
-          </div>
-        </div>
-        <button id="versionPickerBtn" aria-haspopup="dialog" aria-expanded="false" title="Choose game version">v1.0.0</button>
+        <button id="versionPickerBtn" aria-haspopup="dialog" aria-expanded="false" title="Choose game version">v0.9.0</button>
         <div id="versionPickerMenu" aria-label="Game versions" role="dialog">
           <div id="versionPickerHeader">
             <span id="versionPickerTitle">Choose Version</span>

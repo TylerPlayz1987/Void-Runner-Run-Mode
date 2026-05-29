@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="128" viewBox="0 0 1280 128" role="img" aria-label="Sunny close-up portrait sprite sheet with 10 expressions">
+  <defs>
+    <g id="portraitBase">
+      <g stroke="#FFFF00" stroke-width="3" stroke-linecap="round">
+        <line x1="0" y1="-52" x2="0" y2="-62"/>
+        <line x1="0" y1="52" x2="0" y2="62"/>
+        <line x1="-52" y1="0" x2="-62" y2="0"/>
+        <line x1="52" y1="0" x2="62" y2="0"/>
+        <line x1="-37" y1="-37" x2="-45" y2="-45"/>
+        <line x1="37" y1="37" x2="45" y2="45"/>
+        <line x1="37" y1="-37" x2="45" y2="-45"/>
+        <line x1="-37" y1="37" x2="-45" y2="45"/>
+      </g>
+      <circle cx="0" cy="0" r="36" fill="#FFFF00" stroke="#dfc600" stroke-width="2"/>
+      <ellipse cx="0" cy="44" rx="30" ry="19" fill="#FFFF00" stroke="#ddc400" stroke-width="1.6"/>
+      <line x1="-22" y1="36" x2="-38" y2="58" stroke="#FFFF00" stroke-width="7" stroke-linecap="round"/>
+      <line x1="22" y1="36" x2="38" y2="58" stroke="#FFFF00" stroke-width="7" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprNeutral">
+      <circle cx="-12" cy="-7" r="4" fill="#1a1a1a"/>
+      <circle cx="12" cy="-7" r="4" fill="#1a1a1a"/>
+      <line x1="-8" y1="12" x2="8" y2="12" stroke="#1a1a1a" stroke-width="2.6" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprHappy1">
+      <circle cx="-12" cy="-7" r="4" fill="#1a1a1a"/>
+      <circle cx="12" cy="-7" r="4" fill="#1a1a1a"/>
+      <path d="M -12 11 Q 0 23 12 11" fill="none" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprHappy2">
+      <circle cx="-12" cy="-7" r="4.4" fill="#1a1a1a"/>
+      <circle cx="12" cy="-7" r="4.4" fill="#1a1a1a"/>
+      <path d="M -14 11 Q 0 25 14 11" fill="none" stroke="#1a1a1a" stroke-width="3.2" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprHappy3">
+      <circle cx="-12" cy="-7" r="4.8" fill="#1a1a1a"/>
+      <circle cx="12" cy="-7" r="4.8" fill="#1a1a1a"/>
+      <path d="M -15 10 Q 0 26 15 10" fill="none" stroke="#1a1a1a" stroke-width="3.4" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprWorried">
+      <ellipse cx="-12" cy="-7" rx="4.4" ry="3.5" fill="#1a1a1a"/>
+      <ellipse cx="12" cy="-7" rx="4.4" ry="3.5" fill="#1a1a1a"/>
+      <path d="M -10 15 Q 0 5 10 15" fill="none" stroke="#1a1a1a" stroke-width="2.8" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprSad">
+      <circle cx="-12" cy="-7" r="4" fill="#1a1a1a"/>
+      <circle cx="12" cy="-7" r="4" fill="#1a1a1a"/>
+      <path d="M -12 17 Q 0 3 12 17" fill="none" stroke="#1a1a1a" stroke-width="2.8" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprBlink">
+      <line x1="-18" y1="-7" x2="-7" y2="-7" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+      <line x1="7" y1="-7" x2="18" y2="-7" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+      <line x1="-6" y1="12" x2="6" y2="12" stroke="#1a1a1a" stroke-width="2.4" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprSurprised">
+      <circle cx="-12" cy="-7" r="4.6" fill="#1a1a1a"/>
+      <circle cx="12" cy="-7" r="4.6" fill="#1a1a1a"/>
+      <circle cx="0" cy="14" r="6" fill="none" stroke="#1a1a1a" stroke-width="2.6"/>
+    </g>
+
+    <g id="exprTalking">
+      <circle cx="-12" cy="-7" r="4" fill="#1a1a1a"/>
+      <circle cx="12" cy="-7" r="4" fill="#1a1a1a"/>
+      <ellipse cx="0" cy="14" rx="7.5" ry="4.8" fill="#1a1a1a"/>
+    </g>
+  </defs>
+
+  <g transform="translate(64,64)">
+    <use href="#portraitBase" transform="rotate(0)"/>
+    <use href="#exprNeutral"/>
+  </g>
+
+  <g transform="translate(192,64)">
+    <use href="#portraitBase" transform="rotate(18)"/>
+    <use href="#exprHappy1"/>
+  </g>
+
+  <g transform="translate(320,64)">
+    <use href="#portraitBase" transform="rotate(48)"/>
+    <use href="#exprHappy2"/>
+  </g>
+
+  <g transform="translate(448,64)">
+    <use href="#portraitBase" transform="rotate(84)"/>
+    <use href="#exprHappy3"/>
+  </g>
+
+  <g transform="translate(576,64)">
+    <use href="#portraitBase" transform="rotate(10)"/>
+    <use href="#exprWorried"/>
+  </g>
+
+  <g transform="translate(704,64)">
+    <use href="#portraitBase" transform="rotate(2)"/>
+    <use href="#exprSad"/>
+  </g>
+
+  <g transform="translate(832,64)">
+    <use href="#portraitBase" transform="rotate(0)"/>
+    <use href="#exprBlink"/>
+  </g>
+
+  <g transform="translate(960,64)">
+    <use href="#portraitBase" transform="rotate(28)"/>
+    <use href="#exprSurprised"/>
+  </g>
+
+  <g transform="translate(1088,64)">
+    <use href="#portraitBase" transform="rotate(42)"/>
+    <use href="#exprTalking"/>
+  </g>
+
+  <g transform="translate(1216,64)">
+    <use href="#portraitBase" transform="rotate(62)"/>
+    <use href="#exprTalking"/>
+  </g>
+</svg>

@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="128" viewBox="0 0 1280 128" role="img" aria-label="Moony close-up portrait sprite sheet with 10 expressions">
+  <defs>
+    <g id="portraitBase">
+      <circle cx="0" cy="0" r="36" fill="#dbe6ff" stroke="#aebcde" stroke-width="2"/>
+      <circle cx="13" cy="-4" r="30" fill="#0a1020"/>
+      <circle cx="-9" cy="-18" r="2.1" fill="rgba(245,248,255,0.45)"/>
+      <circle cx="-16" cy="3" r="1.7" fill="rgba(245,248,255,0.4)"/>
+      <circle cx="-5" cy="10" r="1.8" fill="rgba(245,248,255,0.35)"/>
+      <ellipse cx="0" cy="44" rx="30" ry="19" fill="#cfdcff" stroke="#aab7d9" stroke-width="1.6"/>
+      <line x1="-22" y1="36" x2="-38" y2="58" stroke="#d7e2ff" stroke-width="7" stroke-linecap="round"/>
+      <line x1="22" y1="36" x2="38" y2="58" stroke="#d7e2ff" stroke-width="7" stroke-linecap="round"/>
+    </g>
+
+    <g id="exprNeutral"><circle cx="-14" cy="-9" r="4" fill="#f5f9ff"/><circle cx="2" cy="-7" r="4" fill="#f5f9ff"/><line x1="-10" y1="12" x2="0" y2="12" stroke="#f5f9ff" stroke-width="2.6" stroke-linecap="round"/></g>
+    <g id="exprHappy"><circle cx="-14" cy="-9" r="4" fill="#f5f9ff"/><circle cx="2" cy="-7" r="4" fill="#f5f9ff"/><path d="M -12 11 Q -5 23 2 11" fill="none" stroke="#f5f9ff" stroke-width="3" stroke-linecap="round"/></g>
+    <g id="exprExcited"><circle cx="-14" cy="-9" r="4.5" fill="#f5f9ff"/><circle cx="2" cy="-7" r="4.5" fill="#f5f9ff"/><ellipse cx="-5" cy="14" rx="8.2" ry="5.9" fill="none" stroke="#f5f9ff" stroke-width="2.7"/></g>
+    <g id="exprWorried"><ellipse cx="-14" cy="-9" rx="4.4" ry="3.5" fill="#f5f9ff"/><ellipse cx="2" cy="-7" rx="4.4" ry="3.5" fill="#f5f9ff"/><path d="M -10 15 Q -5 5 0 15" fill="none" stroke="#f5f9ff" stroke-width="2.8" stroke-linecap="round"/></g>
+    <g id="exprAngry"><circle cx="-14" cy="-9" r="4" fill="#f5f9ff"/><circle cx="2" cy="-7" r="4" fill="#f5f9ff"/><line x1="-19" y1="-15" x2="-11" y2="-11" stroke="#f5f9ff" stroke-width="2.6" stroke-linecap="round"/><line x1="6" y1="-13" x2="-1" y2="-10" stroke="#f5f9ff" stroke-width="2.6" stroke-linecap="round"/><line x1="-10" y1="13" x2="0" y2="13" stroke="#f5f9ff" stroke-width="3.2" stroke-linecap="round"/></g>
+    <g id="exprSad"><circle cx="-14" cy="-9" r="4" fill="#f5f9ff"/><circle cx="2" cy="-7" r="4" fill="#f5f9ff"/><path d="M -12 17 Q -5 3 2 17" fill="none" stroke="#f5f9ff" stroke-width="2.8" stroke-linecap="round"/></g>
+    <g id="exprBlink"><line x1="-20" y1="-9" x2="-10" y2="-9" stroke="#f5f9ff" stroke-width="3" stroke-linecap="round"/><line x1="-2" y1="-7" x2="6" y2="-7" stroke="#f5f9ff" stroke-width="3" stroke-linecap="round"/><line x1="-8" y1="12" x2="-2" y2="12" stroke="#f5f9ff" stroke-width="2.4" stroke-linecap="round"/></g>
+    <g id="exprSurprised"><circle cx="-14" cy="-9" r="4.6" fill="#f5f9ff"/><circle cx="2" cy="-7" r="4.6" fill="#f5f9ff"/><circle cx="-5" cy="14" r="5.6" fill="none" stroke="#f5f9ff" stroke-width="2.6"/></g>
+    <g id="exprDetermined"><ellipse cx="-14" cy="-9" rx="4.1" ry="3.2" fill="#f5f9ff"/><ellipse cx="2" cy="-7" rx="4.1" ry="3.2" fill="#f5f9ff"/><line x1="-19" y1="-15" x2="-10" y2="-16.5" stroke="#f5f9ff" stroke-width="2.2" stroke-linecap="round"/><line x1="6" y1="-14" x2="-1" y2="-15.2" stroke="#f5f9ff" stroke-width="2.2" stroke-linecap="round"/><line x1="-10" y1="13" x2="0" y2="13" stroke="#f5f9ff" stroke-width="2.8" stroke-linecap="round"/></g>
+    <g id="exprTalking"><circle cx="-14" cy="-9" r="4" fill="#f5f9ff"/><circle cx="2" cy="-7" r="4" fill="#f5f9ff"/><ellipse cx="-5" cy="14" rx="7" ry="4.5" fill="#f5f9ff"/></g>
+  </defs>
+
+  <g transform="translate(64,64)"><use href="#portraitBase"/><use href="#exprNeutral"/></g>
+  <g transform="translate(192,64)"><use href="#portraitBase"/><use href="#exprHappy"/></g>
+  <g transform="translate(320,64)"><use href="#portraitBase"/><use href="#exprExcited"/></g>
+  <g transform="translate(448,64)"><use href="#portraitBase"/><use href="#exprWorried"/></g>
+  <g transform="translate(576,64)"><use href="#portraitBase"/><use href="#exprAngry"/></g>
+  <g transform="translate(704,64)"><use href="#portraitBase"/><use href="#exprSad"/></g>
+  <g transform="translate(832,64)"><use href="#portraitBase"/><use href="#exprBlink"/></g>
+  <g transform="translate(960,64)"><use href="#portraitBase"/><use href="#exprSurprised"/></g>
+  <g transform="translate(1088,64)"><use href="#portraitBase"/><use href="#exprDetermined"/></g>
+  <g transform="translate(1216,64)"><use href="#portraitBase"/><use href="#exprTalking"/></g>
+</svg>
