@@ -590,15 +590,28 @@
   async function open() {
     const storyMenu = getEl("storyModeMenu");
     const modeMenu = getEl("modeMenu");
-    if (!storyMenu || !modeMenu) return;
+    if (!storyMenu) {
+      console.warn('Story Mode menu element not found');
+      return;
+    }
 
     await enterGameFullscreen();
     hideHudForStoryMenu();
     hideGameplayLayerForStoryMenu();
-    modeMenu.style.display = "none";
-    storyMenu.style.display = "flex";
-    storyMenu.setAttribute("aria-hidden", "false");
-    showChapterMenu();
+    if (modeMenu) {
+      try {
+        modeMenu.style.display = "none";
+      } catch (e) {
+        /* ignore style failures */
+      }
+    }
+    try {
+      storyMenu.style.display = "flex";
+      storyMenu.setAttribute("aria-hidden", "false");
+      showChapterMenu();
+    } catch (err) {
+      console.error('Failed to show Story Mode menu', err);
+    }
   }
 
   async function close() {
